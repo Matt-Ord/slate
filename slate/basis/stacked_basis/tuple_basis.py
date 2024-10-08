@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, Self, override
+from typing import Any, Iterator, Literal, Protocol, Self, overload, override
 
 import numpy as np
 
@@ -18,7 +18,7 @@ class TupleMetadata[_M: BasisMetadata, _E](BasisMetadata):
     @property
     def inner(self: Self) -> tuple[_M, ...]:
         """Inner metadata."""
-        return self.inner
+        return self._inner
 
     @property
     def extra(self: Self) -> _E:
@@ -142,6 +142,9 @@ class TupleBasis[_M: BasisMetadata, _E, _DT: np.generic](
     def __iter__(self) -> Iterator[Basis[_M, _DT]]:
         return self._inner.__iter__()
 
+    def __getitem__(self: Self, index: int) -> Basis[_M, _DT]:
+        return self._inner[index]
+
     def __convert_vector_into__(
         self,
         vectors: np.ndarray[Any, np.dtype[_DT]],
@@ -158,3 +161,39 @@ class TupleBasis[_M: BasisMetadata, _E, _DT: np.generic](
 
         # We overload __convert_vector_into__, more likely to get the 'happy path'
         return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
+
+
+class TupleBasisLike[*_TS](Protocol):
+    """A type for basis like the tuple basis."""
+
+    @property
+    def inner(self) -> tuple[*_TS]:
+        """Inner basis."""
+        ...
+
+    @property
+    def size(self) -> int:
+        """Number of elements in the basis."""
+        ...
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Shape of the inner data."""
+        ...
+
+    @overload
+    def __getitem__[_B: Basis[Any, Any]](
+        self: TupleBasisLike[Any, Any, _B, *tuple[Any, ...]], index: Literal[2]
+    ) -> _B: ...
+    @overload
+    def __getitem__[_B: Basis[Any, Any]](
+        self: TupleBasisLike[Any, _B, *tuple[Any, ...]], index: Literal[1]
+    ) -> _B: ...
+    @overload
+    def __getitem__[_B: Basis[Any, Any]](
+        self: TupleBasisLike[_B, *tuple[Any, ...]], index: Literal[0]
+    ) -> _B: ...
+    @overload
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
+
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
