@@ -12,8 +12,14 @@ class SlateArray[_B: Basis[Any, Any]]:
     """An array with data stored in a given basis."""
 
     def __init__(self, basis: _B, data: np.ndarray[Any, np.dtype[Any]]) -> None:
+        assert basis.size == data.size
         self._basis = basis
-        self._data = data
+        self._data = data.ravel()
+
+    @property
+    def fundamental_shape(self: Self) -> tuple[int, ...]:
+        """Datatype of the data stored in the array."""
+        return self._basis.fundamental_shape
 
     @property
     def dtype(self: Self) -> np.dtype[Any]:

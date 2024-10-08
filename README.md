@@ -10,7 +10,7 @@ SLATE aims to be **versatile** and **structure**, making it ideal for users who 
 
 ## Features
 
-- **Composable Primitives**: Use diagonal, truncated, COO, and other bases to build complex matrix representations.
+- **Composable Primitives**: Use diagonal, truncated, transformed, and other bases to build complex matrix representations.
 - **Hierarchical Basis**: A modular and hierarchical approach to represent matrices and tensors.
 - **Automatic Transformations**: Seamlessly switch between different matrix representations.
 - **Sparse Representation**: Handle large, sparse matrices in an intuitive way.
@@ -22,4 +22,61 @@ You can install SLATE directly via pip:
 
 ```bash
 pip install slate
+```
+
+## Usage Examples
+
+### Creating a SlateArray
+
+To create a `SlateArray` with a given basis and data:
+
+```python
+import numpy as np
+from slate.array.array import SlateArray
+from slate.basis.basis import FundamentalBasis
+from slate.basis.metadata import FundamentalBasisMetadata
+
+# Create some data
+data = np.array([[1, 2], [3, 4]])
+
+# Create a basis
+basis = FundamentalBasis(FundamentalBasisMetadata(data.shape))
+
+# Create a SlateArray
+slate_array = SlateArray(basis, data)
+
+print(slate_array.raw_data)
+```
+
+### Converting to a Full NumPy Array
+
+To convert the `SlateArray` back to a full NumPy array:
+
+```python
+full_array = slate_array.as_array()
+print(full_array)
+```
+
+### Creating a SlateArray from a NumPy Array
+
+You can also create a `SlateArray` directly from a NumPy array:
+
+```python
+new_slate_array = SlateArray.from_array(data)
+print(new_slate_array.raw_data)
+```
+
+### Using Different Bases
+
+SLATE supports various bases like `TruncatedBasis`, `EvenlySpacedBasis`, and `TransformedBasis`. Here is an example of using a `TruncatedBasis`:
+
+```python
+from slate.basis.truncated import TruncatedBasis
+from slate.basis.metadata import BasisMetadata
+
+# Create a truncated basis
+truncated_basis = TruncatedBasis(10, FundamentalBasis(FundamentalBasisMetadata((20,))))
+
+# Create a SlateArray with the truncated basis
+truncated_slate_array = SlateArray(truncated_basis, data)
 ```

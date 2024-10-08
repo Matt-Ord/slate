@@ -1,0 +1,58 @@
+from __future__ import annotations
+
+from typing import Any
+
+import numpy as np
+import pytest
+
+from slate.array.array import SlateArray
+from slate.basis.basis import FundamentalBasis
+from slate.basis.metadata import FundamentalBasisMetadata
+
+
+@pytest.fixture
+def shape() -> tuple[int, ...]:
+    return (2, 3)
+
+
+@pytest.fixture
+def sample_data(shape: tuple[int, ...]) -> np.ndarray[Any, np.dtype[np.int64]]:
+    rng = np.random.default_rng()
+    return rng.integers(0, 10, shape)
+
+
+@pytest.fixture
+def slate_array(
+    sample_data: np.ndarray[Any, np.dtype[np.int64]],
+) -> SlateArray[FundamentalBasis[FundamentalBasisMetadata, np.int64]]:
+    return SlateArray.from_array(sample_data)
+
+
+def test_slate_array_as_array(
+    slate_array: SlateArray[FundamentalBasis[FundamentalBasisMetadata, np.int64]],
+) -> None:
+    np.testing.assert_array_equal(slate_array.raw_data, slate_array.as_array().ravel())
+
+
+def test_slate_array_dtype(
+    slate_array: SlateArray[FundamentalBasis[FundamentalBasisMetadata, np.int64]],
+) -> None:
+    assert slate_array.dtype == np.int64
+
+
+def test_slate_array_basis(
+    slate_array: SlateArray[FundamentalBasis[FundamentalBasisMetadata, np.int64]],
+) -> None:
+    assert slate_array.basis == FundamentalBasis(
+        FundamentalBasisMetadata(slate_array.fundamental_shape)
+    )
+
+
+def test_create_array_with_wrong_size() -> None:
+    with pytest.raises(AssertionError):
+        SlateArray(FundamentalBasis.from_shape((2, 3)), np.array([1, 2, 3, 4]))
+
+
+def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) -> None:
+    slate_array = SlateArray.from_array(sample_data)
+    np.testing.assert_array_equal(slate_array.as_array(), sample_data)
