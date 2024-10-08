@@ -31,7 +31,7 @@ jobs:
 
       - name: Run lint
         run: |
-          poetry run ruff
+          poetry run ruff check
 
       - name: Run tests
         run: |
