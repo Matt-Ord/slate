@@ -1,26 +1,21 @@
 [tool.poetry]
-name = "surface_potential_analysis"
+name = "slate"
 version = "0.0.1"
-description = ""
+description = "A Framework for Automatic Basis Transformations"
 authors = ["Matthew Ord <mo433@cam.ac.uk>"]
 readme = "README.md"
-packages = [{ include = "surface_potential_analysis" }]
+packages = [{ include = "slate" }]
 
 [tool.poetry.scripts]
 main = '_main.main:main'
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.13"
-numpy = "^1.26.3"
-matplotlib = "^3.8.2"
-scipy = "^1.11.0"
-# hamiltonian_generator = { path = "./lib/hamiltonian_generator" }
-qutip = "^5.0.0"
-sse_solver_py = { path = "lib/sse_solver/sse_solver_py" }
-hamiltonian_generator = { path = "lib/hamiltonian_generator" }
+python = ">=3.13,<3.14"
+numpy = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
+pytest = "^8.3.3"
 
 [tool.ruff]
 unsafe-fixes = true
@@ -40,7 +35,6 @@ ignore = [
     "TD003",
     "TD002",
 ]
-exclude = ["typings/**/*", "lib/**/*"]
 
 
 [tool.ruff.lint.extend-per-file-ignores]
@@ -62,6 +56,9 @@ convention = "numpy"
 
 [tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [build-system]
 requires = ["poetry-core"]
