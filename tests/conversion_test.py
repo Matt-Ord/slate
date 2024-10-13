@@ -6,9 +6,7 @@ import numpy as np
 
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
-from slate.basis.basis import FundamentalBasis
-from slate.basis.stacked_basis.diagonal_basis import DiagonalBasis
-from slate.basis.stacked_basis.tuple_basis import TupleBasis
+from slate.basis import DiagonalBasis, FundamentalBasis, TupleBasis
 from slate.basis.transformed import TransformedBasis
 
 if TYPE_CHECKING:

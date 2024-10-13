@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, Literal, Protocol, Self, overload, override
+from typing import Any, Iterator, Literal, Self, cast, overload, override
 
 import numpy as np
 
-from slate.basis.basis import Basis, FundamentalBasis
+from slate.basis import Basis, FundamentalBasis
 from slate.basis.metadata import BasisMetadata
 
 
@@ -163,35 +163,35 @@ class TupleBasis[_M: BasisMetadata, _E, _DT: np.generic](
         return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
 
 
-class TupleBasisLike[*_TS](Protocol):
-    """A type for basis like the tuple basis."""
+class VariadicTupleBasis[*_TS, _E, _DT: np.generic](TupleBasis[BasisMetadata, _E, _DT]):
+    """A variadic alternative to tuple basis.
+
+    Note all sub basis must have the same datatype (_DT), but it is not
+    currently possible to add this information to the type system.
+    """
+
+    def __init__(self: Self, inner: tuple[*_TS], extra_metadata: _E) -> None:
+        super().__init__(
+            cast(tuple[Basis[BasisMetadata, _DT], ...], inner), extra_metadata
+        )
 
     @property
-    def inner(self) -> tuple[*_TS]:
+    def inner(self) -> tuple[*_TS]:  # type: ignore inconsistent type
         """Inner basis."""
-        ...
-
-    @property
-    def size(self) -> int:
-        """Number of elements in the basis."""
-        ...
-
-    @property
-    def shape(self) -> tuple[int, ...]:
-        """Shape of the inner data."""
-        ...
+        return cast(tuple[*_TS], super().inner)
 
     @overload
     def __getitem__[_B: Basis[Any, Any]](
-        self: TupleBasisLike[Any, Any, _B, *tuple[Any, ...]], index: Literal[2]
+        self: VariadicTupleBasis[Any, Any, _B, *tuple[Any, ...], _E, _DT],
+        index: Literal[2],
     ) -> _B: ...
     @overload
     def __getitem__[_B: Basis[Any, Any]](
-        self: TupleBasisLike[Any, _B, *tuple[Any, ...]], index: Literal[1]
+        self: VariadicTupleBasis[Any, _B, *tuple[Any, ...], _E, _DT], index: Literal[1]
     ) -> _B: ...
     @overload
     def __getitem__[_B: Basis[Any, Any]](
-        self: TupleBasisLike[_B, *tuple[Any, ...]], index: Literal[0]
+        self: VariadicTupleBasis[_B, *tuple[Any, ...], _E, _DT], index: Literal[0]
     ) -> _B: ...
     @overload
     def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...

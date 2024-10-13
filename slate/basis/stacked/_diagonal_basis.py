@@ -4,10 +4,10 @@ from typing import Any, Iterator, Self, cast, override
 
 import numpy as np
 
-from slate.basis.basis import Basis
+from slate.basis import Basis
 from slate.basis.metadata import BasisMetadata
 
-from .tuple_basis import TupleBasis, TupleMetadata
+from ._tuple_basis import TupleBasis, TupleMetadata
 
 
 class DiagonalBasis[_M: BasisMetadata, _E, _DT: np.generic](

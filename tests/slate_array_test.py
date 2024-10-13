@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from slate.array.array import SlateArray
-from slate.basis.basis import FundamentalBasis
+from slate.basis import FundamentalBasis
 from slate.basis.metadata import FundamentalBasisMetadata
 
 

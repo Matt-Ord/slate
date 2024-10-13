@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 from slate.array.array import SlateArray
 
 if TYPE_CHECKING:
-    from slate.basis.basis import Basis
+    from slate.basis import Basis
 
 
 def convert_array[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
