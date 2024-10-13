@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, Iterable, Self, override
+from typing import TYPE_CHECKING, Any, Iterable, Self, override
 
 import numpy as np
 
-from slate.basis.basis import Basis
 from slate.basis.metadata import BasisMetadata
+from slate.basis.wrapped import WrappedBasis
+
+if TYPE_CHECKING:
+    from slate.basis import Basis
 
 
 def pad_ft_points[_DT: np.generic](
@@ -70,18 +73,12 @@ def pad_ft_points[_DT: np.generic](
     return padded
 
 
-class TruncatedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
+class TruncatedBasis[_M: BasisMetadata, _DT: np.generic](WrappedBasis[_M, _DT]):
     """Represents a truncated basis."""
 
     def __init__(self: Self, size: int, inner: Basis[_M, _DT]) -> None:
-        self._inner = inner
-        self._metadata = inner.metadata
         self._size = size
-
-    @property
-    def inner(self: Self) -> Basis[_M, _DT]:
-        """Inner basis."""
-        return self._inner
+        super().__init__(inner)
 
     @property
     def size(self: Self) -> int:
@@ -97,22 +94,20 @@ class TruncatedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
         return hash((self._size, self._inner))
 
     @override
-    def __into_fundamental__(
+    def __into_inner__(
         self,
         vectors: np.ndarray[Any, np.dtype[_DT]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[_DT]]:
-        transformed = pad_ft_points(vectors, s=(self._inner.size,), axes=(axis,))
-        return self._inner.__into_fundamental__(transformed, axis=axis)
+        return pad_ft_points(vectors, s=(self._inner.size,), axes=(axis,))
 
     @override
-    def __from_fundamental__(
+    def __from_inner__(
         self,
         vectors: np.ndarray[Any, np.dtype[_DT]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[_DT]]:
-        transformed = self._inner.__from_fundamental__(vectors, axis=axis)
-        return pad_ft_points(transformed, s=(self._size,), axes=(axis,))
+        return pad_ft_points(vectors, s=(self._size,), axes=(axis,))
 
     @override
     def __convert_vector_into__(
@@ -129,5 +124,4 @@ class TruncatedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
         if isinstance(basis, TruncatedBasis) and self.inner == basis.inner:
             return pad_ft_points(vectors, s=(basis.size,), axes=(axis,))
 
-        fundamental = pad_ft_points(vectors, s=(self._inner.size,), axes=(axis,))
-        return self._inner.__convert_vector_into__(fundamental, basis, axis=axis)
+        return super().__convert_vector_into__(vectors, basis, axis)

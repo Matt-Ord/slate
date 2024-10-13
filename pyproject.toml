@@ -49,6 +49,8 @@ allow-dunder-method-names = [
     "__into_transformed__",
     "__from_transformed__",
     "__convert_vector_into__",
+    "__into_inner__",
+    "__from_inner__",
 ]
 
 [tool.ruff.lint.pydocstyle]

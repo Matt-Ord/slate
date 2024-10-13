@@ -8,7 +8,7 @@ import pytest
 from slate.array.array import SlateArray
 
 if TYPE_CHECKING:
-    from slate.basis.basis import FundamentalBasis
+    from slate.basis import FundamentalBasis
     from slate.basis.metadata import FundamentalBasisMetadata
 
 

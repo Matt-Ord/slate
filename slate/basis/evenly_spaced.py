@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Self, override
+from typing import TYPE_CHECKING, Any, Self, override
 
 import numpy as np
 
-from slate.basis.basis import Basis
 from slate.basis.metadata import BasisMetadata
+from slate.basis.wrapped import WrappedBasis
 from slate.util.util import slice_along_axis
+
+if TYPE_CHECKING:
+    from slate.basis import Basis
 
 
 def _pad_sample_axis[_DT: np.generic](
@@ -48,13 +51,12 @@ class Spacing:
     offset: int
 
 
-class EvenlySpacedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
+class EvenlySpacedBasis[_M: BasisMetadata, _DT: np.generic](WrappedBasis[_M, _DT]):
     """Represents a basis sampled evenly along an axis."""
 
     def __init__(self: Self, spacing: Spacing, inner: Basis[_M, _DT]) -> None:
-        self._inner = inner
-        self._metadata = inner.metadata
         self._spacing = spacing
+        super().__init__(inner)
         assert self._inner.size == self._spacing.step * self._spacing.n
 
     def __hash__(self) -> int:
@@ -64,11 +66,6 @@ class EvenlySpacedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
     def spacing(self: Self) -> Spacing:
         """Spacing of the basis."""
         return self._spacing
-
-    @property
-    def inner(self: Self) -> Basis[_M, _DT]:
-        """Inner basis."""
-        return self._inner
 
     @property
     def size(self: Self) -> int:
@@ -81,47 +78,19 @@ class EvenlySpacedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
         return False
 
     @override
-    def __into_fundamental__(
+    def __into_inner__(
         self,
         vectors: np.ndarray[Any, np.dtype[_DT]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[_DT]]:
-        inner = _pad_sample_axis(
-            vectors, self._spacing.step, self._spacing.offset, axis
-        )
-        return self._inner.__into_fundamental__(inner, axis=axis)
+        return _pad_sample_axis(vectors, self._spacing.step, self._spacing.offset, axis)
 
     @override
-    def __from_fundamental__(
+    def __from_inner__(
         self,
         vectors: np.ndarray[Any, np.dtype[_DT]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[_DT]]:
-        inner = self._inner.__from_fundamental__(vectors, axis=axis)
         return _truncate_sample_axis(
-            inner, self._spacing.step, self._spacing.offset, axis
-        )
-
-    @override
-    def __convert_vector_into__(
-        self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
-        basis: Basis[_M, _DT],
-        axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
-        assert self.metadata == basis.metadata
-
-        if self == basis:
-            return vectors
-        inner = _pad_sample_axis(
             vectors, self._spacing.step, self._spacing.offset, axis
         )
-        if isinstance(basis, EvenlySpacedBasis) and self.inner == basis.inner:
-            return _truncate_sample_axis(
-                inner,
-                basis.spacing.step,
-                basis.spacing.offset,
-                axis,
-            )
-
-        return self._inner.__convert_vector_into__(inner, basis, axis=axis)

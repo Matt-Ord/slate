@@ -4,7 +4,7 @@ from typing import Any, Self
 
 import numpy as np
 
-from slate.basis.basis import Basis, FundamentalBasis
+from slate.basis import Basis, FundamentalBasis
 from slate.basis.metadata import FundamentalBasisMetadata
 
 

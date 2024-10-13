@@ -33,7 +33,7 @@ To create a `SlateArray` with a given basis and data:
 ```python
 import numpy as np
 from slate.array.array import SlateArray
-from slate.basis.basis import FundamentalBasis
+from slate.basis import FundamentalBasis
 from slate.basis.metadata import FundamentalBasisMetadata
 
 # Create some data
@@ -71,7 +71,7 @@ print(new_slate_array.raw_data)
 SLATE supports various bases like `TruncatedBasis`, `EvenlySpacedBasis`, and `TransformedBasis`. Here is an example of using a `TruncatedBasis`:
 
 ```python
-from slate.basis.truncated import TruncatedBasis
+from slate.basis import TruncatedBasis
 from slate.basis.metadata import BasisMetadata
 
 # Create a truncated basis
