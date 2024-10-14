@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, Never, Self, cast
 
 import numpy as np
 
@@ -18,7 +18,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
 
     def __init__(
         self: Self,
-        data: SlateArray[VariadicTupleBasis[Basis[M, DT], Basis[M, DT], Any, DT]],
+        data: SlateArray[DT, VariadicTupleBasis[Basis[M, DT], Basis[M, DT], Any, DT]],
     ) -> None:
         self._data = data
         super().__init__(data.basis[1])
@@ -34,8 +34,11 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = np.tensordot(
-            cast(np.ndarray[Any, np.dtype[Any]], vectors),
-            self._data.raw_data.reshape(self._data.basis.shape),
+            cast(np.ndarray[Any, np.dtype[Never]], vectors),
+            cast(
+                np.ndarray[Any, np.dtype[Never]],
+                self._data.raw_data.reshape(self._data.basis.shape),
+            ),
             axes=([axis], [0]),
         )
         return np.moveaxis(transformed, -1, axis)
@@ -46,11 +49,13 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = np.tensordot(
-            cast(np.ndarray[Any, np.dtype[Any]], vectors),
-            cast(
-                np.ndarray[Any, np.dtype[Any]],
-                np.linalg.inv(self._data.raw_data.reshape(self._data.basis.shape)),
+            cast(np.ndarray[Any, np.dtype[Never]], vectors),
+            np.linalg.inv(
+                cast(
+                    np.ndarray[Any, np.dtype[Never]],
+                    self._data.raw_data.reshape(self._data.basis.shape),
+                )
             ),
             axes=([axis], [0]),
         )
-        return np.moveaxis(transformed, -1, axis)
+        return np.moveaxis(cast(np.ndarray[Any, np.dtype[DT1]], transformed), -1, axis)

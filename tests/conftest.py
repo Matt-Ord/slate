@@ -26,12 +26,12 @@ def sample_data(shape: tuple[int, ...]) -> np.ndarray[Any, np.dtype[np.int64]]:
 @pytest.fixture
 def slate_array_integer(
     sample_data: np.ndarray[Any, np.dtype[np.int64]],
-) -> SlateArray[FundamentalBasis[FundamentalBasisMetadata, np.int64]]:
+) -> SlateArray[np.int64, FundamentalBasis[FundamentalBasisMetadata]]:
     return SlateArray.from_array(sample_data)
 
 
 @pytest.fixture
 def slate_array_complex(
     sample_data: np.ndarray[Any, np.dtype[np.int64]],
-) -> SlateArray[FundamentalBasis[FundamentalBasisMetadata, np.complex128]]:
+) -> SlateArray[np.complex128, FundamentalBasis[FundamentalBasisMetadata]]:
     return SlateArray.from_array(sample_data.astype(np.complex128))

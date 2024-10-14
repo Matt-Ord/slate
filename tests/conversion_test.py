@@ -12,7 +12,7 @@ from slate.basis.transformed import TransformedBasis
 
 def test_transformed_basis_round_trip(
     slate_array_complex: SlateArray[
-        FundamentalBasis[FundamentalBasisMetadata, np.complex128]
+        np.complex128, FundamentalBasis[FundamentalBasisMetadata]
     ],
 ) -> None:
     basis = TransformedBasis(slate_array_complex.basis)
@@ -36,8 +36,8 @@ def test_transformed_basis_round_trip(
 
 def test_diagonal_basis_round_trip() -> None:
     full_basis = VariadicTupleBasis[
-        FundamentalBasis[FundamentalBasisMetadata, np.generic],
-        FundamentalBasis[FundamentalBasisMetadata, np.generic],
+        FundamentalBasis[FundamentalBasisMetadata],
+        FundamentalBasis[FundamentalBasisMetadata],
         None,
         np.generic,
     ]((FundamentalBasis.from_shape((10,)), FundamentalBasis.from_shape((10,))), None)
