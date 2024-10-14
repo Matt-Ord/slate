@@ -39,13 +39,15 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         """Metadata associated with the basis."""
         return self._metadata
 
-    def _dtype_variance_fn(self: Self, a: DT, b: Never) -> None:
+    @staticmethod
+    def _dtype_variance_fn(_a: DT, _b: Never) -> None:
         """
         Fix the variance of DT.
 
         This is a workaround for the limitation in typing __into_fundamental__
         which should be [DT1: DT]
         """
+        return
 
     @abstractmethod
     def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
