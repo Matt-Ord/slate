@@ -6,7 +6,7 @@ from typing import Any, Never, Self, override
 import numpy as np
 
 from slate.basis import Basis
-from slate.basis.metadata import BasisMetadata
+from slate.metadata import BasisMetadata
 
 
 class WrappedBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):

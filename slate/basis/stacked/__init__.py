@@ -6,16 +6,16 @@ from ._diagonal_basis import DiagonalBasis
 from ._tuple_basis import (
     StackedBasis,
     TupleBasis,
-    TupleMetadata,
     VariadicTupleBasis,
     stacked_basis_as_fundamental,
+    tuple_basis,
 )
 
 __all__ = [
     "DiagonalBasis",
     "StackedBasis",
     "TupleBasis",
-    "TupleMetadata",
     "VariadicTupleBasis",
     "stacked_basis_as_fundamental",
+    "tuple_basis",
 ]

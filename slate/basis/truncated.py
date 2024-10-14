@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Any, Iterable, Never, Self, override
 
 import numpy as np
 
-from slate.basis.metadata import BasisMetadata
 from slate.basis.wrapped import WrappedBasis
+from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.basis import Basis

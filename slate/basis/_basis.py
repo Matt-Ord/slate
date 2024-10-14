@@ -5,7 +5,7 @@ from typing import Any, Never, Self
 
 import numpy as np
 
-from slate.basis.metadata import BasisMetadata, FundamentalBasisMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
@@ -113,7 +113,7 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     @staticmethod
     def from_shape(
         shape: tuple[int, ...],
-    ) -> FundamentalBasis[FundamentalBasisMetadata]:
+    ) -> FundamentalBasis[SimpleMetadata]:
         """Get a fundamental basis from a shape.
 
         Parameters
@@ -122,9 +122,9 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
 
         Returns
         -------
-        FundamentalBasis[FundamentalBasisMetadata, np.generic]
+        FundamentalBasis[SimpleMetadata, np.generic]
         """
-        return FundamentalBasis(FundamentalBasisMetadata(shape))
+        return FundamentalBasis(SimpleMetadata(shape))
 
 
 def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
