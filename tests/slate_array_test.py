@@ -12,7 +12,7 @@ from slate.basis.metadata import FundamentalBasisMetadata
 
 def test_slate_array_as_array(
     slate_array_integer: SlateArray[
-        FundamentalBasis[FundamentalBasisMetadata, np.int64]
+        np.int64, FundamentalBasis[FundamentalBasisMetadata]
     ],
 ) -> None:
     np.testing.assert_array_equal(
@@ -22,7 +22,7 @@ def test_slate_array_as_array(
 
 def test_slate_array_dtype(
     slate_array_integer: SlateArray[
-        FundamentalBasis[FundamentalBasisMetadata, np.int64]
+        np.int64, FundamentalBasis[FundamentalBasisMetadata]
     ],
 ) -> None:
     assert slate_array_integer.dtype == np.int64
@@ -30,7 +30,7 @@ def test_slate_array_dtype(
 
 def test_slate_array_basis(
     slate_array_integer: SlateArray[
-        FundamentalBasis[FundamentalBasisMetadata, np.int64]
+        np.int64, FundamentalBasis[FundamentalBasisMetadata]
     ],
 ) -> None:
     assert slate_array_integer.basis == FundamentalBasis(
