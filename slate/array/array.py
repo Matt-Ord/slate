@@ -5,7 +5,7 @@ from typing import Any, Self, cast
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis
-from slate.basis.metadata import FundamentalBasisMetadata
+from slate.metadata import SimpleMetadata
 
 
 class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
@@ -62,7 +62,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
     @staticmethod
     def from_array[DT1: np.generic](
         array: np.ndarray[Any, np.dtype[DT1]],
-    ) -> SlateArray[DT1, FundamentalBasis[FundamentalBasisMetadata]]:
+    ) -> SlateArray[DT1, FundamentalBasis[SimpleMetadata]]:
         """Get a SlateArray from an array.
 
         Parameters
@@ -71,11 +71,9 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
         Returns
         -------
-        SlateArray[FundamentalBasisMetadata, DT]
+        SlateArray[SimpleMetadata, DT]
         """
-        return SlateArray[DT1, FundamentalBasis[FundamentalBasisMetadata]](
-            FundamentalBasis[FundamentalBasisMetadata](
-                FundamentalBasisMetadata(array.shape)
-            ),
+        return SlateArray[DT1, FundamentalBasis[SimpleMetadata]](
+            FundamentalBasis[SimpleMetadata](SimpleMetadata(array.shape)),
             array,
         )

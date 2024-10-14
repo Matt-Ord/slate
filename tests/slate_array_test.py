@@ -7,13 +7,11 @@ import pytest
 
 from slate.array.array import SlateArray
 from slate.basis import FundamentalBasis
-from slate.basis.metadata import FundamentalBasisMetadata
+from slate.metadata import SimpleMetadata
 
 
 def test_slate_array_as_array(
-    slate_array_integer: SlateArray[
-        np.int64, FundamentalBasis[FundamentalBasisMetadata]
-    ],
+    slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
 ) -> None:
     np.testing.assert_array_equal(
         slate_array_integer.raw_data, slate_array_integer.as_array().ravel()
@@ -21,20 +19,16 @@ def test_slate_array_as_array(
 
 
 def test_slate_array_dtype(
-    slate_array_integer: SlateArray[
-        np.int64, FundamentalBasis[FundamentalBasisMetadata]
-    ],
+    slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
 ) -> None:
     assert slate_array_integer.dtype == np.int64
 
 
 def test_slate_array_basis(
-    slate_array_integer: SlateArray[
-        np.int64, FundamentalBasis[FundamentalBasisMetadata]
-    ],
+    slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
 ) -> None:
     assert slate_array_integer.basis == FundamentalBasis(
-        FundamentalBasisMetadata(slate_array_integer.fundamental_shape)
+        SimpleMetadata(slate_array_integer.fundamental_shape)
     )
 
 

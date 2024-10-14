@@ -5,15 +5,13 @@ import numpy as np
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis import DiagonalBasis, FundamentalBasis
-from slate.basis.metadata import FundamentalBasisMetadata
 from slate.basis.stacked._tuple_basis import VariadicTupleBasis
 from slate.basis.transformed import TransformedBasis
+from slate.metadata import SimpleMetadata
 
 
 def test_transformed_basis_round_trip(
-    slate_array_complex: SlateArray[
-        np.complex128, FundamentalBasis[FundamentalBasisMetadata]
-    ],
+    slate_array_complex: SlateArray[np.complex128, FundamentalBasis[SimpleMetadata]],
 ) -> None:
     basis = TransformedBasis(slate_array_complex.basis)
 
@@ -36,8 +34,8 @@ def test_transformed_basis_round_trip(
 
 def test_diagonal_basis_round_trip() -> None:
     full_basis = VariadicTupleBasis[
-        FundamentalBasis[FundamentalBasisMetadata],
-        FundamentalBasis[FundamentalBasisMetadata],
+        FundamentalBasis[SimpleMetadata],
+        FundamentalBasis[SimpleMetadata],
         None,
         np.generic,
     ]((FundamentalBasis.from_shape((10,)), FundamentalBasis.from_shape((10,))), None)

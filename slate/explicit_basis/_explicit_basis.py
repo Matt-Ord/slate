@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any, Never, Self, cast
 
 import numpy as np
 
-from slate.basis.metadata import BasisMetadata
 from slate.basis.wrapped import WrappedBasis
+from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.array.array import SlateArray
