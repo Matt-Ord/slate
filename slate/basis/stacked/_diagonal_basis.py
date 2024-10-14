@@ -1,82 +1,71 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, Self, cast, override
+from typing import Any, Self, cast
 
 import numpy as np
 
 from slate.basis import Basis
 from slate.basis.metadata import BasisMetadata
+from slate.basis.wrapped import WrappedBasis
 
-from ._tuple_basis import TupleBasis, TupleMetadata
+from ._tuple_basis import TupleMetadata, VariadicTupleBasis
 
 
-class DiagonalBasis[_M: BasisMetadata, _E, _DT: np.generic](
-    Basis[TupleMetadata[_M, _E], _DT]
+class DiagonalBasis[
+    B0: Basis[Any, Any],
+    B1: Basis[Any, Any],
+    E,
+    DT: np.generic,
+](
+    WrappedBasis[TupleMetadata[BasisMetadata, E], DT],
 ):
     """Represents a diagonal basis."""
 
-    def __init__(self: Self, inner: TupleBasis[_M, _E, _DT]) -> None:
-        self._inner = inner
-        assert inner.n_dim == 2  # noqa: PLR2004
-        self._metadata = inner.metadata
+    def __init__(self: Self, inner: VariadicTupleBasis[B0, B1, E, DT]) -> None:
+        super().__init__(inner)
+        assert self.inner.children[0].size == self.inner.children[1].size
 
     @property
-    def inner(self) -> TupleBasis[_M, _E, _DT]:
-        """Inner basis."""
-        return self._inner
+    def inner(self: Self) -> VariadicTupleBasis[B0, B1, E, DT]:
+        return cast(VariadicTupleBasis[B0, B1, E, DT], self._inner)
 
     @property
     def size(self) -> int:
         """Number of elements in the basis."""
-        return self._inner[0].size
+        return self.inner.children[0].size
 
-    @property
-    def shape(self) -> tuple[int, ...]:
-        """Shape of the inner data."""
-        return tuple(x.size for x in self._inner)
-
-    def __iter__(self) -> Iterator[Basis[_M, _DT]]:
-        return self._inner.__iter__()
-
-    def __getitem__(self: Self, index: int) -> Basis[_M, _DT]:
-        return self._inner[index]
-
-    @override
-    def __into_fundamental__(
+    def __into_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         swapped = vectors.swapaxes(axis, 0)
         stacked = swapped.reshape(self.size, *swapped.shape[1:])
 
-        inner = (
+        return (
             cast(
-                np.ndarray[Any, np.dtype[_DT]],
+                np.ndarray[Any, np.dtype[DT]],
                 np.einsum(  # type: ignore lib
                     "i...,ij->ij...",
                     stacked,  # type: ignore lib
-                    np.eye(self._inner[0].size, self.inner[1].size),
+                    np.eye(self.inner.children[0].size, self.inner.children[1].size),
                 ),
             )
             .reshape(-1, *swapped.shape[1:])
             .swapaxes(axis, 0)
         )
-        return self._inner.__into_fundamental__(inner, axis)
 
-    @override
-    def __from_fundamental__(
+    def __from_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
-        inner = self._inner.__from_fundamental__(vectors, axis)
-        swapped = inner.swapaxes(axis, 0)
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        swapped = vectors.swapaxes(axis, 0)
         stacked = swapped.reshape(*self.inner.shape, *swapped.shape[1:])
 
         return (
             cast(
-                np.ndarray[Any, np.dtype[_DT]],
+                np.ndarray[Any, np.dtype[DT]],
                 np.einsum("ii...->i...", stacked),  # type: ignore lib
             )
             .reshape(self.size, *swapped.shape[1:])

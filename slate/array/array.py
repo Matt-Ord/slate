@@ -8,10 +8,10 @@ from slate.basis import Basis, FundamentalBasis
 from slate.basis.metadata import FundamentalBasisMetadata
 
 
-class SlateArray[_B: Basis[Any, Any]]:
+class SlateArray[B: Basis[Any, Any]]:
     """An array with data stored in a given basis."""
 
-    def __init__(self, basis: _B, data: np.ndarray[Any, np.dtype[Any]]) -> None:
+    def __init__(self, basis: B, data: np.ndarray[Any, np.dtype[Any]]) -> None:
         assert basis.size == data.size
         self._basis = basis
         self._data = data.ravel()
@@ -27,7 +27,7 @@ class SlateArray[_B: Basis[Any, Any]]:
         return self._data.dtype
 
     @property
-    def basis(self: Self) -> _B:
+    def basis(self: Self) -> B:
         """The basis of the Array."""
         return self._basis
 
@@ -45,25 +45,25 @@ class SlateArray[_B: Basis[Any, Any]]:
 
         Returns
         -------
-        np.ndarray[Any, np.dtype[_DT]]
+        np.ndarray[Any, np.dtype[DT]]
         """
         return self.basis.__convert_vector_into__(
             self._data.ravel(), FundamentalBasis(self.basis.metadata)
         ).reshape(self.basis.fundamental_shape)
 
     @staticmethod
-    def from_array[_DT: np.generic](
-        array: np.ndarray[Any, np.dtype[_DT]],
-    ) -> SlateArray[FundamentalBasis[FundamentalBasisMetadata, _DT]]:
+    def from_array[DT: np.generic](
+        array: np.ndarray[Any, np.dtype[DT]],
+    ) -> SlateArray[FundamentalBasis[FundamentalBasisMetadata, DT]]:
         """Get a SlateArray from an array.
 
         Parameters
         ----------
-        array : np.ndarray[Any, np.dtype[_DT]]
+        array : np.ndarray[Any, np.dtype[DT]]
 
         Returns
         -------
-        SlateArray[FundamentalBasisMetadata, _DT]
+        SlateArray[FundamentalBasisMetadata, DT]
         """
         return SlateArray(
             FundamentalBasis(FundamentalBasisMetadata(array.shape)), array

@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import numpy as np
 
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
-from slate.basis import DiagonalBasis, FundamentalBasis, TupleBasis
+from slate.basis import DiagonalBasis, FundamentalBasis
+from slate.basis.metadata import FundamentalBasisMetadata
+from slate.basis.stacked._tuple_basis import VariadicTupleBasis
 from slate.basis.transformed import TransformedBasis
-
-if TYPE_CHECKING:
-    from slate.basis.metadata import FundamentalBasisMetadata
 
 
 def test_transformed_basis_round_trip(
@@ -38,9 +35,12 @@ def test_transformed_basis_round_trip(
 
 
 def test_diagonal_basis_round_trip() -> None:
-    full_basis = TupleBasis(
-        (FundamentalBasis.from_shape((10,)), FundamentalBasis.from_shape((10,))), None
-    )
+    full_basis = VariadicTupleBasis[
+        FundamentalBasis[FundamentalBasisMetadata, np.generic],
+        FundamentalBasis[FundamentalBasisMetadata, np.generic],
+        None,
+        np.generic,
+    ]((FundamentalBasis.from_shape((10,)), FundamentalBasis.from_shape((10,))), None)
     diagonal_basis = DiagonalBasis(full_basis)
 
     array = SlateArray(full_basis, np.diag(np.ones(10)))

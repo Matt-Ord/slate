@@ -16,6 +16,7 @@ numpy = "^2.0.0"
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
 pytest = "^8.3.3"
+pyright = "^1.1.384"
 
 [tool.ruff]
 unsafe-fixes = true

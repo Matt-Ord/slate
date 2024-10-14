@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Self, override
+from typing import Any, Self, cast, override
 
 import numpy as np
 
@@ -8,7 +8,7 @@ from slate.basis.metadata import BasisMetadata
 from slate.basis.wrapped import WrappedBasis
 
 
-class TransformedBasis[_M: BasisMetadata](WrappedBasis[_M, np.complex128]):
+class TransformedBasis[M: BasisMetadata](WrappedBasis[M, np.complex128]):
     """Represents a fourier transformed basis."""
 
     def __eq__(self, value: object) -> bool:
@@ -25,17 +25,23 @@ class TransformedBasis[_M: BasisMetadata](WrappedBasis[_M, np.complex128]):
         return self.inner.size
 
     @override
-    def __into_inner__(
+    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
         self,
-        vectors: np.ndarray[Any, np.dtype[np.complex128]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[np.complex128]]:
-        return np.fft.ifft(vectors, axis=axis, norm="ortho")
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return cast(
+            np.ndarray[Any, np.dtype[DT1]],
+            np.fft.ifft(vectors, axis=axis, norm="ortho"),
+        )
 
     @override
-    def __from_inner__(
+    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
         self,
-        vectors: np.ndarray[Any, np.dtype[np.complex128]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[np.complex128]]:
-        return np.fft.fft(vectors, axis=axis, norm="ortho")
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return cast(
+            np.ndarray[Any, np.dtype[DT1]],
+            np.fft.fft(vectors, axis=axis, norm="ortho"),
+        )

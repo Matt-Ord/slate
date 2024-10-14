@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, Literal, Self, cast, overload, override
+from typing import Any, Iterator, Literal, Never, Self, cast, overload, override
 
 import numpy as np
 
@@ -8,69 +8,67 @@ from slate.basis import Basis, FundamentalBasis
 from slate.basis.metadata import BasisMetadata
 
 
-class TupleMetadata[_M: BasisMetadata, _E](BasisMetadata):
+class TupleMetadata[M: BasisMetadata, E](BasisMetadata):
     """Metadata built from a tuple of individual metadata entries."""
 
-    def __init__(self: Self, inner: tuple[_M, ...], extra: _E) -> None:
-        self._inner = inner
+    def __init__(self: Self, children: tuple[M, ...], extra: E) -> None:
+        self._children = children
         self._extra = extra
 
     @property
-    def inner(self: Self) -> tuple[_M, ...]:
-        """Inner metadata."""
-        return self._inner
+    def children(self: Self) -> tuple[M, ...]:
+        """Children metadata."""
+        return self._children
 
     @property
-    def extra(self: Self) -> _E:
+    def extra(self: Self) -> E:
         """Extra metadata."""
         return self._extra
 
     @property
     def fundamental_shape(self: Self) -> tuple[int, ...]:
         """Shape of the full data."""
-        return tuple(np.prod(i.fundamental_shape).item() for i in self._inner)
+        return tuple(np.prod(i.fundamental_shape).item() for i in self.children)
 
-    def __getitem__(self: Self, index: int) -> _M:
-        return self._inner[index]
+    def __getitem__(self: Self, index: int) -> M:
+        return self.children[index]
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TupleMetadata):
             return (self.extra == value.extra) and all(  # type: ignore unknown
                 a == b
-                for (a, b) in zip(self.inner, value.inner)  # type: ignore unknown
+                for (a, b) in zip(self.children, value.children)  # type: ignore unknown
             )
         return False
 
     def __hash__(self) -> int:
-        return hash((self.extra, self.inner))
+        return hash((self.extra, self.children))
 
 
-type StackedBasis[_M: BasisMetadata, _E, _DT: np.generic] = Basis[
-    TupleMetadata[_M, _E], _DT
-]
+type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[TupleMetadata[M, E], DT]
 
 
-def stacked_basis_as_fundamental[_M: BasisMetadata, _E, _DT: np.generic](
-    basis: StackedBasis[_M, _E, _DT],
-) -> TupleBasis[_M, _E, _DT]:
+def stacked_basis_as_fundamental[M: BasisMetadata, E, DT: np.generic](
+    basis: StackedBasis[M, E, DT],
+) -> TupleBasis[M, E, DT]:
     """Get the equivalent Tuple of Fundamental Basis.
 
     Returns
     -------
-    TupleBasis[_M, _E, _DT]
+    TupleBasis[M, E, DT]
     """
-    return TupleBasis[_M, _E, _DT](
+    return TupleBasis[M, E, DT](
         tuple(FundamentalBasis(basis.metadata[i]) for i in range(basis.n_dim)),
         basis.metadata.extra,
     )
 
 
-def _convert_tuple_basis_vector[_M: BasisMetadata, _E, _DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[_DT]],
-    initial_basis: TupleBasis[_M, _E, _DT],
-    final_basis: TupleBasis[_M, _E, _DT],
+def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
+    vectors: np.ndarray[Any, np.dtype[DT]],
+    initial_basis: TupleBasis[M, E, DT],
+    final_basis: TupleBasis[M, E, DT],
     axis: int = -1,
-) -> np.ndarray[Any, np.dtype[_DT]]:
+) -> np.ndarray[Any, np.dtype[DT]]:
     """
     Convert a vector, expressed in terms of the given basis from_config in the basis to_config.
 
@@ -78,8 +76,8 @@ def _convert_tuple_basis_vector[_M: BasisMetadata, _E, _DT: np.generic](
     ----------
     vector : np.ndarray[tuple[int], np.dtype[np.complex_] | np.dtype[np.float_]]
         the vector to convert
-    from_config : _B3d0Inv
-    to_config : _B3d1Inv
+    from_config : B3d0Inv
+    to_config : B3d1Inv
     axis : int, optional
         axis along which to convert, by default -1
 
@@ -95,21 +93,21 @@ def _convert_tuple_basis_vector[_M: BasisMetadata, _E, _DT: np.generic](
     return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
 
 
-class TupleBasis[_M: BasisMetadata, _E, _DT: np.generic](
-    Basis[TupleMetadata[_M, _E], _DT]
-):
+class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[TupleMetadata[M, E], DT]):
     """Represents a Tuple of independent basis."""
 
     def __init__(
-        self: Self, inner: tuple[Basis[_M, _DT], ...], extra_metadata: _E
+        self: Self, children: tuple[Basis[M, DT], ...], extra_metadata: E
     ) -> None:
-        self._inner = inner
-        self._metadata = TupleMetadata(tuple(i.metadata for i in inner), extra_metadata)
+        self._children = children
+        self._metadata = TupleMetadata(
+            tuple(i.metadata for i in children), extra_metadata
+        )
 
     @property
-    def inner(self) -> tuple[Basis[_M, _DT], ...]:
-        """Inner basis."""
-        return self._inner
+    def children(self) -> tuple[Basis[M, DT], ...]:
+        """Children basis."""
+        return self._children
 
     @property
     def size(self) -> int:
@@ -118,39 +116,51 @@ class TupleBasis[_M: BasisMetadata, _E, _DT: np.generic](
 
     @property
     def shape(self) -> tuple[int, ...]:
-        """Shape of the inner data."""
-        return tuple(x.size for x in self._inner)
+        """Shape of the children data."""
+        return tuple(x.size for x in self.children)
 
     @override
-    def __into_fundamental__(
+    def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         basis = stacked_basis_as_fundamental(self)
-        return _convert_tuple_basis_vector(vectors, basis, self, axis)
+        return _convert_tuple_basis_vector(
+            vectors,
+            cast(TupleBasis[M, E, DT1], basis),
+            cast(TupleBasis[M, E, DT1], self),
+            axis,
+        )
 
     @override
-    def __from_fundamental__(
+    def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         basis = stacked_basis_as_fundamental(self)
-        return _convert_tuple_basis_vector(vectors, basis, self, axis)
+        return _convert_tuple_basis_vector(
+            vectors,
+            cast(TupleBasis[M, E, DT1], basis),
+            cast(TupleBasis[M, E, DT1], self),
+            axis,
+        )
 
-    def __iter__(self) -> Iterator[Basis[_M, _DT]]:
-        return self._inner.__iter__()
+    def __iter__(self) -> Iterator[Basis[M, DT]]:
+        return self.children.__iter__()
 
-    def __getitem__(self: Self, index: int) -> Basis[_M, _DT]:
-        return self._inner[index]
+    def __getitem__(self: Self, index: int) -> Basis[M, DT]:
+        return self.children[index]
 
-    def __convert_vector_into__(
+    def __convert_vector_into__[
+        DT1: np.generic
+    ](  # [DT1: DT, B1: Basis[TupleMetadata[M, E], DT]]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
-        basis: Basis[TupleMetadata[_M, _E], _DT],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        basis: Basis[BasisMetadata, Never],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         assert self.metadata == basis.metadata
 
         if self == basis:
@@ -163,36 +173,36 @@ class TupleBasis[_M: BasisMetadata, _E, _DT: np.generic](
         return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
 
 
-class VariadicTupleBasis[*_TS, _E, _DT: np.generic](TupleBasis[BasisMetadata, _E, _DT]):
+class VariadicTupleBasis[*TS, E, DT: np.generic](TupleBasis[BasisMetadata, E, DT]):
     """A variadic alternative to tuple basis.
 
-    Note all sub basis must have the same datatype (_DT), but it is not
+    Note all sub basis must have the same datatype (DT), but it is not
     currently possible to add this information to the type system.
     """
 
-    def __init__(self: Self, inner: tuple[*_TS], extra_metadata: _E) -> None:
+    def __init__(self: Self, children: tuple[*TS], extra_metadata: E) -> None:
         super().__init__(
-            cast(tuple[Basis[BasisMetadata, _DT], ...], inner), extra_metadata
+            cast(tuple[Basis[BasisMetadata, DT], ...], children), extra_metadata
         )
 
     @property
-    def inner(self) -> tuple[*_TS]:  # type: ignore inconsistent type
+    def children(self) -> tuple[*TS]:  # type: ignore inconsistent type
         """Inner basis."""
-        return cast(tuple[*_TS], super().inner)
+        return cast(tuple[*TS], super().children)
 
     @overload
-    def __getitem__[_B: Basis[Any, Any]](
-        self: VariadicTupleBasis[Any, Any, _B, *tuple[Any, ...], _E, _DT],
+    def __getitem__[B: Basis[Any, Any]](
+        self: VariadicTupleBasis[Any, Any, B, *tuple[Any, ...], E, DT],
         index: Literal[2],
-    ) -> _B: ...
+    ) -> B: ...
     @overload
-    def __getitem__[_B: Basis[Any, Any]](
-        self: VariadicTupleBasis[Any, _B, *tuple[Any, ...], _E, _DT], index: Literal[1]
-    ) -> _B: ...
+    def __getitem__[B: Basis[Any, Any]](
+        self: VariadicTupleBasis[Any, B, *tuple[Any, ...], E, DT], index: Literal[1]
+    ) -> B: ...
     @overload
-    def __getitem__[_B: Basis[Any, Any]](
-        self: VariadicTupleBasis[_B, *tuple[Any, ...], _E, _DT], index: Literal[0]
-    ) -> _B: ...
+    def __getitem__[B: Basis[Any, Any]](
+        self: VariadicTupleBasis[B, *tuple[Any, ...], E, DT], index: Literal[0]
+    ) -> B: ...
     @overload
     def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
 
