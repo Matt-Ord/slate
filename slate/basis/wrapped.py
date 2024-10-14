@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Self, override
+from typing import Any, Never, Self, override
 
 import numpy as np
 
@@ -9,67 +9,57 @@ from slate.basis import Basis
 from slate.basis.metadata import BasisMetadata
 
 
-class WrappedBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
+class WrappedBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
     """Represents a truncated basis."""
 
-    def __init__(self: Self, inner: Basis[_M, _DT]) -> None:
+    def __init__(self: Self, inner: Basis[M, DT]) -> None:
         self._inner = inner
         self._metadata = inner.metadata
 
     @property
-    def inner(self: Self) -> Basis[_M, _DT]:
+    def inner(self: Self) -> Basis[M, DT]:
         """Inner basis."""
         return self._inner
 
     @abstractmethod
-    def __into_inner__(
+    def __into_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[
-            Any,
-            np.dtype[_DT],
-        ],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]: ...
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
     @abstractmethod
-    def __from_inner__(
+    def __from_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[
-            Any,
-            np.dtype[_DT],
-        ],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]: ...
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
-    def __into_fundamental__(
+    def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[
-            Any,
-            np.dtype[_DT],
-        ],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = self.__into_inner__(vectors, axis)
         return self._inner.__into_fundamental__(transformed, axis=axis)
 
-    def __from_fundamental__(
+    def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[
-            Any,
-            np.dtype[_DT],
-        ],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = self._inner.__from_fundamental__(vectors, axis=axis)
         return self.__from_inner__(transformed, axis)
 
     @override
-    def __convert_vector_into__(
+    def __convert_vector_into__[
+        DT1: np.generic,
+    ](  # [DT1: DT, B1: Basis[M1, DT]]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
-        basis: Basis[_M, _DT],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        basis: Basis[BasisMetadata, Never],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         assert self.metadata == basis.metadata
 
         if self == basis:

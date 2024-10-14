@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Self
+from typing import Any, Never, Self
 
 import numpy as np
 
 from slate.basis.metadata import BasisMetadata, FundamentalBasisMetadata
 
 
-class Basis[_M: BasisMetadata, _DT: np.generic](ABC):
+class Basis[M: BasisMetadata, DT: np.generic](ABC):
     """Base class for a basis."""
 
-    def __init__(self, metadata: _M) -> None:
+    def __init__(self, metadata: M) -> None:
         self._metadata = metadata
 
     @property
@@ -31,34 +31,44 @@ class Basis[_M: BasisMetadata, _DT: np.generic](ABC):
 
     @property
     def n_dim(self: Self) -> int:
-        """Number fo dimensions of the full data."""
+        """Number of dimensions of the full data."""
         return len(self.fundamental_shape)
 
     @property
-    def metadata(self: Self) -> _M:
+    def metadata(self: Self) -> M:
         """Metadata associated with the basis."""
         return self._metadata
 
-    @abstractmethod
-    def __into_fundamental__(
-        self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
-        axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]: ...
+    def _dtype_variance_fn(self: Self, a: DT, b: Never) -> None:
+        """
+        Fix the variance of DT.
+
+        This is a workaround for the limitation in typing __into_fundamental__
+        which should be [DT1: DT]
+        """
 
     @abstractmethod
-    def __from_fundamental__(
+    def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]: ...
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
-    def __convert_vector_into__(
+    @abstractmethod
+    def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
-        basis: Basis[_M, _DT],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
+
+    def __convert_vector_into__[
+        DT1: np.generic,
+    ](  # [DT1: DT, B1: Basis[M1, DT]]
+        self,
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        basis: Basis[BasisMetadata, Never],
+        axis: int = -1,
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         assert self.metadata == basis.metadata
 
         if self == basis:
@@ -68,7 +78,7 @@ class Basis[_M: BasisMetadata, _DT: np.generic](ABC):
         return basis.__from_fundamental__(fundamental, axis)
 
 
-class FundamentalBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
+class FundamentalBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
     """Represents a full fundamental basis."""
 
     @property
@@ -76,18 +86,18 @@ class FundamentalBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
         """Number of elements in the basis."""
         return self.fundamental_size
 
-    def __into_fundamental__(
+    def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors
 
-    def __from_fundamental__(
+    def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors
 
     def __eq__(self, value: object) -> bool:
@@ -115,13 +125,13 @@ class FundamentalBasis[_M: BasisMetadata, _DT: np.generic](Basis[_M, _DT]):
         return FundamentalBasis(FundamentalBasisMetadata(shape))
 
 
-def basis_as_fundamental[_M: BasisMetadata, _DT: np.generic](
-    basis: Basis[_M, _DT],
-) -> FundamentalBasis[_M, _DT]:
+def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
+    basis: Basis[M, DT],
+) -> FundamentalBasis[M, DT]:
     """Get the fundamental basis for a given basis.
 
     Returns
     -------
-    FundamentalBasis[_M, _DT]
+    FundamentalBasis[M, DT]
     """
     return FundamentalBasis(basis.metadata)

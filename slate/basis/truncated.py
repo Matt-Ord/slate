@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, Iterable, Self, override
+from typing import TYPE_CHECKING, Any, Iterable, Never, Self, override
 
 import numpy as np
 
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
     from slate.basis import Basis
 
 
-def pad_ft_points[_DT: np.generic](
-    array: np.ndarray[Any, np.dtype[_DT]],
+def pad_ft_points[DT: np.generic](
+    array: np.ndarray[Any, np.dtype[DT]],
     s: Iterable[int],
     axes: Iterable[int],
-) -> np.ndarray[Any, np.dtype[_DT]]:
+) -> np.ndarray[Any, np.dtype[DT]]:
     """
     Pad the points in the fourier transform with zeros.
 
@@ -42,7 +42,7 @@ def pad_ft_points[_DT: np.generic](
 
     padded_shape = shape_arr.copy()
     padded_shape[axes_arr] = s
-    padded: np.ndarray[Any, np.dtype[_DT]] = np.zeros(  # type: ignore can't infer dtype
+    padded: np.ndarray[Any, np.dtype[DT]] = np.zeros(  # type: ignore can't infer dtype
         shape=padded_shape, dtype=array.dtype
     )
 
@@ -73,10 +73,10 @@ def pad_ft_points[_DT: np.generic](
     return padded
 
 
-class TruncatedBasis[_M: BasisMetadata, _DT: np.generic](WrappedBasis[_M, _DT]):
+class TruncatedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
     """Represents a truncated basis."""
 
-    def __init__(self: Self, size: int, inner: Basis[_M, _DT]) -> None:
+    def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:
         self._size = size
         super().__init__(inner)
 
@@ -94,28 +94,30 @@ class TruncatedBasis[_M: BasisMetadata, _DT: np.generic](WrappedBasis[_M, _DT]):
         return hash((self._size, self._inner))
 
     @override
-    def __into_inner__(
+    def __into_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         return pad_ft_points(vectors, s=(self._inner.size,), axes=(axis,))
 
     @override
-    def __from_inner__(
+    def __from_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         return pad_ft_points(vectors, s=(self._size,), axes=(axis,))
 
     @override
-    def __convert_vector_into__(
+    def __convert_vector_into__[
+        DT1: np.generic,
+    ](  # [DT1: DT, B1: Basis[M1, DT]]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
-        basis: Basis[_M, _DT],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        basis: Basis[BasisMetadata, Never],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         assert self.metadata == basis.metadata
 
         if self == basis:

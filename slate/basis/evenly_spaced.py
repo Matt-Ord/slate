@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     from slate.basis import Basis
 
 
-def _pad_sample_axis[_DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[_DT]],
+def _pad_sample_axis[DT: np.generic](
+    vectors: np.ndarray[Any, np.dtype[DT]],
     step: int,
     offset: int,
     axis: int = -1,
-) -> np.ndarray[tuple[int, ...], np.dtype[_DT]]:
+) -> np.ndarray[tuple[int, ...], np.dtype[DT]]:
     final_shape = np.array(vectors.shape)
     final_shape[axis] = step * final_shape[axis]
     padded = np.zeros(final_shape, dtype=vectors.dtype)
@@ -30,12 +30,12 @@ def _pad_sample_axis[_DT: np.generic](
     return padded  # type: ignore[no-any-return]
 
 
-def _truncate_sample_axis[_DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[_DT]],
+def _truncate_sample_axis[DT: np.generic](
+    vectors: np.ndarray[Any, np.dtype[DT]],
     step: int,
     offset: int,
     axis: int = -1,
-) -> np.ndarray[tuple[int, ...], np.dtype[_DT]]:
+) -> np.ndarray[tuple[int, ...], np.dtype[DT]]:
     truncated = vectors[slice_along_axis(slice(offset % step, None, step), axis)]  # type: ignore index type wrong
     # We could alternatively roll before we take the slice
     # and slice(0, None, ns) but this is worse for performance
@@ -51,10 +51,10 @@ class Spacing:
     offset: int
 
 
-class EvenlySpacedBasis[_M: BasisMetadata, _DT: np.generic](WrappedBasis[_M, _DT]):
+class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
     """Represents a basis sampled evenly along an axis."""
 
-    def __init__(self: Self, spacing: Spacing, inner: Basis[_M, _DT]) -> None:
+    def __init__(self: Self, spacing: Spacing, inner: Basis[M, DT]) -> None:
         self._spacing = spacing
         super().__init__(inner)
         assert self._inner.size == self._spacing.step * self._spacing.n
@@ -78,19 +78,19 @@ class EvenlySpacedBasis[_M: BasisMetadata, _DT: np.generic](WrappedBasis[_M, _DT
         return False
 
     @override
-    def __into_inner__(
+    def __into_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         return _pad_sample_axis(vectors, self._spacing.step, self._spacing.offset, axis)
 
     @override
-    def __from_inner__(
+    def __from_inner__[DT1: np.generic](  # [DT1: DT]
         self,
-        vectors: np.ndarray[Any, np.dtype[_DT]],
+        vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[_DT]]:
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
         return _truncate_sample_axis(
             vectors, self._spacing.step, self._spacing.offset, axis
         )

@@ -8,14 +8,14 @@ if TYPE_CHECKING:
     from slate.basis import Basis
 
 
-def convert_array[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
-    array: SlateArray[_B0],
-    basis: _B1,
-) -> SlateArray[_B1]:
+def convert_array[B0: Basis[Any, Any], B1: Basis[Any, Any]](
+    array: SlateArray[B0],
+    basis: B1,
+) -> SlateArray[B1]:
     """Convert the array to the given basis.
 
     Returns
     -------
-    SlateArray[_M, _DT]
+    SlateArray[M, DT]
     """
     return SlateArray(basis, array.basis.__convert_vector_into__(array.raw_data, basis))
