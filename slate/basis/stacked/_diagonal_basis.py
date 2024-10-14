@@ -5,10 +5,10 @@ from typing import Any, Self, cast
 import numpy as np
 
 from slate.basis import Basis
-from slate.basis.metadata import BasisMetadata
 from slate.basis.wrapped import WrappedBasis
+from slate.metadata import BasisMetadata, StackedMetadata
 
-from ._tuple_basis import TupleMetadata, VariadicTupleBasis
+from ._tuple_basis import VariadicTupleBasis
 
 
 class DiagonalBasis[
@@ -17,7 +17,7 @@ class DiagonalBasis[
     E,
     DT: np.generic,
 ](
-    WrappedBasis[TupleMetadata[BasisMetadata, E], DT],
+    WrappedBasis[StackedMetadata[BasisMetadata, E], DT],
 ):
     """Represents a diagonal basis."""
 

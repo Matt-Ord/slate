@@ -4,8 +4,8 @@ from typing import Any, Self, cast, override
 
 import numpy as np
 
-from slate.basis.metadata import BasisMetadata
 from slate.basis.wrapped import WrappedBasis
+from slate.metadata import BasisMetadata
 
 
 class TransformedBasis[M: BasisMetadata](WrappedBasis[M, np.complex128]):

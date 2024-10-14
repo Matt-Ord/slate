@@ -5,7 +5,7 @@ from typing import Any, Never, Self
 
 import numpy as np
 
-from slate.basis.metadata import BasisMetadata, FundamentalBasisMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
@@ -80,7 +80,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         return basis.__from_fundamental__(fundamental, axis)
 
 
-class FundamentalBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
+class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     """Represents a full fundamental basis."""
 
     @property
@@ -88,14 +88,14 @@ class FundamentalBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
         """Number of elements in the basis."""
         return self.fundamental_size
 
-    def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
+    def __into_fundamental__[DT1: np.generic](
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors
 
-    def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
+    def __from_fundamental__[DT1: np.generic](
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -113,7 +113,7 @@ class FundamentalBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
     @staticmethod
     def from_shape(
         shape: tuple[int, ...],
-    ) -> FundamentalBasis[FundamentalBasisMetadata, np.generic]:
+    ) -> FundamentalBasis[SimpleMetadata]:
         """Get a fundamental basis from a shape.
 
         Parameters
@@ -122,14 +122,14 @@ class FundamentalBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
 
         Returns
         -------
-        FundamentalBasis[FundamentalBasisMetadata, np.generic]
+        FundamentalBasis[SimpleMetadata, np.generic]
         """
-        return FundamentalBasis(FundamentalBasisMetadata(shape))
+        return FundamentalBasis(SimpleMetadata(shape))
 
 
 def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
     basis: Basis[M, DT],
-) -> FundamentalBasis[M, DT]:
+) -> FundamentalBasis[M]:
     """Get the fundamental basis for a given basis.
 
     Returns

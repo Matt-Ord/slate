@@ -5,47 +5,12 @@ from typing import Any, Iterator, Literal, Never, Self, cast, overload, override
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis
-from slate.basis.metadata import BasisMetadata
+from slate.metadata import BasisMetadata
+from slate.metadata.stacked import StackedMetadata
 
-
-class TupleMetadata[M: BasisMetadata, E](BasisMetadata):
-    """Metadata built from a tuple of individual metadata entries."""
-
-    def __init__(self: Self, children: tuple[M, ...], extra: E) -> None:
-        self._children = children
-        self._extra = extra
-
-    @property
-    def children(self: Self) -> tuple[M, ...]:
-        """Children metadata."""
-        return self._children
-
-    @property
-    def extra(self: Self) -> E:
-        """Extra metadata."""
-        return self._extra
-
-    @property
-    def fundamental_shape(self: Self) -> tuple[int, ...]:
-        """Shape of the full data."""
-        return tuple(np.prod(i.fundamental_shape).item() for i in self.children)
-
-    def __getitem__(self: Self, index: int) -> M:
-        return self.children[index]
-
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, TupleMetadata):
-            return (self.extra == value.extra) and all(  # type: ignore unknown
-                a == b
-                for (a, b) in zip(self.children, value.children)  # type: ignore unknown
-            )
-        return False
-
-    def __hash__(self) -> int:
-        return hash((self.extra, self.children))
-
-
-type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[TupleMetadata[M, E], DT]
+type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[
+    StackedMetadata[M, E], DT
+]
 
 
 def stacked_basis_as_fundamental[M: BasisMetadata, E, DT: np.generic](
@@ -93,14 +58,14 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
     return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
 
 
-class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[TupleMetadata[M, E], DT]):
+class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E], DT]):
     """Represents a Tuple of independent basis."""
 
     def __init__(
         self: Self, children: tuple[Basis[M, DT], ...], extra_metadata: E
     ) -> None:
         self._children = children
-        self._metadata = TupleMetadata(
+        self._metadata = StackedMetadata(
             tuple(i.metadata for i in children), extra_metadata
         )
 
@@ -207,3 +172,9 @@ class VariadicTupleBasis[*TS, E, DT: np.generic](TupleBasis[BasisMetadata, E, DT
     def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
 
     def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
+
+
+def tuple_basis[*TS](
+    *children: *TS,
+) -> VariadicTupleBasis[*TS, None, Never]:  # type: ignore unnecessary
+    return VariadicTupleBasis[*TS, None, Never](children, None)
