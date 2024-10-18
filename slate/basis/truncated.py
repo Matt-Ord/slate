@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Never, Self, override
+from typing import Any, Callable, Iterable, Never, Self, override
 
 import numpy as np
 
+from slate.basis import Basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-
-if TYPE_CHECKING:
-    from slate.basis import Basis
 
 
 def pad_ft_points[DT: np.generic](
@@ -73,7 +71,9 @@ def pad_ft_points[DT: np.generic](
     return padded
 
 
-class TruncatedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
+class TruncatedBasis[M: BasisMetadata, DT: np.generic](
+    WrappedBasis[M, DT, Basis[M, DT]]
+):
     """Represents a truncated basis."""
 
     def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:

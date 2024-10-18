@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Self, override
+from typing import Any, Callable, Self, override
 
 import numpy as np
 
+from slate.basis import Basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util.util import slice_along_axis
-
-if TYPE_CHECKING:
-    from slate.basis import Basis
 
 
 def _pad_sample_axis[DT: np.generic](
@@ -51,7 +49,9 @@ class Spacing:
     offset: int
 
 
-class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
+class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](
+    WrappedBasis[M, DT, Basis[M, DT]]
+):
     """Represents a basis sampled evenly along an axis."""
 
     def __init__(self: Self, spacing: Spacing, inner: Basis[M, DT]) -> None:
