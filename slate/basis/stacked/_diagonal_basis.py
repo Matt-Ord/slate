@@ -6,28 +6,28 @@ import numpy as np
 
 from slate.basis import Basis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata import BasisMetadata, StackedMetadata
+from slate.metadata import StackedMetadata
 
 from ._tuple_basis import VariadicTupleBasis
 
 
 class DiagonalBasis[
+    DT: np.generic,
     B0: Basis[Any, Any],
     B1: Basis[Any, Any],
     E,
-    DT: np.generic,
 ](
-    WrappedBasis[StackedMetadata[BasisMetadata, E], DT],
+    WrappedBasis[StackedMetadata[Any, E], DT],
 ):
     """Represents a diagonal basis."""
 
-    def __init__(self: Self, inner: VariadicTupleBasis[B0, B1, E, DT]) -> None:
+    def __init__(self: Self, inner: VariadicTupleBasis[DT, B0, B1, E]) -> None:
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
     @property
-    def inner(self: Self) -> VariadicTupleBasis[B0, B1, E, DT]:
-        return cast(VariadicTupleBasis[B0, B1, E, DT], self._inner)
+    def inner(self: Self) -> VariadicTupleBasis[DT, B0, B1, E]:
+        return cast(VariadicTupleBasis[DT, B0, B1, E], self._inner)
 
     @property
     def size(self) -> int:
