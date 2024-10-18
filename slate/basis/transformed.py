@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Self, cast, override
+from typing import TYPE_CHECKING, Any, Callable, Self, cast, override
 
 import numpy as np
 
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from slate.basis import Basis
 
 
 class TransformedBasis[M: BasisMetadata](WrappedBasis[M, np.complex128]):
@@ -45,3 +48,16 @@ class TransformedBasis[M: BasisMetadata](WrappedBasis[M, np.complex128]):
             np.ndarray[Any, np.dtype[DT1]],
             np.fft.fft(vectors, axis=axis, norm="ortho"),
         )
+
+    @override
+    def with_rewrapped_inner(
+        self: Self,
+        wrapper: Callable[[Basis[M, np.complex128]], Basis[M, np.complex128]],
+    ) -> TransformedBasis[M]:
+        """Get the wrapped basis after wrapper is applied to inner.
+
+        Returns
+        -------
+        TruncatedBasis[M, DT]
+        """
+        return TransformedBasis(wrapper(self.inner))

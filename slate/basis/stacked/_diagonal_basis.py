@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Self, cast
+from typing import Any, Callable, Self, cast, override
 
 import numpy as np
 
@@ -17,7 +17,7 @@ class DiagonalBasis[
     B1: Basis[Any, Any],
     E,
 ](
-    WrappedBasis[StackedMetadata[Any, E], DT],
+    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, B0, B1, E]],
 ):
     """Represents a diagonal basis."""
 
@@ -77,3 +77,18 @@ class DiagonalBasis[
 
     def __hash__(self) -> int:
         return hash((2, self.inner))
+
+    @override
+    def with_rewrapped_inner(
+        self: Self,
+        wrapper: Callable[
+            [VariadicTupleBasis[DT, B0, B1, E]], VariadicTupleBasis[DT, B0, B1, E]
+        ],
+    ) -> DiagonalBasis[DT, B0, B1, E]:
+        """Get the wrapped basis after wrapper is applied to inner.
+
+        Returns
+        -------
+        TruncatedBasis[M, DT]
+        """
+        return DiagonalBasis(wrapper(self.inner))
