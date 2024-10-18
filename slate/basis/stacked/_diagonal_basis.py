@@ -79,7 +79,13 @@ class DiagonalBasis[
         return hash((2, self.inner))
 
     @override
-    def with_rewrapped_inner(
+    def with_inner(
+        self: Self, inner: VariadicTupleBasis[DT, B0, B1, E]
+    ) -> DiagonalBasis[DT, B0, B1, E]:
+        return self.with_modified_inner(lambda _: inner)
+
+    @override
+    def with_modified_inner(
         self: Self,
         wrapper: Callable[
             [VariadicTupleBasis[DT, B0, B1, E]], VariadicTupleBasis[DT, B0, B1, E]
