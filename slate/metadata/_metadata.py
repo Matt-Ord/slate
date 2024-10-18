@@ -53,8 +53,8 @@ class ExplicitLabeledMetadata[DT: np.generic](LabeledMetadata[DT]):
 
 @dataclass(frozen=True, kw_only=True)
 class LabelSpacing:
-    start: float = 0
-    delta: float
+    start: np.float64 = np.floating(0)  # noqa: RUF009
+    delta: np.float64
 
 
 @dataclass(frozen=True, kw_only=True)

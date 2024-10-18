@@ -138,7 +138,7 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
         return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
 
 
-class VariadicTupleBasis[*TS, E, DT: np.generic](TupleBasis[BasisMetadata, E, DT]):
+class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
     """A variadic alternative to tuple basis.
 
     Note all sub basis must have the same datatype (DT), but it is not
@@ -157,24 +157,46 @@ class VariadicTupleBasis[*TS, E, DT: np.generic](TupleBasis[BasisMetadata, E, DT
 
     @overload
     def __getitem__[B: Basis[Any, Any]](
-        self: VariadicTupleBasis[Any, Any, B, *tuple[Any, ...], E, DT],
+        self: VariadicTupleBasis[DT, Any, Any, B, *tuple[Any, ...], E],
         index: Literal[2],
-    ) -> B: ...
+    ) -> B:
+        ...
+
     @overload
     def __getitem__[B: Basis[Any, Any]](
-        self: VariadicTupleBasis[Any, B, *tuple[Any, ...], E, DT], index: Literal[1]
-    ) -> B: ...
+        self: VariadicTupleBasis[DT, Any, B, *tuple[Any, ...], E], index: Literal[1]
+    ) -> B:
+        ...
+
     @overload
     def __getitem__[B: Basis[Any, Any]](
-        self: VariadicTupleBasis[B, *tuple[Any, ...], E, DT], index: Literal[0]
-    ) -> B: ...
+        self: VariadicTupleBasis[DT, B, *tuple[Any, ...], E], index: Literal[0]
+    ) -> B:
+        ...
+
     @overload
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]:
+        ...
 
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]:
+        ...
 
 
-def tuple_basis[*TS](
-    *children: *TS,
-) -> VariadicTupleBasis[*TS, None, Never]:  # type: ignore unnecessary
-    return VariadicTupleBasis[*TS, None, Never](children, None)
+@overload
+def tuple_basis[*TS, E](
+    children: tuple[*TS], extra_metadata: None = None
+) -> VariadicTupleBasis[np.generic, *TS, None]:
+    ...
+
+
+@overload
+def tuple_basis[*TS, E](
+    children: tuple[*TS], extra_metadata: E
+) -> VariadicTupleBasis[np.generic, *TS, E]:
+    ...
+
+
+def tuple_basis[*TS, E](
+    children: tuple[*TS], extra_metadata: E | None = None
+) -> VariadicTupleBasis[np.generic, *TS, E | None]:
+    return VariadicTupleBasis[np.generic, *TS, E | None](children, extra_metadata)
