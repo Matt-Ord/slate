@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Protocol, Self
+from typing import Any, Iterator, Protocol, Self, SupportsIndex
 
 import numpy as np
 
@@ -23,20 +23,28 @@ class SimpleMetadata:
     fundamental_shape: tuple[int, ...]
 
 
-class LabeledMetadata[DT: np.generic](SimpleMetadata, ABC):
+class LabelCollection[DT](Protocol):
+    def __getitem__(self: Self, i: SupportsIndex, /) -> DT: ...
+
+    def __iter__(self: Self) -> Iterator[DT]: ...
+
+
+class LabeledMetadata[DT](SimpleMetadata, ABC):
     """A metadata with some data associated to each location."""
 
     fundamental_shape: tuple[int, ...]
 
     @property
     @abstractmethod
-    def values(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
+    def values(self: Self) -> LabelCollection[DT]:
         """Shape of the full data."""
 
+
+class DeltaMetadata[DT](LabeledMetadata[DT], ABC):
     @property
+    @abstractmethod
     def delta(self: Self) -> DT:
         """Shape of the full data."""
-        return self.values[-1] - self.values[0]
 
 
 @dataclass(frozen=True)
@@ -46,25 +54,25 @@ class ExplicitLabeledMetadata[DT: np.generic](LabeledMetadata[DT]):
     _values: np.ndarray[Any, np.dtype[DT]]
 
     @property
-    def values(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
+    def values(self: Self) -> LabelCollection[DT]:
         """Shape of the full data."""
         return self._values
 
 
 @dataclass(frozen=True, kw_only=True)
 class LabelSpacing:
-    start: np.float64 = np.floating(0)  # noqa: RUF009
-    delta: np.float64
+    start: float = 0
+    delta: float
 
 
 @dataclass(frozen=True, kw_only=True)
-class SpacedLabeledMetadata(LabeledMetadata[np.float64]):
+class SpacedLabeledMetadata(DeltaMetadata[float]):
     """A metadata with some data associated to each location."""
 
     spacing: LabelSpacing
 
     @property
-    def values(self: Self) -> np.ndarray[Any, np.dtype[np.float64]]:
+    def values(self: Self) -> LabelCollection[float]:
         """Shape of the full data."""
         return np.linspace(
             self.spacing.start,
@@ -73,6 +81,6 @@ class SpacedLabeledMetadata(LabeledMetadata[np.float64]):
         )
 
     @property
-    def delta(self: Self) -> np.float64:
+    def delta(self: Self) -> float:
         """Shape of the full data."""
-        return np.floating(self.spacing.delta)
+        return self.spacing.delta
