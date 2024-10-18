@@ -96,7 +96,11 @@ class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](
         )
 
     @override
-    def with_rewrapped_inner(
+    def with_inner(self: Self, inner: Basis[M, DT]) -> EvenlySpacedBasis[M, DT]:
+        return self.with_modified_inner(lambda _: inner)
+
+    @override
+    def with_modified_inner(
         self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M, DT]]
     ) -> EvenlySpacedBasis[M, DT]:
         """Get the wrapped basis after wrapper is applied to inner.

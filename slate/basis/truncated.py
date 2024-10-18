@@ -129,7 +129,11 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         return super().__convert_vector_into__(vectors, basis, axis)
 
     @override
-    def with_rewrapped_inner(
+    def with_inner(self: Self, inner: Basis[M, DT]) -> TruncatedBasis[M, DT]:
+        return self.with_modified_inner(lambda _: inner)
+
+    @override
+    def with_modified_inner(
         self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M, DT]]
     ) -> TruncatedBasis[M, DT]:
         """Get the wrapped basis after wrapper is applied to inner.
