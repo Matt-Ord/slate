@@ -5,7 +5,10 @@ from typing import Any, cast
 
 import numpy as np
 
-from slate.metadata._metadata import LabeledMetadata, SpacedLabeledMetadata
+from slate.metadata._metadata import (
+    DeltaMetadata,
+    SpacedLabeledMetadata,
+)
 from slate.metadata.stacked import StackedMetadata
 from slate.metadata.util import (
     fundamental_nk_points,
@@ -15,7 +18,7 @@ from slate.metadata.util import (
 )
 
 
-class LengthMetadata(LabeledMetadata[np.float64]):
+class LengthMetadata(DeltaMetadata[float]):
     """Metadata with the addition of length."""
 
 
@@ -34,7 +37,7 @@ def fundamental_delta_x(metadata: LengthMetadata) -> float:
     -------
     float
     """
-    return metadata.delta.item()
+    return metadata.delta
 
 
 def fundamental_dx(metadata: SpacedLengthMetadata) -> float:
