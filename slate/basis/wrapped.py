@@ -12,7 +12,7 @@ from slate.metadata import BasisMetadata
 class WrappedBasis[
     M: BasisMetadata,
     DT: np.generic,
-    B: Basis[BasisMetadata, np.generic] = Basis[M, DT],  # : Basis[M, DT]  # noqa: E251
+    B: Basis[BasisMetadata, Never] = Basis[M, DT],  # : Basis[M, DT]  # noqa: E251
 ](Basis[M, DT]):
     """Represents a truncated basis."""
 

@@ -4,16 +4,18 @@ from typing import TYPE_CHECKING, Any, Never, Self, cast
 
 import numpy as np
 
+from slate.basis._basis import Basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.array.array import SlateArray
-    from slate.basis._basis import Basis
     from slate.basis.stacked._tuple_basis import VariadicTupleBasis
 
 
-class ExplicitBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
+class ExplicitBasis[M: BasisMetadata, DT: np.generic](
+    WrappedBasis[M, DT, Basis[M, DT]]
+):
     """Represents a truncated basis."""
 
     def __init__(
