@@ -1,0 +1,75 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable, Self, override
+
+import numpy as np
+
+from slate.basis.wrapped import WrappedBasis
+from slate.metadata._metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from slate.basis._basis import Basis
+
+
+class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
+    WrappedBasis[M0, DT]
+):
+    """Represents a truncated basis."""
+
+    def __init__(
+        self: Self,
+        inner: Basis[M0, DT],
+        inner_recast: Basis[M1, DT],
+        outer_recast: Basis[M1, DT],
+    ) -> None:
+        assert self._inner_recast.size == self.inner.size
+        self._inner_recast = inner_recast
+        self._outer_recast = outer_recast
+        super().__init__(inner)
+
+    @property
+    def size(self: Self) -> int:
+        """The size of the basis."""
+        return self.outer_recast.size
+
+    @property
+    def inner_recast(self: Self) -> Basis[M1, DT]:
+        """The basis the inner was recast to."""
+        return self._inner_recast
+
+    @property
+    def outer_recast(self: Self) -> Basis[M1, DT]:
+        """The basis the inner recast was transformed to."""
+        return self._outer_recast
+
+    @override
+    def __into_inner__[DT1: np.generic](  # [DT1: DT]
+        self,
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        axis: int = -1,
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return self._outer_recast.__convert_vector_into__(
+            vectors, self._inner_recast, axis
+        )
+
+    @override
+    def __from_inner__[DT1: np.generic](  # [DT1: DT]
+        self,
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        axis: int = -1,
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return self._inner_recast.__convert_vector_into__(
+            vectors, self._outer_recast, axis
+        )
+
+    @override
+    def with_rewrapped_inner(
+        self: Self, wrapper: Callable[[Basis[M0, DT]], Basis[M0, DT]]
+    ) -> RecastBasis[M0, M1, DT]:
+        """Get the wrapped basis after wrapper is applied to inner.
+
+        Returns
+        -------
+        TruncatedBasis[M, DT]
+        """
+        return RecastBasis(wrapper(self.inner), self.inner_recast, self.outer_recast)

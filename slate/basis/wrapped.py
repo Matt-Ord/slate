@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Never, Self, override
+from typing import Any, Callable, Never, Self, override
 
 import numpy as np
 
@@ -9,7 +9,11 @@ from slate.basis import Basis
 from slate.metadata import BasisMetadata
 
 
-class WrappedBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
+class WrappedBasis[
+    M: BasisMetadata,
+    DT: np.generic,
+    B: Basis[BasisMetadata, np.generic] = Basis[M, DT],  # : Basis[M, DT]  # noqa: E251
+](Basis[M, DT]):
     """Represents a truncated basis."""
 
     def __init__(self: Self, inner: Basis[M, DT]) -> None:
@@ -20,6 +24,17 @@ class WrappedBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
     def inner(self: Self) -> Basis[M, DT]:
         """Inner basis."""
         return self._inner
+
+    @abstractmethod
+    def with_rewrapped_inner(
+        self: Self, wrapper: Callable[[B], B]
+    ) -> WrappedBasis[M, DT, B]:
+        """Get the wrapped basis after wrapper is applied to inner.
+
+        Returns
+        -------
+        WrappedBasis[M, DT]
+        """
 
     @abstractmethod
     def __into_inner__[DT1: np.generic](  # [DT1: DT]
@@ -69,4 +84,4 @@ class WrappedBasis[M: BasisMetadata, DT: np.generic](Basis[M, DT]):
 
         if isinstance(basis, WrappedBasis) and self.inner == basis.inner:
             return basis.__from_inner__(as_inner, axis)
-        return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)
+        return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown

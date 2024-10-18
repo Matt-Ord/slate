@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Self, override
+from typing import TYPE_CHECKING, Any, Callable, Self, override
 
 import numpy as np
 
@@ -94,3 +94,15 @@ class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
         return _truncate_sample_axis(
             vectors, self._spacing.step, self._spacing.offset, axis
         )
+
+    @override
+    def with_rewrapped_inner(
+        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M, DT]]
+    ) -> EvenlySpacedBasis[M, DT]:
+        """Get the wrapped basis after wrapper is applied to inner.
+
+        Returns
+        -------
+        TruncatedBasis[M, DT]
+        """
+        return EvenlySpacedBasis(self.spacing, wrapper(self.inner))

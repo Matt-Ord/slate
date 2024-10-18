@@ -34,10 +34,10 @@ def test_transformed_basis_round_trip(
 
 def test_diagonal_basis_round_trip() -> None:
     full_basis = VariadicTupleBasis[
+        np.generic,
         FundamentalBasis[SimpleMetadata],
         FundamentalBasis[SimpleMetadata],
         None,
-        np.generic,
     ]((FundamentalBasis.from_shape((10,)), FundamentalBasis.from_shape((10,))), None)
     diagonal_basis = DiagonalBasis(full_basis)
 

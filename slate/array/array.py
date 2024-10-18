@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations  # noqa: A005
 
 from typing import Any, Self, cast
 

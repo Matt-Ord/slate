@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, Iterable, Never, Self, override
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Never, Self, override
 
 import numpy as np
 
@@ -127,3 +127,15 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT]):
             return pad_ft_points(vectors, s=(basis.size,), axes=(axis,))
 
         return super().__convert_vector_into__(vectors, basis, axis)
+
+    @override
+    def with_rewrapped_inner(
+        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M, DT]]
+    ) -> TruncatedBasis[M, DT]:
+        """Get the wrapped basis after wrapper is applied to inner.
+
+        Returns
+        -------
+        TruncatedBasis[M, DT]
+        """
+        return TruncatedBasis(self.size, wrapper(self.inner))
