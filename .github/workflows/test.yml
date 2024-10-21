@@ -33,6 +33,3 @@ jobs:
 
       - name: Run tests
         run: poetry run pytest
-
-      - name: Build docs
-        run: poetry run sphinx-apidoc --module-first -o docs/source/ slate/
