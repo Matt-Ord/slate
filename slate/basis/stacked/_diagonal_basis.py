@@ -79,18 +79,28 @@ class DiagonalBasis[
         return hash((2, self.inner))
 
     @override
-    def with_inner(
-        self: Self, inner: VariadicTupleBasis[DT, B0, B1, E]
-    ) -> DiagonalBasis[DT, B0, B1, E]:
+    def with_inner[  # type: ignore there is no way to bound inner in parent
+        DT1: np.generic,
+        B01: Basis[Any, Any],
+        B11: Basis[Any, Any],
+        E1,
+    ](
+        self: Self, inner: VariadicTupleBasis[DT1, B01, B11, E1]
+    ) -> DiagonalBasis[DT1, B01, B11, E1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
-    def with_modified_inner(
+    def with_modified_inner[  # type: ignore there is no way to bound the wrapper function in the parent class
+        DT1: np.generic,
+        B01: Basis[Any, Any],
+        B11: Basis[Any, Any],
+        E1,
+    ](
         self: Self,
         wrapper: Callable[
-            [VariadicTupleBasis[DT, B0, B1, E]], VariadicTupleBasis[DT, B0, B1, E]
+            [VariadicTupleBasis[DT, B0, B1, E]], VariadicTupleBasis[DT1, B01, B11, E1]
         ],
-    ) -> DiagonalBasis[DT, B0, B1, E]:
+    ) -> DiagonalBasis[DT1, B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner.
 
         Returns
