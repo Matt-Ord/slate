@@ -50,14 +50,18 @@ class TransformedBasis[M: BasisMetadata](
         )
 
     @override
-    def with_inner(self: Self, inner: Basis[M, np.complex128]) -> TransformedBasis[M]:
+    def with_inner[M1: BasisMetadata](
+        self: Self, inner: Basis[M1, np.complex128]
+    ) -> TransformedBasis[M1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
-    def with_modified_inner(
+    def with_modified_inner[
+        M1: BasisMetadata,
+    ](
         self: Self,
-        wrapper: Callable[[Basis[M, np.complex128]], Basis[M, np.complex128]],
-    ) -> TransformedBasis[M]:
+        wrapper: Callable[[Basis[M, np.complex128]], Basis[M1, np.complex128]],
+    ) -> TransformedBasis[M1]:
         """Get the wrapped basis after wrapper is applied to inner.
 
         Returns

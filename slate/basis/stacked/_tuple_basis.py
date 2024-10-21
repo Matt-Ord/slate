@@ -1,6 +1,17 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, Literal, Never, Self, cast, overload, override
+from itertools import starmap
+from typing import (
+    Any,
+    Callable,
+    Iterator,
+    Literal,
+    Never,
+    Self,
+    cast,
+    overload,
+    override,
+)
 
 import numpy as np
 
@@ -84,6 +95,44 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
         """Shape of the children data."""
         return tuple(x.size for x in self.children)
 
+    def with_child(self: Self, inner: Basis[M, DT], idx: int) -> TupleBasis[M, E, DT]:
+        """Get a basis with the basis at idx set to inner.
+
+        Parameters
+        ----------
+        self : Self
+        inner : B
+
+        Returns
+        -------
+        TupleBasis[M, DT, B]
+        """
+        return self.with_modified_child(lambda _: inner, idx)
+
+    def with_modified_child(
+        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M, DT]], idx: int
+    ) -> TupleBasis[M, E, DT]:
+        """Get the basis with modified child.
+
+        Returns
+        -------
+        TupleBasis[M, E, DT]
+        """
+        return self.with_modified_children(lambda i, b: b if i != idx else wrapper(b))
+
+    def with_modified_children(
+        self: Self, wrapper: Callable[[int, Basis[M, DT]], Basis[M, DT]]
+    ) -> TupleBasis[M, E, DT]:
+        """Get the basis with modified children.
+
+        Returns
+        -------
+        TupleBasis[M, E, DT]
+        """
+        return TupleBasis[M, E, DT](
+            tuple(starmap(wrapper, enumerate(self.children))), self.metadata.extra
+        )
+
     @override
     def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
@@ -159,41 +208,34 @@ class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
     def __getitem__[B: Basis[Any, Any]](
         self: VariadicTupleBasis[DT, Any, Any, B, *tuple[Any, ...], E],
         index: Literal[2],
-    ) -> B:
-        ...
+    ) -> B: ...
 
     @overload
     def __getitem__[B: Basis[Any, Any]](
         self: VariadicTupleBasis[DT, Any, B, *tuple[Any, ...], E], index: Literal[1]
-    ) -> B:
-        ...
+    ) -> B: ...
 
     @overload
     def __getitem__[B: Basis[Any, Any]](
         self: VariadicTupleBasis[DT, B, *tuple[Any, ...], E], index: Literal[0]
-    ) -> B:
-        ...
+    ) -> B: ...
 
     @overload
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]:
-        ...
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
 
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]:
-        ...
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
 
 
 @overload
 def tuple_basis[*TS, E](
     children: tuple[*TS], extra_metadata: None = None
-) -> VariadicTupleBasis[np.generic, *TS, None]:
-    ...
+) -> VariadicTupleBasis[np.generic, *TS, None]: ...
 
 
 @overload
 def tuple_basis[*TS, E](
     children: tuple[*TS], extra_metadata: E
-) -> VariadicTupleBasis[np.generic, *TS, E]:
-    ...
+) -> VariadicTupleBasis[np.generic, *TS, E]: ...
 
 
 def tuple_basis[*TS, E](
