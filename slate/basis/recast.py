@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Self, override
+from typing import Any, Callable, Self, override
 
 import numpy as np
 
+from slate.basis._basis import Basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata._metadata import BasisMetadata
 
-if TYPE_CHECKING:
-    from slate.basis._basis import Basis
-
 
 class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
-    WrappedBasis[M0, DT]
+    WrappedBasis[M0, DT, Basis[M0, DT]]
 ):
     """Represents a truncated basis."""
 

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     WrappedBasis[M, DT, Basis[M, DT]]
 ):
-    """Represents a truncated basis."""
+    """Represents an explicit basis."""
 
     def __init__(
         self: Self,
