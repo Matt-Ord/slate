@@ -8,7 +8,7 @@ import numpy as np
 from slate.basis import Basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-from slate.util.util import slice_along_axis
+from slate.util import slice_along_axis
 
 
 def _pad_sample_axis[DT: np.generic](

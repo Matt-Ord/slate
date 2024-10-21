@@ -95,44 +95,6 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
         """Shape of the children data."""
         return tuple(x.size for x in self.children)
 
-    def with_child(self: Self, inner: Basis[M, DT], idx: int) -> TupleBasis[M, E, DT]:
-        """Get a basis with the basis at idx set to inner.
-
-        Parameters
-        ----------
-        self : Self
-        inner : B
-
-        Returns
-        -------
-        TupleBasis[M, DT, B]
-        """
-        return self.with_modified_child(lambda _: inner, idx)
-
-    def with_modified_child(
-        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M, DT]], idx: int
-    ) -> TupleBasis[M, E, DT]:
-        """Get the basis with modified child.
-
-        Returns
-        -------
-        TupleBasis[M, E, DT]
-        """
-        return self.with_modified_children(lambda i, b: b if i != idx else wrapper(b))
-
-    def with_modified_children(
-        self: Self, wrapper: Callable[[int, Basis[M, DT]], Basis[M, DT]]
-    ) -> TupleBasis[M, E, DT]:
-        """Get the basis with modified children.
-
-        Returns
-        -------
-        TupleBasis[M, E, DT]
-        """
-        return TupleBasis[M, E, DT](
-            tuple(starmap(wrapper, enumerate(self.children))), self.metadata.extra
-        )
-
     @override
     def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
@@ -243,3 +205,50 @@ def tuple_basis[*TS, E](
 ) -> VariadicTupleBasis[np.generic, *TS, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
     return VariadicTupleBasis[np.generic, *TS, E | None](children, extra_metadata)
+
+
+def tuple_basis_with_modified_children[M: BasisMetadata, E, DT: np.generic](
+    basis: TupleBasis[M, E, DT], wrapper: Callable[[int, Basis[M, DT]], Basis[M, DT]]
+) -> TupleBasis[M, E, DT]:
+    """Get the basis with modified children.
+
+    Returns
+    -------
+    TupleBasis[M, E, DT]
+    """
+    return TupleBasis[M, E, DT](
+        tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata.extra
+    )
+
+
+def tuple_basis_with_modified_child[M: BasisMetadata, E, DT: np.generic](
+    basis: TupleBasis[M, E, DT],
+    wrapper: Callable[[Basis[M, DT]], Basis[M, DT]],
+    idx: int,
+) -> TupleBasis[M, E, DT]:
+    """Get the basis with modified child.
+
+    Returns
+    -------
+    TupleBasis[M, E, DT]
+    """
+    return tuple_basis_with_modified_children(
+        basis, lambda i, b: b if i != idx else wrapper(b)
+    )
+
+
+def tuple_basis_with_child[M: BasisMetadata, E, DT: np.generic](
+    basis: TupleBasis[M, E, DT], inner: Basis[M, DT], idx: int
+) -> TupleBasis[M, E, DT]:
+    """Get a basis with the basis at idx set to inner.
+
+    Parameters
+    ----------
+    self : Self
+    inner : B
+
+    Returns
+    -------
+    TupleBasis[M, DT, B]
+    """
+    return tuple_basis_with_modified_child(basis, lambda _: inner, idx)
