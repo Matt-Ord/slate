@@ -17,6 +17,7 @@ numpy = "^2.0.0"
 ruff = "*"
 pytest = "^8.3.3"
 pyright = "^1.1.384"
+sphinx = "^8.1.3"
 
 [tool.ruff]
 unsafe-fixes = true
@@ -35,6 +36,7 @@ ignore = [
     "CPY001",
     "TD003",
     "TD002",
+    "DOC201",
 ]
 
 

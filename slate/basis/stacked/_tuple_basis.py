@@ -241,4 +241,5 @@ def tuple_basis[*TS, E](
 def tuple_basis[*TS, E](
     children: tuple[*TS], extra_metadata: E | None = None
 ) -> VariadicTupleBasis[np.generic, *TS, E | None]:
+    """Build a VariadicTupleBasis from a tuple."""
     return VariadicTupleBasis[np.generic, *TS, E | None](children, extra_metadata)
