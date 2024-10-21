@@ -8,6 +8,7 @@ from slate.array.array import SlateArray
 from slate.basis import Basis
 from slate.basis._basis import FundamentalBasis
 from slate.basis.stacked._tuple_basis import TupleBasis
+from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata, SimpleMetadata
 
 
@@ -40,3 +41,14 @@ def slate_array_basis_variance() -> None:
     _c: SlateArray[np.floating[Any], Basis[BasisMetadata, np.float64]] = a
     _d: SlateArray[np.float128, Basis[BasisMetadata, np.float64]] = a  # type: ignore should fail
     _e: SlateArray[np.generic, Basis[BasisMetadata, np.float64]] = a
+
+
+def wrappeed_basis_variance() -> None:
+    a = cast(
+        WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.float64]],
+        {},
+    )
+    _b: WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.generic]] = a  # type: ignore should fail
+    _c: WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.float64]] = a
+    _d: WrappedBasis[SimpleMetadata, np.float64, Basis[BasisMetadata, np.generic]] = a  # type: ignore should fail
+    _e: WrappedBasis[SimpleMetadata, np.float64, Basis[BasisMetadata, np.float64]] = a
