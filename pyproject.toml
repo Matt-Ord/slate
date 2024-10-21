@@ -42,6 +42,7 @@ ignore = [
 
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/**/*" = ["PLR6301", "PLC2701", "PLR0914", "D101", "D102", "D103", "D104"]
+"docs/**/*" = ["INP001", "I002"]
 
 [tool.ruff.lint.pylint]
 allow-dunder-method-names = [
