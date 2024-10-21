@@ -1,13 +1,16 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
 
 from slate.array.array import SlateArray
 from slate.basis import FundamentalBasis
-from slate.metadata import SimpleMetadata
+from slate.metadata.stacked import StackedMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata import SimpleMetadata
 
 
 def test_slate_array_as_array(
@@ -28,7 +31,7 @@ def test_slate_array_basis(
     slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
 ) -> None:
     assert slate_array_integer.basis == FundamentalBasis(
-        SimpleMetadata(slate_array_integer.fundamental_shape)
+        StackedMetadata.from_shape(slate_array_integer.fundamental_shape)
     )
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from itertools import starmap
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Iterator,
@@ -18,6 +19,9 @@ import numpy as np
 from slate.basis import Basis, FundamentalBasis
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked import StackedMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata._metadata import SimpleMetadata
 
 type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[
     StackedMetadata[M, E], DT
@@ -185,7 +189,8 @@ class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
     @overload
     def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
 
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
+    def __getitem__(self: Self, index: int) -> Basis[Any, Any]:
+        return super().__getitem__(index)
 
 
 @overload
@@ -252,3 +257,52 @@ def tuple_basis_with_child[M: BasisMetadata, E, DT: np.generic](
     TupleBasis[M, DT, B]
     """
     return tuple_basis_with_modified_child(basis, lambda _: inner, idx)
+
+
+def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
+    metadata: StackedMetadata[M, E],
+) -> TupleBasis[M, E, np.generic]:
+    """Get a basis with the basis at idx set to inner.
+
+    Parameters
+    ----------
+    self : Self
+    inner : B
+
+    Returns
+    -------
+    TupleBasis[M, DT, B]
+    """
+    children = tuple(FundamentalBasis(c) for c in metadata.children)
+    return TupleBasis(children, metadata.extra)
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, ...], *, extra: None = None
+) -> TupleBasis[SimpleMetadata, None, np.generic]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, ...], *, extra: E
+) -> TupleBasis[SimpleMetadata, E, np.generic]: ...
+
+
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, ...], *, extra: E | None = None
+) -> TupleBasis[SimpleMetadata, E | None, np.generic]:
+    """Get a basis with the basis at idx set to inner.
+
+    Parameters
+    ----------
+    self : Self
+    inner : B
+
+    Returns
+    -------
+    TupleBasis[M, DT, B]
+    """
+    return fundamental_tuple_basis_from_metadata(
+        StackedMetadata.from_shape(shape, extra=extra)
+    )

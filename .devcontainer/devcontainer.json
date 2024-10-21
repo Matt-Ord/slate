@@ -133,7 +133,8 @@
 				"esbenp.prettier-vscode",
 				"streetsidesoftware.code-spell-checker",
 				"tamasfe.even-better-toml",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"peakchen90.open-html-in-browser"
 			]
 		}
 	},
