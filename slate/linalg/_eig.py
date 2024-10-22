@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from slate.basis._basis import Basis, FundamentalBasis
 from slate.basis.stacked._diagonal_basis import DiagonalBasis
 from slate.basis.stacked._tuple_basis import (
     TupleBasis,
-    fundamental_tuple_basis_from_metadata,
+    as_tuple_basis,
     tuple_basis,
 )
 from slate.explicit_basis._explicit_basis import ExplicitBasis, ExplicitUnitaryBasis
@@ -26,6 +26,7 @@ def eigvals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
         Basis[StackedMetadata[M, E], np.generic],
     ],
 ) -> SlateArray[np.complex128, FundamentalBasis[BasisMetadata]]:
+    """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
     return SlateArray(FundamentalBasis.from_shape(a.shape), a)
 
@@ -33,7 +34,7 @@ def eigvals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
 def _eig_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[DT, TupleBasis[M, E, np.generic]],
 ) -> SlateArray[
-    DT,
+    np.complex128,
     DiagonalBasis[
         DT,
         ExplicitBasis[BasisMetadata, DT],
@@ -42,14 +43,18 @@ def _eig_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     ],
 ]:
     eig = np.linalg.eig(array.raw_data.reshape(array.basis.shape))
-
     states_basis = tuple_basis(
         (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[1])
     )
 
-    basis = ExplicitBasis(SlateArray(states_basis, eig.eigenvectors))
+    basis_0 = ExplicitBasis(SlateArray(states_basis, np.transpose(eig.eigenvectors)))
+    basis_1 = ExplicitBasis(
+        SlateArray(
+            states_basis, cast(np.ndarray[Any, Any], np.linalg.inv(eig.eigenvectors))
+        )
+    )
     return SlateArray(
-        DiagonalBasis(tuple_basis((basis, basis), array.basis.metadata.extra)),
+        DiagonalBasis(tuple_basis((basis_0, basis_1), array.basis.metadata.extra)),
         eig.eigenvalues,
     )
 
@@ -60,7 +65,7 @@ def eig[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
         Basis[StackedMetadata[M, E], np.generic],
     ],
 ) -> SlateArray[
-    DT,
+    np.complex128,
     DiagonalBasis[
         DT,
         ExplicitBasis[BasisMetadata, DT],
@@ -68,9 +73,28 @@ def eig[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
         E,
     ],
 ]:
+    """Get the diagonal form of a matrix.
+
+    .. literalinclude:: ../../examples/linalg.py
+        :language: python
+        :lines: 9-
+        :linenos:
+        :lineno-start: 1
+        :dedent: 4
+    """
     assert array.basis.n_dim == 2  # noqa: PLR2004
-    tuple_basis = fundamental_tuple_basis_from_metadata(array.basis.metadata)
+    tuple_basis = as_tuple_basis(array.basis)
     return _eig_from_tuple(convert_array(array, tuple_basis))
+
+
+def eigvalsh[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
+    array: SlateArray[
+        DT,
+        Basis[StackedMetadata[M, E], np.generic],
+    ],
+) -> SlateArray[np.float64, FundamentalBasis[BasisMetadata]]:
+    a = np.linalg.eigvalsh(array.as_array())
+    return SlateArray(FundamentalBasis.from_shape(a.shape), a)
 
 
 def _eigh_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
@@ -87,10 +111,17 @@ def _eigh_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     assert array.basis.n_dim == 2  # noqa: PLR2004
     eig = np.linalg.eigh(array.raw_data.reshape(array.basis.shape))
 
-    states_basis = tuple_basis((FundamentalBasis.from_shape((4,)), array.basis[1]))
-    basis = ExplicitUnitaryBasis(SlateArray(states_basis, eig.eigenvectors))
+    states_basis = tuple_basis(
+        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[1])
+    )
+    basis_0 = ExplicitUnitaryBasis[BasisMetadata, DT](
+        SlateArray(states_basis, np.transpose(eig.eigenvectors))
+    )
+    basis_1 = ExplicitUnitaryBasis(
+        SlateArray(states_basis, np.conj(np.transpose(eig.eigenvectors)))
+    )
     return SlateArray(
-        DiagonalBasis(tuple_basis((basis, basis), array.basis.metadata.extra)),
+        DiagonalBasis(tuple_basis((basis_0, basis_1), array.basis.metadata.extra)),
         eig.eigenvalues,
     )
 
@@ -110,5 +141,5 @@ def eigh[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     ],
 ]:
     assert array.basis.n_dim == 2  # noqa: PLR2004
-    tuple_basis = fundamental_tuple_basis_from_metadata(array.basis.metadata)
+    tuple_basis = as_tuple_basis(array.basis)
     return _eigh_from_tuple(convert_array(array, tuple_basis))

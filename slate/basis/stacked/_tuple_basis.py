@@ -17,6 +17,7 @@ from typing import (
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis
+from slate.basis.wrapped import WrappedBasis, get_wrapped_basis_super_inner
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked import StackedMetadata
 
@@ -108,8 +109,8 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
         basis = stacked_basis_as_fundamental(self)
         return _convert_tuple_basis_vector(
             vectors,
-            cast(TupleBasis[M, E, DT1], basis),
             cast(TupleBasis[M, E, DT1], self),
+            cast(TupleBasis[M, E, DT1], basis),
             axis,
         )
 
@@ -306,3 +307,22 @@ def fundamental_tuple_basis_from_shape[E](
     return fundamental_tuple_basis_from_metadata(
         StackedMetadata.from_shape(shape, extra=extra)
     )
+
+
+def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
+    basis: Basis[StackedMetadata[M, E], DT],
+) -> TupleBasis[M, E, np.generic]:
+    """Get the closest basis to basis that is a TupleBasis.
+
+    - For a wrapped TupleBasis, this will return the unwrapped basis
+    - For a basis which is not a wrapped tuple_basis, this returns the fundamental stacked basis
+
+    This is useful for functions which require a TupleBasis, and ensures that
+    only the minimal basis conversion is required.
+    """
+    if isinstance(basis, WrappedBasis):
+        super_inner = get_wrapped_basis_super_inner(basis)  # type: ignore unknown
+        if isinstance(super_inner, TupleBasis):
+            return cast(TupleBasis[M, E, np.generic], super_inner)
+
+    return fundamental_tuple_basis_from_metadata(basis.metadata)
