@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
 from slate.array.array import SlateArray
 from slate.basis import Basis
 from slate.basis._basis import FundamentalBasis
+from slate.basis.stacked._diagonal_basis import DiagonalBasis
 from slate.basis.stacked._tuple_basis import TupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata, SimpleMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata.stacked import StackedMetadata
 
 
 def basis_variance() -> None:
@@ -52,3 +56,39 @@ def wrappeed_basis_variance() -> None:
     _c: WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.float64]] = a
     _d: WrappedBasis[SimpleMetadata, np.float64, Basis[BasisMetadata, np.generic]] = a  # type: ignore should fail
     _e: WrappedBasis[SimpleMetadata, np.float64, Basis[BasisMetadata, np.float64]] = a
+
+
+def diagonal_basis_variance() -> None:
+    a = cast(
+        DiagonalBasis[
+            np.floating[Any],
+            Basis[SimpleMetadata, np.float64],
+            Basis[SimpleMetadata, np.float64],
+            None,
+        ],
+        {},
+    )
+    _b: DiagonalBasis[
+        np.generic,
+        Basis[SimpleMetadata, np.float64],
+        Basis[SimpleMetadata, np.float64],
+        None,
+    ] = a  # type: ignore should fail
+    _c: DiagonalBasis[
+        np.float64,
+        Basis[SimpleMetadata, np.float64],
+        Basis[SimpleMetadata, np.float64],
+        None,
+    ] = a
+    _d: DiagonalBasis[
+        np.float64,
+        Basis[StackedMetadata[Any, Any], np.float64],
+        Basis[SimpleMetadata, np.float64],
+        None,
+    ] = a  # type: ignore should fail
+    _e: DiagonalBasis[
+        np.float64,
+        Basis[BasisMetadata, np.float64],
+        Basis[SimpleMetadata, np.float64],
+        None,
+    ] = a

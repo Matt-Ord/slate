@@ -5,10 +5,11 @@ basis that diagonalizes the array
 
 .. literalinclude:: ../../examples/linalg.py
     :language: python
+    :lineno-start: 8
 """
 
 from __future__ import annotations
 
-from ._eig import eig, eigh
+from ._eig import eig, eigh, eigvals, eigvalsh
 
-__all__ = ["eig", "eigh"]
+__all__ = ["eig", "eigh", "eigvals", "eigvalsh"]

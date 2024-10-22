@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, Never, Self, override
+from typing import Any, Callable, Iterator, Never, Self, override
 
 import numpy as np
 
@@ -105,3 +105,25 @@ class WrappedBasis[
         if isinstance(basis, WrappedBasis) and self.inner == basis.inner:
             return basis.__from_inner__(as_inner, axis)
         return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown
+
+
+def wrapped_basis_iter_inner[
+    M: BasisMetadata,
+    DT: np.generic,
+](basis: WrappedBasis[M, DT, Any]) -> Iterator[Basis[M, DT]]:
+    """Return successive calls to basis.inner until the basis is not a WrappedBasis."""
+    yield basis.inner
+    if isinstance(basis.inner, WrappedBasis):
+        yield from wrapped_basis_iter_inner(basis.inner)  # type: ignore unknown
+
+
+def get_wrapped_basis_super_inner[
+    M: BasisMetadata,
+    DT: np.generic,
+](basis: WrappedBasis[M, DT, Any]) -> Basis[M, DT]:
+    """Get the `super inner` of a wrapped basis.
+
+    If the inner is itself a wrapped basis, return the super inner of that basis
+    """
+    *_, last = wrapped_basis_iter_inner(basis)
+    return last
