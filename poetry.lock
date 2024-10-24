@@ -410,13 +410,13 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pyright"
-version = "1.1.385"
+version = "1.1.382"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.385-py3-none-any.whl", hash = "sha256:e5b9a1b8d492e13004d822af94d07d235f2c7c158457293b51ab2214c8c5b375"},
-    {file = "pyright-1.1.385.tar.gz", hash = "sha256:1bf042b8f080441534aa02101dea30f8fc2efa8f7b6f1ab05197c21317f5bfa7"},
+    {file = "pyright-1.1.382-py3-none-any.whl", hash = "sha256:b6658802b2eca1107a6d63b6816903da4c7a53dffebc27cdbc02ebd904b7a18e"},
+    {file = "pyright-1.1.382.tar.gz", hash = "sha256:0c953837aa9f1e1d8d46772ee7ebae845104db657e9216834dbdde567a11f177"},
 ]
 
 [package.dependencies]
@@ -666,4 +666,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.13,<3.14"
-content-hash = "4988b2548547120d4c56ad84134818179cf7de2a1a16efd1fcc0bcd33021d90b"
+content-hash = "47bb3a1aba68b1d1681185162929e4e2c29f08ad4ef4eaaff75cfa860e8c1a15"
