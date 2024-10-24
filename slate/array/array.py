@@ -1,11 +1,14 @@
 from __future__ import annotations  # noqa: A005
 
-from typing import Any, Self, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis
-from slate.metadata import SimpleMetadata
+from slate.metadata.stacked import StackedMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata import SimpleMetadata
 
 
 class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
@@ -62,7 +65,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
     @staticmethod
     def from_array[DT1: np.generic](
         array: np.ndarray[Any, np.dtype[DT1]],
-    ) -> SlateArray[DT1, FundamentalBasis[SimpleMetadata]]:
+    ) -> SlateArray[DT1, FundamentalBasis[StackedMetadata[SimpleMetadata, None]]]:
         """Get a SlateArray from an array.
 
         Parameters
@@ -73,7 +76,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
         -------
         SlateArray[SimpleMetadata, DT]
         """
-        return SlateArray[DT1, FundamentalBasis[SimpleMetadata]](
-            FundamentalBasis[SimpleMetadata](SimpleMetadata(array.shape)),
+        return SlateArray(
+            FundamentalBasis(StackedMetadata.from_shape(array.shape)),
             array,
         )
