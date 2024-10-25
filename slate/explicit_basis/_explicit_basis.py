@@ -24,7 +24,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     def __init__(
         self: Self,
-        data: SlateArray[DT, VariadicTupleBasis[DT, Basis[M, DT], Basis[M, DT], Any]],
+        data: SlateArray[DT, VariadicTupleBasis[DT, Any, Any, Any]],
     ) -> None:
         self._data = data
         super().__init__(data.basis[1])
@@ -111,7 +111,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 
     def __init__(
         self: Self,
-        data: SlateArray[DT, VariadicTupleBasis[DT, Basis[Any, DT], Basis[M, DT], Any]],
+        data: SlateArray[DT, VariadicTupleBasis[DT, Any, Any, Any]],
         *,
         assert_unitary: bool = False,
     ) -> None:
