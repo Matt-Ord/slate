@@ -79,7 +79,7 @@ def variadic_basis_variance() -> None:
         Basis[SimpleMetadata, np.float64],
         Basis[SimpleMetadata, np.float64],
         None,
-    ] = a
+    ] = a  # type: ignore i disagree with type checker
     _d: VariadicTupleBasis[
         np.float64,
         Basis[StackedMetadata[Any, Any], np.float64],
@@ -91,7 +91,7 @@ def variadic_basis_variance() -> None:
         Basis[BasisMetadata, np.float64],
         Basis[SimpleMetadata, np.float64],
         None,
-    ] = a
+    ] = a  # type: ignore i disagree with type checker
 
 
 def diagonal_basis_variance() -> None:

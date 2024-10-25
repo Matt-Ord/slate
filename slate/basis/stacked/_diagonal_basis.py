@@ -17,7 +17,7 @@ class DiagonalBasis[
     B1: Basis[Any, Any],
     E,
 ](
-    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, B0, B1, E]],
+    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]],
 ):
     """Represents a diagonal basis."""
 
@@ -26,8 +26,8 @@ class DiagonalBasis[
         assert self.inner.children[0].size == self.inner.children[1].size
 
     @property
-    def inner(self: Self) -> VariadicTupleBasis[DT, B0, B1, E]:
-        return cast(VariadicTupleBasis[DT, B0, B1, E], self._inner)
+    def inner(self: Self) -> VariadicTupleBasis[DT, Any, Any, E]:
+        return cast(VariadicTupleBasis[DT, Any, Any, E], self._inner)
 
     @property
     def size(self) -> int:
@@ -98,7 +98,7 @@ class DiagonalBasis[
     ](
         self: Self,
         wrapper: Callable[
-            [VariadicTupleBasis[DT, B0, B1, E]], VariadicTupleBasis[DT1, B01, B11, E1]
+            [VariadicTupleBasis[DT, Any, B1, E]], VariadicTupleBasis[DT1, B01, B11, E1]
         ],
     ) -> DiagonalBasis[DT1, B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner.
