@@ -9,6 +9,7 @@ from typing import (
     Literal,
     Never,
     Self,
+    TypeGuard,
     cast,
     overload,
     override,
@@ -211,6 +212,13 @@ def tuple_basis[*TS, E](
 ) -> VariadicTupleBasis[np.generic, *TS, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
     return VariadicTupleBasis[np.generic, *TS, E | None](children, extra_metadata)
+
+
+def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
+    _basis: TupleBasis[M, E, DT],
+) -> TypeGuard[VariadicTupleBasis[np.generic, *tuple[Basis[M, DT], ...], E]]:
+    """Cast a TupleBasis as a VariadicTupleBasis."""
+    return True
 
 
 def tuple_basis_with_modified_children[M: BasisMetadata, E, DT: np.generic](
