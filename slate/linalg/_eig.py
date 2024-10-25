@@ -7,7 +7,7 @@ import numpy as np
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis._basis import Basis, FundamentalBasis
-from slate.basis.stacked._diagonal_basis import DiagonalBasis
+from slate.basis.stacked._diagonal_basis import DiagonalBasis, diagonal_basis
 from slate.basis.stacked._tuple_basis import (
     TupleBasis,
     as_tuple_basis,
@@ -54,7 +54,7 @@ def _eig_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
         )
     )
     return SlateArray(
-        DiagonalBasis(tuple_basis((basis_0, basis_1), array.basis.metadata.extra)),
+        diagonal_basis((basis_0, basis_1), array.basis.metadata.extra),
         eig.eigenvalues,
     )
 
@@ -121,7 +121,7 @@ def _eigh_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
         SlateArray(states_basis, np.conj(np.transpose(eig.eigenvectors)))
     )
     return SlateArray(
-        DiagonalBasis(tuple_basis((basis_0, basis_1), array.basis.metadata.extra)),
+        diagonal_basis((basis_0, basis_1), array.basis.metadata.extra),
         eig.eigenvalues,
     )
 

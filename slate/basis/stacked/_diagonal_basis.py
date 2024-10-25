@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, cast, override
+from typing import Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
@@ -21,7 +21,7 @@ class DiagonalBasis[
 ):
     """Represents a diagonal basis."""
 
-    def __init__(self: Self, inner: VariadicTupleBasis[DT, B0, B1, E]) -> None:
+    def __init__(self: Self, inner: VariadicTupleBasis[DT, Any, Any, E]) -> None:
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
@@ -108,3 +108,24 @@ class DiagonalBasis[
         TruncatedBasis[M, DT]
         """
         return DiagonalBasis(wrapper(self.inner))
+
+
+@overload
+def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
+    children: tuple[_B0, _B1], extra_metadata: None = None
+) -> DiagonalBasis[np.generic, _B0, _B1, None]: ...
+
+
+@overload
+def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
+    children: tuple[_B0, _B1], extra_metadata: E
+) -> DiagonalBasis[np.generic, _B0, _B1, E]: ...
+
+
+def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
+    children: tuple[_B0, _B1], extra_metadata: E | None = None
+) -> DiagonalBasis[np.generic, _B0, _B1, E | None]:
+    """Build a VariadicTupleBasis from a tuple."""
+    return DiagonalBasis[np.generic, Any, Any, E | None](
+        VariadicTupleBasis(children, extra_metadata)
+    )
