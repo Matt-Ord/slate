@@ -9,11 +9,11 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 
-class CoBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
+class ConjBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
     """Represents a fourier transformed basis."""
 
     def __eq__(self, value: object) -> bool:
-        if isinstance(value, CoBasis):
+        if isinstance(value, ConjBasis):
             return self.size == value.size and value.inner == self.inner  # type: ignore unknown
         return False
 
@@ -24,6 +24,10 @@ class CoBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self.inner.size
+
+    @override
+    def conjugate_basis(self) -> ConjBasis[M, DT]:
+        return ConjBasis(self.inner.conjugate_basis())
 
     @override
     def __into_inner__[DT1: np.generic](  # type: ignore we should have stricter bound on parent
@@ -44,18 +48,18 @@ class CoBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]
     @override
     def with_inner[M1: BasisMetadata, DT1: np.generic](
         self: Self, inner: Basis[M1, DT1]
-    ) -> CoBasis[M1, DT1]:
+    ) -> ConjBasis[M1, DT1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
     def with_modified_inner[M1: BasisMetadata, DT1: np.generic](
         self: Self,
         wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]],
-    ) -> CoBasis[M1, DT1]:
+    ) -> ConjBasis[M1, DT1]:
         """Get the wrapped basis after wrapper is applied to inner.
 
         Returns
         -------
         TruncatedBasis[M, DT]
         """
-        return CoBasis(wrapper(self.inner))
+        return ConjBasis(wrapper(self.inner))

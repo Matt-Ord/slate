@@ -86,6 +86,9 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
             tuple(i.metadata for i in children), extra_metadata
         )
 
+    def conjugate_basis(self) -> TupleBasis[M, E, DT]:
+        return self
+
     @property
     def children(self) -> tuple[Basis[M, DT], ...]:
         """Children basis."""
@@ -154,6 +157,14 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
         # We overload __convert_vector_into__, more likely to get the 'happy path'
         return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
 
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, TupleBasis):
+            return value.children == self.children  # type: ignore unknown
+        return False
+
+    def __hash__(self) -> int:
+        return hash((self.metadata.extra, self.children))
+
 
 class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
     """A variadic alternative to tuple basis.
@@ -166,6 +177,9 @@ class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
         super().__init__(
             cast(tuple[Basis[BasisMetadata, DT], ...], children), extra_metadata
         )
+
+    def conjugate_basis(self) -> VariadicTupleBasis[DT, *TS, E]:
+        return self
 
     @property
     def children(self) -> tuple[*TS]:  # type: ignore inconsistent type

@@ -25,6 +25,9 @@ class DiagonalBasis[
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
+    def conjugate_basis(self) -> DiagonalBasis[DT, B0, B1, E]:
+        return DiagonalBasis(self.inner.conjugate_basis())
+
     @property
     def inner(self: Self) -> VariadicTupleBasis[DT, Any, Any, E]:
         return cast(VariadicTupleBasis[DT, Any, Any, E], self._inner)
@@ -98,7 +101,7 @@ class DiagonalBasis[
     ](
         self: Self,
         wrapper: Callable[
-            [VariadicTupleBasis[DT, Any, B1, E]], VariadicTupleBasis[DT1, B01, B11, E1]
+            [VariadicTupleBasis[DT, Any, Any, E]], VariadicTupleBasis[DT1, B01, B11, E1]
         ],
     ) -> DiagonalBasis[DT1, B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner.

@@ -149,3 +149,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         TruncatedBasis[M, DT]
         """
         return TruncatedBasis(self.size, wrapper(self.inner))
+
+    @override
+    def conjugate_basis(self) -> TruncatedBasis[M, DT]:
+        return TruncatedBasis(self.size, self.inner.conjugate_basis())

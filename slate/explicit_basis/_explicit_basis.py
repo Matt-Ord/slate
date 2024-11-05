@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, Self, cast, override
+import uuid
+from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, override
 
 import numpy as np
 
@@ -17,6 +18,9 @@ if TYPE_CHECKING:
     from slate.basis.stacked._tuple_basis import VariadicTupleBasis
 
 
+type Direction = Literal["forward", "backward"]
+
+
 class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     WrappedBasis[M, DT, Basis[M, DT]]
 ):
@@ -25,46 +29,89 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     def __init__(
         self: Self,
         data: SlateArray[DT, VariadicTupleBasis[DT, Any, Any, Any]],
+        *,
+        direction: Direction = "forward",
+        data_id: uuid.UUID | None = None,
     ) -> None:
         self._data = data
+        self._direction: Direction = direction
+        self._data_id = data_id or uuid.uuid4()
         super().__init__(data.basis[1])
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, ExplicitBasis):
+            return (
+                self.size == value.size
+                and value.inner == self.inner  # type: ignore unknown
+                and value.direction == self.direction
+                and value._data_id == self._data_id
+            )
+        return False
+
+    def __hash__(self) -> int:
+        return hash((1, self.inner, self.direction, self._data_id))
 
     @property
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self._data.basis[0].size
 
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
+    @override
+    def conjugate_basis(self) -> ExplicitBasis[M, DT]:
+        return ExplicitBasis(
+            self._data,
+            direction="forward" if self.direction == "backward" else "backward",
+            data_id=self._data_id,
+        )
+
+    @property
+    def direction(self: Self) -> Direction:
+        """The convention used to select the direction for the forward transform."""
+        return self._direction
+
+    @property
+    def _transform_matrix(self) -> np.ndarray[Any, Any]:
+        return (
+            self._data.raw_data.reshape(self._data.basis.shape)
+            if self.direction == "forward"
+            else np.transpose(
+                np.linalg.inv(self._data.raw_data.reshape(self._data.basis.shape))  # type: ignore unknown
+            )  # type: ignore unknown
+        )
+
+    @override
+    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = np.tensordot(
             cast(np.ndarray[Any, np.dtype[Never]], vectors),
-            cast(
-                np.ndarray[Any, np.dtype[Never]],
-                self._data.raw_data.reshape(self._data.basis.shape),
-            ),
+            self._transform_matrix,
             axes=([axis], [0]),
         )
         return np.moveaxis(transformed, -1, axis)
 
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
+    @property
+    def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
+        return (
+            np.linalg.inv(self._data.raw_data.reshape(self._data.basis.shape))  # type: ignore inv
+            if self.direction == "forward"
+            else np.transpose(self._data.raw_data.reshape(self._data.basis.shape))
+        )
+
+    @override
+    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = np.tensordot(
             cast(np.ndarray[Any, np.dtype[Never]], vectors),
-            np.linalg.inv(
-                cast(
-                    np.ndarray[Any, np.dtype[Never]],
-                    self._data.raw_data.reshape(self._data.basis.shape),
-                )
-            ),
+            self._inverse_transform_matrix,
             axes=([axis], [0]),
         )
-        return np.moveaxis(cast(np.ndarray[Any, np.dtype[DT1]], transformed), -1, axis)
+        return np.moveaxis(transformed, -1, axis)
 
     @override
     def with_inner[
@@ -91,7 +138,9 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
             extra_metadata=self._data.basis.metadata.extra,
         )
         return ExplicitBasis(
-            cast(SlateArray[DT1, Any], convert_array(self._data, new_basis))
+            cast(SlateArray[DT1, Any], convert_array(self._data, new_basis)),
+            direction=self.direction,
+            data_id=self._data_id,
         )
 
 
@@ -114,46 +163,40 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         data: SlateArray[DT, VariadicTupleBasis[DT, Any, Any, Any]],
         *,
         assert_unitary: bool = False,
+        direction: Direction = "forward",
+        data_id: uuid.UUID | None = None,
     ) -> None:
         if assert_unitary:
             _assert_unitary(self._data.raw_data.reshape(self._data.basis.shape))
-        super().__init__(data)
+        super().__init__(data, direction=direction, data_id=data_id)
+
+    @override
+    def conjugate_basis(self) -> ExplicitUnitaryBasis[M, DT]:
+        return ExplicitUnitaryBasis(
+            self._data,
+            direction="forward" if self.direction == "backward" else "backward",
+            data_id=self._data_id,
+        )
 
     @property
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self._data.basis[0].size
 
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
-        axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        transformed = np.tensordot(
-            cast(np.ndarray[Any, np.dtype[Never]], vectors),
-            cast(
-                np.ndarray[Any, np.dtype[Never]],
-                self._data.raw_data.reshape(self._data.basis.shape),
-            ),
-            axes=([axis], [0]),
+    @property
+    @override
+    def _transform_matrix(self) -> np.ndarray[Any, Any]:
+        return (
+            self._data.raw_data.reshape(self._data.basis.shape)
+            if self.direction == "forward"
+            else np.conj(self._data.raw_data.reshape(self._data.basis.shape))
         )
-        return np.moveaxis(transformed, -1, axis)
 
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
-        axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        transformed = np.tensordot(
-            cast(np.ndarray[Any, np.dtype[Never]], vectors),
-            np.conj(
-                np.transpose(
-                    cast(
-                        np.ndarray[Any, np.dtype[Never]],
-                        self._data.raw_data.reshape(self._data.basis.shape),
-                    )
-                )
-            ),
-            axes=([axis], [0]),
+    @property
+    @override
+    def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
+        return (
+            np.transpose(np.conj(self._data.raw_data.reshape(self._data.basis.shape)))
+            if self.direction == "forward"
+            else np.transpose(self._data.raw_data.reshape(self._data.basis.shape))
         )
-        return np.moveaxis(cast(np.ndarray[Any, np.dtype[DT1]], transformed), -1, axis)

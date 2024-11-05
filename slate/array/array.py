@@ -5,7 +5,10 @@ from typing import TYPE_CHECKING, Any, Self, cast
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis
-from slate.metadata.stacked import StackedMetadata
+from slate.basis.stacked._tuple_basis import (
+    TupleBasis,
+    fundamental_tuple_basis_from_shape,
+)
 
 if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata
@@ -65,7 +68,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
     @staticmethod
     def from_array[DT1: np.generic](
         array: np.ndarray[Any, np.dtype[DT1]],
-    ) -> SlateArray[DT1, FundamentalBasis[StackedMetadata[SimpleMetadata, None]]]:
+    ) -> SlateArray[DT1, TupleBasis[SimpleMetadata, None, np.generic]]:
         """Get a SlateArray from an array.
 
         Parameters
@@ -77,6 +80,6 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
         SlateArray[SimpleMetadata, DT]
         """
         return SlateArray(
-            FundamentalBasis(StackedMetadata.from_shape(array.shape)),
+            fundamental_tuple_basis_from_shape(array.shape),
             array,
         )

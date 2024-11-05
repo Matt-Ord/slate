@@ -63,6 +63,9 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
+    @abstractmethod
+    def conjugate_basis(self) -> Basis[M, DT]: ...
+
     def __convert_vector_into__[
         DT1: np.generic,
     ](  # [DT1: DT, B1: Basis[M1, DT]]
@@ -109,6 +112,9 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
 
     def __hash__(self) -> int:
         return hash(self.metadata)
+
+    def conjugate_basis(self) -> FundamentalBasis[M]:
+        return self
 
     @staticmethod
     def from_shape(
