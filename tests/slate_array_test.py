@@ -7,7 +7,9 @@ import pytest
 
 from slate.array.array import SlateArray
 from slate.basis import FundamentalBasis
-from slate.metadata.stacked import StackedMetadata
+from slate.basis.stacked._tuple_basis import (
+    fundamental_tuple_basis_from_shape,
+)
 
 if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata
@@ -30,8 +32,8 @@ def test_slate_array_dtype(
 def test_slate_array_basis(
     slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
 ) -> None:
-    assert slate_array_integer.basis == FundamentalBasis(
-        StackedMetadata.from_shape(slate_array_integer.fundamental_shape)
+    assert slate_array_integer.basis == fundamental_tuple_basis_from_shape(
+        slate_array_integer.fundamental_shape
     )
 
 

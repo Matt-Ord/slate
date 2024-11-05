@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ._diagonal_basis import DiagonalBasis
+from ._diagonal_basis import DiagonalBasis, diagonal_basis
 from ._tuple_basis import (
     StackedBasis,
     TupleBasis,
@@ -16,6 +16,7 @@ __all__ = [
     "StackedBasis",
     "TupleBasis",
     "VariadicTupleBasis",
+    "diagonal_basis",
     "stacked_basis_as_fundamental",
     "tuple_basis",
 ]

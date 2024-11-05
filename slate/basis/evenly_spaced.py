@@ -72,6 +72,10 @@ class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](
         """Number of elements in the basis."""
         return self._spacing.n
 
+    @override
+    def conjugate_basis(self) -> EvenlySpacedBasis[M, DT]:
+        return self
+
     def __eq__(self, value: object) -> bool:
         if isinstance(value, EvenlySpacedBasis):
             return self._spacing == value._spacing and value._inner == self._inner  # type: ignore unknown

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -47,12 +47,11 @@ def _eig_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
         (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[1])
     )
 
-    basis_0 = ExplicitBasis(SlateArray(states_basis, np.transpose(eig.eigenvectors)))
-    basis_1 = ExplicitBasis(
-        SlateArray(
-            states_basis, cast(np.ndarray[Any, Any], np.linalg.inv(eig.eigenvectors))
-        )
+    basis_0 = ExplicitBasis[BasisMetadata, DT](
+        SlateArray(states_basis, np.transpose(eig.eigenvectors))
     )
+    basis_1 = basis_0.conjugate_basis()
+
     return SlateArray(
         diagonal_basis((basis_0, basis_1), array.basis.metadata.extra),
         eig.eigenvalues,
@@ -117,9 +116,8 @@ def _eigh_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     basis_0 = ExplicitUnitaryBasis[BasisMetadata, DT](
         SlateArray(states_basis, np.transpose(eig.eigenvectors))
     )
-    basis_1 = ExplicitUnitaryBasis(
-        SlateArray(states_basis, np.conj(np.transpose(eig.eigenvectors)))
-    )
+    basis_1 = basis_0.conjugate_basis()
+
     return SlateArray(
         diagonal_basis((basis_0, basis_1), array.basis.metadata.extra),
         eig.eigenvalues,

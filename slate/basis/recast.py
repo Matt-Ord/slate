@@ -41,6 +41,10 @@ class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
         return self._outer_recast
 
     @override
+    def conjugate_basis(self) -> Basis[M0, DT]:
+        return self
+
+    @override
     def __into_inner__[DT1: np.generic](  # [DT1: DT]
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
