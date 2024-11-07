@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from slate.array.array import SlateArray
+from slate.array.util import transpose
 from slate.basis import FundamentalBasis
 from slate.basis.stacked._tuple_basis import (
     fundamental_tuple_basis_from_shape,
@@ -45,3 +46,15 @@ def test_create_array_with_wrong_size() -> None:
 def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) -> None:
     slate_array = SlateArray.from_array(sample_data)
     np.testing.assert_array_equal(slate_array.as_array(), sample_data)
+
+
+def test_transpose_array() -> None:
+    data = SlateArray.from_array(np.array([1, 2, 3, 4, 4, 6]).reshape(2, 3))
+
+    np.testing.assert_array_equal(
+        data.as_array().transpose(), transpose(data).as_array()
+    )
+    np.testing.assert_array_equal(
+        data.as_array(), transpose(transpose(data)).as_array()
+    )
+    assert transpose(transpose(data)).basis == data.basis

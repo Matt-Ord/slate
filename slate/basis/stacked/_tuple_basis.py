@@ -235,25 +235,35 @@ def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
     return True
 
 
-def tuple_basis_with_modified_children[M: BasisMetadata, E, DT: np.generic](
-    basis: TupleBasis[M, E, DT], wrapper: Callable[[int, Basis[M, DT]], Basis[M, DT]]
-) -> TupleBasis[M, E, DT]:
+def tuple_basis_with_modified_children[
+    M: BasisMetadata,
+    E,
+    DT: np.generic,
+    DT1: np.generic,
+](
+    basis: TupleBasis[M, E, DT], wrapper: Callable[[int, Basis[M, DT1]], Basis[M, DT]]
+) -> TupleBasis[M, E, DT1]:
     """Get the basis with modified children.
 
     Returns
     -------
     TupleBasis[M, E, DT]
     """
-    return TupleBasis[M, E, DT](
+    return TupleBasis[M, E, DT1](
         tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata.extra
     )
 
 
-def tuple_basis_with_modified_child[M: BasisMetadata, E, DT: np.generic](
+def tuple_basis_with_modified_child[
+    M: BasisMetadata,
+    E,
+    DT: np.generic,
+    DT1: np.generic,
+](
     basis: TupleBasis[M, E, DT],
-    wrapper: Callable[[Basis[M, DT]], Basis[M, DT]],
+    wrapper: Callable[[Basis[M, DT]], Basis[M, DT1]],
     idx: int,
-) -> TupleBasis[M, E, DT]:
+) -> TupleBasis[M, E, DT | DT1]:
     """Get the basis with modified child.
 
     Returns
@@ -261,7 +271,7 @@ def tuple_basis_with_modified_child[M: BasisMetadata, E, DT: np.generic](
     TupleBasis[M, E, DT]
     """
     return tuple_basis_with_modified_children(
-        basis, lambda i, b: b if i != idx else wrapper(b)
+        basis, lambda i, b: cast(Basis[M, DT | DT1], b if i != idx else wrapper(b))
     )
 
 
