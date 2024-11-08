@@ -127,12 +127,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     ](
         self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
     ) -> ExplicitBasis[M1, DT1]:
-        """Get the wrapped basis after wrapper is applied to inner.
-
-        Returns
-        -------
-        TruncatedBasis[M, DT]
-        """
+        """Get the wrapped basis after wrapper is applied to inner."""
         new_basis = tuple_basis(
             (self._data.basis[0], wrapper(self.inner)),
             extra_metadata=self._data.basis.metadata.extra,

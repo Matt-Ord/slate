@@ -9,18 +9,7 @@ if TYPE_CHECKING:
 def slice_along_axis(
     slice_at_axis: slice | int | None, axis: int = -1
 ) -> tuple[EllipsisType | slice | int | None, ...] | tuple[slice | int | None, ...]:
-    """Return a slice such that the 1d slice provided by slice_at_axis, slices along the dimension provided.
-
-    Parameters
-    ----------
-    slice_at_axis : slice | int | None
-    axis : int, optional
-        axis, by default -1
-
-    Returns
-    -------
-    tuple[EllipsisType | slice | int | None, ...] | tuple[slice | int | None, ...]
-    """
+    """Return a slice such that the 1d slice provided by slice_at_axis, slices along the dimension provided."""
     from_end = False
     if axis < 0:  # choosing axis at the end
         from_end = True

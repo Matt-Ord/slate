@@ -76,10 +76,5 @@ class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
     ](
         self: Self, wrapper: Callable[[Basis[M0, DT]], Basis[M2, DT]]
     ) -> RecastBasis[M2, M1, DT]:
-        """Get the wrapped basis after wrapper is applied to inner.
-
-        Returns
-        -------
-        TruncatedBasis[M, DT]
-        """
+        """Get the wrapped basis after wrapper is applied to inner."""
         return RecastBasis(wrapper(self.inner), self.inner_recast, self.outer_recast)

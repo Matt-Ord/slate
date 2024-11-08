@@ -51,16 +51,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
         self._data = cast(np.ndarray[Any, np.dtype[DT]], data).ravel()
 
     def as_array(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
-        """Get the data as a (full) np.array.
-
-        Parameters
-        ----------
-        self : Self
-
-        Returns
-        -------
-        np.ndarray[Any, np.dtype[DT]]
-        """
+        """Get the data as a (full) np.array."""
         return self.basis.__convert_vector_into__(
             self._data.ravel(), FundamentalBasis(self.basis.metadata)
         ).reshape(self.basis.fundamental_shape)
@@ -69,16 +60,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
     def from_array[DT1: np.generic](
         array: np.ndarray[Any, np.dtype[DT1]],
     ) -> SlateArray[DT1, TupleBasis[SimpleMetadata, None, np.generic]]:
-        """Get a SlateArray from an array.
-
-        Parameters
-        ----------
-        array : np.ndarray[Any, np.dtype[DT]]
-
-        Returns
-        -------
-        SlateArray[SimpleMetadata, DT]
-        """
+        """Get a SlateArray from an array."""
         return SlateArray(
             fundamental_tuple_basis_from_shape(array.shape),
             array,

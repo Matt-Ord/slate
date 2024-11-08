@@ -33,12 +33,7 @@ type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[
 def stacked_basis_as_fundamental[M: BasisMetadata, E, DT: np.generic](
     basis: StackedBasis[M, E, DT],
 ) -> TupleBasis[M, E, DT]:
-    """Get the equivalent Tuple of Fundamental Basis.
-
-    Returns
-    -------
-    TupleBasis[M, E, DT]
-    """
+    """Get the equivalent Tuple of Fundamental Basis."""
     return TupleBasis[M, E, DT](
         tuple(FundamentalBasis(basis.metadata[i]) for i in range(basis.n_dim)),
         basis.metadata.extra,
@@ -62,10 +57,6 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
     to_config : B3d1Inv
     axis : int, optional
         axis along which to convert, by default -1
-
-    Returns
-    -------
-    np.ndarray[tuple[int], np.dtype[np.complex_]]
     """
     swapped = vectors.swapaxes(axis, 0)
     stacked = swapped.reshape(*initial_basis.shape, *swapped.shape[1:])
@@ -243,12 +234,7 @@ def tuple_basis_with_modified_children[
 ](
     basis: TupleBasis[M, E, DT], wrapper: Callable[[int, Basis[M, DT1]], Basis[M, DT]]
 ) -> TupleBasis[M, E, DT1]:
-    """Get the basis with modified children.
-
-    Returns
-    -------
-    TupleBasis[M, E, DT]
-    """
+    """Get the basis with modified children."""
     return TupleBasis[M, E, DT1](
         tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata.extra
     )
@@ -264,12 +250,7 @@ def tuple_basis_with_modified_child[
     wrapper: Callable[[Basis[M, DT]], Basis[M, DT1]],
     idx: int,
 ) -> TupleBasis[M, E, DT | DT1]:
-    """Get the basis with modified child.
-
-    Returns
-    -------
-    TupleBasis[M, E, DT]
-    """
+    """Get the basis with modified child."""
     return tuple_basis_with_modified_children(
         basis, lambda i, b: cast(Basis[M, DT | DT1], b if i != idx else wrapper(b))
     )
@@ -278,34 +259,14 @@ def tuple_basis_with_modified_child[
 def tuple_basis_with_child[M: BasisMetadata, E, DT: np.generic](
     basis: TupleBasis[M, E, DT], inner: Basis[M, DT], idx: int
 ) -> TupleBasis[M, E, DT]:
-    """Get a basis with the basis at idx set to inner.
-
-    Parameters
-    ----------
-    self : Self
-    inner : B
-
-    Returns
-    -------
-    TupleBasis[M, DT, B]
-    """
+    """Get a basis with the basis at idx set to inner."""
     return tuple_basis_with_modified_child(basis, lambda _: inner, idx)
 
 
 def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
     metadata: StackedMetadata[M, E],
 ) -> TupleBasis[M, E, np.generic]:
-    """Get a basis with the basis at idx set to inner.
-
-    Parameters
-    ----------
-    self : Self
-    inner : B
-
-    Returns
-    -------
-    TupleBasis[M, DT, B]
-    """
+    """Get a basis with the basis at idx set to inner."""
     children = tuple(FundamentalBasis(c) for c in metadata.children)
     return TupleBasis(children, metadata.extra)
 
@@ -325,17 +286,7 @@ def fundamental_tuple_basis_from_shape[E](
 def fundamental_tuple_basis_from_shape[E](
     shape: tuple[int, ...], *, extra: E | None = None
 ) -> TupleBasis[SimpleMetadata, E | None, np.generic]:
-    """Get a basis with the basis at idx set to inner.
-
-    Parameters
-    ----------
-    self : Self
-    inner : B
-
-    Returns
-    -------
-    TupleBasis[M, DT, B]
-    """
+    """Get a basis with the basis at idx set to inner."""
     return fundamental_tuple_basis_from_metadata(
         StackedMetadata.from_shape(shape, extra=extra)
     )

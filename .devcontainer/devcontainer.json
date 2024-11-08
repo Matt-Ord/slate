@@ -135,7 +135,8 @@
 				"tamasfe.even-better-toml",
 				"charliermarsh.ruff",
 				"peakchen90.open-html-in-browser",
-				"github.vscode-github-actions"
+				"github.vscode-github-actions",
+				"GitHub.copilot"
 			]
 		}
 	},

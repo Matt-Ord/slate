@@ -110,10 +110,5 @@ class TransformedBasis[M: BasisMetadata](
         self: Self,
         wrapper: Callable[[Basis[M, np.complex128]], Basis[M1, np.complex128]],
     ) -> TransformedBasis[M1]:
-        """Get the wrapped basis after wrapper is applied to inner.
-
-        Returns
-        -------
-        TruncatedBasis[M, DT]
-        """
+        """Get the wrapped basis after wrapper is applied to inner."""
         return TransformedBasis(wrapper(self.inner))
