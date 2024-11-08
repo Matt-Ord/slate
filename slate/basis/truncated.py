@@ -30,10 +30,7 @@ def pad_ft_points[DT: np.generic](
     axes : NDArray
         The list of axis to pad
 
-    Returns
-    -------
-    NDArray
-        The padded array
+
     """
     shape_arr = np.array(array.shape, dtype=np.int_)
     axes_arr = np.asarray(axes)
@@ -142,12 +139,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
     ](
         self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
     ) -> TruncatedBasis[M1, DT1]:
-        """Get the wrapped basis after wrapper is applied to inner.
-
-        Returns
-        -------
-        TruncatedBasis[M, DT]
-        """
+        """Get the wrapped basis after wrapper is applied to inner."""
         return TruncatedBasis(self.size, wrapper(self.inner))
 
     @override

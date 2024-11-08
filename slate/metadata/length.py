@@ -27,90 +27,36 @@ class SpacedLengthMetadata(SpacedLabeledMetadata, LengthMetadata):
 
 
 def fundamental_delta_x(metadata: LengthMetadata) -> float:
-    """Get the fundamental delta x.
-
-    Parameters
-    ----------
-    metadata : LengthMetadata
-
-    Returns
-    -------
-    float
-    """
+    """Get the fundamental delta x."""
     return metadata.delta
 
 
 def fundamental_dx(metadata: SpacedLengthMetadata) -> float:
-    """Get the fundamental dx.
-
-    Parameters
-    ----------
-    metadata : SpacedLengthMetadata
-
-    Returns
-    -------
-    float
-    """
+    """Get the fundamental dx."""
     return fundamental_delta_x(metadata) / fundamental_size(metadata)
 
 
 def fundamental_dk(metadata: SpacedLengthMetadata) -> float:
-    """Get the fundamental dk.
-
-    Parameters
-    ----------
-    metadata : SpacedLengthMetadata
-
-    Returns
-    -------
-    float
-    """
+    """Get the fundamental dk."""
     return 2 * np.pi / fundamental_delta_x(metadata)
 
 
 def fundamental_delta_k(metadata: SpacedLengthMetadata) -> float:
-    """Get the fundamental delta k.
-
-    Parameters
-    ----------
-    metadata : SpacedLengthMetadata
-
-    Returns
-    -------
-    float
-    """
+    """Get the fundamental delta k."""
     return fundamental_size(metadata) * fundamental_dk(metadata)
 
 
 def fundamental_x_points(
     metadata: SpacedLengthMetadata,
 ) -> np.ndarray[Any, np.dtype[np.float64]]:
-    """Get the coordinates, using the x convention (0...N).
-
-    Parameters
-    ----------
-    metadata : BasisMetadata
-
-    Returns
-    -------
-    np.ndarray[Any, np.dtype[np.int_]]
-    """
+    """Get the coordinates, using the x convention (0...N)."""
     return fundamental_delta_k(metadata) * fundamental_nk_points(metadata)
 
 
 def fundamental_k_points(
     metadata: SpacedLengthMetadata,
 ) -> np.ndarray[Any, np.dtype[np.float64]]:
-    """Get the coordinates, using the kx convention (0...N/2-N/2...).
-
-    Parameters
-    ----------
-    metadata : BasisMetadata
-
-    Returns
-    -------
-    np.ndarray[Any, np.dtype[np.int_]]
-    """
+    """Get the coordinates, using the kx convention (0...N/2-N/2...)."""
     return fundamental_dk(metadata) * fundamental_nk_points(metadata)
 
 
@@ -142,16 +88,7 @@ type SpacedVolumeMetadata = StackedMetadata[SpacedLengthMetadata, AxisDirections
 def fundamental_stacked_delta_x(
     metadata: VolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
-    """Get the fundamental stacked delta x.
-
-    Parameters
-    ----------
-    metadata : VolumeMetadata
-
-    Returns
-    -------
-    tuple[np.ndarray[Any, np.dtype[np.float64]], ...]
-    """
+    """Get the fundamental stacked delta x."""
     scaled = cast(
         np.ndarray[Any, np.dtype[np.float64]],
         np.einsum("ij,i->ij", metadata.extra, [c.delta for c in metadata.children]),  # type: ignore unknown
@@ -162,16 +99,7 @@ def fundamental_stacked_delta_x(
 def fundamental_stacked_dx(
     metadata: SpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
-    """Get the fundamental stacked dx.
-
-    Parameters
-    ----------
-    metadata : VolumeMetadata
-
-    Returns
-    -------
-    tuple[np.ndarray[Any, np.dtype[np.float64]], ...]
-    """
+    """Get the fundamental stacked dx."""
     scaled = cast(
         np.ndarray[Any, np.dtype[np.float64]],
         np.einsum(  # type: ignore unknown
@@ -186,32 +114,14 @@ def fundamental_stacked_dx(
 def fundamental_stacked_dk(
     metadata: SpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
-    """Get the fundamental stacked dk.
-
-    Parameters
-    ----------
-    metadata : VolumeMetadata
-
-    Returns
-    -------
-    tuple[np.ndarray[Any, np.dtype[np.float64]], ...]
-    """
+    """Get the fundamental stacked dk."""
     return tuple(2 * np.pi * np.linalg.inv(fundamental_stacked_delta_x(metadata)).T)
 
 
 def fundamental_stacked_delta_k(
     metadata: SpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
-    """Get the fundamental stacked delta k.
-
-    Parameters
-    ----------
-    metadata : VolumeMetadata
-
-    Returns
-    -------
-    tuple[np.ndarray[Any, np.dtype[np.float64]], ...]
-    """
+    """Get the fundamental stacked delta k."""
     scaled = cast(
         np.ndarray[Any, np.dtype[np.float64]],
         np.einsum(  # type: ignore unknown
@@ -222,48 +132,21 @@ def fundamental_stacked_delta_k(
 
 
 def fundamental_volume(metadata: VolumeMetadata) -> float:
-    """Get the fundamental volume.
-
-    Parameters
-    ----------
-    metadata : VolumeMetadata
-
-    Returns
-    -------
-    float
-    """
+    """Get the fundamental volume."""
     return np.linalg.det(fundamental_stacked_delta_x(metadata))
 
 
 def fundamental_reciprocal_volume(
     metadata: SpacedVolumeMetadata,
 ) -> float:
-    """Get the fundamental reciprocal volume.
-
-    Parameters
-    ----------
-    metadata : VolumeMetadata
-
-    Returns
-    -------
-    float
-    """
+    """Get the fundamental reciprocal volume."""
     return np.linalg.det(fundamental_stacked_delta_k(metadata))
 
 
 def fundamental_stacked_x_points(
     metadata: SpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
-    """Get the stacked coordinates, using the x convention (0...N).
-
-    Parameters
-    ----------
-    metadata : BasisMetadata
-
-    Returns
-    -------
-    np.ndarray[Any, np.dtype[np.int_]]
-    """
+    """Get the stacked coordinates, using the x convention (0...N)."""
     scaled = cast(
         np.ndarray[Any, np.dtype[np.float64]],
         np.einsum(  # type: ignore unknown
@@ -278,16 +161,7 @@ def fundamental_stacked_x_points(
 def fundamental_stacked_k_points(
     metadata: SpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
-    """Get the stacked coordinates, using the kx convention (0...N/2-N/2...).
-
-    Parameters
-    ----------
-    metadata : BasisMetadata
-
-    Returns
-    -------
-    np.ndarray[Any, np.dtype[np.int_]]
-    """
+    """Get the stacked coordinates, using the kx convention (0...N/2-N/2...)."""
     scaled = cast(
         np.ndarray[Any, np.dtype[np.float64]],
         np.einsum(  # type: ignore unknown

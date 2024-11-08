@@ -104,12 +104,7 @@ class DiagonalBasis[
             [VariadicTupleBasis[DT, Any, Any, E]], VariadicTupleBasis[DT1, B01, B11, E1]
         ],
     ) -> DiagonalBasis[DT1, B01, B11, E1]:
-        """Get the wrapped basis after wrapper is applied to inner.
-
-        Returns
-        -------
-        TruncatedBasis[M, DT]
-        """
+        """Get the wrapped basis after wrapper is applied to inner."""
         return DiagonalBasis(wrapper(self.inner))
 
 

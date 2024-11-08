@@ -113,10 +113,5 @@ class EvenlySpacedBasis[M: BasisMetadata, DT: np.generic](
     ](
         self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
     ) -> EvenlySpacedBasis[M1, DT1]:
-        """Get the wrapped basis after wrapper is applied to inner.
-
-        Returns
-        -------
-        TruncatedBasis[M, DT]
-        """
+        """Get the wrapped basis after wrapper is applied to inner."""
         return EvenlySpacedBasis(self.spacing, wrapper(self.inner))

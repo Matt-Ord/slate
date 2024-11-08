@@ -120,26 +120,12 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     def from_shape(
         shape: tuple[int, ...],
     ) -> FundamentalBasis[SimpleMetadata]:
-        """Get a fundamental basis from a shape.
-
-        Parameters
-        ----------
-        shape : tuple[int, ...]
-
-        Returns
-        -------
-        FundamentalBasis[SimpleMetadata, np.generic]
-        """
+        """Get a fundamental basis from a shape."""
         return FundamentalBasis(SimpleMetadata(shape))
 
 
 def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
     basis: Basis[M, DT],
 ) -> FundamentalBasis[M]:
-    """Get the fundamental basis for a given basis.
-
-    Returns
-    -------
-    FundamentalBasis[M, DT]
-    """
+    """Get the fundamental basis for a given basis."""
     return FundamentalBasis(basis.metadata)
