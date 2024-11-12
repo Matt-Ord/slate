@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Literal, Self, cast, overload, override
+from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, override
 
 import numpy as np
 
@@ -9,8 +9,10 @@ from slate.basis._basis import FundamentalBasis
 from slate.basis.stacked._tuple_basis import TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-from slate.metadata._metadata import SimpleMetadata
 from slate.metadata.stacked import StackedMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata._metadata import SimpleMetadata
 
 type Direction = Literal["forward", "backward"]
 
@@ -116,7 +118,8 @@ class TransformedBasis[M: BasisMetadata](
     ) -> TransformedBasis[M1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return TransformedBasis(wrapper(self.inner))
-    
+
+
 def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](
     metadata: StackedMetadata[M, E],
 ) -> TupleBasis[M, E, np.complexfloating[Any, Any]]:
@@ -202,4 +205,3 @@ def fundamental_transformed_tuple_basis_from_shape[E](
     return fundamental_transformed_tuple_basis_from_metadata(
         StackedMetadata.from_shape(shape, extra=extra)
     )
-
