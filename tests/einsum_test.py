@@ -6,13 +6,13 @@ import numpy as np
 
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
-from slate.basis.evenly_spaced import EvenlySpacedBasis, Spacing
+from slate.basis.cropped import CroppedBasis
 from slate.basis.stacked._tuple_basis import (
     TupleBasis,
     tuple_basis_with_child,
 )
 from slate.basis.transformed import TransformedBasis
-from slate.basis.truncated import TruncatedBasis
+from slate.basis.truncated import TruncatedBasis, Truncation
 from slate.linalg._eig import eig
 
 if TYPE_CHECKING:
@@ -57,17 +57,17 @@ def test_einsum() -> None:
 
     _test_einsum_in_basis(array, vector, TransformedBasis(vector.basis[0]))
     _test_einsum_in_basis(
-        array, vector, TruncatedBasis(vector.basis.size, vector.basis[0])
+        array, vector, CroppedBasis(vector.basis.size, vector.basis[0])
     )
     _test_einsum_in_basis(
         array,
         vector,
-        EvenlySpacedBasis(Spacing(vector.basis[0].size, 1, 0), vector.basis[0]),
+        TruncatedBasis(Truncation(vector.basis[0].size, 1, 0), vector.basis[0]),
     )
     _test_einsum_in_basis(
         array,
         vector,
-        EvenlySpacedBasis(Spacing(vector.basis[0].size, 1, 10), vector.basis[0]),
+        TruncatedBasis(Truncation(vector.basis[0].size, 1, 10), vector.basis[0]),
     )
 
 

@@ -273,6 +273,64 @@ def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int], *, extra: None = None
+) -> VariadicTupleBasis[np.generic, Basis[SimpleMetadata, np.generic], None]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int], *, extra: E
+) -> VariadicTupleBasis[np.generic, Basis[SimpleMetadata, np.generic], E]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, int], *, extra: None = None
+) -> VariadicTupleBasis[
+    np.generic,
+    Basis[SimpleMetadata, np.generic],
+    Basis[SimpleMetadata, np.generic],
+    None,
+]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, int], *, extra: E
+) -> VariadicTupleBasis[
+    np.generic,
+    Basis[SimpleMetadata, np.generic],
+    Basis[SimpleMetadata, np.generic],
+    E,
+]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, int, int], *, extra: None = None
+) -> VariadicTupleBasis[
+    np.generic,
+    Basis[SimpleMetadata, np.generic],
+    Basis[SimpleMetadata, np.generic],
+    Basis[SimpleMetadata, np.generic],
+    None,
+]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
+    shape: tuple[int, int, int], *, extra: E
+) -> VariadicTupleBasis[
+    np.generic,
+    Basis[SimpleMetadata, np.generic],
+    Basis[SimpleMetadata, np.generic],
+    Basis[SimpleMetadata, np.generic],
+    E,
+]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_shape[E](
     shape: tuple[int, ...], *, extra: None = None
 ) -> TupleBasis[SimpleMetadata, None, np.generic]: ...
 

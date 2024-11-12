@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ._basis import Basis, FundamentalBasis
-from .evenly_spaced import EvenlySpacedBasis
+from .cropped import CroppedBasis
 from .stacked import (
     DiagonalBasis,
     StackedBasis,
@@ -12,17 +12,18 @@ from .stacked import (
     tuple_basis,
 )
 from .transformed import TransformedBasis
-from .truncated import TruncatedBasis
+from .truncated import TruncatedBasis, Truncation
 from .wrapped import WrappedBasis
 
 __all__ = [
     "Basis",
+    "CroppedBasis",
     "DiagonalBasis",
-    "EvenlySpacedBasis",
     "FundamentalBasis",
     "StackedBasis",
     "TransformedBasis",
     "TruncatedBasis",
+    "Truncation",
     "TupleBasis",
     "VariadicTupleBasis",
     "WrappedBasis",
