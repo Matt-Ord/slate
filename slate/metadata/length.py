@@ -91,7 +91,7 @@ def fundamental_stacked_delta_x(
     """Get the fundamental stacked delta x."""
     scaled = cast(
         np.ndarray[Any, np.dtype[np.float64]],
-        np.einsum("ij,i->ij", metadata.extra, [c.delta for c in metadata.children]),  # type: ignore unknown
+        np.einsum("ij,i->ij", metadata.extra.vectors, [c.delta for c in metadata.children]),  # type: ignore unknown
     )
     return tuple(scaled)
 
