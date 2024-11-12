@@ -64,7 +64,7 @@ def _assert_orthonormal(vectors: tuple[np.ndarray[Any, np.dtype[np.float64]]]) -
     identity_matrix = np.eye(len(vectors))
     result = np.dot(vectors, np.transpose(vectors))
 
-    assert np.testing.assert_allclose(
+    np.testing.assert_allclose(
         result,
         identity_matrix,
         err_msg="The provided axis vectors are not orthonormal.",
