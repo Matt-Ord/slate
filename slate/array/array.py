@@ -65,3 +65,9 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
             fundamental_tuple_basis_from_shape(array.shape),
             array,
         )
+        
+    def with_basis[B1: Basis[Any, Any]](  # B1: B
+        self: Self, basis: B1
+    ) -> SlateArray[DT, B1]:
+        """Get the SlateArray with the basis set to basis."""
+        return SlateArray(basis, self.basis.__convert_vector_into__(self.raw_data, basis))
