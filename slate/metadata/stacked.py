@@ -34,10 +34,7 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, StackedMetadata):
-            return (self.extra == value.extra) and all(  # type: ignore unknown
-                a == b
-                for (a, b) in zip(self.children, value.children)  # type: ignore unknown
-            )
+            return (self.extra == value.extra) and self.children == value.children  # type: ignore unknown
         return False
 
     def __hash__(self) -> int:

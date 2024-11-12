@@ -20,10 +20,10 @@ class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
         inner_recast: Basis[M1, DT],
         outer_recast: Basis[M1, DT],
     ) -> None:
-        assert self._inner_recast.size == self.inner.size
         self._inner_recast = inner_recast
         self._outer_recast = outer_recast
         super().__init__(inner)
+        assert self._inner_recast.size == self.inner.size
 
     @property
     def size(self: Self) -> int:

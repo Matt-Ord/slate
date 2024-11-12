@@ -58,7 +58,7 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
     @staticmethod
     def from_array[DT1: np.generic](
-        array: np.ndarray[Any, np.dtype[DT1]],
+        array: np.ndarray[tuple[int, ...], np.dtype[DT1]],
     ) -> SlateArray[DT1, TupleBasis[SimpleMetadata, None, np.generic]]:
         """Get a SlateArray from an array."""
         return SlateArray(
