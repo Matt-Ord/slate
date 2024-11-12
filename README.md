@@ -68,14 +68,14 @@ print(new_slate_array.raw_data)
 
 ### Using Different Bases
 
-SLATE supports various bases like `TruncatedBasis`, `EvenlySpacedBasis`, and `TransformedBasis`. Here is an example of using a `TruncatedBasis`:
+SLATE supports various bases like `TruncatedBasis`, `CroppedBasis`, and `TransformedBasis`. Here is an example of using a `CroppedBasis`:
 
 ```python
-from slate.basis import TruncatedBasis
+from slate.basis import CroppedBasis
 from slate.metadata import BasisMetadata
 
 # Create a truncated basis
-truncated_basis = TruncatedBasis(10, FundamentalBasis(SimpleMetadata((20,))))
+truncated_basis = CroppedBasis(10, FundamentalBasis(SimpleMetadata((20,))))
 
 # Create a SlateArray with the truncated basis
 truncated_slate_array = SlateArray(truncated_basis, data)

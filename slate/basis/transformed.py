@@ -1,12 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Literal, Self, cast, override
+from typing import Any, Callable, Literal, Self, cast, overload, override
 
 import numpy as np
 
 from slate.basis import Basis
+from slate.basis._basis import FundamentalBasis
+from slate.basis.stacked._tuple_basis import TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
+from slate.metadata._metadata import SimpleMetadata
+from slate.metadata.stacked import StackedMetadata
 
 type Direction = Literal["forward", "backward"]
 
@@ -112,3 +116,90 @@ class TransformedBasis[M: BasisMetadata](
     ) -> TransformedBasis[M1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return TransformedBasis(wrapper(self.inner))
+    
+def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](
+    metadata: StackedMetadata[M, E],
+) -> TupleBasis[M, E, np.complexfloating[Any, Any]]:
+    """Get a transformed fundamental basis with the given metadata."""
+    children = tuple(TransformedBasis(FundamentalBasis(c)) for c in metadata.children)
+    return TupleBasis(children, metadata.extra)
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int], *, extra: None = None
+) -> VariadicTupleBasis[np.complex128, Basis[SimpleMetadata, np.complex128], None]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int], *, extra: E
+) -> VariadicTupleBasis[np.complex128, Basis[SimpleMetadata, np.complex128], E]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, int], *, extra: None = None
+) -> VariadicTupleBasis[
+    np.complex128,
+    Basis[SimpleMetadata, np.complex128],
+    Basis[SimpleMetadata, np.complex128],
+    None,
+]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, int], *, extra: E
+) -> VariadicTupleBasis[
+    np.complex128,
+    Basis[SimpleMetadata, np.complex128],
+    Basis[SimpleMetadata, np.complex128],
+    E,
+]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, int, int], *, extra: None = None
+) -> VariadicTupleBasis[
+    np.complex128,
+    Basis[SimpleMetadata, np.complex128],
+    Basis[SimpleMetadata, np.complex128],
+    Basis[SimpleMetadata, np.complex128],
+    None,
+]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, int, int], *, extra: E
+) -> VariadicTupleBasis[
+    np.complex128,
+    Basis[SimpleMetadata, np.complex128],
+    Basis[SimpleMetadata, np.complex128],
+    Basis[SimpleMetadata, np.complex128],
+    E,
+]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, ...], *, extra: None = None
+) -> TupleBasis[SimpleMetadata, None, np.complex128]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, ...], *, extra: E
+) -> TupleBasis[SimpleMetadata, E, np.complex128]: ...
+
+
+def fundamental_transformed_tuple_basis_from_shape[E](
+    shape: tuple[int, ...], *, extra: E | None = None
+) -> TupleBasis[SimpleMetadata, E | None, np.complex128]:
+    """Get a basis with the basis at idx set to inner."""
+    return fundamental_transformed_tuple_basis_from_metadata(
+        StackedMetadata.from_shape(shape, extra=extra)
+    )
+
