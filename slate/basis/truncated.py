@@ -14,7 +14,7 @@ from slate.util import slice_along_axis
 
 @dataclass(frozen=True)
 class Truncation:
-    """Spacing of the basis."""
+    """Truncation of the basis."""
 
     n: int
     step: int
@@ -71,7 +71,7 @@ def truncate_along_axis[DT: np.generic](
 
 @dataclass(frozen=True)
 class Padding:
-    """Spacing of the basis."""
+    """Padding of the basis."""
 
     n: int
     step: int
@@ -139,7 +139,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     def truncation(self: Self) -> Truncation:
-        """Spacing of the basis."""
+        """Truncation of the basis."""
         return self._truncation
 
     @property
