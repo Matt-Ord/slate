@@ -3,7 +3,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterable, Literal, cast
 
 import numpy as np
-from matplotlib import pyplot as plt
+
+try:
+    from matplotlib import pyplot as plt
+except ImportError:
+    plt = None
+
+
 from matplotlib.axes import Axes as MPLAxes
 from matplotlib.colors import Colormap, LogNorm, Normalize, SymLogNorm
 from matplotlib.figure import Figure as MPLFigure
@@ -92,16 +98,11 @@ def get_figure(ax: Axes | None) -> tuple[Figure, Axes]:
     """Get the figure of the given axis.
 
     If no figure exists, a new figure is created
-
-    Parameters
-    ----------
-    ax : Axes | None
-
-    Returns
-    -------
-    tuple[Figure, Axes]
-
     """
+    if plt is None:
+        msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
+        raise ImportError(msg)  # noqa: DOC501
+
     if ax is None:
         return cast(tuple[Figure, Axes], plt.subplots())  # type: ignore plt.subplots Unknown type
 
@@ -110,6 +111,17 @@ def get_figure(ax: Axes | None) -> tuple[Figure, Axes]:
         fig = cast(Figure, plt.figure())  # type: ignore plt.figure Unknown type
         ax.set_figure(fig)
     return fig, ax
+
+
+def get_axis_colorbar(axis: Axes) -> Colorbar | None:
+    """Get a colorbar attached to the axis."""
+    if plt is None:
+        msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
+        raise ImportError(msg)  # noqa: DOC501
+    for artist in axis.get_children():
+        if isinstance(artist, plt.cm.ScalarMappable) and artist.colorbar is not None:
+            return artist.colorbar
+    return None
 
 
 Measure = Literal["real", "imag", "abs", "angle"]
