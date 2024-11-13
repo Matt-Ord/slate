@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, TypedDict, TypeVar, Unpack, overload
 
 import numpy as np
-from matplotlib import pyplot as plt
 
 from slate.basis.stacked._tuple_basis import (
     as_tuple_basis,
@@ -23,6 +22,7 @@ from ._util import (
     Axes,
     Figure,
     Measure,
+    get_axis_colorbar,
     get_figure,
     get_lim,
     get_measured_data,
@@ -32,7 +32,6 @@ from ._util import (
 
 if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
-    from matplotlib.colorbar import Colorbar
     from matplotlib.lines import Line2D
 
     from slate.array.array import SlateArray
@@ -227,14 +226,6 @@ def plot_data_1d_x(
     ax.set_xlabel(f"x{(axes[0] % 3)} axis")
 
     return fig, ax, line
-
-
-def get_axis_colorbar(axis: Axes) -> Colorbar | None:
-    """Get a colorbar attached to the axis."""
-    for artist in axis.get_children():
-        if isinstance(artist, plt.cm.ScalarMappable) and artist.colorbar is not None:
-            return artist.colorbar
-    return None
 
 
 def _has_colorbar(axis: Axes) -> bool:
