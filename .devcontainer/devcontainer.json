@@ -140,5 +140,5 @@
 			]
 		}
 	},
-	"onCreateCommand": "poetry install"
+	"onCreateCommand": "poetry install --all-extras"
 }

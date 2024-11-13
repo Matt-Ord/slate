@@ -17,7 +17,7 @@ from slate.explicit_basis._explicit_basis import ExplicitBasis, ExplicitUnitaryB
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.metadata.stacked import StackedMetadata
+    from slate.metadata.stacked.stacked import StackedMetadata
 
 
 def eigvals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](

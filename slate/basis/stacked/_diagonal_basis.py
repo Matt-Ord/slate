@@ -111,19 +111,19 @@ class DiagonalBasis[
 @overload
 def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
     children: tuple[_B0, _B1], extra_metadata: None = None
-) -> DiagonalBasis[np.generic, _B0, _B1, None]: ...
+) -> DiagonalBasis[Any, _B0, _B1, None]: ...
 
 
 @overload
 def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
     children: tuple[_B0, _B1], extra_metadata: E
-) -> DiagonalBasis[np.generic, _B0, _B1, E]: ...
+) -> DiagonalBasis[Any, _B0, _B1, E]: ...
 
 
 def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
     children: tuple[_B0, _B1], extra_metadata: E | None = None
-) -> DiagonalBasis[np.generic, _B0, _B1, E | None]:
+) -> DiagonalBasis[Any, _B0, _B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
-    return DiagonalBasis[np.generic, Any, Any, E | None](
+    return DiagonalBasis[Any, Any, Any, E | None](
         VariadicTupleBasis(children, extra_metadata)
     )
