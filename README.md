@@ -21,7 +21,7 @@ SLATE aims to be **versatile** and **structured**, making it ideal for users who
 You can install SLATE directly via pip:
 
 ```bash
-pip install slate
+pip install slate-core
 ```
 
 ## Usage Examples
@@ -39,31 +39,10 @@ from slate.metadata import SimpleMetadata
 # Create some data
 data = np.array([[1, 2], [3, 4]])
 
-# Create a basis
-basis = FundamentalBasis(SimpleMetadata(data.shape))
-
 # Create a SlateArray
-slate_array = SlateArray(basis, data)
+new_slate_array = SlateArray.from_array(data)
 
 print(slate_array.raw_data)
-```
-
-### Converting to a Full NumPy Array
-
-To convert the `SlateArray` back to a full NumPy array:
-
-```python
-full_array = slate_array.as_array()
-print(full_array)
-```
-
-### Creating a SlateArray from a NumPy Array
-
-You can also create a `SlateArray` directly from a NumPy array:
-
-```python
-new_slate_array = SlateArray.from_array(data)
-print(new_slate_array.raw_data)
 ```
 
 ### Using Different Bases
@@ -79,4 +58,13 @@ truncated_basis = CroppedBasis(10, FundamentalBasis(SimpleMetadata((20,))))
 
 # Create a SlateArray with the truncated basis
 truncated_slate_array = SlateArray(truncated_basis, data)
+```
+
+### Converting Back to a Full NumPy Array
+
+To convert the `SlateArray` back to a full NumPy array:
+
+```python
+full_array = slate_array.as_array()
+print(full_array)
 ```
