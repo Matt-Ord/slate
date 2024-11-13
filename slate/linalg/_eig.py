@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 def eigvals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[
         DT,
-        Basis[StackedMetadata[M, E], np.generic],
+        Basis[StackedMetadata[M, E], Any],
     ],
 ) -> SlateArray[np.complex128, FundamentalBasis[BasisMetadata]]:
     """Get the eigenvalues of a matrix."""
@@ -61,7 +61,7 @@ def _eig_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
 def eig[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[
         DT,
-        Basis[StackedMetadata[M, E], np.generic],
+        Basis[StackedMetadata[M, E], Any],
     ],
 ) -> SlateArray[
     np.complex128,
@@ -89,7 +89,7 @@ def eig[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
 def eigvalsh[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[
         DT,
-        Basis[StackedMetadata[M, E], np.generic],
+        Basis[StackedMetadata[M, E], Any],
     ],
 ) -> SlateArray[np.float64, FundamentalBasis[BasisMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
@@ -127,7 +127,7 @@ def _eigh_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
 def eigh[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[
         DT,
-        Basis[StackedMetadata[M, E], np.generic],
+        Basis[StackedMetadata[M, E], Any],
     ],
 ) -> SlateArray[
     np.float64,
