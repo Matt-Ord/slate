@@ -6,9 +6,6 @@ authors = ["Matthew Ord <mo433@cam.ac.uk>"]
 readme = "README.md"
 packages = [{ include = "slate" }]
 
-[tool.poetry.scripts]
-main = '_main.main:main'
-
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
 numpy = "^2.0.0"
