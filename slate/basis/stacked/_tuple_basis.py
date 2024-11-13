@@ -20,7 +20,7 @@ import numpy as np
 from slate.basis import Basis, FundamentalBasis
 from slate.basis.wrapped import WrappedBasis, get_wrapped_basis_super_inner
 from slate.metadata import BasisMetadata
-from slate.metadata.stacked import StackedMetadata
+from slate.metadata.stacked.stacked import StackedMetadata
 
 if TYPE_CHECKING:
     from slate.metadata._metadata import SimpleMetadata
@@ -203,25 +203,25 @@ class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
 @overload
 def tuple_basis[*TS, E](
     children: tuple[*TS], extra_metadata: None = None
-) -> VariadicTupleBasis[np.generic, *TS, None]: ...
+) -> VariadicTupleBasis[Any, *TS, None]: ...
 
 
 @overload
 def tuple_basis[*TS, E](
     children: tuple[*TS], extra_metadata: E
-) -> VariadicTupleBasis[np.generic, *TS, E]: ...
+) -> VariadicTupleBasis[Any, *TS, E]: ...
 
 
 def tuple_basis[*TS, E](
     children: tuple[*TS], extra_metadata: E | None = None
 ) -> VariadicTupleBasis[np.generic, *TS, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
-    return VariadicTupleBasis[np.generic, *TS, E | None](children, extra_metadata)
+    return VariadicTupleBasis[Any, *TS, E | None](children, extra_metadata)
 
 
 def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
     _basis: TupleBasis[M, E, DT],
-) -> TypeGuard[VariadicTupleBasis[np.generic, *tuple[Basis[M, DT], ...], E]]:
+) -> TypeGuard[VariadicTupleBasis[Any, *tuple[Basis[M, DT], ...], E]]:
     """Cast a TupleBasis as a VariadicTupleBasis."""
     return True
 

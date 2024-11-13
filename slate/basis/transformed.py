@@ -9,7 +9,7 @@ from slate.basis._basis import FundamentalBasis
 from slate.basis.stacked._tuple_basis import TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-from slate.metadata.stacked import StackedMetadata
+from slate.metadata.stacked.stacked import StackedMetadata
 
 if TYPE_CHECKING:
     from slate.metadata._metadata import SimpleMetadata

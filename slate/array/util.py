@@ -11,7 +11,7 @@ from slate.metadata._metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.basis._basis import Basis
-    from slate.metadata.stacked import StackedMetadata
+    from slate.metadata.stacked.stacked import StackedMetadata
 
 
 def _transpose_from_tuple[DT: np.generic, M: BasisMetadata, E](
