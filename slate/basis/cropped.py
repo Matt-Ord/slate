@@ -1,71 +1,13 @@
 from __future__ import annotations
 
-import itertools
-from typing import Any, Callable, Iterable, Never, Self, override
+from typing import Any, Callable, Never, Self, override
 
 import numpy as np
 
 from slate.basis import Basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-
-
-def pad_ft_points[DT: np.generic](
-    array: np.ndarray[Any, np.dtype[DT]],
-    s: Iterable[int],
-    axes: Iterable[int],
-) -> np.ndarray[Any, np.dtype[DT]]:
-    """
-    Pad the points in the fourier transform with zeros.
-
-    Pad the points in the fourier transform with zeros, keeping the frequencies of
-    each point the same in the initial and final grid.
-
-    Parameters
-    ----------
-    array : NDArray
-        The array to pad
-    s : Sequence[int]
-        The length along each axis to pad or truncate to
-    axes : NDArray
-        The list of axis to pad
-
-
-    """
-    shape_arr = np.array(array.shape, dtype=np.int_)
-    axes_arr = np.asarray(axes)
-
-    padded_shape = shape_arr.copy()
-    padded_shape[axes_arr] = s
-    padded: np.ndarray[Any, np.dtype[DT]] = np.zeros(  # type: ignore can't infer dtype
-        shape=padded_shape, dtype=array.dtype
-    )
-
-    slice_start = np.array([slice(None) for _ in array.shape], dtype=slice)
-    slice_start[axes_arr] = np.array(
-        [
-            slice(1 + min((n - 1) // 2, (s - 1) // 2))
-            for (n, s) in zip(shape_arr[axes_arr], s, strict=True)
-        ],
-        dtype=slice,
-    )
-    slice_end = np.array([slice(None) for _ in array.shape], dtype=slice)
-    slice_end[axes_arr] = np.array(
-        [
-            slice(start, None)
-            if (start := max((-n + 1) // 2, (-s + 1) // 2)) < 0
-            # else no negative frequencies
-            else slice(0, 0)
-            for (n, s) in zip(shape_arr[axes_arr], s, strict=True)
-        ],
-        dtype=slice,
-    )
-    # For each combination of start/end region of the array
-    # add in the corresponding values to the padded array
-    for slices in itertools.product(*np.array([slice_start, slice_end]).T.tolist()):
-        padded[tuple(slices)] = array[tuple(slices)]
-
-    return padded
+from slate.util import pad_ft_points
 
 
 class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):

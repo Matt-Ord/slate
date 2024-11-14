@@ -16,7 +16,7 @@ from slate.plot.plot import (
     plot_data_2d_k,
     plot_data_2d_x,
 )
-from slate.util._util import get_data_in_axes
+from slate.util import get_data_in_axes
 
 from ._util import (
     Axes,
