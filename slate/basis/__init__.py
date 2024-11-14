@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from ._basis import Basis, FundamentalBasis
 from .cropped import CroppedBasis
+from .recast import RecastBasis
 from .stacked import (
     DiagonalBasis,
     StackedBasis,
@@ -20,6 +21,7 @@ __all__ = [
     "CroppedBasis",
     "DiagonalBasis",
     "FundamentalBasis",
+    "RecastBasis",
     "StackedBasis",
     "TransformedBasis",
     "TruncatedBasis",
