@@ -16,7 +16,7 @@ from slate.metadata.stacked.volume.util import (
 from slate.util import (
     get_max_idx,
 )
-from slate.util._util import get_data_in_axes
+from slate.util._index import get_data_in_axes
 
 from ._util import (
     Axes,
