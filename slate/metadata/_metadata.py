@@ -47,11 +47,12 @@ class DeltaMetadata[DT](LabeledMetadata[DT], ABC):
         """Shape of the full data."""
 
 
-@dataclass(frozen=True)
 class ExplicitLabeledMetadata[DT: np.generic](LabeledMetadata[DT]):
     """A metadata with some data associated to each location."""
 
-    _values: np.ndarray[Any, np.dtype[DT]]
+    def __init__(self, values: np.ndarray[Any, np.dtype[DT]]) -> None:
+        self._values = values
+        super().__init__(values.shape)
 
     @property
     def values(self: Self) -> LabelCollection[DT]:
