@@ -5,12 +5,10 @@ from typing import TYPE_CHECKING, Any, cast
 import numpy as np
 
 from slate.array.array import SlateArray
-from slate.basis import Basis
-from slate.basis._basis import FundamentalBasis
-from slate.basis.stacked._diagonal_basis import DiagonalBasis
-from slate.basis.stacked._tuple_basis import TupleBasis, VariadicTupleBasis
+from slate.basis import Basis, FundamentalBasis
+from slate.basis.stacked import DiagonalBasis, TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata import BasisMetadata, SimpleMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata, VolumeMetadata
 
 if TYPE_CHECKING:
     from slate.metadata.stacked import StackedMetadata
@@ -28,6 +26,11 @@ def tuple_basis_variance() -> None:
     _c: Basis[BasisMetadata, np.float128] = a
     _d: TupleBasis[BasisMetadata, np.generic, np.float128] = a  # type: ignore should fail
     _d: TupleBasis[BasisMetadata, np.float128, np.float128] = a
+    a1 = cast(
+        TupleBasis[VolumeMetadata, None, np.generic],
+        {},
+    )
+    _b1: TupleBasis[VolumeMetadata, None, np.complex128] = a1
 
 
 def fundamental_basis_variance() -> None:

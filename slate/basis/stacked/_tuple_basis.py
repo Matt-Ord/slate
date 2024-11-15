@@ -70,7 +70,7 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E
     """Represents a Tuple of independent basis."""
 
     def __init__(
-        self: Self, children: tuple[Basis[M, DT], ...], extra_metadata: E
+        self: Self, children: tuple[Basis[M, Any], ...], extra_metadata: E
     ) -> None:
         self._children = children
         self._metadata = StackedMetadata(
