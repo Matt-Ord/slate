@@ -198,18 +198,29 @@ class SplitBasis[
 
 @overload
 def split_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
-    children: tuple[_B0, _B1], extra_metadata: None = None
+    children: tuple[_B0, _B1],
+    extra_metadata: None = None,
+    *,
+    direction: TransformDirection = "forward",
 ) -> SplitBasis[_B0, _B1, None]: ...
 
 
 @overload
 def split_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
-    children: tuple[_B0, _B1], extra_metadata: E
+    children: tuple[_B0, _B1],
+    extra_metadata: E,
+    *,
+    direction: TransformDirection = "forward",
 ) -> SplitBasis[_B0, _B1, E]: ...
 
 
 def split_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
-    children: tuple[_B0, _B1], extra_metadata: E | None = None
+    children: tuple[_B0, _B1],
+    extra_metadata: E | None = None,
+    *,
+    direction: TransformDirection = "forward",
 ) -> SplitBasis[_B0, _B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
-    return SplitBasis[Any, Any, E | None](VariadicTupleBasis(children, extra_metadata))
+    return SplitBasis[Any, Any, E | None](
+        VariadicTupleBasis(children, extra_metadata), direction=direction
+    )
