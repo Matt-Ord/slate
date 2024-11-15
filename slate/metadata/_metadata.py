@@ -55,7 +55,7 @@ class ExplicitLabeledMetadata[DT: np.generic](LabeledMetadata[DT]):
         super().__init__(values.shape)
 
     @property
-    def values(self: Self) -> LabelCollection[DT]:
+    def values(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
         """Shape of the full data."""
         return self._values
 

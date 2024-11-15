@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from ._metadata import (
     BasisMetadata,
+    DeltaMetadata,
     ExplicitLabeledMetadata,
     LabeledMetadata,
     LabelSpacing,
@@ -15,6 +16,7 @@ from .stacked import SpacedVolumeMetadata, StackedMetadata, VolumeMetadata
 
 __all__ = [
     "BasisMetadata",
+    "DeltaMetadata",
     "ExplicitLabeledMetadata",
     "LabelSpacing",
     "LabeledMetadata",

@@ -14,6 +14,7 @@ from ._volume import (
     fundamental_stacked_k_points,
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,
+    fundamental_stacked_x_points,
     fundamental_volume,
 )
 
@@ -29,5 +30,6 @@ __all__ = [
     "fundamental_stacked_k_points",
     "fundamental_stacked_nk_points",
     "fundamental_stacked_nx_points",
+    "fundamental_stacked_x_points",
     "fundamental_volume",
 ]
