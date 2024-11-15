@@ -16,9 +16,7 @@ class DiagonalBasis[
     B0: Basis[Any, Any],
     B1: Basis[Any, Any],
     E,
-](
-    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]],
-):
+](WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]]):
     """Represents a diagonal basis."""
 
     def __init__(self: Self, inner: VariadicTupleBasis[DT, Any, Any, E]) -> None:
@@ -34,7 +32,6 @@ class DiagonalBasis[
 
     @property
     def size(self) -> int:
-        """Number of elements in the basis."""
         return self.inner.children[0].size
 
     def __into_inner__[DT1: np.generic](  # [DT1: DT]

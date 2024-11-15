@@ -14,7 +14,7 @@ from slate.metadata.stacked.stacked import StackedMetadata
 if TYPE_CHECKING:
     from slate.metadata._metadata import SimpleMetadata
 
-type Direction = Literal["forward", "backward"]
+type TransformDirection = Literal["forward", "backward"]
 
 
 class TransformedBasis[M: BasisMetadata](
@@ -23,9 +23,12 @@ class TransformedBasis[M: BasisMetadata](
     """Represents a fourier transformed basis."""
 
     def __init__(
-        self: Self, inner: Basis[M, np.complex128], *, direction: Direction = "forward"
+        self: Self,
+        inner: Basis[M, np.complex128],
+        *,
+        direction: TransformDirection = "forward",
     ) -> None:
-        self._direction: Direction = direction
+        self._direction: TransformDirection = direction
         super().__init__(inner)
 
     def __eq__(self, value: object) -> bool:
@@ -53,7 +56,7 @@ class TransformedBasis[M: BasisMetadata](
         return self.inner.size
 
     @property
-    def direction(self: Self) -> Direction:
+    def direction(self: Self) -> TransformDirection:
         """The convention used to select the direction for the forward transform."""
         return self._direction
 
