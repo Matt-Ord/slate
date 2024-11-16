@@ -51,7 +51,7 @@ class CachedFunction[**P, R]:
     def __init__(
         self,
         function: Callable[P, R],
-        path: Path | None | Callable[P, Path | None],
+        path: Path | Callable[P, Path | None] | None,
         *,
         default_call: CallType = "load_or_call_cached",
     ) -> None:
@@ -136,7 +136,7 @@ def cached[**P, R: Mapping[Any, Any]](
 
 
 def cached[**P, R: Mapping[Any, Any]](
-    path: Path | None | Callable[P, Path | None],
+    path: Path | Callable[P, Path | None] | None,
     *,
     default_call: CallType = "load_or_call_cached",
 ) -> Callable[[Callable[P, R]], CachedFunction[P, R]]:
