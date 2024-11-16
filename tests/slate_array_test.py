@@ -58,3 +58,15 @@ def test_transpose_array() -> None:
         data.as_array(), transpose(transpose(data)).as_array()
     )
     assert transpose(transpose(data)).basis == data.basis
+
+
+def test_add_mul_array() -> None:
+    data = SlateArray.from_array(np.array([1, 2, 3, 4, 4, 6]).reshape(2, 3))
+
+    np.testing.assert_array_equal(
+        data.as_array() + data.as_array(), (data + data).as_array()
+    )
+    np.testing.assert_array_equal(
+        data.as_array() - data.as_array(), (data - data).as_array()
+    )
+    np.testing.assert_array_equal(2 * data.as_array(), (data * 2).as_array())

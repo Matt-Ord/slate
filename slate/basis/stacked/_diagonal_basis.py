@@ -25,6 +25,7 @@ class DiagonalBasis[
 
     def __init__(self: Self, inner: VariadicTupleBasis[DT, Any, Any, E]) -> None:
         super().__init__(inner)
+        assert isinstance(self.inner, SimpleBasis)
         assert self.inner.children[0].size == self.inner.children[1].size
 
     def conjugate_basis(self) -> DiagonalBasis[DT, B0, B1, E]:

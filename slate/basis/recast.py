@@ -23,6 +23,8 @@ class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
         self._inner_recast = inner_recast
         self._outer_recast = outer_recast
         super().__init__(inner)
+
+        assert isinstance(self.outer_recast, SimpleBasis)
         assert self._inner_recast.size == self.inner.size
 
     @property

@@ -25,6 +25,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
     def __init__(self: Self, truncation: Truncation, inner: Basis[M, DT]) -> None:
         self._truncation = truncation
         super().__init__(inner)
+        assert isinstance(self.inner, SimpleBasis)
         assert_unique_indices(
             self._inner.size, self._truncation.n, self._truncation.step
         )

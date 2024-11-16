@@ -18,6 +18,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](
     def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:
         self._size = size
         super().__init__(inner)
+        assert isinstance(self.inner, SimpleBasis)
 
     @property
     def size(self: Self) -> int:
