@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Never, Self
+from typing import Any, Never, Protocol, Self, cast, override, runtime_checkable
 
 import numpy as np
 
@@ -83,7 +83,61 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         return basis.__from_fundamental__(fundamental, axis)
 
 
-class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
+@runtime_checkable
+class SupportsAddBasis(Protocol):
+    def add_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
+
+    def sub_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
+
+
+@runtime_checkable
+class SupportsMulBasis(Protocol):
+    def mul_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: float,
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
+
+
+class SimpleBasis(SupportsAddBasis, SupportsMulBasis):
+    def __init__(self) -> None:
+        msg = "SimpleBasis should not be instantiated directly."
+        raise ValueError(msg)
+
+    @override
+    def add_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return cast(np.ndarray[Any, np.dtype[DT1]], lhs + rhs)
+
+    @override
+    def sub_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return cast(np.ndarray[Any, np.dtype[DT1]], lhs - rhs)
+
+    @override
+    def mul_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: float,
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return cast(np.ndarray[Any, np.dtype[DT1]], lhs * rhs)
+
+
+class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic], SimpleBasis):
     """Represents a full fundamental basis."""
 
     @property

@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from ._basis import Basis, FundamentalBasis
+from ._basis import (
+    Basis,
+    FundamentalBasis,
+    SimpleBasis,
+    SupportsAddBasis,
+    SupportsMulBasis,
+)
 from .cropped import CroppedBasis
 from .recast import RecastBasis
 from .split import SplitBasis, split_basis
@@ -23,8 +29,11 @@ __all__ = [
     "DiagonalBasis",
     "FundamentalBasis",
     "RecastBasis",
+    "SimpleBasis",
     "SplitBasis",
     "StackedBasis",
+    "SupportsAddBasis",
+    "SupportsMulBasis",
     "TransformedBasis",
     "TruncatedBasis",
     "Truncation",

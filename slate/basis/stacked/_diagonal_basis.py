@@ -5,6 +5,7 @@ from typing import Any, Callable, Self, cast, overload, override
 import numpy as np
 
 from slate.basis import Basis
+from slate.basis._basis import SimpleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import StackedMetadata
 
@@ -16,7 +17,10 @@ class DiagonalBasis[
     B0: Basis[Any, Any],
     B1: Basis[Any, Any],
     E,
-](WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]]):
+](
+    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]],
+    SimpleBasis,
+):
     """Represents a diagonal basis."""
 
     def __init__(self: Self, inner: VariadicTupleBasis[DT, Any, Any, E]) -> None:

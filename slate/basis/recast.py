@@ -4,13 +4,13 @@ from typing import Any, Callable, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis
+from slate.basis import Basis, SimpleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata._metadata import BasisMetadata
 
 
 class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
-    WrappedBasis[M0, DT, Basis[M0, DT]]
+    WrappedBasis[M0, DT, Basis[M0, DT]], SimpleBasis
 ):
     """Represents a truncated basis."""
 

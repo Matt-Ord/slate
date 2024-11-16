@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, 
 import numpy as np
 
 from slate.basis import Basis
-from slate.basis._basis import FundamentalBasis
+from slate.basis._basis import FundamentalBasis, SimpleBasis
 from slate.basis.stacked._tuple_basis import TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
@@ -18,7 +18,7 @@ type TransformDirection = Literal["forward", "backward"]
 
 
 class TransformedBasis[M: BasisMetadata](
-    WrappedBasis[M, np.complex128, Basis[M, np.complex128]]
+    WrappedBasis[M, np.complex128, Basis[M, np.complex128]], SimpleBasis
 ):
     """Represents a fourier transformed basis."""
 
