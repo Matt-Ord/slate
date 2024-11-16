@@ -4,13 +4,15 @@ from typing import Any, Callable, Never, Self, override
 
 import numpy as np
 
-from slate.basis import Basis
+from slate.basis import Basis, SimpleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util import pad_ft_points
 
 
-class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
+class CroppedBasis[M: BasisMetadata, DT: np.generic](
+    WrappedBasis[M, DT, Basis[M, DT]], SimpleBasis
+):
     """Represents a cropped basis."""
 
     def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:

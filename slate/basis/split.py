@@ -4,7 +4,7 @@ from typing import Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis
+from slate.basis._basis import Basis, SupportsMulBasis
 from slate.basis.stacked import DiagonalBasis, VariadicTupleBasis, tuple_basis
 from slate.basis.transformed import TransformDirection, TransformedBasis
 from slate.basis.wrapped import WrappedBasis
@@ -20,7 +20,8 @@ class SplitBasis[
 ](
     WrappedBasis[
         StackedMetadata[Any, E], np.complex128, VariadicTupleBasis[Any, Any, Any, E]
-    ]
+    ],
+    SupportsMulBasis,
 ):
     r"""Represents data in the split operator basis.
 
@@ -70,6 +71,18 @@ class SplitBasis[
             self.inner.conjugate_basis(),
             direction="backward" if self.direction == "forward" else "forward",
         )
+
+    @override
+    def mul_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: float,
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        out = rhs.copy()
+        end = self.inner.children[0].size
+        out[slice_along_axis(slice(0, end))] *= lhs
+        out[slice_along_axis(slice(2 * end, 3 * end))] *= lhs
+        return out
 
     @property
     @override

@@ -5,6 +5,7 @@ from typing import Any, Callable, Self, override
 import numpy as np
 
 from slate.basis import Basis
+from slate.basis._basis import SimpleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util._pad import (
@@ -17,7 +18,7 @@ from slate.util._pad import (
 
 
 class TruncatedBasis[M: BasisMetadata, DT: np.generic](
-    WrappedBasis[M, DT, Basis[M, DT]]
+    WrappedBasis[M, DT, Basis[M, DT]], SimpleBasis
 ):
     """Represents a basis sampled evenly along an axis."""
 

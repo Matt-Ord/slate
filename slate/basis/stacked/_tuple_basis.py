@@ -18,6 +18,7 @@ from typing import (
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis
+from slate.basis._basis import SimpleBasis
 from slate.basis.wrapped import WrappedBasis, get_wrapped_basis_super_inner
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked.stacked import StackedMetadata
@@ -66,7 +67,9 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
     return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
 
 
-class TupleBasis[M: BasisMetadata, E, DT: np.generic](Basis[StackedMetadata[M, E], DT]):
+class TupleBasis[M: BasisMetadata, E, DT: np.generic](
+    Basis[StackedMetadata[M, E], DT], SimpleBasis
+):
     """Represents a Tuple of independent basis."""
 
     def __init__(
