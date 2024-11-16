@@ -30,6 +30,7 @@ class TransformedBasis[M: BasisMetadata](
     ) -> None:
         self._direction: TransformDirection = direction
         super().__init__(inner)
+        assert isinstance(self.inner, SimpleBasis)
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TransformedBasis):

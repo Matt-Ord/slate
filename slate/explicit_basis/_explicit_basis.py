@@ -37,6 +37,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
         super().__init__(data.basis[1])
+        assert isinstance(self.inner, SimpleBasis)
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, ExplicitBasis):

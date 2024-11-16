@@ -84,7 +84,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
 
 
 @runtime_checkable
-class SupportsAddBasis(Protocol):
+class SupportsAdd(Protocol):
     def add_data[DT1: np.number[Any]](
         self: Self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
@@ -98,20 +98,24 @@ class SupportsAddBasis(Protocol):
     ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
 
+class SupportsAddBasis[M: BasisMetadata, DT: np.generic](SupportsAdd, Basis[M, DT]): ...
+
+
 @runtime_checkable
-class SupportsMulBasis(Protocol):
+class SupportsMul(Protocol):
     def mul_data[DT1: np.number[Any]](
         self: Self,
-        lhs: float,
-        rhs: np.ndarray[Any, np.dtype[DT1]],
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: float,
     ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
 
-class SimpleBasis(SupportsAddBasis, SupportsMulBasis):
-    def __init__(self) -> None:
-        msg = "SimpleBasis should not be instantiated directly."
-        raise ValueError(msg)
+class SupportsMulBasis[M: BasisMetadata, DT: np.generic](SupportsMul, Basis[M, DT]): ...
 
+
+class SimpleBasis[M: BasisMetadata = Any, DT: np.generic = Any](
+    SupportsMulBasis[M, DT], SupportsAddBasis[M, DT]
+):
     @override
     def add_data[DT1: np.number[Any]](
         self: Self,
@@ -131,13 +135,13 @@ class SimpleBasis(SupportsAddBasis, SupportsMulBasis):
     @override
     def mul_data[DT1: np.number[Any]](
         self: Self,
-        lhs: float,
-        rhs: np.ndarray[Any, np.dtype[DT1]],
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: float,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return cast(np.ndarray[Any, np.dtype[DT1]], lhs * rhs)
 
 
-class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic], SimpleBasis):
+class FundamentalBasis[M: BasisMetadata](SimpleBasis[M, np.generic]):
     """Represents a full fundamental basis."""
 
     @property

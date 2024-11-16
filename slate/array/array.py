@@ -4,11 +4,12 @@ from typing import TYPE_CHECKING, Any, Self, cast
 
 import numpy as np
 
-from slate.basis import Basis, FundamentalBasis
+from slate.basis import Basis, FundamentalBasis, SupportsAddBasis, SupportsMulBasis
 from slate.basis.stacked._tuple_basis import (
     TupleBasis,
     fundamental_tuple_basis_from_shape,
 )
+from slate.metadata._metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata
@@ -70,4 +71,30 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
         self: Self, basis: B1
     ) -> SlateArray[DT, B1]:
         """Get the SlateArray with the basis set to basis."""
-        return SlateArray(basis, self.basis.__convert_vector_into__(self.raw_data, basis))
+        return SlateArray(
+            basis, self.basis.__convert_vector_into__(self.raw_data, basis)
+        )
+
+    def __add__[_DT: np.number[Any], M: BasisMetadata](
+        self: SlateArray[_DT, SupportsAddBasis[M, Any]],
+        other: SlateArray[_DT, Basis[M, Any]],
+    ) -> SlateArray[_DT, Basis[M, Any]]:
+        data = self.basis.add_data(self.raw_data, other.with_basis(self.basis).raw_data)
+
+        return SlateArray[_DT, Basis[M, Any]](self.basis, data)
+
+    def __sub__[_DT: np.number[Any], M: BasisMetadata](
+        self: SlateArray[_DT, SupportsAddBasis[M, Any]],
+        other: SlateArray[_DT, Basis[M, Any]],
+    ) -> SlateArray[_DT, Basis[M, Any]]:
+        data = self.basis.sub_data(self.raw_data, other.with_basis(self.basis).raw_data)
+
+        return SlateArray[_DT, Basis[M, Any]](self.basis, data)
+
+    def __mul__[_DT: np.number[Any], M: BasisMetadata](
+        self: SlateArray[_DT, SupportsMulBasis[M, Any]],
+        other: float,
+    ) -> SlateArray[_DT, Basis[M, Any]]:
+        data = self.basis.mul_data(self.raw_data, other)
+
+        return SlateArray[_DT, Basis[M, Any]](self.basis, data)

@@ -6,7 +6,9 @@ from ._basis import (
     Basis,
     FundamentalBasis,
     SimpleBasis,
+    SupportsAdd,
     SupportsAddBasis,
+    SupportsMul,
     SupportsMulBasis,
 )
 from .cropped import CroppedBasis
@@ -32,7 +34,9 @@ __all__ = [
     "SimpleBasis",
     "SplitBasis",
     "StackedBasis",
+    "SupportsAdd",
     "SupportsAddBasis",
+    "SupportsMul",
     "SupportsMulBasis",
     "TransformedBasis",
     "TruncatedBasis",

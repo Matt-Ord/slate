@@ -68,7 +68,7 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
 
 
 class TupleBasis[M: BasisMetadata, E, DT: np.generic](
-    Basis[StackedMetadata[M, E], DT], SimpleBasis
+    SimpleBasis[StackedMetadata[M, E], DT],
 ):
     """Represents a Tuple of independent basis."""
 
@@ -76,6 +76,7 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](
         self: Self, children: tuple[Basis[M, Any], ...], extra_metadata: E
     ) -> None:
         self._children = children
+        assert all(isinstance(c, SimpleBasis) for c in children)
         self._metadata = StackedMetadata(
             tuple(i.metadata for i in children), extra_metadata
         )
