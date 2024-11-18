@@ -21,6 +21,17 @@ def fundamental_size(
     return np.prod(metadata.fundamental_shape).item()
 
 
+def nx_points(size: int) -> np.ndarray[Any, np.dtype[np.int_]]:
+    """Get the index, using the x convention (0...N)."""
+    return np.arange(0, size, dtype=int)
+
+
+def nk_points(size: int) -> np.ndarray[Any, np.dtype[np.int_]]:
+    """Get the index, using the kx convention (0...N/2-N/2...)."""
+    n = size
+    return np.fft.ifftshift(np.arange((-n + 1) // 2, (n + 1) // 2))
+
+
 def fundamental_nx_points(
     metadata: BasisMetadata,
 ) -> np.ndarray[Any, np.dtype[np.int_]]:
