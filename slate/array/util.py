@@ -6,8 +6,8 @@ import numpy as np
 
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
-from slate.basis.stacked._tuple_basis import TupleBasis, as_tuple_basis, tuple_basis
-from slate.metadata._metadata import BasisMetadata
+from slate.basis.stacked import TupleBasis, as_tuple_basis, tuple_basis
+from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.basis._basis import Basis

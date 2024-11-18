@@ -4,7 +4,7 @@ from typing import Any, Self, overload
 
 import numpy as np
 
-from slate.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 
 class StackedMetadata[M: BasisMetadata, E](BasisMetadata):

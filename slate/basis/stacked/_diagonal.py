@@ -9,7 +9,7 @@ from slate.basis._basis import SimpleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import StackedMetadata
 
-from ._tuple_basis import VariadicTupleBasis
+from ._tuple import VariadicTupleBasis
 
 
 class DiagonalBasis[

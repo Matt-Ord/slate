@@ -24,7 +24,7 @@ from slate.metadata import BasisMetadata
 from slate.metadata.stacked.stacked import StackedMetadata
 
 if TYPE_CHECKING:
-    from slate.metadata._metadata import SimpleMetadata
+    from slate.metadata import SimpleMetadata
 
 type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[
     StackedMetadata[M, E], DT

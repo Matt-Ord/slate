@@ -8,14 +8,14 @@ import numpy as np
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis._basis import Basis, SimpleBasis
-from slate.basis.stacked._tuple_basis import tuple_basis
+from slate.basis.stacked import tuple_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from slate.basis.stacked._tuple_basis import VariadicTupleBasis
+    from slate.basis.stacked import VariadicTupleBasis
 
 
 type Direction = Literal["forward", "backward"]

@@ -6,7 +6,7 @@ import numpy as np
 
 from slate.basis import Basis, SimpleBasis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata._metadata import BasisMetadata
+from slate.metadata import BasisMetadata
 
 
 class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](

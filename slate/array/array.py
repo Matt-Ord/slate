@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Any, Self, cast
 import numpy as np
 
 from slate.basis import Basis, FundamentalBasis, SupportsAddBasis, SupportsMulBasis
-from slate.basis.stacked._tuple_basis import (
+from slate.basis.stacked import (
     TupleBasis,
     fundamental_tuple_basis_from_shape,
 )
-from slate.metadata._metadata import BasisMetadata
+from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata

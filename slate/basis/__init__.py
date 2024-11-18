@@ -11,6 +11,7 @@ from ._basis import (
     SupportsMul,
     SupportsMulBasis,
 )
+from .coordinate import CoordinateBasis
 from .cropped import CroppedBasis
 from .recast import RecastBasis
 from .split import SplitBasis, split_basis
@@ -27,6 +28,7 @@ from .wrapped import WrappedBasis
 
 __all__ = [
     "Basis",
+    "CoordinateBasis",
     "CroppedBasis",
     "DiagonalBasis",
     "FundamentalBasis",
