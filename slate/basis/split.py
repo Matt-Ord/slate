@@ -4,7 +4,7 @@ from typing import Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, SupportsMul
+from slate.basis._basis import Basis
 from slate.basis.stacked import DiagonalBasis, VariadicTupleBasis, tuple_basis
 from slate.basis.transformed import TransformDirection, TransformedBasis
 from slate.basis.wrapped import WrappedBasis
@@ -21,7 +21,6 @@ class SplitBasis[
     WrappedBasis[
         StackedMetadata[Any, E], np.complex128, VariadicTupleBasis[Any, Any, Any, E]
     ],
-    SupportsMul,
 ):
     r"""Represents data in the split operator basis.
 

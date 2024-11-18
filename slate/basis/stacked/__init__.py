@@ -13,6 +13,7 @@ from ._tuple import (
     fundamental_tuple_basis_from_shape,
     stacked_basis_as_fundamental,
     tuple_basis,
+    tuple_basis_with_child,
 )
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "isotropic_basis",
     "stacked_basis_as_fundamental",
     "tuple_basis",
+    "tuple_basis_with_child",
 ]

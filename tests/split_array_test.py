@@ -3,10 +3,9 @@ from __future__ import annotations
 import numpy as np
 
 from slate.array.array import SlateArray
-from slate.basis._basis import FundamentalBasis
+from slate.basis import FundamentalBasis
 from slate.basis.split import split_basis
-from slate.basis.stacked import diagonal_basis
-from slate.basis.stacked_basis import tuple_basis
+from slate.basis.stacked import diagonal_basis, tuple_basis
 from slate.basis.transformed import (
     TransformedBasis,
 )

@@ -7,16 +7,16 @@ import numpy as np
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis.cropped import CroppedBasis
-from slate.basis.stacked_basis import (
+from slate.basis.stacked import (
     TupleBasis,
     tuple_basis_with_child,
 )
 from slate.basis.transformed import TransformedBasis
 from slate.basis.truncated import TruncatedBasis, Truncation
-from slate.linalg._eig import eig
+from slate.linalg import eig
 
 if TYPE_CHECKING:
-    from slate.basis._basis import Basis
+    from slate.basis import Basis
 
 
 def _test_einsum_in_basis(

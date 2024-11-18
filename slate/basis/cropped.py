@@ -4,21 +4,18 @@ from typing import Any, Callable, Never, Self, override
 
 import numpy as np
 
-from slate.basis import Basis, SimpleBasis
+from slate.basis import Basis, BasisFeatures
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util import pad_ft_points
 
 
-class CroppedBasis[M: BasisMetadata, DT: np.generic](
-    WrappedBasis[M, DT, Basis[M, DT]], SimpleBasis
-):
+class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
     """Represents a cropped basis."""
 
     def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:
         self._size = size
         super().__init__(inner)
-        assert isinstance(self.inner, SimpleBasis)
 
     @property
     def size(self: Self) -> int:
@@ -88,3 +85,49 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](
     @override
     def conjugate_basis(self) -> CroppedBasis[M, DT]:
         return CroppedBasis(self.size, self.inner.conjugate_basis())
+
+    @property
+    @override
+    def features(self) -> set[BasisFeatures]:
+        out = set[BasisFeatures]()
+        if "SIMPLE_ADD" in self.inner.features:
+            out.add("ADD")
+            out.add("SIMPLE_ADD")
+        if "SIMPLE_MUL" in self.inner.features:
+            out.add("MUL")
+            out.add("SIMPLE_MUL")
+        if "SIMPLE_SUB" in self.inner.features:
+            out.add("SUB")
+            out.add("SIMPLE_SUB")
+        return out
+
+    @override
+    def add_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_ADD" not in self.features:
+            msg = "add_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs + rhs).astype(lhs.dtype)
+
+    @override
+    def mul_data[DT1: np.number[Any]](
+        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_MUL" not in self.features:
+            msg = "mul_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs * rhs).astype(lhs.dtype)
+
+    @override
+    def sub_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_SUB" not in self.features:
+            msg = "sub_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs - rhs).astype(lhs.dtype)
