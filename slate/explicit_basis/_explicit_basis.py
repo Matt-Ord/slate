@@ -9,13 +9,14 @@ from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis import Basis, BasisFeatures
 from slate.basis.stacked import tuple_basis
+from slate.basis.stacked._tuple import as_tuple_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from slate.basis.stacked import VariadicTupleBasis
+    from slate.metadata.stacked.stacked import StackedMetadata
 
 
 type Direction = Literal["forward", "backward"]
@@ -28,15 +29,16 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     def __init__(
         self: Self,
-        data: SlateArray[DT, VariadicTupleBasis[DT, Any, Any, Any]],
+        data: SlateArray[StackedMetadata[Any, Any], DT],
         *,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
-        self._data = data
+        converted = data.with_basis(as_tuple_basis(data.basis))
+        self._data = converted
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
-        super().__init__(data.basis[1])
+        super().__init__(converted.basis[1])
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, ExplicitBasis):
@@ -133,7 +135,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
             extra_metadata=self._data.basis.metadata.extra,
         )
         return ExplicitBasis(
-            cast(SlateArray[DT1, Any], convert_array(self._data, new_basis)),
+            cast(SlateArray[Any, DT1], convert_array(self._data, new_basis)),
             direction=self.direction,
             data_id=self._data_id,
         )
@@ -201,15 +203,15 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 
     def __init__(
         self: Self,
-        data: SlateArray[DT, VariadicTupleBasis[DT, Any, Any, Any]],
+        data: SlateArray[StackedMetadata[Any, Any], DT],
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
+        super().__init__(data, direction=direction, data_id=data_id)
         if assert_unitary:
             _assert_unitary(self._data.raw_data.reshape(self._data.basis.shape))
-        super().__init__(data, direction=direction, data_id=data_id)
 
     @override
     def conjugate_basis(self) -> ExplicitUnitaryBasis[M, DT]:

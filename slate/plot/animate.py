@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
 
     from slate.array.array import SlateArray
-    from slate.basis._basis import Basis
     from slate.metadata.stacked.volume import SpacedVolumeMetadata
 
 
@@ -86,8 +85,8 @@ def build_animation(  # noqa: PLR0913
     return (fig, ax, ArtistAnimation(fig, frames))
 
 
-def animate_data_through_surface_x(  # noqa: PLR0913
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def animate_data_through_surface_x[DT: np.number[Any]](  # noqa: PLR0913
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
@@ -159,8 +158,8 @@ def _get_slice_idx(
     return idx[:insert_pos] + (x_0_idx,) + idx[insert_pos:]
 
 
-def animate_data_through_list_1d_n(  # noqa: PLR0913
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def animate_data_through_list_1d_n[DT: np.number[Any]](  # noqa: PLR0913
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -214,8 +213,8 @@ def animate_data_through_list_1d_n(  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_through_list_1d_x(  # noqa: PLR0913
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def animate_data_through_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -266,8 +265,8 @@ def animate_data_through_list_1d_x(  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_through_list_1d_k(  # noqa: PLR0913
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def animate_data_through_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -319,8 +318,8 @@ def animate_data_through_list_1d_k(  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_through_list_2d_k(  # noqa: PLR0913
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def animate_data_through_list_2d_k[DT: np.number[Any]](  # noqa: PLR0913
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
@@ -369,8 +368,8 @@ def animate_data_through_list_2d_k(  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_through_list_2d_x(  # noqa: PLR0913
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def animate_data_through_list_2d_x[DT: np.number[Any]](  # noqa: PLR0913
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,

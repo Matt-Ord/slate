@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -21,7 +21,9 @@ if TYPE_CHECKING:
 
 
 def test_transformed_basis_round_trip(
-    slate_array_complex: SlateArray[np.complex128, FundamentalBasis[SimpleMetadata]],
+    slate_array_complex: SlateArray[
+        Any, np.complex128, FundamentalBasis[SimpleMetadata]
+    ],
 ) -> None:
     basis = TransformedBasis(slate_array_complex.basis)
 

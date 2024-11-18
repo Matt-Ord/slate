@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 
 def test_slate_array_as_array(
-    slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
+    slate_array_integer: SlateArray[SimpleMetadata, np.int64],
 ) -> None:
     np.testing.assert_array_equal(
         slate_array_integer.raw_data, slate_array_integer.as_array().ravel()
@@ -25,13 +25,13 @@ def test_slate_array_as_array(
 
 
 def test_slate_array_dtype(
-    slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
+    slate_array_integer: SlateArray[SimpleMetadata, np.int64],
 ) -> None:
     assert slate_array_integer.dtype == np.int64
 
 
 def test_slate_array_basis(
-    slate_array_integer: SlateArray[np.int64, FundamentalBasis[SimpleMetadata]],
+    slate_array_integer: SlateArray[SimpleMetadata, np.int64],
 ) -> None:
     assert slate_array_integer.basis == fundamental_tuple_basis_from_shape(
         slate_array_integer.fundamental_shape
