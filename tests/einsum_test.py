@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 
 def _test_einsum_in_basis(
-    array: SlateArray[Any, TupleBasis[Any, None, Any]],
-    vector: SlateArray[Any, TupleBasis[Any, None, Any]],
+    array: SlateArray[Any, Any, TupleBasis[Any, None, Any]],
+    vector: SlateArray[Any, Any, TupleBasis[Any, None, Any]],
     basis: Basis[Any, Any],
 ) -> None:
     transformed_array = convert_array(

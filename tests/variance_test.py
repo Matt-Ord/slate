@@ -11,6 +11,8 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata, SimpleMetadata, VolumeMetadata
 
 if TYPE_CHECKING:
+    from slate.basis.transformed import TransformedBasis
+    from slate.metadata.length import LengthMetadata
     from slate.metadata.stacked import StackedMetadata
 
 
@@ -41,13 +43,15 @@ def fundamental_basis_variance() -> None:
 
 def slate_array_basis_variance() -> None:
     a = cast(
-        SlateArray[np.float64, Basis[SimpleMetadata, np.float64]],
+        SlateArray[SimpleMetadata, np.float64, FundamentalBasis[SimpleMetadata]],
         {},
     )
-    _b: SlateArray[np.floating[Any], Basis[BasisMetadata, np.generic]] = a  # type: ignore should fail
-    _c: SlateArray[np.floating[Any], Basis[BasisMetadata, np.float64]] = a
-    _d: SlateArray[np.float128, Basis[BasisMetadata, np.float64]] = a  # type: ignore should fail
-    _e: SlateArray[np.generic, Basis[BasisMetadata, np.float64]] = a
+    _b: SlateArray[BasisMetadata, np.generic] = a
+    _c: SlateArray[BasisMetadata, np.floating[Any]] = a
+    _d: SlateArray[BasisMetadata, np.float128] = a  # type: ignore should fail
+    _d: SlateArray[BasisMetadata, np.float64, TransformedBasis[SimpleMetadata]] = a  # type: ignore should fail
+    _e: SlateArray[BasisMetadata, np.float64] = a
+    _f: SlateArray[LengthMetadata, np.float64] = a  # type: ignore should fail
 
 
 def wrappeed_basis_variance() -> None:

@@ -18,7 +18,11 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def slate_array_stacked() -> (
-    SlateArray[np.complex128, TupleBasis[SimpleMetadata, None, np.generic]]
+    SlateArray[
+        StackedMetadata[SimpleMetadata, None],
+        np.complex128,
+        TupleBasis[SimpleMetadata, None, np.generic],
+    ]
 ):
     rng = np.random.default_rng()
     shape = (10, 10)
@@ -28,6 +32,7 @@ def slate_array_stacked() -> (
 
 def _test_eig(
     array: SlateArray[
+        Any,
         np.complexfloating[Any, Any],
         Basis[StackedMetadata[SimpleMetadata, None], Any],
     ],
@@ -56,6 +61,7 @@ def test_linalg_complex() -> None:
 
 def _test_eigh(
     array: SlateArray[
+        Any,
         np.complexfloating[Any, Any],
         Basis[StackedMetadata[SimpleMetadata, None], Any],
     ],

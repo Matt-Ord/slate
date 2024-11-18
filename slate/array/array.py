@@ -14,20 +14,29 @@ from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata
+    from slate.metadata.stacked import StackedMetadata
 
 
-class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
+class SlateArray[
+    M: BasisMetadata,
+    DT: np.generic,
+    B: Basis[BasisMetadata, Any] = Basis[M, Any],
+]:  # B: Basis[Any, DT]
     """An array with data stored in a given basis."""
 
-    def __init__(self, basis: B, data: np.ndarray[Any, np.dtype[DT]]) -> None:
+    def __init__[DT1: np.generic, B1: Basis[BasisMetadata, Any]](
+        self: SlateArray[Any, DT1, B1],
+        basis: B1,
+        data: np.ndarray[Any, np.dtype[DT]],
+    ) -> None:
         assert basis.size == data.size
-        self._basis = basis
+        self._basis = cast(B, basis)
         self._data = data.ravel()
 
     @property
     def fundamental_shape(self: Self) -> tuple[int, ...]:
         """Datatype of the data stored in the array."""
-        return self._basis.fundamental_shape
+        return self.basis.fundamental_shape
 
     @property
     def dtype(self: Self) -> np.dtype[DT]:
@@ -61,7 +70,11 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
     @staticmethod
     def from_array[DT1: np.generic](
         array: np.ndarray[tuple[int, ...], np.dtype[DT1]],
-    ) -> SlateArray[DT1, TupleBasis[SimpleMetadata, None, np.generic]]:
+    ) -> SlateArray[
+        StackedMetadata[SimpleMetadata, None],
+        DT1,
+        TupleBasis[SimpleMetadata, None, np.generic],
+    ]:
         """Get a SlateArray from an array."""
         return SlateArray(
             fundamental_tuple_basis_from_shape(array.shape),
@@ -70,16 +83,16 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
     def with_basis[B1: Basis[Any, Any]](  # B1: B
         self: Self, basis: B1
-    ) -> SlateArray[DT, B1]:
+    ) -> SlateArray[M, DT, B1]:
         """Get the SlateArray with the basis set to basis."""
         return SlateArray(
             basis, self.basis.__convert_vector_into__(self.raw_data, basis)
         )
 
-    def __add__[DT1: np.number[Any], M: BasisMetadata](
-        self: SlateArray[DT1, Basis[M, Any]],
-        other: SlateArray[DT1, Basis[M, Any]],
-    ) -> SlateArray[DT1, Basis[M, Any]]:
+    def __add__[DT1: np.number[Any], M1: BasisMetadata](
+        self: SlateArray[M1, DT1],
+        other: SlateArray[M1, DT1],
+    ) -> SlateArray[M1, DT1]:
         basis = as_add_basis(self.basis)
         data = basis.add_data(
             self.with_basis(basis).raw_data,
@@ -88,10 +101,10 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
         return SlateArray(basis, data)
 
-    def __sub__[DT1: np.number[Any], M: BasisMetadata](
-        self: SlateArray[DT1, Basis[M, Any]],
-        other: SlateArray[DT1, Basis[M, Any]],
-    ) -> SlateArray[DT1, Basis[M, Any]]:
+    def __sub__[DT1: np.number[Any], M1: BasisMetadata](
+        self: SlateArray[M1, DT1],
+        other: SlateArray[M1, DT1],
+    ) -> SlateArray[M1, DT1]:
         basis = as_sub_basis(self.basis)
         data = basis.sub_data(
             self.with_basis(basis).raw_data,
@@ -100,10 +113,10 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
         return SlateArray(basis, data)
 
-    def __mul__[DT1: np.number[Any], M: BasisMetadata](
-        self: SlateArray[DT1, Basis[M, Any]],
+    def __mul__[DT1: np.number[Any], M1: BasisMetadata](
+        self: SlateArray[M1, DT1],
         other: float,
-    ) -> SlateArray[DT1, Basis[M, Any]]:
+    ) -> SlateArray[M1, DT1]:
         basis = as_mul_basis(self.basis)
         data = basis.mul_data(self.with_basis(basis).raw_data, other)
         return SlateArray(basis, data)

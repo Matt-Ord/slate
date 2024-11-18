@@ -35,7 +35,8 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
 
     from slate.array.array import SlateArray
-    from slate.basis._basis import Basis
+    from slate.metadata import BasisMetadata
+    from slate.metadata.stacked.stacked import StackedMetadata
     from slate.metadata.stacked.volume import SpacedVolumeMetadata
 from ._util import Scale, set_ymargin
 
@@ -97,8 +98,8 @@ def plot_data_1d[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, line
 
 
-def plot_data_1d_n(
-    data: SlateArray[Any, Basis[Any, Any]],
+def plot_data_1d_n[DT: np.number[Any]](
+    data: SlateArray[StackedMetadata[BasisMetadata, Any], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -136,8 +137,8 @@ def plot_data_1d_n(
     )
 
 
-def plot_data_1d_k(
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def plot_data_1d_k[DT: np.number[Any]](
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -183,8 +184,8 @@ def plot_data_1d_k(
     return fig, ax, line
 
 
-def plot_data_1d_x(
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def plot_data_1d_x[DT: np.number[Any]](
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -275,8 +276,8 @@ def plot_data_2d[DT: np.number[Any]](
     return fig, ax, mesh
 
 
-def plot_data_2d_k(
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def plot_data_2d_k[DT: np.number[Any]](
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -330,8 +331,8 @@ def plot_data_2d_k(
     return fig, ax, mesh
 
 
-def plot_data_2d_x(
-    data: SlateArray[Any, Basis[SpacedVolumeMetadata, Any]],
+def plot_data_2d_x[DT: np.number[Any]](
+    data: SlateArray[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
