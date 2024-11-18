@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Never, Protocol, Self, cast, override, runtime_checkable
+from typing import (
+    Any,
+    Literal,
+    Never,
+    Self,
+)
 
 import numpy as np
 
-from slate.metadata import BasisMetadata, SimpleMetadata
+from slate.metadata import BasisMetadata
+
+BasisFeatures = Literal["ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB"]
 
 
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
@@ -38,6 +45,11 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
     def metadata(self: Self) -> M:
         """Metadata associated with the basis."""
         return self._metadata
+
+    @property
+    def features(self: Self) -> set[BasisFeatures]:
+        """Features of the basis."""
+        return set()
 
     @staticmethod
     def _dtype_variance_fn(_a: DT, _b: Never) -> None:
@@ -82,108 +94,26 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         fundamental = self.__into_fundamental__(vectors, axis)
         return basis.__from_fundamental__(fundamental, axis)
 
-
-@runtime_checkable
-class SupportsAdd(Protocol):
-    def add_data[DT1: np.number[Any]](
-        self: Self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
-
-    def sub_data[DT1: np.number[Any]](
-        self: Self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
-
-
-class SupportsAddBasis[M: BasisMetadata, DT: np.generic](SupportsAdd, Basis[M, DT]): ...
-
-
-@runtime_checkable
-class SupportsMul(Protocol):
-    def mul_data[DT1: np.number[Any]](
-        self: Self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: float,
-    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
-
-
-class SupportsMulBasis[M: BasisMetadata, DT: np.generic](SupportsMul, Basis[M, DT]): ...
-
-
-class SimpleBasis[M: BasisMetadata = Any, DT: np.generic = Any](
-    SupportsMulBasis[M, DT], SupportsAddBasis[M, DT]
-):
-    @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number[Any]](  # noqa: PLR6301
         self: Self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return cast(np.ndarray[Any, np.dtype[DT1]], lhs + rhs)
+        msg = "add_data not implemented for this basis"
+        raise NotImplementedError(msg)
 
-    @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number[Any]](  # noqa: PLR6301
         self: Self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return cast(np.ndarray[Any, np.dtype[DT1]], lhs - rhs)
+        msg = "sub_data not implemented for this basis"
+        raise NotImplementedError(msg)
 
-    @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number[Any]](  # noqa: PLR6301
         self: Self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: float,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return cast(np.ndarray[Any, np.dtype[DT1]], lhs * rhs)
-
-
-class FundamentalBasis[M: BasisMetadata](SimpleBasis[M, np.generic]):
-    """Represents a full fundamental basis."""
-
-    @property
-    def size(self: Self) -> int:
-        """Number of elements in the basis."""
-        return self.fundamental_size
-
-    def __into_fundamental__[DT1: np.generic](
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
-        axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return vectors
-
-    def __from_fundamental__[DT1: np.generic](
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
-        axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return vectors
-
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, FundamentalBasis):
-            return value.metadata == self.metadata  # type: ignore unknown
-        return False
-
-    def __hash__(self) -> int:
-        return hash(self.metadata)
-
-    def conjugate_basis(self) -> FundamentalBasis[M]:
-        return self
-
-    @staticmethod
-    def from_shape(
-        shape: tuple[int, ...],
-    ) -> FundamentalBasis[SimpleMetadata]:
-        """Get a fundamental basis from a shape."""
-        return FundamentalBasis(SimpleMetadata(shape))
-
-
-def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
-    basis: Basis[M, DT],
-) -> FundamentalBasis[M]:
-    """Get the fundamental basis for a given basis."""
-    return FundamentalBasis(basis.metadata)
+        msg = "mul_data not implemented for this basis"
+        raise NotImplementedError(msg)

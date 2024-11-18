@@ -17,8 +17,8 @@ from typing import (
 
 import numpy as np
 
-from slate.basis import Basis, FundamentalBasis
-from slate.basis._basis import SimpleBasis
+from slate.basis._basis import Basis, BasisFeatures
+from slate.basis.fundamental import FundamentalBasis
 from slate.basis.wrapped import WrappedBasis, get_wrapped_basis_super_inner
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked.stacked import StackedMetadata
@@ -68,7 +68,7 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
 
 
 class TupleBasis[M: BasisMetadata, E, DT: np.generic](
-    SimpleBasis[StackedMetadata[M, E], DT],
+    Basis[StackedMetadata[M, E], DT],
 ):
     """Represents a Tuple of independent basis."""
 
@@ -76,7 +76,6 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](
         self: Self, children: tuple[Basis[M, Any], ...], extra_metadata: E
     ) -> None:
         self._children = children
-        assert all(isinstance(c, SimpleBasis) for c in children)
         self._metadata = StackedMetadata(
             tuple(i.metadata for i in children), extra_metadata
         )
@@ -159,6 +158,52 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](
 
     def __hash__(self) -> int:
         return hash((self.metadata.extra, self.children))
+
+    @property
+    @override
+    def features(self) -> set[BasisFeatures]:
+        out = set[BasisFeatures]()
+        if all("SIMPLE_ADD" in c.features for c in self.children):
+            out.add("ADD")
+            out.add("SIMPLE_ADD")
+        if all("SIMPLE_MUL" in c.features for c in self.children):
+            out.add("MUL")
+            out.add("SIMPLE_MUL")
+        if all("SIMPLE_SUB" in c.features for c in self.children):
+            out.add("SUB")
+            out.add("SIMPLE_SUB")
+        return out
+
+    @override
+    def add_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_ADD" not in self.features:
+            msg = "add_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs + rhs).astype(lhs.dtype)
+
+    @override
+    def mul_data[DT1: np.number[Any]](
+        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_MUL" not in self.features:
+            msg = "mul_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs * rhs).astype(lhs.dtype)
+
+    @override
+    def sub_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_SUB" not in self.features:
+            msg = "sub_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs - rhs).astype(lhs.dtype)
 
 
 class VariadicTupleBasis[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):

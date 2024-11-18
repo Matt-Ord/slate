@@ -8,7 +8,7 @@ import pytest
 from slate.array.array import SlateArray
 from slate.array.util import transpose
 from slate.basis import FundamentalBasis
-from slate.basis.stacked_basis import (
+from slate.basis.stacked import (
     fundamental_tuple_basis_from_shape,
 )
 

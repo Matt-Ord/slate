@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, 
 
 import numpy as np
 
-from slate.basis import Basis
-from slate.basis._basis import FundamentalBasis, SimpleBasis
+from slate.basis._basis import Basis, BasisFeatures
+from slate.basis.fundamental import FundamentalBasis
 from slate.basis.stacked import TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
@@ -18,7 +18,7 @@ type TransformDirection = Literal["forward", "backward"]
 
 
 class TransformedBasis[M: BasisMetadata](
-    WrappedBasis[M, np.complex128, Basis[M, np.complex128]], SimpleBasis
+    WrappedBasis[M, np.complex128, Basis[M, np.complex128]],
 ):
     """Represents a fourier transformed basis."""
 
@@ -30,7 +30,6 @@ class TransformedBasis[M: BasisMetadata](
     ) -> None:
         self._direction: TransformDirection = direction
         super().__init__(inner)
-        assert isinstance(self.inner, SimpleBasis)
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TransformedBasis):
@@ -122,6 +121,52 @@ class TransformedBasis[M: BasisMetadata](
     ) -> TransformedBasis[M1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return TransformedBasis(wrapper(self.inner))
+
+    @property
+    @override
+    def features(self) -> set[BasisFeatures]:
+        out = set[BasisFeatures]()
+        if "SIMPLE_ADD" in self.inner.features:
+            out.add("ADD")
+            out.add("SIMPLE_ADD")
+        if "SIMPLE_MUL" in self.inner.features:
+            out.add("MUL")
+            out.add("SIMPLE_MUL")
+        if "SIMPLE_SUB" in self.inner.features:
+            out.add("SUB")
+            out.add("SIMPLE_SUB")
+        return out
+
+    @override
+    def add_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_ADD" not in self.features:
+            msg = "add_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs + rhs).astype(lhs.dtype)
+
+    @override
+    def mul_data[DT1: np.number[Any]](
+        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_MUL" not in self.features:
+            msg = "mul_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs * rhs).astype(lhs.dtype)
+
+    @override
+    def sub_data[DT1: np.number[Any]](
+        self: Self,
+        lhs: np.ndarray[Any, np.dtype[DT1]],
+        rhs: np.ndarray[Any, np.dtype[DT1]],
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if "SIMPLE_SUB" not in self.features:
+            msg = "sub_data not implemented for this basis"
+            raise NotImplementedError(msg)
+        return (lhs - rhs).astype(lhs.dtype)
 
 
 def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](

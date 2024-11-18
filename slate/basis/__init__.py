@@ -4,15 +4,11 @@ from __future__ import annotations
 
 from ._basis import (
     Basis,
-    FundamentalBasis,
-    SimpleBasis,
-    SupportsAdd,
-    SupportsAddBasis,
-    SupportsMul,
-    SupportsMulBasis,
+    BasisFeatures,
 )
 from .coordinate import CoordinateBasis
 from .cropped import CroppedBasis
+from .fundamental import FundamentalBasis
 from .recast import RecastBasis
 from .split import SplitBasis, split_basis
 from .stacked import (
@@ -28,18 +24,14 @@ from .wrapped import WrappedBasis
 
 __all__ = [
     "Basis",
+    "BasisFeatures",
     "CoordinateBasis",
     "CroppedBasis",
     "DiagonalBasis",
     "FundamentalBasis",
     "RecastBasis",
-    "SimpleBasis",
     "SplitBasis",
     "StackedBasis",
-    "SupportsAdd",
-    "SupportsAddBasis",
-    "SupportsMul",
-    "SupportsMulBasis",
     "TransformedBasis",
     "TruncatedBasis",
     "Truncation",

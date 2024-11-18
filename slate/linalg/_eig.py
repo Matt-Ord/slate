@@ -6,7 +6,7 @@ import numpy as np
 
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
-from slate.basis._basis import Basis, FundamentalBasis
+from slate.basis.fundamental import FundamentalBasis
 from slate.basis.stacked import (
     DiagonalBasis,
     TupleBasis,
@@ -18,6 +18,7 @@ from slate.explicit_basis import ExplicitBasis, ExplicitUnitaryBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
+    from slate.basis import Basis
     from slate.metadata.stacked.stacked import StackedMetadata
 
 
