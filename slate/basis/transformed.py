@@ -6,13 +6,13 @@ import numpy as np
 
 from slate.basis import Basis
 from slate.basis._basis import FundamentalBasis, SimpleBasis
-from slate.basis.stacked._tuple_basis import TupleBasis, VariadicTupleBasis
+from slate.basis.stacked import TupleBasis, VariadicTupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked.stacked import StackedMetadata
 
 if TYPE_CHECKING:
-    from slate.metadata._metadata import SimpleMetadata
+    from slate.metadata import SimpleMetadata
 
 type TransformDirection = Literal["forward", "backward"]
 

@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-from slate.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 
 def fundamental_ndim(

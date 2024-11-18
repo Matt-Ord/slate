@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, TypedDict, TypeVar, Unpack, overload
 
 import numpy as np
 
-from slate.basis.stacked._tuple_basis import (
+from slate.basis.stacked import (
     as_tuple_basis,
     fundamental_tuple_basis_from_metadata,
 )

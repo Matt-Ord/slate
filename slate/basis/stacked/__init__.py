@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from ._diagonal_basis import DiagonalBasis, diagonal_basis
+from ._diagonal import DiagonalBasis, diagonal_basis
 from ._isotropic import IsotropicBasis, isotropic_basis
-from ._tuple_basis import (
+from ._tuple import (
     StackedBasis,
     TupleBasis,
     VariadicTupleBasis,

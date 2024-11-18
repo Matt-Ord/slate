@@ -10,7 +10,7 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import StackedMetadata
 from slate.metadata.util import nx_points
 
-from ._tuple_basis import VariadicTupleBasis
+from ._tuple import VariadicTupleBasis
 
 
 class IsotropicBasis[

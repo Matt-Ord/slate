@@ -7,7 +7,7 @@ import numpy as np
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis.cropped import CroppedBasis
-from slate.basis.stacked._tuple_basis import (
+from slate.basis.stacked_basis import (
     TupleBasis,
     tuple_basis_with_child,
 )

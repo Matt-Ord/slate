@@ -11,8 +11,8 @@ from slate.linalg._eig import eig, eigh, eigvals, eigvalsh
 
 if TYPE_CHECKING:
     from slate.basis._basis import Basis
-    from slate.basis.stacked._tuple_basis import TupleBasis
-    from slate.metadata._metadata import SimpleMetadata
+    from slate.basis.stacked_basis import TupleBasis
+    from slate.metadata import SimpleMetadata
     from slate.metadata.stacked import StackedMetadata
 
 

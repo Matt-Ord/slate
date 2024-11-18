@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
-from slate.basis.stacked._tuple_basis import (
+from slate.basis.stacked import (
     fundamental_tuple_basis_from_metadata,
 )
 from slate.metadata.stacked.volume.util import get_x_coordinates_in_axes

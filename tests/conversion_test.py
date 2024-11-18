@@ -8,7 +8,7 @@ from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
 from slate.basis.recast import RecastBasis
 from slate.basis.stacked import diagonal_basis
-from slate.basis.stacked._tuple_basis import (
+from slate.basis.stacked_basis import (
     fundamental_tuple_basis_from_shape,
     tuple_basis,
 )
