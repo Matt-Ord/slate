@@ -19,7 +19,7 @@ import numpy as np
 
 from slate.basis._basis import Basis, BasisFeatures
 from slate.basis.fundamental import FundamentalBasis
-from slate.basis.wrapped import WrappedBasis, get_wrapped_basis_super_inner
+from slate.basis.wrapped import get_wrapped_basis_super_inner
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked.stacked import StackedMetadata
 
@@ -410,9 +410,8 @@ def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
     This is useful for functions which require a TupleBasis, and ensures that
     only the minimal basis conversion is required.
     """
-    if isinstance(basis, WrappedBasis):
-        super_inner = get_wrapped_basis_super_inner(basis)  # type: ignore unknown
-        if isinstance(super_inner, TupleBasis):
-            return cast(TupleBasis[M, E, np.generic], super_inner)
+    super_inner = get_wrapped_basis_super_inner(basis)  # type: ignore unknown
+    if isinstance(super_inner, TupleBasis):
+        return cast(TupleBasis[M, E, np.generic], super_inner)
 
     return fundamental_tuple_basis_from_metadata(basis.metadata)

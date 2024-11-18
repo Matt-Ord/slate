@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from slate.metadata.stacked.stacked import StackedMetadata
 
 
-def eigvals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
+def eig_vals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[
         DT,
         Basis[StackedMetadata[M, E], np.generic],
@@ -88,7 +88,7 @@ def eig[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     return _eig_from_tuple(convert_array(array, tuple_basis))
 
 
-def eigvalsh[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
+def eigh_vals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[
         DT,
         Basis[StackedMetadata[M, E], np.generic],

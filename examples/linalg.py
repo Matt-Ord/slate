@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from slate.array.array import SlateArray
-from slate.linalg import eig, eigvals
+from slate.linalg import eig, eig_vals
 
 if __name__ == "__main__":
     rng = np.random.default_rng()
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     array = SlateArray.from_array(data)
 
     diagonal = eig(array)
-    eigenvalues = eigvals(array)
+    eigenvalues = eig_vals(array)
 
     # Diagonal is a matrix with the eigenvalues along the diagonal
     np.testing.assert_allclose(diagonal.raw_data, eigenvalues.as_array())

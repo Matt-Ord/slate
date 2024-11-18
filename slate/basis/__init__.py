@@ -16,11 +16,12 @@ from .stacked import (
     StackedBasis,
     TupleBasis,
     VariadicTupleBasis,
+    as_tuple_basis,
     tuple_basis,
 )
 from .transformed import TransformedBasis
 from .truncated import TruncatedBasis, Truncation
-from .wrapped import WrappedBasis
+from .wrapped import WrappedBasis, as_add_basis, as_mul_basis, as_sub_basis
 
 __all__ = [
     "Basis",
@@ -38,6 +39,10 @@ __all__ = [
     "TupleBasis",
     "VariadicTupleBasis",
     "WrappedBasis",
+    "as_add_basis",
+    "as_mul_basis",
+    "as_sub_basis",
+    "as_tuple_basis",
     "split_basis",
     "tuple_basis",
 ]

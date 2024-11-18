@@ -7,7 +7,7 @@ import pytest
 
 from slate.array.array import SlateArray
 from slate.array.conversion import convert_array
-from slate.linalg._eig import eig, eigh, eigvals, eigvalsh
+from slate.linalg._eig import eig, eig_vals, eigh, eigh_vals
 
 if TYPE_CHECKING:
     from slate.basis import Basis
@@ -34,7 +34,7 @@ def _test_eig(
 ) -> None:
     diagonal = eig(array)
 
-    eigenvalues = eigvals(array)
+    eigenvalues = eig_vals(array)
     np.testing.assert_allclose(eigenvalues.as_array(), diagonal.raw_data)
 
     full_as_diagonal = convert_array(array, diagonal.basis)
@@ -62,7 +62,7 @@ def _test_eigh(
 ) -> None:
     diagonal = eigh(array)
 
-    eigenvalues = eigvalsh(array)
+    eigenvalues = eigh_vals(array)
     np.testing.assert_allclose(eigenvalues.as_array(), diagonal.raw_data)
 
     full_as_diagonal = convert_array(array, diagonal.basis)
