@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypedDict, TypeVar, Unpack, overload
+from typing import TYPE_CHECKING, Any, TypedDict, Unpack, overload
 
 import numpy as np
 
@@ -39,8 +39,6 @@ if TYPE_CHECKING:
     from slate.metadata.stacked.volume import SpacedVolumeMetadata
 from ._util import Scale, set_ymargin
 
-_DType = TypeVar("_DType", bound=np.floating[Any] | np.complexfloating[Any, Any])
-
 
 class PlotKwargs(TypedDict, total=False):
     """Extra arguments to plot functions."""
@@ -50,8 +48,8 @@ class PlotKwargs(TypedDict, total=False):
     measure: Measure
 
 
-def plot_data_1d(  # noqa: PLR0913
-    data: np.ndarray[tuple[int], np.dtype[_DType]],
+def plot_data_1d[DT: np.number[Any]](  # noqa: PLR0913
+    data: np.ndarray[tuple[int], np.dtype[DT]],
     coordinates: np.ndarray[tuple[int], np.dtype[np.float64]],
     y_errors: np.ndarray[tuple[int], np.dtype[np.float64]] | None = None,
     *,
@@ -234,23 +232,23 @@ def _has_colorbar(axis: Axes) -> bool:
 
 
 @overload
-def plot_data_2d(
-    data: np.ndarray[tuple[int], np.dtype[_DType]],
+def plot_data_2d[DT: np.number[Any]](
+    data: np.ndarray[tuple[int], np.dtype[DT]],
     coordinates: np.ndarray[tuple[int, int], np.dtype[np.float64]],
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, QuadMesh]: ...
 
 
 @overload
-def plot_data_2d(
-    data: np.ndarray[tuple[int, int], np.dtype[_DType]],
+def plot_data_2d[DT: np.number[Any]](
+    data: np.ndarray[tuple[int, int], np.dtype[DT]],
     coordinates: None = None,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, QuadMesh]: ...
 
 
-def plot_data_2d(
-    data: np.ndarray[Any, np.dtype[_DType]],
+def plot_data_2d[DT: np.number[Any]](
+    data: np.ndarray[Any, np.dtype[DT]],
     coordinates: np.ndarray[tuple[int, int], np.dtype[np.float64]] | None = None,
     *,
     ax: Axes | None = None,

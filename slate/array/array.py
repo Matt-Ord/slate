@@ -76,10 +76,10 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
             basis, self.basis.__convert_vector_into__(self.raw_data, basis)
         )
 
-    def __add__[_DT: np.number[Any], M: BasisMetadata](
-        self: SlateArray[_DT, Basis[M, Any]],
-        other: SlateArray[_DT, Basis[M, Any]],
-    ) -> SlateArray[_DT, Basis[M, Any]]:
+    def __add__[DT1: np.number[Any], M: BasisMetadata](
+        self: SlateArray[DT1, Basis[M, Any]],
+        other: SlateArray[DT1, Basis[M, Any]],
+    ) -> SlateArray[DT1, Basis[M, Any]]:
         basis = as_add_basis(self.basis)
         data = basis.add_data(
             self.with_basis(basis).raw_data,
@@ -88,10 +88,10 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
         return SlateArray(basis, data)
 
-    def __sub__[_DT: np.number[Any], M: BasisMetadata](
-        self: SlateArray[_DT, Basis[M, Any]],
-        other: SlateArray[_DT, Basis[M, Any]],
-    ) -> SlateArray[_DT, Basis[M, Any]]:
+    def __sub__[DT1: np.number[Any], M: BasisMetadata](
+        self: SlateArray[DT1, Basis[M, Any]],
+        other: SlateArray[DT1, Basis[M, Any]],
+    ) -> SlateArray[DT1, Basis[M, Any]]:
         basis = as_sub_basis(self.basis)
         data = basis.sub_data(
             self.with_basis(basis).raw_data,
@@ -100,10 +100,10 @@ class SlateArray[DT: np.generic, B: Basis[Any, Any]]:  # B: Basis[Any, DT]
 
         return SlateArray(basis, data)
 
-    def __mul__[_DT: np.number[Any], M: BasisMetadata](
-        self: SlateArray[_DT, Basis[M, Any]],
+    def __mul__[DT1: np.number[Any], M: BasisMetadata](
+        self: SlateArray[DT1, Basis[M, Any]],
         other: float,
-    ) -> SlateArray[_DT, Basis[M, Any]]:
+    ) -> SlateArray[DT1, Basis[M, Any]]:
         basis = as_mul_basis(self.basis)
         data = basis.mul_data(self.with_basis(basis).raw_data, other)
         return SlateArray(basis, data)
