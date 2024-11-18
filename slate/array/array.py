@@ -89,7 +89,7 @@ class SlateArray[
             basis, self.basis.__convert_vector_into__(self.raw_data, basis)
         )
 
-    def __add__[DT1: np.number[Any], M1: BasisMetadata](
+    def __add__[M1: BasisMetadata, DT1: np.number[Any]](
         self: SlateArray[M1, DT1],
         other: SlateArray[M1, DT1],
     ) -> SlateArray[M1, DT1]:
@@ -101,7 +101,7 @@ class SlateArray[
 
         return SlateArray(basis, data)
 
-    def __sub__[DT1: np.number[Any], M1: BasisMetadata](
+    def __sub__[M1: BasisMetadata, DT1: np.number[Any]](
         self: SlateArray[M1, DT1],
         other: SlateArray[M1, DT1],
     ) -> SlateArray[M1, DT1]:
@@ -113,7 +113,7 @@ class SlateArray[
 
         return SlateArray(basis, data)
 
-    def __mul__[DT1: np.number[Any], M1: BasisMetadata](
+    def __mul__[M1: BasisMetadata, DT1: np.number[Any]](
         self: SlateArray[M1, DT1],
         other: float,
     ) -> SlateArray[M1, DT1]:
