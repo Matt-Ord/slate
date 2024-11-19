@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .stacked import Metadata2D, Metadata3D, MetadataND, StackedMetadata
+from .stacked import Metadata1D, Metadata2D, Metadata3D, MetadataND, StackedMetadata
 from .volume import (
     SpacedVolumeMetadata,
     VolumeMetadata,
@@ -11,6 +11,7 @@ from .volume import (
 )
 
 __all__ = [
+    "Metadata1D",
     "Metadata2D",
     "Metadata3D",
     "MetadataND",

@@ -12,7 +12,15 @@ from ._metadata import (
     SpacedLabeledMetadata,
 )
 from .length import LengthMetadata
-from .stacked import SpacedVolumeMetadata, StackedMetadata, VolumeMetadata
+from .stacked import (
+    Metadata1D,
+    Metadata2D,
+    Metadata3D,
+    MetadataND,
+    SpacedVolumeMetadata,
+    StackedMetadata,
+    VolumeMetadata,
+)
 
 __all__ = [
     "BasisMetadata",
@@ -22,6 +30,10 @@ __all__ = [
     "LabeledMetadata",
     "LengthMetadata",
     "LengthMetadata",
+    "Metadata1D",
+    "Metadata2D",
+    "Metadata3D",
+    "MetadataND",
     "SimpleMetadata",
     "SpacedLabeledMetadata",
     "SpacedVolumeMetadata",
