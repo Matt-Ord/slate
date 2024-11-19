@@ -4,7 +4,7 @@ from typing import Any, Callable, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util._pad import (
@@ -89,8 +89,8 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        out = set[BasisFeatures]()
+    def features(self) -> set[BasisFeature]:
+        out = set[BasisFeature]()
         if "SIMPLE_ADD" in self.inner.features:
             out.add("ADD")
             out.add("SIMPLE_ADD")
@@ -100,6 +100,8 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         if "SIMPLE_SUB" in self.inner.features:
             out.add("SUB")
             out.add("SIMPLE_SUB")
+        if "INDEX" in self.inner.features:
+            out.add("INDEX")
         return out
 
     @override
@@ -132,3 +134,11 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+    @property
+    @override
+    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+        if "INDEX" not in self.features:
+            msg = "points not implemented for this basis"
+            raise NotImplementedError(msg)
+        return self.__from_inner__(self.inner.points)

@@ -106,6 +106,11 @@ def tuple_basis_2d_variance() -> None:
         Basis[SimpleMetadata, np.float64],
         None,
     ] = a1
+    _e5: TupleBasis[
+        BasisMetadata,
+        None,
+        np.float64,
+    ] = a1
     _e4: Metadata2D[LengthMetadata, SimpleMetadata, None] = a1.metadata()
     _e3: TupleBasis2D[
         np.float64,
@@ -113,6 +118,14 @@ def tuple_basis_2d_variance() -> None:
         Basis[LengthMetadata, np.float64],
         None,
     ] = a1  # type: ignore should fail
+
+    a2 = cast(
+        TupleBasis2D[
+            np.generic, Basis[VolumeMetadata, Any], Basis[VolumeMetadata, Any], None
+        ],
+        {},
+    )
+    _b2: TupleBasis[Any, None, np.complex128, StackedMetadata[Any, None]] = a2
 
 
 def diagonal_basis_variance() -> None:

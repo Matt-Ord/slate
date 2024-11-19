@@ -4,7 +4,7 @@ from typing import Any, Callable, Self, Sequence, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
@@ -19,19 +19,19 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         points: Sequence[int] | np.ndarray[Any, np.dtype[np.int_]],
         inner: Basis[M, DT],
     ) -> None:
-        self._points = np.sort(points)
+        self._inner_points = np.sort(points)
         super().__init__(inner)
-        assert np.unique(self._points).size == self._points.size
+        assert np.unique(self._inner_points).size == self._inner_points.size
 
     @property
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def inner_points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
         """Truncation of the basis."""
-        return self._points
+        return self._inner_points
 
     @property
     def size(self: Self) -> int:
         """Number of elements in the basis."""
-        return self.points.size
+        return self.inner_points.size
 
     @override
     def conjugate_basis(self) -> CoordinateBasis[M, DT]:
@@ -40,7 +40,8 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
     def __eq__(self, value: object) -> bool:
         if isinstance(value, CoordinateBasis):
             return (
-                np.allclose(self.points, value.points) and value._inner == self._inner  # type: ignore unknown
+                np.allclose(self.inner_points, value.inner_points)
+                and value._inner == self._inner  # type: ignore unknown
             )
         return False
 
@@ -61,7 +62,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return vectors.swapaxes(axis, 0)[self.points].swapaxes(axis, 0)
+        return vectors.swapaxes(axis, 0)[self.inner_points].swapaxes(axis, 0)
 
     @override
     def with_inner[
@@ -78,12 +79,12 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
     ) -> CoordinateBasis[M1, DT1]:
         """Get the wrapped basis after wrapper is applied to inner."""
-        return CoordinateBasis(self.points, wrapper(self.inner))
+        return CoordinateBasis(self.inner_points, wrapper(self.inner))
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        out = set[BasisFeatures]()
+    def features(self) -> set[BasisFeature]:
+        out = set[BasisFeature]()
         if "SIMPLE_ADD" in self.inner.features:
             out.add("ADD")
             out.add("SIMPLE_ADD")
@@ -93,6 +94,8 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         if "SIMPLE_SUB" in self.inner.features:
             out.add("SUB")
             out.add("SIMPLE_SUB")
+        if "INDEX" in self.inner.features:
+            out.add("INDEX")
         return out
 
     @override
@@ -125,3 +128,11 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+    @property
+    @override
+    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+        if "INDEX" not in self.features:
+            msg = "points not implemented for this basis"
+            raise NotImplementedError(msg)
+        return self.__from_inner__(self.inner.points)

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, 
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
 from slate.basis.stacked import TupleBasis
 from slate.basis.wrapped import WrappedBasis
@@ -125,8 +125,8 @@ class TransformedBasis[M: BasisMetadata](
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        out = set[BasisFeatures]()
+    def features(self) -> set[BasisFeature]:
+        out = set[BasisFeature]()
         if "SIMPLE_ADD" in self.inner.features:
             out.add("ADD")
             out.add("SIMPLE_ADD")

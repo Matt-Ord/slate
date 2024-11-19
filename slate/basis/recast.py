@@ -4,7 +4,7 @@ from typing import Any, Callable, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
@@ -82,8 +82,8 @@ class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        out = set[BasisFeatures]()
+    def features(self) -> set[BasisFeature]:
+        out = set[BasisFeature]()
         if "SIMPLE_ADD" in self.outer_recast.features:
             out.add("ADD")
             out.add("SIMPLE_ADD")
