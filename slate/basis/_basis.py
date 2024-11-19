@@ -29,21 +29,23 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
     @property
     def fundamental_size(self: Self) -> int:
         """Size of the full data."""
-        return np.prod(self.metadata.fundamental_shape).item()
+        return np.prod(self.metadata().fundamental_shape).item()
 
     @property
     def fundamental_shape(self: Self) -> tuple[int, ...]:
         """Shape of the full data."""
-        return self.metadata.fundamental_shape
+        return self.metadata().fundamental_shape
 
     @property
     def n_dim(self: Self) -> int:
         """Number of dimensions of the full data."""
         return len(self.fundamental_shape)
 
-    @property
     def metadata(self: Self) -> M:
-        """Metadata associated with the basis."""
+        """Metadata associated with the basis.
+
+        Note: this should be a property, but this would ruin variance.
+        """
         return self._metadata
 
     @property
@@ -86,7 +88,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         basis: Basis[BasisMetadata, Never],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        assert self.metadata == basis.metadata
+        assert self.metadata() == basis.metadata()
 
         if self == basis:
             return vectors

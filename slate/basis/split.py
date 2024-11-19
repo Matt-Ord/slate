@@ -1,16 +1,20 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, cast, overload, override
+from typing import TYPE_CHECKING, Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
 from slate.basis._basis import Basis
-from slate.basis.stacked import DiagonalBasis, VariadicTupleBasis, tuple_basis
+from slate.basis.stacked import DiagonalBasis, tuple_basis
+from slate.basis.stacked._tuple import TupleBasis2D
 from slate.basis.transformed import TransformDirection, TransformedBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata.stacked.stacked import StackedMetadata
 from slate.util import slice_along_axis
 from slate.util._pad import Padding, pad_along_axis
+
+if TYPE_CHECKING:
+    from slate.metadata._metadata import BasisMetadata
 
 
 class SplitBasis[
@@ -19,7 +23,7 @@ class SplitBasis[
     E,
 ](
     WrappedBasis[
-        StackedMetadata[Any, E], np.complex128, VariadicTupleBasis[Any, Any, Any, E]
+        StackedMetadata[Any, E], np.complex128, TupleBasis2D[np.complex128, B0, B1, E]
     ],
 ):
     r"""Represents data in the split operator basis.
@@ -39,7 +43,7 @@ class SplitBasis[
 
     def __init__(
         self: Self,
-        inner: VariadicTupleBasis[Any, Any, Any, E],
+        inner: TupleBasis2D[Any, Any, Any, E],
         *,
         direction: TransformDirection = "forward",
     ) -> None:
@@ -85,11 +89,18 @@ class SplitBasis[
 
     @property
     @override
-    def inner(self: Self) -> VariadicTupleBasis[np.complex128, Any, Any, E]:
-        return cast(VariadicTupleBasis[np.complex128, Any, Any, E], self._inner)
+    def inner(self: Self) -> TupleBasis2D[np.complex128, B0, B1, E]:
+        return cast(TupleBasis2D[np.complex128, Any, Any, E], self._inner)
 
     @property
-    def transformed_inner(self: Self) -> VariadicTupleBasis[np.complex128, Any, Any, E]:
+    def transformed_inner(
+        self: Self,
+    ) -> TupleBasis2D[
+        np.complex128,
+        TransformedBasis[BasisMetadata],
+        TransformedBasis[BasisMetadata],
+        E,
+    ]:
         """Inner of the transformed part of the basis."""
         return tuple_basis(
             (
@@ -102,7 +113,7 @@ class SplitBasis[
                     direction="backward" if self.direction == "forward" else "forward",
                 ),
             ),
-            self.inner.metadata.extra,
+            self.inner.metadata().extra,
         )
 
     @property
@@ -187,9 +198,7 @@ class SplitBasis[
         B01: Basis[Any, Any],
         B11: Basis[Any, Any],
         E1,
-    ](
-        self: Self, inner: VariadicTupleBasis[Any, B01, B11, E1]
-    ) -> SplitBasis[B01, B11, E1]:
+    ](self: Self, inner: TupleBasis2D[Any, B01, B11, E1]) -> SplitBasis[B01, B11, E1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
@@ -200,8 +209,8 @@ class SplitBasis[
     ](
         self: Self,
         wrapper: Callable[
-            [VariadicTupleBasis[Any, Any, Any, E]],
-            VariadicTupleBasis[Any, B01, B11, E1],
+            [TupleBasis2D[Any, Any, Any, E]],
+            TupleBasis2D[Any, B01, B11, E1],
         ],
     ) -> SplitBasis[B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner."""
@@ -234,5 +243,5 @@ def split_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
 ) -> SplitBasis[_B0, _B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
     return SplitBasis[Any, Any, E | None](
-        VariadicTupleBasis(children, extra_metadata), direction=direction
+        tuple_basis(children, extra_metadata), direction=direction
     )

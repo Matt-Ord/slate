@@ -132,7 +132,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         """Get the wrapped basis after wrapper is applied to inner."""
         new_basis = tuple_basis(
             (self._data.basis[0], wrapper(self.inner)),
-            extra_metadata=self._data.basis.metadata.extra,
+            extra_metadata=self._data.basis.metadata().extra,
         )
         return ExplicitBasis(
             cast(SlateArray[Any, DT1], convert_array(self._data, new_basis)),

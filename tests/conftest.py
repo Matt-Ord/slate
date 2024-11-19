@@ -8,7 +8,7 @@ import pytest
 from slate.array.array import SlateArray
 
 if TYPE_CHECKING:
-    from slate.metadata import SimpleMetadata
+    from slate.metadata import BasisMetadata
     from slate.metadata.stacked import StackedMetadata
 
 
@@ -26,12 +26,12 @@ def sample_data(shape: tuple[int, ...]) -> np.ndarray[Any, np.dtype[np.int64]]:
 @pytest.fixture
 def slate_array_integer(
     sample_data: np.ndarray[Any, np.dtype[np.int64]],
-) -> SlateArray[StackedMetadata[SimpleMetadata, None], np.int64]:
+) -> SlateArray[StackedMetadata[BasisMetadata, None], np.int64]:
     return SlateArray.from_array(sample_data)
 
 
 @pytest.fixture
 def slate_array_complex(
     sample_data: np.ndarray[Any, np.dtype[np.int64]],
-) -> SlateArray[StackedMetadata[SimpleMetadata, None], np.complex128]:
+) -> SlateArray[StackedMetadata[BasisMetadata, None], np.complex128]:
     return SlateArray.from_array(sample_data.astype(np.complex128))

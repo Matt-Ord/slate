@@ -32,11 +32,11 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, FundamentalBasis):
-            return value.metadata == self.metadata  # type: ignore unknown
+            return value.metadata() == self.metadata()  # type: ignore unknown
         return False
 
     def __hash__(self) -> int:
-        return hash(self.metadata)
+        return hash(self.metadata())
 
     @override
     def conjugate_basis(self) -> FundamentalBasis[M]:
@@ -81,4 +81,4 @@ def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
     basis: Basis[M, DT],
 ) -> FundamentalBasis[M]:
     """Get the fundamental basis for a given basis."""
-    return FundamentalBasis(basis.metadata)
+    return FundamentalBasis(basis.metadata())

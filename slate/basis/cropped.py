@@ -55,7 +55,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
         basis: Basis[BasisMetadata, Never],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        assert self.metadata == basis.metadata
+        assert self.metadata() == basis.metadata()
 
         if self == basis:
             return vectors

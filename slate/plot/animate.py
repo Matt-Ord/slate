@@ -122,10 +122,10 @@ def animate_data_through_surface_x[DT: np.number[Any]](  # noqa: PLR0913
     idx = tuple(0 for _ in range(data.basis.n_dim - 3)) if idx is None else idx
     clim = (0.0, clim[1]) if clim[0] is None and measure == "abs" else clim
 
-    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata)
+    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata())
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
-    coordinates = get_x_coordinates_in_axes(data.basis.metadata, axes, idx)
+    coordinates = get_x_coordinates_in_axes(data.basis.metadata(), axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
     measured_data = get_measured_data(data_in_axis, measure)
 

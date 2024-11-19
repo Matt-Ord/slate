@@ -18,7 +18,7 @@ def _transpose_from_tuple[DT: np.generic, M: BasisMetadata, E](
 ) -> SlateArray[StackedMetadata[M, E], DT]:
     assert array.basis.n_dim == 2  # noqa: PLR2004
     return SlateArray(
-        tuple_basis((array.basis[1], array.basis[0]), array.basis.metadata.extra),
+        tuple_basis((array.basis[1], array.basis[0]), array.basis.metadata().extra),
         array.raw_data.reshape(array.basis.shape).transpose(),
     )
 
