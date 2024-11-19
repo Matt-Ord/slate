@@ -7,7 +7,7 @@ import numpy as np
 from slate.array.array import SlateArray
 from slate.basis import Basis, FundamentalBasis
 from slate.basis.stacked import DiagonalBasis, TupleBasis
-from slate.basis.stacked._tuple import TupleBasis2D, TupleBasisND
+from slate.basis.stacked._tuple import TupleBasis2D
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata, SimpleMetadata, VolumeMetadata
 from slate.metadata.length import LengthMetadata
@@ -76,42 +76,6 @@ def stacked_metadata_variance() -> None:
 
     a1 = cast(MetadataND[SimpleMetadata, SimpleMetadata, SimpleMetadata], {})
     _b1: MetadataND[BasisMetadata, BasisMetadata, BasisMetadata] = a1  # type: ignore i disagree with type checker
-
-
-def variadic_basis_variance() -> None:
-    a = cast(
-        TupleBasisND[
-            np.floating[Any],
-            Basis[SimpleMetadata, np.float64],
-            Basis[SimpleMetadata, np.float64],
-            None,
-        ],
-        {},
-    )
-    _b: TupleBasisND[
-        np.generic,
-        Basis[SimpleMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a  # type: ignore should fail
-    _c: TupleBasisND[
-        np.float64,
-        Basis[SimpleMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a
-    _d: TupleBasisND[
-        np.float64,
-        Basis[StackedMetadata[Any, Any], np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a  # type: ignore should fail
-    _e: TupleBasisND[
-        np.float64,
-        Basis[BasisMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a  # type: ignore i disagree with type checker
 
 
 def tuple_basis_2d_variance() -> None:

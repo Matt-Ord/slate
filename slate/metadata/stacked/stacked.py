@@ -62,7 +62,7 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
         )
 
 
-class MetadataND[*M, E](StackedMetadata[BasisMetadata, E]):
+class MetadataND[*M, E](StackedMetadata[Any, E]):
     """Metadata built from a tuple of three individual metadata entries."""
 
     def __init__[*M1, _E](

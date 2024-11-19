@@ -73,8 +73,13 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
     return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
 
 
-class TupleBasis[M: BasisMetadata, E, DT: np.generic](
-    Basis[StackedMetadata[M, E], DT],
+class TupleBasis[
+    M: BasisMetadata,
+    E,
+    DT: np.generic,
+    _InnerM: StackedMetadata[Any, Any] = StackedMetadata[M, E],
+](
+    Basis[_InnerM, DT],
 ):
     """Represents a Tuple of independent basis."""
 
@@ -86,7 +91,7 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](
             tuple(i.metadata() for i in children), extra_metadata
         )
 
-    def conjugate_basis(self) -> TupleBasis[M, E, DT]:
+    def conjugate_basis(self) -> TupleBasis[M, E, DT, _InnerM]:
         return self
 
     @property
@@ -212,8 +217,14 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](
         return (lhs - rhs).astype(lhs.dtype)
 
 
-class TupleBasisND[DT: np.generic, *TS, E](
-    TupleBasis[Any, E, DT], Basis[MetadataND[*tuple[BasisMetadata, ...], E], Any]
+class TupleBasisND[
+    DT: np.generic,
+    E,
+    _InnerM: MetadataND[*tuple[BasisMetadata, ...], Any] = MetadataND[
+        *tuple[BasisMetadata, ...], E
+    ],
+](
+    TupleBasis[Any, E, DT, _InnerM],
 ):
     """A variadic alternative to tuple basis.
 
@@ -221,7 +232,9 @@ class TupleBasisND[DT: np.generic, *TS, E](
     currently possible to add this information to the type system.
     """
 
-    def __init__(self: Self, children: tuple[*TS], extra_metadata: E) -> None:
+    def __init__(
+        self: Self, children: tuple[Basis[BasisMetadata, DT], ...], extra_metadata: E
+    ) -> None:
         msg = "TupleBasisND is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
         super().__init__(
@@ -229,37 +242,18 @@ class TupleBasisND[DT: np.generic, *TS, E](
         )
 
     @override
-    def metadata(self) -> MetadataND[*tuple[BasisMetadata, ...], E]:
-        return cast(MetadataND[*tuple[BasisMetadata, ...], E], super().metadata())
+    def metadata(self) -> _InnerM:
+        return super().metadata()
 
-    def conjugate_basis(self) -> TupleBasisND[DT, *TS, E]:
+    def conjugate_basis(self) -> TupleBasisND[DT, E, _InnerM]:
         return self
 
     @property
-    def children(self) -> tuple[*TS]:  # type: ignore inconsistent type
+    def children(self) -> tuple[Basis[BasisMetadata, DT], ...]:  # type: ignore inconsistent type
         """Inner basis."""
-        return cast(tuple[*TS], super().children)
+        return cast(tuple[Basis[BasisMetadata, DT], ...], super().children)
 
-    @overload
-    def __getitem__[B: Basis[Any, Any]](
-        self: TupleBasisND[DT, Any, Any, B, *tuple[Any, ...], E],
-        index: Literal[2],
-    ) -> B: ...
-
-    @overload
-    def __getitem__[B: Basis[Any, Any]](
-        self: TupleBasisND[DT, Any, B, *tuple[Any, ...], E], index: Literal[1]
-    ) -> B: ...
-
-    @overload
-    def __getitem__[B: Basis[Any, Any]](
-        self: TupleBasisND[DT, B, *tuple[Any, ...], E], index: Literal[0]
-    ) -> B: ...
-
-    @overload
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]: ...
-
-    def __getitem__(self: Self, index: int) -> Basis[Any, Any]:
+    def __getitem__(self: Self, index: int) -> Basis[BasisMetadata, DT]:
         return super().__getitem__(index)
 
 
@@ -268,8 +262,7 @@ class TupleBasis1D[
     B0: Basis[BasisMetadata, Any],
     E,
 ](
-    TupleBasisND[DT, Basis[BasisMetadata, Any], E],
-    Basis[Metadata1D[BasisMetadata, E], Any],
+    TupleBasisND[DT, E, Metadata1D[BasisMetadata, E]],
 ):
     """A variadic alternative to tuple basis.
 
@@ -322,8 +315,7 @@ class TupleBasis2D[
     B1: Basis[BasisMetadata, Any],
     E,
 ](
-    TupleBasisND[DT, Basis[BasisMetadata, Any], Basis[BasisMetadata, Any], E],
-    Basis[Metadata2D[BasisMetadata, BasisMetadata, E], Any],
+    TupleBasisND[DT, E, Metadata2D[BasisMetadata, BasisMetadata, E]],
 ):
     """A variadic alternative to tuple basis.
 
@@ -379,14 +371,7 @@ class TupleBasis3D[
     B2: Basis[BasisMetadata, Any],
     E,
 ](
-    TupleBasisND[
-        DT,
-        Basis[BasisMetadata, Any],
-        Basis[BasisMetadata, Any],
-        Basis[BasisMetadata, Any],
-        E,
-    ],
-    Basis[Metadata3D[BasisMetadata, BasisMetadata, BasisMetadata, E], Any],
+    TupleBasisND[DT, E, Metadata3D[BasisMetadata, BasisMetadata, BasisMetadata, E]],
 ):
     """A variadic alternative to tuple basis.
 
@@ -506,13 +491,13 @@ def tuple_basis[
 @overload
 def tuple_basis[B0, B1, B2, *TS, E](
     children: tuple[B0, B1, B2, *TS], extra_metadata: None = None
-) -> TupleBasisND[Any, B0, B1, B2, *TS, None]: ...
+) -> TupleBasisND[Any, None]: ...
 
 
 @overload
 def tuple_basis[B0, B1, B2, *TS, E](
     children: tuple[B0, B1, B2, *TS], extra_metadata: E
-) -> TupleBasisND[Any, B0, B1, B2, *TS, E]: ...
+) -> TupleBasisND[Any, E]: ...
 
 
 def tuple_basis[B0, B1, B2, *TS, E](
@@ -524,7 +509,7 @@ def tuple_basis[B0, B1, B2, *TS, E](
 
 def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
     _basis: TupleBasis[M, E, DT],
-) -> TypeGuard[TupleBasisND[Any, *tuple[Basis[M, DT], ...], E]]:
+) -> TypeGuard[TupleBasisND[Any, E]]:
     """Cast a TupleBasis as a VariadicTupleBasis."""
     return True
 

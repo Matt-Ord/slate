@@ -9,7 +9,7 @@ from slate.basis.stacked import DiagonalBasis, tuple_basis
 from slate.basis.stacked._tuple import TupleBasis2D
 from slate.basis.transformed import TransformDirection, TransformedBasis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata.stacked.stacked import StackedMetadata
+from slate.metadata.stacked.stacked import Metadata2D
 from slate.util import slice_along_axis
 from slate.util._pad import Padding, pad_along_axis
 
@@ -23,7 +23,7 @@ class SplitBasis[
     E,
 ](
     WrappedBasis[
-        StackedMetadata[Any, E], np.complex128, TupleBasis2D[np.complex128, B0, B1, E]
+        Metadata2D[Any, Any, E], np.complex128, TupleBasis2D[np.complex128, B0, B1, E]
     ],
 ):
     r"""Represents data in the split operator basis.
