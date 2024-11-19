@@ -5,7 +5,7 @@ from typing import Any, Callable, Iterator, Never, Self, override
 
 import numpy as np
 
-from slate.basis import Basis
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
 from slate.metadata import BasisMetadata
 
@@ -13,7 +13,7 @@ from slate.metadata import BasisMetadata
 class WrappedBasis[
     M: BasisMetadata,
     DT: np.generic,
-    B: Basis[BasisMetadata, Never] = Basis[M, DT],  # : Basis[M, DT]
+    B: Basis[BasisMetadata, Any] = Basis[M, DT],  # : Basis[M, DT]
 ](Basis[M, DT]):
     """Represents a truncated basis."""
 
@@ -115,19 +115,26 @@ def get_wrapped_basis_super_inner[
     return last
 
 
+def as_feature_basis[M: BasisMetadata, E, DT: np.generic](
+    basis: Basis[M, DT], features: set[BasisFeature]
+) -> Basis[M, DT]:
+    """Get the closest basis that supports the feature set."""
+    return next(
+        (b for b in wrapped_basis_iter_inner(basis) if features <= b.features),
+        FundamentalBasis(basis.metadata()),
+    )
+
+
 def as_add_basis[M: BasisMetadata, E, DT: np.generic](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
     """Get the closest basis that supports addition.
 
-    If the basis is already an add basis, return it.
-    If it wraps an add basis, return the inner basis.
+    If the basis is already an ADD basis, return it.
+    If it wraps an ADD basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return next(
-        (b for b in wrapped_basis_iter_inner(basis) if "ADD" in b.features),
-        FundamentalBasis(basis.metadata()),
-    )
+    return as_feature_basis(basis, {"ADD"})
 
 
 def as_sub_basis[M: BasisMetadata, E, DT: np.generic](
@@ -135,26 +142,32 @@ def as_sub_basis[M: BasisMetadata, E, DT: np.generic](
 ) -> Basis[M, DT]:
     """Get the closest basis that supports subtraction.
 
-    If the basis is already a sub basis, return it.
-    If it wraps a sub basis, return the inner basis.
+    If the basis is already a SUB basis, return it.
+    If it wraps a SUB basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return next(
-        (b for b in wrapped_basis_iter_inner(basis) if "SUB" in b.features),
-        FundamentalBasis(basis.metadata()),
-    )
+    return as_feature_basis(basis, {"SUB"})
 
 
 def as_mul_basis[M: BasisMetadata, E, DT: np.generic](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
-    """Get the closest basis that supports multiplication.
+    """Get the closest basis that supports MUL.
 
-    If the basis is already a mul basis, return it.
-    If it wraps a mul basis, return the inner basis.
+    If the basis is already a MUL basis, return it.
+    If it wraps a MUL basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return next(
-        (b for b in wrapped_basis_iter_inner(basis) if "MUL" in b.features),
-        FundamentalBasis(basis.metadata()),
-    )
+    return as_feature_basis(basis, {"MUL"})
+
+
+def as_index_basis[M: BasisMetadata, E, DT: np.generic](
+    basis: Basis[M, DT],
+) -> Basis[M, DT]:
+    """Get the closest basis that supports INDEX.
+
+    If the basis is already an INDEX basis, return it.
+    If it wraps a INDEX basis, return the inner basis.
+    Otherwise, return the fundamental.
+    """
+    return as_feature_basis(basis, {"INDEX"})

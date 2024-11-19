@@ -17,7 +17,7 @@ from typing import (
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
 from slate.basis.wrapped import get_wrapped_basis_super_inner
 from slate.metadata import BasisMetadata
@@ -172,8 +172,8 @@ class TupleBasis[
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        out = set[BasisFeatures]()
+    def features(self) -> set[BasisFeature]:
+        out = set[BasisFeature]()
         if all("SIMPLE_ADD" in c.features for c in self.children):
             out.add("ADD")
             out.add("SIMPLE_ADD")
@@ -183,6 +183,8 @@ class TupleBasis[
         if all("SIMPLE_SUB" in c.features for c in self.children):
             out.add("SUB")
             out.add("SIMPLE_SUB")
+        if all("INDEX" in c.features for c in self.children):
+            out.add("INDEX")
         return out
 
     @override
@@ -215,6 +217,14 @@ class TupleBasis[
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+    @property
+    @override
+    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+        if "INDEX" not in self.features:
+            msg = "points not implemented for this basis"
+            raise NotImplementedError(msg)
+        return self.__from_fundamental__(np.arange(self.size))
 
 
 class TupleBasisND[
@@ -262,7 +272,7 @@ class TupleBasis1D[
     B0: Basis[BasisMetadata, Any],
     E,
 ](
-    TupleBasisND[DT, E, Metadata1D[BasisMetadata, E]],
+    TupleBasisND[DT, E, Metadata1D[Any, E]],
 ):
     """A variadic alternative to tuple basis.
 
@@ -315,7 +325,7 @@ class TupleBasis2D[
     B1: Basis[BasisMetadata, Any],
     E,
 ](
-    TupleBasisND[DT, E, Metadata2D[BasisMetadata, BasisMetadata, E]],
+    TupleBasisND[DT, E, Metadata2D[Any, Any, E]],
 ):
     """A variadic alternative to tuple basis.
 
@@ -371,7 +381,7 @@ class TupleBasis3D[
     B2: Basis[BasisMetadata, Any],
     E,
 ](
-    TupleBasisND[DT, E, Metadata3D[BasisMetadata, BasisMetadata, BasisMetadata, E]],
+    TupleBasisND[DT, E, Metadata3D[Any, Any, Any, E]],
 ):
     """A variadic alternative to tuple basis.
 
@@ -490,13 +500,13 @@ def tuple_basis[
 
 @overload
 def tuple_basis[B0, B1, B2, *TS, E](
-    children: tuple[B0, B1, B2, *TS], extra_metadata: None = None
+    children: tuple[*TS], extra_metadata: None = None
 ) -> TupleBasisND[Any, None]: ...
 
 
 @overload
 def tuple_basis[B0, B1, B2, *TS, E](
-    children: tuple[B0, B1, B2, *TS], extra_metadata: E
+    children: tuple[*TS], extra_metadata: E
 ) -> TupleBasisND[Any, E]: ...
 
 
@@ -638,9 +648,63 @@ def fundamental_tuple_basis_from_shape[E](
     )
 
 
-def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
-    basis: Basis[StackedMetadata[M, E], DT],
-) -> TupleBasis[M, E, np.generic]:
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[Metadata1D[M0, E], DT],
+) -> TupleBasis1D[np.generic, Basis[M0, Any], E]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[Metadata2D[M0, M1, E], DT],
+) -> TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[Metadata3D[M0, M1, M2, E], DT],
+) -> TupleBasis3D[np.generic, Basis[M0, Any], Basis[M1, Any], Basis[M1, Any], E]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[StackedMetadata[M0, E], DT],
+) -> TupleBasis[M0, E, np.generic]: ...
+
+
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Any,
+) -> Any:
     """Get the closest basis to basis that is a TupleBasis.
 
     - For a wrapped TupleBasis, this will return the unwrapped basis
@@ -651,6 +715,6 @@ def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
     """
     super_inner = get_wrapped_basis_super_inner(basis)  # type: ignore unknown
     if isinstance(super_inner, TupleBasis):
-        return cast(TupleBasis[M, E, np.generic], super_inner)
+        return cast(TupleBasis[M0, E, np.generic], super_inner)
 
     return fundamental_tuple_basis_from_metadata(basis.metadata())

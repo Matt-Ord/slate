@@ -12,7 +12,20 @@ import numpy as np
 
 from slate.metadata import BasisMetadata
 
-BasisFeatures = Literal["ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB"]
+BasisFeature = Literal[
+    "ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB", "INDEX"
+]
+"""
+Features of a basis.
+This specify certain operations that can be performed on the basis.
+- ADD: addition of data
+- MUL: multiplication of data
+- SUB: subtraction of data
+- SIMPLE_ADD: addition of data by adding raw data
+- SIMPLE_MUL: multiplication of data by multiplying raw data
+- SIMPLE_SUB: subtraction of data by subtracting raw data
+- INDEX: The basis is a simple truncation of a fundamental basis which can be represented as a CoordinateBasis basis.
+"""
 
 
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
@@ -49,7 +62,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         return self._metadata
 
     @property
-    def features(self: Self) -> set[BasisFeatures]:
+    def features(self: Self) -> set[BasisFeature]:
         """Features of the basis."""
         return set()
 
@@ -118,4 +131,11 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         rhs: float,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         msg = "mul_data not implemented for this basis"
+        raise NotImplementedError(msg)
+
+    @property
+    def points(
+        self: Self,
+    ) -> np.ndarray[Any, np.dtype[np.int_]]:
+        msg = "points not implemented for this basis, requires the INDEX feature"
         raise NotImplementedError(msg)

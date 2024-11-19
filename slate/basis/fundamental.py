@@ -4,7 +4,7 @@ from typing import Any, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.metadata import BasisMetadata, SimpleMetadata
 
 
@@ -51,8 +51,8 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        return {"ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB"}
+    def features(self) -> set[BasisFeature]:
+        return {"ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB", "INDEX"}
 
     @override
     def add_data[DT1: np.number[Any]](
@@ -75,6 +75,11 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return (lhs - rhs).astype(lhs.dtype)
+
+    @property
+    @override
+    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+        return np.arange(self.size)
 
 
 def basis_as_fundamental[M: BasisMetadata, DT: np.generic](

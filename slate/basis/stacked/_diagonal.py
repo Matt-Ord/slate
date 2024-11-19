@@ -4,9 +4,9 @@ from typing import Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeatures
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata import StackedMetadata
+from slate.metadata import Metadata2D
 
 from ._tuple import TupleBasis2D, tuple_basis
 
@@ -17,20 +17,23 @@ class DiagonalBasis[
     B1: Basis[Any, Any],
     E,
 ](
-    WrappedBasis[StackedMetadata[Any, E], DT, TupleBasis2D[DT, Any, Any, E]],
+    WrappedBasis[Metadata2D[Any, Any, E], DT, TupleBasis2D[DT, Any, Any, E]],
 ):
     """Represents a diagonal basis."""
 
-    def __init__(self: Self, inner: TupleBasis2D[DT, Any, Any, E]) -> None:
-        super().__init__(inner)
+    def __init__[_DT: np.generic, _B0: Basis[Any, Any], _B1: Basis[Any, Any], _E](
+        self: DiagonalBasis[_DT, _B0, _B1, _E],
+        inner: TupleBasis2D[DT, B0, B1, E],
+    ) -> None:
+        super().__init__(cast(Any, inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 
     def conjugate_basis(self) -> DiagonalBasis[DT, B0, B1, E]:
-        return DiagonalBasis(self.inner.conjugate_basis())
+        return DiagonalBasis[DT, B0, B1, E](self.inner.conjugate_basis())
 
     @property
-    def inner(self: Self) -> TupleBasis2D[DT, Any, Any, E]:
-        return cast(TupleBasis2D[DT, Any, Any, E], self._inner)
+    def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
+        return cast(TupleBasis2D[DT, B0, B1, E], self._inner)
 
     @property
     def size(self) -> int:
@@ -104,12 +107,12 @@ class DiagonalBasis[
         ],
     ) -> DiagonalBasis[DT1, B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner."""
-        return DiagonalBasis(wrapper(self.inner))
+        return DiagonalBasis[DT1, B01, B11, E1](wrapper(self.inner))
 
     @property
     @override
-    def features(self) -> set[BasisFeatures]:
-        out = set[BasisFeatures]()
+    def features(self) -> set[BasisFeature]:
+        out = set[BasisFeature]()
         if "SIMPLE_ADD" in self.inner.features:
             out.add("ADD")
             out.add("SIMPLE_ADD")
@@ -119,6 +122,8 @@ class DiagonalBasis[
         if "SIMPLE_SUB" in self.inner.features:
             out.add("SUB")
             out.add("SIMPLE_SUB")
+        if "INDEX" in self.inner.features:
+            out.add("INDEX")
         return out
 
     @override
@@ -151,6 +156,14 @@ class DiagonalBasis[
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+    @property
+    @override
+    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+        if "INDEX" not in self.features:
+            msg = "points not implemented for this basis"
+            raise NotImplementedError(msg)
+        return self.__from_inner__(self.inner.points)
 
 
 @overload

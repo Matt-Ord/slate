@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ._basis import (
     Basis,
-    BasisFeatures,
+    BasisFeature,
 )
 from .coordinate import CoordinateBasis
 from .cropped import CroppedBasis
@@ -28,7 +28,7 @@ from .wrapped import WrappedBasis, as_add_basis, as_mul_basis, as_sub_basis
 
 __all__ = [
     "Basis",
-    "BasisFeatures",
+    "BasisFeature",
     "CoordinateBasis",
     "CroppedBasis",
     "DiagonalBasis",
