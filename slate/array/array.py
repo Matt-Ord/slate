@@ -64,7 +64,7 @@ class SlateArray[
     def as_array(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
         """Get the data as a (full) np.array."""
         return self.basis.__convert_vector_into__(
-            self._data.ravel(), FundamentalBasis(self.basis.metadata)
+            self._data.ravel(), FundamentalBasis(self.basis.metadata())
         ).reshape(self.basis.fundamental_shape)
 
     @staticmethod
@@ -73,7 +73,7 @@ class SlateArray[
     ) -> SlateArray[
         StackedMetadata[SimpleMetadata, None],
         DT1,
-        TupleBasis[SimpleMetadata, None, np.generic],
+        TupleBasis[BasisMetadata, None, np.generic],
     ]:
         """Get a SlateArray from an array."""
         return SlateArray(

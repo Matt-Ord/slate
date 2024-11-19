@@ -9,7 +9,7 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import StackedMetadata
 from slate.metadata.util import nx_points
 
-from ._tuple import VariadicTupleBasis
+from ._tuple import TupleBasis2D, tuple_basis
 
 
 class IsotropicBasis[
@@ -18,11 +18,13 @@ class IsotropicBasis[
     B1: Basis[Any, Any],
     E,
 ](
-    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]],
+    WrappedBasis[StackedMetadata[Any, E], DT, TupleBasis2D[DT, B0, B1, E]],
 ):
     """Represents an isotropic basis."""
 
-    def __init__(self: Self, inner: VariadicTupleBasis[DT, Any, Any, E]) -> None:
+    def __init__[_DT: np.generic, _B0: Basis[Any, Any], _B1: Basis[Any, Any], _E](
+        self: IsotropicBasis[_DT, _B0, _B1, _E], inner: TupleBasis2D[_DT, _B0, _B1, _E]
+    ) -> None:
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
@@ -30,8 +32,8 @@ class IsotropicBasis[
         return IsotropicBasis(self.inner.conjugate_basis())
 
     @property
-    def inner(self: Self) -> VariadicTupleBasis[DT, Any, Any, E]:
-        return cast(VariadicTupleBasis[DT, Any, Any, E], self._inner)
+    def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
+        return cast(TupleBasis2D[DT, B0, B1, E], self._inner)
 
     @property
     def size(self) -> int:
@@ -74,7 +76,7 @@ class IsotropicBasis[
         B11: Basis[Any, Any],
         E1,
     ](
-        self: Self, inner: VariadicTupleBasis[DT1, B01, B11, E1]
+        self: Self, inner: TupleBasis2D[DT1, B01, B11, E1]
     ) -> IsotropicBasis[DT1, B01, B11, E1]:
         return self.with_modified_inner(lambda _: inner)
 
@@ -87,7 +89,7 @@ class IsotropicBasis[
     ](
         self: Self,
         wrapper: Callable[
-            [VariadicTupleBasis[DT, Any, Any, E]], VariadicTupleBasis[DT1, B01, B11, E1]
+            [TupleBasis2D[DT, Any, Any, E]], TupleBasis2D[DT1, B01, B11, E1]
         ],
     ) -> IsotropicBasis[DT1, B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner."""
@@ -156,6 +158,4 @@ def isotropic_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
     children: tuple[_B0, _B1], extra_metadata: E | None = None
 ) -> IsotropicBasis[Any, _B0, _B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
-    return IsotropicBasis[Any, Any, Any, E | None](
-        VariadicTupleBasis(children, extra_metadata)
-    )
+    return IsotropicBasis(tuple_basis(children, extra_metadata))

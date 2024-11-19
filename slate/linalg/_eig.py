@@ -52,7 +52,7 @@ def _eig_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     basis_1 = basis_0.conjugate_basis()
 
     return SlateArray(
-        diagonal_basis((basis_0, basis_1), array.basis.metadata.extra),
+        diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues,
     )
 
@@ -114,7 +114,7 @@ def _eigh_from_tuple[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     basis_1 = basis_0.conjugate_basis()
 
     return SlateArray(
-        diagonal_basis((basis_0, basis_1), array.basis.metadata.extra),
+        diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues.astype(np.complex128),
     )
 

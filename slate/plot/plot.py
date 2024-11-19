@@ -165,12 +165,12 @@ def plot_data_1d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_k = fundamental_transformed_tuple_basis_from_metadata(data.basis.metadata)
+    basis_k = fundamental_transformed_tuple_basis_from_metadata(data.basis.metadata())
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
-    coordinates = get_k_coordinates_in_axes(basis_k.metadata, axes, idx)
+    coordinates = get_k_coordinates_in_axes(basis_k.metadata(), axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
     shifted_data = np.fft.fftshift(data_in_axis)
@@ -212,12 +212,12 @@ def plot_data_1d_x[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata)
+    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata())
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
-    coordinates = get_x_coordinates_in_axes(basis_x.metadata, axes, idx)
+    coordinates = get_x_coordinates_in_axes(basis_x.metadata(), axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
     fig, ax, line = plot_data_1d(data_in_axis, coordinates[0], periodic=True, **kwargs)
@@ -304,12 +304,12 @@ def plot_data_2d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, QuadMesh]
     """
-    basis_k = fundamental_transformed_tuple_basis_from_metadata(data.basis.metadata)
+    basis_k = fundamental_transformed_tuple_basis_from_metadata(data.basis.metadata())
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
-    coordinates = get_k_coordinates_in_axes(basis_k.metadata, axes, idx)
+    coordinates = get_k_coordinates_in_axes(basis_k.metadata(), axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
     shifted_data = np.fft.fftshift(data_in_axis)
@@ -361,12 +361,12 @@ def plot_data_2d_x[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, QuadMesh]
     """
-    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata)
+    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata())
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
-    coordinates = get_x_coordinates_in_axes(basis_x.metadata, axes, idx)
+    coordinates = get_x_coordinates_in_axes(basis_x.metadata(), axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
     fig, ax, mesh = plot_data_2d(

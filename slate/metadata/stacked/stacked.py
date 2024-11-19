@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Self, overload
+from typing import Any, Self, cast, overload
 
 import numpy as np
 
@@ -60,3 +60,71 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
         return StackedMetadata[SimpleMetadata, Any](
             tuple(SimpleMetadata((s,)) for s in shape), extra
         )
+
+
+class MetadataND[*M, E](StackedMetadata[BasisMetadata, E]):
+    """Metadata built from a tuple of three individual metadata entries."""
+
+    def __init__[*M1, _E](
+        self: MetadataND[*M1, _E],
+        children: tuple[*M1],
+        extra: _E,
+    ) -> None:
+        super().__init__(cast(tuple[BasisMetadata, ...], children), extra)
+
+    @property
+    @overload
+    def children(self: Self) -> tuple[*M]:  # type: ignore not allowed to put bounds on m
+        return cast(tuple[*M], super().children)
+
+
+class Metadata1D[M0: BasisMetadata, E](MetadataND[BasisMetadata, E]):
+    """Metadata built from a tuple of two individual metadata entries."""
+
+    def __init__[_M0: BasisMetadata, _E](
+        self: Metadata1D[_M0, _E],
+        children: tuple[_M0],
+        extra: _E,
+    ) -> None:
+        super().__init__(children, cast(E, extra))
+
+    @property
+    @overload
+    def children(self: Self) -> tuple[M0]:
+        return cast(tuple[M0], super().children)
+
+
+class Metadata2D[M0: BasisMetadata, M1: BasisMetadata, E](
+    MetadataND[BasisMetadata, BasisMetadata, E]
+):
+    """Metadata built from a tuple of two individual metadata entries."""
+
+    def __init__[_M0: BasisMetadata, _M1: BasisMetadata, _E](
+        self: Metadata2D[_M0, _M1, _E],
+        children: tuple[_M0, _M1],
+        extra: _E,
+    ) -> None:
+        super().__init__(children, cast(E, extra))
+
+    @property
+    @overload
+    def children(self: Self) -> tuple[M0, M1]:
+        return cast(tuple[M0, M1], super().children)
+
+
+class Metadata3D[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
+    MetadataND[BasisMetadata, BasisMetadata, BasisMetadata, E]
+):
+    """Metadata built from a tuple of three individual metadata entries."""
+
+    def __init__[_M0: BasisMetadata, _M1: BasisMetadata, _M2: BasisMetadata, _E](
+        self: Metadata3D[_M0, _M1, _M2, _E],
+        children: tuple[_M0, _M1, _M2],
+        extra: _E,
+    ) -> None:
+        super().__init__(children, cast(E, extra))
+
+    @property
+    @overload
+    def children(self: Self) -> tuple[M0, M1, M2]:
+        return cast(tuple[M0, M1, M2], super().children)

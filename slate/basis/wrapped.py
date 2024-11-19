@@ -19,7 +19,7 @@ class WrappedBasis[
 
     def __init__(self: Self, inner: Basis[M, DT]) -> None:
         self._inner = inner
-        self._metadata = inner.metadata
+        self._metadata = inner.metadata()
 
     @property
     def inner(self: Self) -> Basis[M, DT]:
@@ -81,7 +81,7 @@ class WrappedBasis[
         basis: Basis[BasisMetadata, Never],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        assert self.metadata == basis.metadata
+        assert self.metadata() == basis.metadata()
 
         if self == basis:
             return vectors
@@ -126,7 +126,7 @@ def as_add_basis[M: BasisMetadata, E, DT: np.generic](
     """
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if "ADD" in b.features),
-        FundamentalBasis(basis.metadata),
+        FundamentalBasis(basis.metadata()),
     )
 
 
@@ -141,7 +141,7 @@ def as_sub_basis[M: BasisMetadata, E, DT: np.generic](
     """
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if "SUB" in b.features),
-        FundamentalBasis(basis.metadata),
+        FundamentalBasis(basis.metadata()),
     )
 
 
@@ -156,5 +156,5 @@ def as_mul_basis[M: BasisMetadata, E, DT: np.generic](
     """
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if "MUL" in b.features),
-        FundamentalBasis(basis.metadata),
+        FundamentalBasis(basis.metadata()),
     )

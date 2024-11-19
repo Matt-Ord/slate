@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from slate.basis import Basis
     from slate.basis.stacked import TupleBasis
     from slate.metadata import SimpleMetadata
+    from slate.metadata._metadata import BasisMetadata
     from slate.metadata.stacked import StackedMetadata
 
 
@@ -21,7 +22,7 @@ def slate_array_stacked() -> (
     SlateArray[
         StackedMetadata[SimpleMetadata, None],
         np.complex128,
-        TupleBasis[SimpleMetadata, None, np.generic],
+        TupleBasis[BasisMetadata, None, np.generic],
     ]
 ):
     rng = np.random.default_rng()
@@ -34,7 +35,7 @@ def _test_eig(
     array: SlateArray[
         Any,
         np.complexfloating[Any, Any],
-        Basis[StackedMetadata[SimpleMetadata, None], Any],
+        Basis[StackedMetadata[BasisMetadata, None], Any],
     ],
 ) -> None:
     diagonal = eig(array)
@@ -63,7 +64,7 @@ def _test_eigh(
     array: SlateArray[
         Any,
         np.complexfloating[Any, Any],
-        Basis[StackedMetadata[SimpleMetadata, None], Any],
+        Basis[StackedMetadata[BasisMetadata, None], Any],
     ],
 ) -> None:
     diagonal = eigh(array)

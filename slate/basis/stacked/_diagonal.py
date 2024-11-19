@@ -8,7 +8,7 @@ from slate.basis._basis import Basis, BasisFeatures
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import StackedMetadata
 
-from ._tuple import VariadicTupleBasis
+from ._tuple import TupleBasis2D, tuple_basis
 
 
 class DiagonalBasis[
@@ -17,11 +17,11 @@ class DiagonalBasis[
     B1: Basis[Any, Any],
     E,
 ](
-    WrappedBasis[StackedMetadata[Any, E], DT, VariadicTupleBasis[DT, Any, Any, E]],
+    WrappedBasis[StackedMetadata[Any, E], DT, TupleBasis2D[DT, Any, Any, E]],
 ):
     """Represents a diagonal basis."""
 
-    def __init__(self: Self, inner: VariadicTupleBasis[DT, Any, Any, E]) -> None:
+    def __init__(self: Self, inner: TupleBasis2D[DT, Any, Any, E]) -> None:
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
@@ -29,8 +29,8 @@ class DiagonalBasis[
         return DiagonalBasis(self.inner.conjugate_basis())
 
     @property
-    def inner(self: Self) -> VariadicTupleBasis[DT, Any, Any, E]:
-        return cast(VariadicTupleBasis[DT, Any, Any, E], self._inner)
+    def inner(self: Self) -> TupleBasis2D[DT, Any, Any, E]:
+        return cast(TupleBasis2D[DT, Any, Any, E], self._inner)
 
     @property
     def size(self) -> int:
@@ -87,7 +87,7 @@ class DiagonalBasis[
         B11: Basis[Any, Any],
         E1,
     ](
-        self: Self, inner: VariadicTupleBasis[DT1, B01, B11, E1]
+        self: Self, inner: TupleBasis2D[DT1, B01, B11, E1]
     ) -> DiagonalBasis[DT1, B01, B11, E1]:
         return self.with_modified_inner(lambda _: inner)
 
@@ -100,7 +100,7 @@ class DiagonalBasis[
     ](
         self: Self,
         wrapper: Callable[
-            [VariadicTupleBasis[DT, Any, Any, E]], VariadicTupleBasis[DT1, B01, B11, E1]
+            [TupleBasis2D[DT, Any, Any, E]], TupleBasis2D[DT1, B01, B11, E1]
         ],
     ) -> DiagonalBasis[DT1, B01, B11, E1]:
         """Get the wrapped basis after wrapper is applied to inner."""
@@ -169,6 +169,4 @@ def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
     children: tuple[_B0, _B1], extra_metadata: E | None = None
 ) -> DiagonalBasis[Any, _B0, _B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
-    return DiagonalBasis[Any, Any, Any, E | None](
-        VariadicTupleBasis(children, extra_metadata)
-    )
+    return DiagonalBasis(tuple_basis(children, extra_metadata))
