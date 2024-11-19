@@ -212,7 +212,9 @@ class TupleBasis[M: BasisMetadata, E, DT: np.generic](
         return (lhs - rhs).astype(lhs.dtype)
 
 
-class TupleBasisND[DT: np.generic, *TS, E](TupleBasis[Any, E, DT]):
+class TupleBasisND[DT: np.generic, *TS, E](
+    TupleBasis[Any, E, DT], Basis[MetadataND[*tuple[BasisMetadata, ...], E], Any]
+):
     """A variadic alternative to tuple basis.
 
     Note all sub basis must have the same datatype (DT), but it is not
@@ -265,7 +267,10 @@ class TupleBasis1D[
     DT: np.generic,
     B0: Basis[BasisMetadata, Any],
     E,
-](TupleBasisND[DT, Basis[BasisMetadata, Any], E]):
+](
+    TupleBasisND[DT, Basis[BasisMetadata, Any], E],
+    Basis[Metadata1D[BasisMetadata, E], Any],
+):
     """A variadic alternative to tuple basis.
 
     Note all sub basis must have the same datatype (DT), but it is not
@@ -316,7 +321,10 @@ class TupleBasis2D[
     B0: Basis[BasisMetadata, Any],
     B1: Basis[BasisMetadata, Any],
     E,
-](TupleBasisND[DT, Basis[BasisMetadata, Any], Basis[BasisMetadata, Any], E]):
+](
+    TupleBasisND[DT, Basis[BasisMetadata, Any], Basis[BasisMetadata, Any], E],
+    Basis[Metadata2D[BasisMetadata, BasisMetadata, E], Any],
+):
     """A variadic alternative to tuple basis.
 
     Note all sub basis must have the same datatype (DT), but it is not
@@ -377,7 +385,8 @@ class TupleBasis3D[
         Basis[BasisMetadata, Any],
         Basis[BasisMetadata, Any],
         E,
-    ]
+    ],
+    Basis[Metadata3D[BasisMetadata, BasisMetadata, BasisMetadata, E], Any],
 ):
     """A variadic alternative to tuple basis.
 
