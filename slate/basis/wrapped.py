@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, Iterator, Never, Self, override
+from typing import Any, Callable, Iterator, Never, Self, cast, override
 
 import numpy as np
 
@@ -18,28 +18,30 @@ class WrappedBasis[
     """Represents a truncated basis."""
 
     def __init__(self: Self, inner: Basis[M, DT]) -> None:
-        self._inner = inner
+        self._inner = cast(B, inner)
         self._metadata = inner.metadata()
 
     @property
-    def inner(self: Self) -> Basis[M, DT]:
+    def inner(self: Self) -> B:
         """Inner basis."""
         return self._inner
 
     def with_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-        B1: Basis[BasisMetadata, Never] = Basis[M1, DT1],
-    ](self: Self, inner: Basis[M1, DT1]) -> WrappedBasis[M1, DT1, B1]:
+        _M: BasisMetadata,
+        _DT: np.generic,
+        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
+    ](self: WrappedBasis[_M, _DT, B], inner: _B) -> WrappedBasis[_M, _DT, _B]:
         """Get the wrapped basis with the inner set to inner."""
         return self.with_modified_inner(lambda _: inner)
 
     @abstractmethod
     def with_modified_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-        B1: Basis[BasisMetadata, Never] = Basis[M1, DT1],
-    ](self: Self, wrapper: Callable[[B], Basis[M1, DT1]]) -> WrappedBasis[M1, DT1, B1]:
+        _M: BasisMetadata,
+        _DT: np.generic,
+        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
+    ](
+        self: WrappedBasis[_M, _DT, B], wrapper: Callable[[B], _B]
+    ) -> WrappedBasis[_M, _DT, _B]:
         """Get the wrapped basis after wrapper is applied to inner."""
 
     @abstractmethod
@@ -88,7 +90,7 @@ class WrappedBasis[
 
         as_inner = self.__into_inner__(vectors, axis)
 
-        if isinstance(basis, WrappedBasis) and self.inner == basis.inner:
+        if isinstance(basis, WrappedBasis) and self.inner == basis.inner:  # type: ignore unknown
             return basis.__from_inner__(as_inner, axis)
         return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown
 

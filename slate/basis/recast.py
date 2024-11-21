@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, override
+from typing import Any, Callable, Never, Self, cast, override
 
 import numpy as np
 
@@ -9,20 +9,23 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 
-class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
-    WrappedBasis[M0, DT, Basis[M0, DT]]
-):
+class RecastBasis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    DT: np.generic,
+    B: Basis[BasisMetadata, Any] = Basis[M0, DT],
+](WrappedBasis[M0, DT, B]):
     """Represents a truncated basis."""
 
     def __init__(
         self: Self,
-        inner: Basis[M0, DT],
+        inner: B,
         inner_recast: Basis[M1, DT],
         outer_recast: Basis[M1, DT],
     ) -> None:
         self._inner_recast = inner_recast
         self._outer_recast = outer_recast
-        super().__init__(inner)
+        super().__init__(cast(Basis[M0, DT], inner))
 
         assert self._inner_recast.size == self.inner.size
 
@@ -67,16 +70,20 @@ class RecastBasis[M0: BasisMetadata, M1: BasisMetadata, DT: np.generic](
 
     @override
     def with_inner[
-        M2: BasisMetadata,
-    ](self: Self, inner: Basis[M2, DT]) -> RecastBasis[M2, M1, DT]:
+        _M: BasisMetadata,
+        _DT: np.generic,
+        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
+    ](self: RecastBasis[_M, M1, DT, B], inner: _B) -> RecastBasis[_M, M1, DT, _B]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
     def with_modified_inner[
-        M2: BasisMetadata,
+        _M: BasisMetadata,
+        _DT: np.generic,
+        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
     ](
-        self: Self, wrapper: Callable[[Basis[M0, DT]], Basis[M2, DT]]
-    ) -> RecastBasis[M2, M1, DT]:
+        self: RecastBasis[_M, M1, DT, B], wrapper: Callable[[B], _B]
+    ) -> RecastBasis[_M, M1, DT, _B]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return RecastBasis(wrapper(self.inner), self.inner_recast, self.outer_recast)
 
