@@ -10,7 +10,7 @@ basis that diagonalizes the array
 
 from __future__ import annotations
 
-from ._eig import eig, eig_vals, eigh, eigh_vals
-from ._einsum import einsum
+from slate.linalg._eig import eig, eig_vals, eigh, eigh_vals
+from slate.linalg._einsum import einsum
 
 __all__ = ["eig", "eig_vals", "eigh", "eigh_vals", "einsum"]

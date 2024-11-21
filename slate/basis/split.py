@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING, Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
+from slate.basis._basis import Basis
+from slate.basis._diagonal import DiagonalBasis
+from slate.basis._tuple import TupleBasis2D, tuple_basis
+from slate.basis.transformed import TransformDirection, TransformedBasis
+from slate.basis.wrapped import WrappedBasis
 from slate.metadata import Metadata2D
 from slate.util import Padding, pad_along_axis, slice_along_axis
-
-from ._basis import Basis
-from .stacked import DiagonalBasis, TupleBasis2D, tuple_basis
-from .transformed import TransformDirection, TransformedBasis
-from .wrapped import WrappedBasis
 
 if TYPE_CHECKING:
     from slate.metadata import BasisMetadata

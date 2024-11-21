@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ._metadata import (
+from slate.metadata._metadata import (
     BasisMetadata,
     DeltaMetadata,
     ExplicitLabeledMetadata,
@@ -11,15 +11,15 @@ from ._metadata import (
     SimpleMetadata,
     SpacedLabeledMetadata,
 )
-from .length import LengthMetadata, SpacedLengthMetadata
-from .stacked import (
+from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
+from slate.metadata.stacked import (
     Metadata1D,
     Metadata2D,
     Metadata3D,
     MetadataND,
     StackedMetadata,
 )
-from .volume import AxisDirections, SpacedVolumeMetadata, VolumeMetadata
+from slate.metadata.volume import AxisDirections, SpacedVolumeMetadata, VolumeMetadata
 
 __all__ = [
     "AxisDirections",

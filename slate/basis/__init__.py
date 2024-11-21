@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
-from ._basis import (
+from slate.basis._basis import (
     Basis,
     BasisFeature,
 )
-from .coordinate import CoordinateBasis
-from .cropped import CroppedBasis
-from .fundamental import FundamentalBasis
-from .recast import RecastBasis
-from .split import SplitBasis, split_basis
-from .stacked import (
-    DiagonalBasis,
-    IsotropicBasis,
+from slate.basis._diagonal import DiagonalBasis, diagonal_basis
+from slate.basis._isotropic import IsotropicBasis, isotropic_basis
+from slate.basis._tuple import (
     StackedBasis,
     TupleBasis,
     TupleBasis1D,
@@ -21,10 +16,8 @@ from .stacked import (
     TupleBasis3D,
     TupleBasisND,
     as_tuple_basis,
-    diagonal_basis,
     fundamental_tuple_basis_from_metadata,
     fundamental_tuple_basis_from_shape,
-    isotropic_basis,
     stacked_basis_as_fundamental,
     tuple_basis,
     tuple_basis_is_variadic,
@@ -32,13 +25,18 @@ from .stacked import (
     tuple_basis_with_modified_child,
     tuple_basis_with_modified_children,
 )
-from .transformed import (
+from slate.basis.coordinate import CoordinateBasis
+from slate.basis.cropped import CroppedBasis
+from slate.basis.fundamental import FundamentalBasis
+from slate.basis.recast import RecastBasis
+from slate.basis.split import SplitBasis, split_basis
+from slate.basis.transformed import (
     TransformedBasis,
     fundamental_transformed_tuple_basis_from_metadata,
     fundamental_transformed_tuple_basis_from_shape,
 )
-from .truncated import Padding, TruncatedBasis, Truncation
-from .wrapped import (
+from slate.basis.truncated import Padding, TruncatedBasis, Truncation
+from slate.basis.wrapped import (
     WrappedBasis,
     as_add_basis,
     as_feature_basis,
