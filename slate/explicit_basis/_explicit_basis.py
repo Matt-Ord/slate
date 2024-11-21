@@ -54,6 +54,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     ]:
         return self._states
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, ExplicitBasis):
             return (
@@ -64,10 +65,12 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
             )
         return False
 
+    @override
     def __hash__(self) -> int:
         return hash((1, self.inner, self.direction, self._data_id))
 
     @property
+    @override
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self._states.basis[0].size
@@ -233,6 +236,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         )
 
     @property
+    @override
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self._states.basis[0].size

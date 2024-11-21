@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Self, cast, overload
+from typing import Any, Self, cast, overload, override
 
 import numpy as np
 
@@ -25,6 +25,7 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
         return self._extra
 
     @property
+    @override
     def fundamental_shape(self: Self) -> tuple[int, ...]:
         """Shape of the full data."""
         return tuple(np.prod(i.fundamental_shape).item() for i in self.children)
@@ -32,11 +33,13 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
     def __getitem__(self: Self, index: int) -> M:
         return self.children[index]
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, StackedMetadata):
             return (self.extra == value.extra) and self.children == value.children  # type: ignore unknown
         return False
 
+    @override
     def __hash__(self) -> int:
         return hash((self.extra, self.children))
 
@@ -73,7 +76,7 @@ class MetadataND[*M, E](StackedMetadata[Any, E]):
         super().__init__(cast(tuple[BasisMetadata, ...], children), extra)
 
     @property
-    @overload
+    @override
     def children(self: Self) -> tuple[*M]:  # type: ignore not allowed to put bounds on m
         return cast(tuple[*M], super().children)
 
@@ -89,7 +92,7 @@ class Metadata1D[M0: BasisMetadata, E](MetadataND[BasisMetadata, E]):
         super().__init__(children, cast(E, extra))
 
     @property
-    @overload
+    @override
     def children(self: Self) -> tuple[M0]:
         return cast(tuple[M0], super().children)
 
@@ -107,7 +110,7 @@ class Metadata2D[M0: BasisMetadata, M1: BasisMetadata, E](
         super().__init__(children, cast(E, extra))
 
     @property
-    @overload
+    @override
     def children(self: Self) -> tuple[M0, M1]:
         return cast(tuple[M0, M1], super().children)
 
@@ -125,6 +128,6 @@ class Metadata3D[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
         super().__init__(children, cast(E, extra))
 
     @property
-    @overload
+    @override
     def children(self: Self) -> tuple[M0, M1, M2]:
         return cast(tuple[M0, M1, M2], super().children)

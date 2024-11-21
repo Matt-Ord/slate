@@ -32,6 +32,7 @@ class TransformedBasis[M: BasisMetadata](
         self._direction: TransformDirection = direction
         super().__init__(inner)
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TransformedBasis):
             return (
@@ -41,6 +42,7 @@ class TransformedBasis[M: BasisMetadata](
             )
         return False
 
+    @override
     def __hash__(self) -> int:
         return hash((1, self.inner, self.direction))
 
@@ -52,6 +54,7 @@ class TransformedBasis[M: BasisMetadata](
         )
 
     @property
+    @override
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self.inner.size

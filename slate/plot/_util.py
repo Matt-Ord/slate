@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Literal, cast
+from typing import TYPE_CHECKING, Any, Iterable, Literal, cast, override
 
 import numpy as np
 
@@ -31,6 +31,7 @@ Scale = Literal["symlog", "linear", "squared", "log"]
 
 
 class Axes(MPLAxes):
+    @override
     def get_figure(self) -> Figure | None: ...
 
     def set_xlabel(self, xlabel: str) -> None: ...  # type: ignore bad overload

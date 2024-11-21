@@ -12,10 +12,11 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     """Represents a full fundamental basis."""
 
     @property
+    @override
     def size(self: Self) -> int:
-        """Number of elements in the basis."""
         return self.fundamental_size
 
+    @override
     def __into_fundamental__[DT1: np.generic](
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
@@ -23,6 +24,7 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors
 
+    @override
     def __from_fundamental__[DT1: np.generic](
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
@@ -30,11 +32,13 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, FundamentalBasis):
             return value.metadata() == self.metadata()  # type: ignore unknown
         return False
 
+    @override
     def __hash__(self) -> int:
         return hash(self.metadata())
 

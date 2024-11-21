@@ -91,6 +91,7 @@ class TupleBasis[
             tuple(i.metadata() for i in children), extra_metadata
         )
 
+    @override
     def conjugate_basis(self) -> TupleBasis[M, E, Any, _InnerM]:
         return self
 
@@ -100,8 +101,8 @@ class TupleBasis[
         return self._children
 
     @property
+    @override
     def size(self) -> int:
-        """Number of elements in the basis."""
         return np.prod(self.shape).item()
 
     @property
@@ -143,6 +144,7 @@ class TupleBasis[
     def __getitem__(self: Self, index: int) -> Basis[M, DT]:
         return self.children[index]
 
+    @override
     def __convert_vector_into__[
         DT1: np.generic
     ](  # [DT1: DT, B1: Basis[TupleMetadata[M, E], DT]]
@@ -162,11 +164,13 @@ class TupleBasis[
         # We overload __convert_vector_into__, more likely to get the 'happy path'
         return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TupleBasis):
             return value.children == self.children  # type: ignore unknown
         return False
 
+    @override
     def __hash__(self) -> int:
         return hash((self.metadata().extra, self.children))
 
@@ -255,6 +259,7 @@ class TupleBasisND[
     def metadata(self) -> _InnerM:
         return super().metadata()
 
+    @override
     def conjugate_basis(self) -> TupleBasisND[DT, E, _InnerM]:
         return self
 
@@ -263,6 +268,7 @@ class TupleBasisND[
         """Inner basis."""
         return cast(tuple[Basis[BasisMetadata, DT], ...], super().children)
 
+    @override
     def __getitem__(self: Self, index: int) -> Basis[BasisMetadata, DT]:
         return super().__getitem__(index)
 
@@ -301,6 +307,7 @@ class TupleBasis1D[
     ) -> Metadata1D[_M0, E]:
         return cast(Metadata1D[_M0, E], super().metadata())
 
+    @override
     def conjugate_basis(self) -> TupleBasis1D[DT, B0, E]:
         return cast(TupleBasis1D[DT, B0, E], super().conjugate_basis())
 
@@ -353,6 +360,7 @@ class TupleBasis2D[
     ) -> Metadata2D[_M0, _M1, E]:
         return cast(Metadata2D[_M0, _M1, E], super().metadata())
 
+    @override
     def conjugate_basis(self) -> TupleBasis2D[DT, B0, B1, E]:
         return cast(TupleBasis2D[DT, B0, B1, E], super().conjugate_basis())
 
@@ -410,6 +418,7 @@ class TupleBasis3D[
     ) -> Metadata3D[_M0, _M1, _M2, E]:
         return cast(Metadata3D[_M0, _M1, _M2, E], super().metadata())
 
+    @override
     def conjugate_basis(self) -> TupleBasis3D[DT, B0, B1, B2, E]:
         return cast(TupleBasis3D[DT, B0, B1, B2, E], super().conjugate_basis())
 

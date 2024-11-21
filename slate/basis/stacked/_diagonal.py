@@ -28,17 +28,21 @@ class DiagonalBasis[
         super().__init__(cast(Any, inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 
+    @override
     def conjugate_basis(self) -> DiagonalBasis[DT, B0, B1, E]:
         return DiagonalBasis[DT, B0, B1, E](self.inner.conjugate_basis())
 
     @property
+    @override
     def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
         return cast(TupleBasis2D[DT, B0, B1, E], self._inner)
 
     @property
+    @override
     def size(self) -> int:
         return self.inner.children[0].size
 
+    @override
     def __into_inner__[DT1: np.generic](  # [DT1: DT]
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
@@ -60,6 +64,7 @@ class DiagonalBasis[
             .swapaxes(axis, 0)
         )
 
+    @override
     def __from_inner__[DT1: np.generic](  # [DT1: DT]
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
@@ -77,9 +82,11 @@ class DiagonalBasis[
             .swapaxes(axis, 0)
         )
 
+    @override
     def __eq__(self, other: object) -> bool:
         return isinstance(other, DiagonalBasis) and (other.inner == self.inner)  # type: ignore unknown
 
+    @override
     def __hash__(self) -> int:
         return hash((2, self.inner))
 

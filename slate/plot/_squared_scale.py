@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self, Sequence
+from typing import TYPE_CHECKING, Self, Sequence, override
 
 import numpy as np
 from matplotlib.scale import ScaleBase
@@ -13,11 +13,13 @@ if TYPE_CHECKING:
 
 
 class SquaredLocator(Locator):
+    @override
     def __call__(self: Self):  # noqa: ANN204
         assert self.axis is not None
         min_val, max_val = self.axis.get_view_interval()  # type: ignore unknown lib type
         return self.tick_values(min_val, max_val)
 
+    @override
     def tick_values(self: Self, vmin: float, vmax: float) -> Sequence[float]:
         """
         Return the locations of the ticks.
@@ -38,46 +40,58 @@ class SquaredScale(ScaleBase):
     def __init__(self, axis: Axis | None) -> None:
         super().__init__(axis)
 
+    @override
     def get_transform(self: Self) -> Transform:
         return self._SquaredTransform()
 
-    def set_default_locators_and_formatters(self: Self, axis: Axis) -> None:  # noqa: PLR6301
+    @override
+    def set_default_locators_and_formatters(self: Self, axis: Axis) -> None:
         axis.set_major_locator(SquaredLocator())
 
     class _SquaredTransform(Transform):
         @property
+        @override
         def input_dims(self: Self) -> int:
             return 1
 
         @property
+        @override
         def output_dims(self: Self) -> int:
             return 1
 
         @property
+        @override
         def is_separable(self: Self) -> bool:
             return True
 
-        def transform_non_affine(self: Self, values: ArrayLike) -> ArrayLike:  # noqa: PLR6301
+        @override
+        def transform_non_affine(self: Self, values: ArrayLike) -> ArrayLike:
             return np.square(np.real(values))
 
-        def inverted(self: Self) -> Transform:  # noqa: PLR6301
+        @override
+        def inverted(self: Self) -> Transform:
             return SquaredScale._InvertedSquaredTransform()
 
     class _InvertedSquaredTransform(Transform):
         @property
+        @override
         def input_dims(self: Self) -> int:
             return 1
 
         @property
+        @override
         def output_dims(self: Self) -> int:
             return 1
 
         @property
+        @override
         def is_separable(self: Self) -> bool:
             return True
 
-        def transform_non_affine(self: Self, values: ArrayLike) -> ArrayLike:  # noqa: PLR6301
+        @override
+        def transform_non_affine(self: Self, values: ArrayLike) -> ArrayLike:
             return np.sqrt(np.abs(values))
 
-        def inverted(self: Self) -> Transform:  # noqa: PLR6301
+        @override
+        def inverted(self: Self) -> Transform:
             return SquaredScale._SquaredTransform()

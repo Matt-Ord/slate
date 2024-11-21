@@ -28,6 +28,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
             self._inner.size, self._truncation.n, self._truncation.step
         )
 
+    @override
     def __hash__(self) -> int:
         return hash((self._inner, self._truncation))
 
@@ -37,6 +38,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         return self._truncation
 
     @property
+    @override
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self._truncation.n
@@ -45,6 +47,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
     def conjugate_basis(self) -> TruncatedBasis[M, DT]:
         return self
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TruncatedBasis):
             return self._truncation == value._truncation and value._inner == self._inner  # type: ignore unknown

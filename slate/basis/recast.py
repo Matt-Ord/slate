@@ -34,6 +34,7 @@ class RecastBasis[
         assert self._inner_recast.size == self.inner.size
 
     @property
+    @override
     def size(self: Self) -> int:
         """The size of the basis."""
         return self.outer_recast.size

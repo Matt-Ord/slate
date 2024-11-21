@@ -29,14 +29,15 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         return self._inner_points
 
     @property
+    @override
     def size(self: Self) -> int:
-        """Number of elements in the basis."""
         return self.inner_points.size
 
     @override
     def conjugate_basis(self) -> CoordinateBasis[M, DT]:
         return self
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, CoordinateBasis):
             return (
