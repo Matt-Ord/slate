@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.array.array import SlateArray
+from slate.array import SlateArray
 from slate.linalg import eig, eig_vals
 
 if __name__ == "__main__":

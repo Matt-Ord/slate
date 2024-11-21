@@ -6,9 +6,7 @@ from typing import (
 
 import numpy as np
 
-from slate.metadata._metadata import LabelSpacing
-from slate.metadata.length import SpacedLengthMetadata
-from slate.metadata.stacked.stacked import StackedMetadata
+from slate.metadata import LabelSpacing, SpacedLengthMetadata, StackedMetadata
 from slate.util import (
     get_position_in_sorted,
     slice_ignoring_axes,

@@ -5,10 +5,9 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array.array import SlateArray
-from slate.array.util import transpose
-from slate.basis import FundamentalBasis
-from slate.basis.stacked import (
+from slate.array import SlateArray, transpose
+from slate.basis import (
+    FundamentalBasis,
     fundamental_tuple_basis_from_shape,
 )
 

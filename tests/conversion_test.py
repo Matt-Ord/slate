@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.array.conversion import convert_array
-from slate.basis.recast import RecastBasis
-from slate.basis.stacked import (
+from slate.array import SlateArray, convert_array
+from slate.basis import (
+    RecastBasis,
+    TransformedBasis,
+    TruncatedBasis,
+    Truncation,
     diagonal_basis,
     fundamental_tuple_basis_from_shape,
     tuple_basis,
 )
-from slate.basis.transformed import TransformedBasis
-from slate.basis.truncated import TruncatedBasis, Truncation
 
 if TYPE_CHECKING:
     from slate.basis import FundamentalBasis

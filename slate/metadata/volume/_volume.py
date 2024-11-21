@@ -5,8 +5,7 @@ from typing import Any, cast
 
 import numpy as np
 
-from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
-from slate.metadata.stacked.stacked import StackedMetadata
+from slate.metadata import LengthMetadata, SpacedLengthMetadata, StackedMetadata
 from slate.metadata.util import (
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,

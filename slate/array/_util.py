@@ -4,13 +4,14 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.array.conversion import convert_array
-from slate.basis.stacked import TupleBasis, as_tuple_basis, tuple_basis
+from slate.basis import TupleBasis, as_tuple_basis, tuple_basis
 from slate.metadata import BasisMetadata
 
+from ._array import SlateArray
+from ._conversion import convert_array
+
 if TYPE_CHECKING:
-    from slate.metadata.stacked.stacked import StackedMetadata
+    from slate.metadata import StackedMetadata
 
 
 def _transpose_from_tuple[DT: np.generic, M: BasisMetadata, E](

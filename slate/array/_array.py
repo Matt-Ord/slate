@@ -1,20 +1,22 @@
-from __future__ import annotations  # noqa: A005
+from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self, cast
 
 import numpy as np
 
-from slate.basis import Basis, FundamentalBasis
-from slate.basis.stacked import (
+from slate.basis import (
+    Basis,
+    FundamentalBasis,
     TupleBasis,
+    as_add_basis,
+    as_mul_basis,
+    as_sub_basis,
     fundamental_tuple_basis_from_shape,
 )
-from slate.basis.wrapped import as_add_basis, as_mul_basis, as_sub_basis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.metadata import SimpleMetadata
-    from slate.metadata.stacked import StackedMetadata
+    from slate.metadata import SimpleMetadata, StackedMetadata
 
 
 class SlateArray[

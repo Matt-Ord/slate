@@ -5,14 +5,6 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
-from slate.plot.plot import (
-    plot_data_1d_k,
-    plot_data_1d_n,
-    plot_data_1d_x,
-    plot_data_2d_k,
-    plot_data_2d_x,
-)
-
 from ._util import (
     Axes,
     Figure,
@@ -20,13 +12,20 @@ from ._util import (
     Scale,
     get_figure,
 )
+from .plot import (
+    plot_data_1d_k,
+    plot_data_1d_n,
+    plot_data_1d_x,
+    plot_data_2d_k,
+    plot_data_2d_x,
+)
 
 if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
-    from slate.array.array import SlateArray
-    from slate.metadata.stacked.volume import SpacedVolumeMetadata
+    from slate.array import SlateArray
+    from slate.metadata import SpacedVolumeMetadata
 
 
 def _get_slice_idx(

@@ -4,11 +4,10 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.array.conversion import convert_array
-from slate.basis.fundamental import FundamentalBasis
-from slate.basis.stacked import (
+from slate.array import SlateArray, convert_array
+from slate.basis import (
     DiagonalBasis,
+    FundamentalBasis,
     TupleBasis,
     as_tuple_basis,
     diagonal_basis,
@@ -18,7 +17,7 @@ from slate.explicit_basis import ExplicitBasis, ExplicitUnitaryBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.metadata.stacked.stacked import StackedMetadata
+    from slate.metadata import StackedMetadata
 
 
 def eig_vals[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
