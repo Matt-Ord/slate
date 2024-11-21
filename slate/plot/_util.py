@@ -81,6 +81,10 @@ class Axes(MPLAxes):
         verticalalignment: str = ...,
         bbox: dict[str, Any] | None = ...,
     ) -> Text: ...
+    @override
+    def twinx(self) -> Axes: ...
+    @override
+    def twiny(self) -> Axes: ...
 
 
 class Figure(MPLFigure):
