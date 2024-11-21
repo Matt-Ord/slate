@@ -158,7 +158,7 @@ class SplitBasis[
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, np.dtype[np.complex128]]:
         a_fundamental = DiagonalBasis(self.inner).__convert_vector_into__(
             self.get_a(vectors, axis), self.inner, axis
         )

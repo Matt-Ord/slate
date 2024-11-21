@@ -23,7 +23,7 @@ class DiagonalBasis[
 
     def __init__[_DT: np.generic, _B0: Basis[Any, Any], _B1: Basis[Any, Any], _E](
         self: DiagonalBasis[_DT, _B0, _B1, _E],
-        inner: TupleBasis2D[DT, B0, B1, E],
+        inner: TupleBasis2D[_DT, _B0, _B1, _E],
     ) -> None:
         super().__init__(cast(Any, inner))
         assert self.inner.children[0].size == self.inner.children[1].size
