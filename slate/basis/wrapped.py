@@ -29,7 +29,7 @@ class WrappedBasis[
     def with_inner[
         _M: BasisMetadata,
         _DT: np.generic,
-        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
+        _B: Basis[BasisMetadata, Any] = Basis[_M, _DT],
     ](self: WrappedBasis[_M, _DT, B], inner: _B) -> WrappedBasis[_M, _DT, _B]:
         """Get the wrapped basis with the inner set to inner."""
         return self.with_modified_inner(lambda _: inner)
@@ -38,7 +38,7 @@ class WrappedBasis[
     def with_modified_inner[
         _M: BasisMetadata,
         _DT: np.generic,
-        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
+        _B: Basis[BasisMetadata, Any] = Basis[_M, _DT],
     ](
         self: WrappedBasis[_M, _DT, B], wrapper: Callable[[B], _B]
     ) -> WrappedBasis[_M, _DT, _B]:

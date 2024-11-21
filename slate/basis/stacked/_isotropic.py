@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, cast, overload, override
+from typing import Any, Callable, Self, overload, override
 
 import numpy as np
 
@@ -33,7 +33,7 @@ class IsotropicBasis[
 
     @property
     def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
-        return cast(TupleBasis2D[DT, B0, B1, E], self._inner)
+        return self._inner
 
     @property
     def size(self) -> int:
