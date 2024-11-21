@@ -6,12 +6,16 @@ from typing import (
 
 import numpy as np
 
+from slate.metadata._metadata import LabelSpacing
+from slate.metadata.length import SpacedLengthMetadata
+from slate.metadata.stacked.stacked import StackedMetadata
 from slate.util import (
     get_position_in_sorted,
     slice_ignoring_axes,
 )
 
 from ._volume import (
+    AxisDirections,
     SpacedVolumeMetadata,
     fundamental_stacked_delta_k,
     fundamental_stacked_delta_x,
@@ -112,4 +116,20 @@ def get_x_coordinates_in_axes(
     return np.transpose(
         points.reshape(-1, *metadata.fundamental_shape)[:, *slice_],
         (0, *(1 + np.array(get_position_in_sorted(axes)))),
+    )
+
+
+def spaced_volume_metadata_from_stacked_delta_x(
+    vectors: tuple[np.ndarray[Any, np.dtype[np.float64]], ...],
+    shape: tuple[int, ...],
+) -> SpacedVolumeMetadata:
+    """Get the metadata for a spaced volume from the vectors and spacing."""
+    delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
+    normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v))
+    return StackedMetadata(
+        tuple(
+            SpacedLengthMetadata((s,), spacing=LabelSpacing(delta=delta))
+            for (s, delta) in zip(shape, delta_v, strict=True)
+        ),
+        AxisDirections(vectors=normalized_vectors),
     )
