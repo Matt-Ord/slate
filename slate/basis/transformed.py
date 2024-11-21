@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
+from slate.basis._tuple import TupleBasis
 from slate.basis.fundamental import FundamentalBasis
-from slate.basis.stacked import TupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import (
     BasisMetadata,
@@ -17,7 +17,7 @@ from slate.metadata import (
 )
 
 if TYPE_CHECKING:
-    from slate.basis.stacked._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
+    from slate.basis._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
     from slate.metadata import SimpleMetadata
 
 type TransformDirection = Literal["forward", "backward"]

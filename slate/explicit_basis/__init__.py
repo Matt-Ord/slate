@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from ._explicit_basis import ExplicitBasis, ExplicitUnitaryBasis
+from slate.explicit_basis._explicit_basis import ExplicitBasis, ExplicitUnitaryBasis
 
 __all__ = ["ExplicitBasis", "ExplicitUnitaryBasis"]

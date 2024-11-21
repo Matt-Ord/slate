@@ -5,14 +5,14 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
-from ._util import (
+from slate.plot._util import (
     Axes,
     Figure,
     Measure,
     Scale,
     get_figure,
 )
-from .plot import (
+from slate.plot.plot import (
     plot_data_1d_k,
     plot_data_1d_n,
     plot_data_1d_x,

@@ -13,12 +13,7 @@ from slate.metadata.volume import (
     get_k_coordinates_in_axes,
     get_x_coordinates_in_axes,
 )
-from slate.util import (
-    get_max_idx,
-)
-from slate.util._index import get_data_in_axes
-
-from ._util import (
+from slate.plot._util import (
     Axes,
     Figure,
     Measure,
@@ -29,6 +24,10 @@ from ._util import (
     get_norm_with_lim,
     get_scale_with_lim,
 )
+from slate.util import (
+    get_max_idx,
+)
+from slate.util._index import get_data_in_axes
 
 if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
@@ -36,7 +35,7 @@ if TYPE_CHECKING:
 
     from slate.array import SlateArray
     from slate.metadata import BasisMetadata, SpacedVolumeMetadata, StackedMetadata
-from ._util import Scale, set_ymargin
+from slate.plot._util import Scale, set_ymargin
 
 
 class PlotKwargs(TypedDict, total=False):

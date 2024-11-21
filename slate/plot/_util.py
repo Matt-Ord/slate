@@ -15,7 +15,7 @@ from matplotlib.colors import Colormap, LogNorm, Normalize, SymLogNorm
 from matplotlib.figure import Figure as MPLFigure
 from matplotlib.scale import LinearScale, LogScale, ScaleBase, SymmetricalLogScale
 
-from ._squared_scale import SquaredScale
+from slate.plot._squared_scale import SquaredScale
 
 if TYPE_CHECKING:
     from matplotlib.cm import ScalarMappable

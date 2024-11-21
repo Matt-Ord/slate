@@ -4,11 +4,10 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from slate.array._array import SlateArray
+from slate.array._conversion import convert_array
 from slate.basis import TupleBasis, as_tuple_basis, tuple_basis
 from slate.metadata import BasisMetadata
-
-from ._array import SlateArray
-from ._conversion import convert_array
 
 if TYPE_CHECKING:
     from slate.metadata import StackedMetadata

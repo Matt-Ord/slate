@@ -5,10 +5,9 @@ from typing import Any, Callable, Self, overload, override
 import numpy as np
 
 from slate.basis import Basis, BasisFeature, WrappedBasis
+from slate.basis._tuple import TupleBasis2D, tuple_basis
 from slate.metadata import StackedMetadata
 from slate.metadata.util import nx_points
-
-from ._tuple import TupleBasis2D, tuple_basis
 
 
 class IsotropicBasis[

@@ -5,10 +5,9 @@ from typing import Any, Callable, Self, cast, overload, override
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
+from slate.basis._tuple import TupleBasis2D, tuple_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import Metadata2D
-
-from ._tuple import TupleBasis2D, tuple_basis
 
 
 class DiagonalBasis[
