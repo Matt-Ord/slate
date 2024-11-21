@@ -539,10 +539,10 @@ def tuple_basis_with_modified_children[
     DT: np.generic,
     DT1: np.generic,
 ](
-    basis: TupleBasis[M, E, DT], wrapper: Callable[[int, Basis[M, DT1]], Basis[M, DT]]
-) -> TupleBasis[M, E, DT1]:
+    basis: TupleBasis[M, E, DT1], wrapper: Callable[[int, Basis[M, DT1]], Basis[M, DT]]
+) -> TupleBasis[M, E, DT]:
     """Get the basis with modified children."""
-    return TupleBasis[M, E, DT1](
+    return TupleBasis[M, E, DT](
         tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata().extra
     )
 
@@ -568,6 +568,41 @@ def tuple_basis_with_child[M: BasisMetadata, E, DT: np.generic](
 ) -> TupleBasis[M, E, DT]:
     """Get a basis with the basis at idx set to inner."""
     return tuple_basis_with_modified_child(basis, lambda _: inner, idx)
+
+
+@overload
+def fundamental_tuple_basis_from_metadata[M0: BasisMetadata, E](
+    metadata: Metadata1D[M0, E],
+) -> TupleBasis1D[np.generic, FundamentalBasis[M0], E]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+    metadata: Metadata2D[M0, M1, E],
+) -> TupleBasis2D[np.generic, FundamentalBasis[M0], FundamentalBasis[M1], E]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+](
+    metadata: Metadata3D[M0, M1, M2, E],
+) -> TupleBasis3D[
+    np.generic,
+    FundamentalBasis[M0],
+    FundamentalBasis[M1],
+    FundamentalBasis[M2],
+    E,
+]: ...
+
+
+@overload
+def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
+    metadata: StackedMetadata[M, E],
+) -> TupleBasis[M, E, np.generic]: ...
 
 
 def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
@@ -726,4 +761,6 @@ def as_tuple_basis[
     if isinstance(super_inner, TupleBasis):
         return cast(TupleBasis[M0, E, np.generic], super_inner)
 
-    return fundamental_tuple_basis_from_metadata(basis.metadata())
+    return fundamental_tuple_basis_from_metadata(
+        cast(StackedMetadata[Any, Any], basis.metadata())
+    )

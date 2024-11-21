@@ -9,7 +9,12 @@ from slate.basis.fundamental import FundamentalBasis
 from slate.basis.stacked import TupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-from slate.metadata.stacked.stacked import StackedMetadata
+from slate.metadata.stacked.stacked import (
+    Metadata1D,
+    Metadata2D,
+    Metadata3D,
+    StackedMetadata,
+)
 
 if TYPE_CHECKING:
     from slate.basis.stacked._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
@@ -171,6 +176,45 @@ class TransformedBasis[M: BasisMetadata](
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_metadata[M0: BasisMetadata, E](
+    metadata: Metadata1D[M0, E],
+) -> TupleBasis1D[np.generic, TransformedBasis[M0], E]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+](
+    metadata: Metadata2D[M0, M1, E],
+) -> TupleBasis2D[np.generic, TransformedBasis[M0], TransformedBasis[M1], E]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+](
+    metadata: Metadata3D[M0, M1, M2, E],
+) -> TupleBasis3D[
+    np.generic,
+    TransformedBasis[M0],
+    TransformedBasis[M1],
+    TransformedBasis[M2],
+    E,
+]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](
+    metadata: StackedMetadata[M, E],
+) -> TupleBasis[M, E, np.generic]: ...
 
 
 def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](

@@ -16,7 +16,10 @@ from ._tuple import (
     fundamental_tuple_basis_from_shape,
     stacked_basis_as_fundamental,
     tuple_basis,
+    tuple_basis_is_variadic,
     tuple_basis_with_child,
+    tuple_basis_with_modified_child,
+    tuple_basis_with_modified_children,
 )
 
 __all__ = [
@@ -35,5 +38,8 @@ __all__ = [
     "isotropic_basis",
     "stacked_basis_as_fundamental",
     "tuple_basis",
+    "tuple_basis_is_variadic",
     "tuple_basis_with_child",
+    "tuple_basis_with_modified_child",
+    "tuple_basis_with_modified_children",
 ]
