@@ -13,7 +13,9 @@ from slate.metadata.util import (
 )
 
 
-def _assert_orthonormal(vectors: tuple[np.ndarray[Any, np.dtype[np.float64]]]) -> None:
+def _assert_orthonormal(
+    vectors: tuple[np.ndarray[Any, np.dtype[np.float64]], ...],
+) -> None:
     identity_matrix = np.eye(len(vectors))
     result = np.dot(vectors, np.transpose(vectors))
 
@@ -28,7 +30,7 @@ def _assert_orthonormal(vectors: tuple[np.ndarray[Any, np.dtype[np.float64]]]) -
 class AxisDirections:
     """Data to store the axis vectors of an array."""
 
-    vectors: tuple[np.ndarray[Any, np.dtype[np.float64]]]
+    vectors: tuple[np.ndarray[Any, np.dtype[np.float64]], ...]
 
     def __post_init__(self) -> None:
         _assert_orthonormal(self.vectors)
