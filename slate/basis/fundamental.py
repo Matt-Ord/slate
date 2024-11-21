@@ -4,8 +4,9 @@ from typing import Any, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
 from slate.metadata import BasisMetadata, SimpleMetadata
+
+from ._basis import Basis, BasisFeature
 
 
 class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):

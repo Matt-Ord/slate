@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.basis import FundamentalBasis
-from slate.basis.split import split_basis
-from slate.basis.stacked import diagonal_basis, tuple_basis
-from slate.basis.transformed import (
+from slate.array import SlateArray
+from slate.basis import (
+    FundamentalBasis,
     TransformedBasis,
+    diagonal_basis,
+    split_basis,
+    tuple_basis,
 )
 
 

@@ -32,7 +32,7 @@ To create a `SlateArray` with a given basis and data:
 
 ```python
 import numpy as np
-from slate.array.array import SlateArray
+from slate.array import SlateArray
 from slate.basis import FundamentalBasis
 from slate.metadata import SimpleMetadata
 

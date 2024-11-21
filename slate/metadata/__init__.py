@@ -11,18 +11,18 @@ from ._metadata import (
     SimpleMetadata,
     SpacedLabeledMetadata,
 )
-from .length import LengthMetadata
+from .length import LengthMetadata, SpacedLengthMetadata
 from .stacked import (
     Metadata1D,
     Metadata2D,
     Metadata3D,
     MetadataND,
-    SpacedVolumeMetadata,
     StackedMetadata,
-    VolumeMetadata,
 )
+from .volume import AxisDirections, SpacedVolumeMetadata, VolumeMetadata
 
 __all__ = [
+    "AxisDirections",
     "BasisMetadata",
     "DeltaMetadata",
     "ExplicitLabeledMetadata",
@@ -36,6 +36,7 @@ __all__ = [
     "MetadataND",
     "SimpleMetadata",
     "SpacedLabeledMetadata",
+    "SpacedLengthMetadata",
     "SpacedVolumeMetadata",
     "StackedMetadata",
     "VolumeMetadata",

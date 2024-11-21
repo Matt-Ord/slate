@@ -4,15 +4,15 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.array.conversion import convert_array
-from slate.basis.cropped import CroppedBasis
-from slate.basis.stacked import (
+from slate.array import SlateArray, convert_array
+from slate.basis import (
+    CroppedBasis,
+    TransformedBasis,
+    TruncatedBasis,
+    Truncation,
     TupleBasis,
     tuple_basis_with_child,
 )
-from slate.basis.transformed import TransformedBasis
-from slate.basis.truncated import TruncatedBasis, Truncation
 from slate.linalg import eig
 
 if TYPE_CHECKING:

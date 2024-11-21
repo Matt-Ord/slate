@@ -4,18 +4,27 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.basis import Basis, FundamentalBasis
-from slate.basis.stacked import DiagonalBasis, TupleBasis
-from slate.basis.stacked._tuple import TupleBasis2D
-from slate.basis.wrapped import WrappedBasis
-from slate.metadata import BasisMetadata, SimpleMetadata, VolumeMetadata
-from slate.metadata.length import LengthMetadata
-from slate.metadata.stacked.stacked import Metadata2D, MetadataND
+from slate.array import SlateArray
+from slate.basis import (
+    Basis,
+    DiagonalBasis,
+    FundamentalBasis,
+    TupleBasis,
+    TupleBasis2D,
+    WrappedBasis,
+)
+from slate.metadata import (
+    BasisMetadata,
+    LengthMetadata,
+    Metadata2D,
+    MetadataND,
+    SimpleMetadata,
+    VolumeMetadata,
+)
 
 if TYPE_CHECKING:
-    from slate.basis.transformed import TransformedBasis
-    from slate.metadata.stacked import StackedMetadata
+    from slate.basis import TransformedBasis
+    from slate.metadata import StackedMetadata
 
 
 def basis_variance() -> None:

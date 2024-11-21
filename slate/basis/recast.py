@@ -4,9 +4,10 @@ from typing import Any, Callable, Never, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
-from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
+
+from ._basis import Basis, BasisFeature
+from .wrapped import WrappedBasis
 
 
 class RecastBasis[

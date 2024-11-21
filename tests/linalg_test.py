@@ -5,16 +5,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array.array import SlateArray
-from slate.array.conversion import convert_array
-from slate.linalg._eig import eig, eig_vals, eigh, eigh_vals
+from slate.array import SlateArray, convert_array
+from slate.linalg import eig, eig_vals, eigh, eigh_vals
 
 if TYPE_CHECKING:
-    from slate.basis import Basis
-    from slate.basis.stacked import TupleBasis
-    from slate.metadata import SimpleMetadata
-    from slate.metadata._metadata import BasisMetadata
-    from slate.metadata.stacked import StackedMetadata
+    from slate.basis import Basis, TupleBasis
+    from slate.metadata import BasisMetadata, SimpleMetadata, StackedMetadata
 
 
 @pytest.fixture

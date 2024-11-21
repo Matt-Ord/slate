@@ -8,8 +8,8 @@ from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
 from slate.basis.stacked import TupleBasis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata import BasisMetadata
-from slate.metadata.stacked.stacked import (
+from slate.metadata import (
+    BasisMetadata,
     Metadata1D,
     Metadata2D,
     Metadata3D,

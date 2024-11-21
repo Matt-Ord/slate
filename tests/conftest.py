@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array.array import SlateArray
+from slate.array import SlateArray
 
 if TYPE_CHECKING:
-    from slate.metadata import BasisMetadata
-    from slate.metadata.stacked import StackedMetadata
+    from slate.metadata import BasisMetadata, StackedMetadata
 
 
 @pytest.fixture

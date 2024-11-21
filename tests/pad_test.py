@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.basis.truncated import (
+from slate.basis import (
     Padding,
     Truncation,
-    pad_along_axis,
-    truncate_along_axis,
 )
+from slate.util import pad_along_axis, truncate_along_axis
 
 
 def test_pad_cropped() -> None:

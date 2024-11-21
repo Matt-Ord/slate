@@ -7,8 +7,9 @@ import numpy as np
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.array.array import SlateArray
     from slate.basis import Basis
+
+    from ._array import SlateArray
 
 
 def convert_array[

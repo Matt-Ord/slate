@@ -5,18 +5,21 @@ from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, override
 
 import numpy as np
 
-from slate.array.array import SlateArray
-from slate.array.conversion import convert_array
-from slate.basis import Basis, BasisFeature
-from slate.basis.stacked import tuple_basis
-from slate.basis.stacked._tuple import TupleBasis2D, as_tuple_basis
-from slate.basis.wrapped import WrappedBasis
+from slate.array import SlateArray, convert_array
+from slate.basis import (
+    Basis,
+    BasisFeature,
+    TupleBasis2D,
+    WrappedBasis,
+    as_tuple_basis,
+    tuple_basis,
+)
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from slate.metadata.stacked.stacked import Metadata2D
+    from slate.metadata import Metadata2D
 
 
 type Direction = Literal["forward", "backward"]

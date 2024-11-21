@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Any, TypedDict, Unpack, overload
 
 import numpy as np
 
-from slate.basis.stacked import (
+from slate.basis import (
     as_tuple_basis,
+    fundamental_transformed_tuple_basis_from_metadata,
     fundamental_tuple_basis_from_metadata,
 )
-from slate.basis.transformed import fundamental_transformed_tuple_basis_from_metadata
-from slate.metadata.stacked.volume.util import (
+from slate.metadata.volume import (
     get_k_coordinates_in_axes,
     get_x_coordinates_in_axes,
 )
@@ -34,10 +34,8 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
-    from slate.array.array import SlateArray
-    from slate.metadata import BasisMetadata
-    from slate.metadata.stacked.stacked import StackedMetadata
-    from slate.metadata.stacked.volume import SpacedVolumeMetadata
+    from slate.array import SlateArray
+    from slate.metadata import BasisMetadata, SpacedVolumeMetadata, StackedMetadata
 from ._util import Scale, set_ymargin
 
 

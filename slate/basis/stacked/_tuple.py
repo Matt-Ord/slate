@@ -20,8 +20,8 @@ import numpy as np
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
 from slate.basis.wrapped import get_wrapped_basis_super_inner
-from slate.metadata import BasisMetadata
-from slate.metadata.stacked.stacked import (
+from slate.metadata import (
+    BasisMetadata,
     Metadata1D,
     Metadata2D,
     Metadata3D,

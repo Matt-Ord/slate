@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 if TYPE_CHECKING:
-    from slate.array.array import SlateArray
+    from slate.array import SlateArray
     from slate.metadata import BasisMetadata
 
 
