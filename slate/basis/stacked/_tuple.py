@@ -91,7 +91,7 @@ class TupleBasis[
             tuple(i.metadata() for i in children), extra_metadata
         )
 
-    def conjugate_basis(self) -> TupleBasis[M, E, DT, _InnerM]:
+    def conjugate_basis(self) -> TupleBasis[M, E, Any, _InnerM]:
         return self
 
     @property

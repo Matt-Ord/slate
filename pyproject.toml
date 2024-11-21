@@ -74,6 +74,10 @@ required-imports = ["from __future__ import annotations"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["tests", "slate", "examples"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
