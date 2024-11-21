@@ -18,15 +18,17 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
         super().__init__(inner)
 
     @property
+    @override
     def size(self: Self) -> int:
-        """Number of elements in the basis."""
         return self._size
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, CroppedBasis):
             return self._size == value._size and value._inner == self._inner  # type: ignore unknown
         return False
 
+    @override
     def __hash__(self) -> int:
         return hash((self._size, self._inner))
 

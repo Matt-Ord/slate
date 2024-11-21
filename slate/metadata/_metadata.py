@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Iterator, Protocol, Self, SupportsIndex
+from typing import Any, Iterator, Protocol, Self, SupportsIndex, override
 
 import numpy as np
 
@@ -55,6 +55,7 @@ class ExplicitLabeledMetadata[DT: np.generic](LabeledMetadata[DT]):
         super().__init__(values.shape)
 
     @property
+    @override
     def values(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
         """Shape of the full data."""
         return self._values
@@ -73,6 +74,7 @@ class SpacedLabeledMetadata(DeltaMetadata[float]):
     spacing: LabelSpacing
 
     @property
+    @override
     def values(self: Self) -> LabelCollection[float]:
         """Shape of the full data."""
         return np.linspace(
@@ -82,6 +84,7 @@ class SpacedLabeledMetadata(DeltaMetadata[float]):
         )
 
     @property
+    @override
     def delta(self: Self) -> float:
         """Shape of the full data."""
         return self.spacing.delta

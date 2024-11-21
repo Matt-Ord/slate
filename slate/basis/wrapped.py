@@ -58,6 +58,7 @@ class WrappedBasis[
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]: ...
 
+    @override
     def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
@@ -66,6 +67,7 @@ class WrappedBasis[
         transformed = self.__into_inner__(vectors, axis)
         return self._inner.__into_fundamental__(transformed, axis=axis)
 
+    @override
     def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],

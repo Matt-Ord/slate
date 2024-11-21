@@ -77,6 +77,7 @@ testpaths = ["tests"]
 [tool.pyright]
 typeCheckingMode = "strict"
 include = ["tests", "slate", "examples"]
+reportImplicitOverride = true
 
 [build-system]
 requires = ["poetry-core"]

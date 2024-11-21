@@ -51,6 +51,7 @@ class SplitBasis[
         self._direction: TransformDirection = direction
         assert self.inner.children[0].size == self.inner.children[1].size
 
+    @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, TransformedBasis):
             return (
@@ -65,6 +66,7 @@ class SplitBasis[
         """The convention used to select the direction for the forward transform."""
         return self._direction
 
+    @override
     def __hash__(self) -> int:
         return hash((1, self.inner, self.direction))
 
