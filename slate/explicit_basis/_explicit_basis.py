@@ -12,10 +12,11 @@ from slate.basis.stacked import tuple_basis
 from slate.basis.stacked._tuple import TupleBasis2D, as_tuple_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-from slate.metadata.stacked.stacked import Metadata2D
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from slate.metadata.stacked.stacked import Metadata2D
 
 
 type Direction = Literal["forward", "backward"]
