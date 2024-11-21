@@ -38,7 +38,15 @@ from .transformed import (
     fundamental_transformed_tuple_basis_from_shape,
 )
 from .truncated import Padding, TruncatedBasis, Truncation
-from .wrapped import WrappedBasis, as_add_basis, as_mul_basis, as_sub_basis
+from .wrapped import (
+    WrappedBasis,
+    as_add_basis,
+    as_feature_basis,
+    as_index_basis,
+    as_mul_basis,
+    as_sub_basis,
+    get_wrapped_basis_super_inner,
+)
 
 __all__ = [
     "Basis",
@@ -62,6 +70,8 @@ __all__ = [
     "TupleBasisND",
     "WrappedBasis",
     "as_add_basis",
+    "as_feature_basis",
+    "as_index_basis",
     "as_mul_basis",
     "as_sub_basis",
     "as_tuple_basis",
@@ -70,6 +80,7 @@ __all__ = [
     "fundamental_transformed_tuple_basis_from_shape",
     "fundamental_tuple_basis_from_metadata",
     "fundamental_tuple_basis_from_shape",
+    "get_wrapped_basis_super_inner",
     "isotropic_basis",
     "split_basis",
     "stacked_basis_as_fundamental",
