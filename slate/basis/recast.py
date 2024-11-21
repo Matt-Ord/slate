@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Never, Self, cast, override
+from typing import Any, Callable, Never, Self, override
 
 import numpy as np
 
@@ -17,15 +17,19 @@ class RecastBasis[
 ](WrappedBasis[M0, DT, B]):
     """Represents a truncated basis."""
 
-    def __init__(
-        self: Self,
-        inner: B,
-        inner_recast: Basis[M1, DT],
-        outer_recast: Basis[M1, DT],
+    def __init__[
+        _M1: BasisMetadata,
+        _DT: np.generic,
+        _B: Basis[BasisMetadata, Any],
+    ](
+        self: RecastBasis[Any, _M1, _DT, _B],
+        inner: _B,
+        inner_recast: Basis[_M1, _DT],
+        outer_recast: Basis[_M1, _DT],
     ) -> None:
-        self._inner_recast = inner_recast
-        self._outer_recast = outer_recast
-        super().__init__(cast(Basis[M0, DT], inner))
+        self._inner_recast: Basis[M1, DT] = inner_recast
+        self._outer_recast: Basis[M1, DT] = outer_recast
+        super().__init__(inner)
 
         assert self._inner_recast.size == self.inner.size
 
