@@ -96,7 +96,7 @@ class TupleBasis[
         return self
 
     @property
-    def children(self) -> tuple[Basis[M, DT], ...]:
+    def children(self) -> tuple[Basis[M, Any], ...]:
         """Children basis."""
         return self._children
 

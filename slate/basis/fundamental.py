@@ -6,6 +6,7 @@ import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
 from slate.metadata import BasisMetadata, SimpleMetadata
+from slate.metadata.stacked import StackedMetadata
 
 
 class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
@@ -47,11 +48,18 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         return self
 
     @staticmethod
+    def from_size(
+        size: int,
+    ) -> FundamentalBasis[SimpleMetadata]:
+        """Get a fundamental basis from a size."""
+        return FundamentalBasis(SimpleMetadata(size))
+
+    @staticmethod
     def from_shape(
         shape: tuple[int, ...],
-    ) -> FundamentalBasis[SimpleMetadata]:
+    ) -> FundamentalBasis[StackedMetadata[SimpleMetadata, None]]:
         """Get a fundamental basis from a shape."""
-        return FundamentalBasis(SimpleMetadata(shape))
+        return FundamentalBasis(StackedMetadata.from_shape(shape))
 
     @property
     @override

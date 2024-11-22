@@ -61,7 +61,7 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
     ) -> StackedMetadata[SimpleMetadata, E1] | StackedMetadata[SimpleMetadata, None]:
         """Get a basic stacked metadata from a shape and (optional) extra."""
         return StackedMetadata[SimpleMetadata, Any](
-            tuple(SimpleMetadata((s,)) for s in shape), extra
+            tuple(SimpleMetadata(s) for s in shape), extra
         )
 
 
