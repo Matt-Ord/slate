@@ -27,10 +27,6 @@ class IsotropicBasis[
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
-    @override
-    def conjugate_basis(self) -> IsotropicBasis[DT, B0, B1, E]:
-        return IsotropicBasis(self.inner.conjugate_basis())
-
     @property
     @override
     def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
@@ -69,11 +65,15 @@ class IsotropicBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, IsotropicBasis) and (other.inner == self.inner)  # type: ignore unknown
+        return (
+            isinstance(other, IsotropicBasis)
+            and (other.inner == self.inner)  # type: ignore unknown
+            and self.conjugate == other.conjugate
+        )
 
     @override
     def __hash__(self) -> int:
-        return hash((2, self.inner))
+        return hash((2, self.inner, self.conjugate))
 
     @override
     def with_inner[  # type: ignore there is no way to bound inner in parent

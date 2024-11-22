@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from typing import TYPE_CHECKING, Any, Callable, Never, Self, cast, override
 
 import numpy as np
@@ -54,21 +55,26 @@ class SplitBasis[
         return self._rhs
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, TransformedBasis):
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, TransformedBasis):
             return (
-                value.lhs == self.lhs  # type: ignore unknown
-                and value.rhs == self.rhs  # type: ignore unknown
+                other.lhs == self.lhs  # type: ignore unknown
+                and other.rhs == self.rhs  # type: ignore unknown
+                and self.conjugate == other.conjugate
             )
         return False
 
     @override
-    def __hash__(self) -> int:
-        return hash((1, hash(self._lhs), hash(self._rhs)))
+    def conjugate_basis(self) -> Self:
+        copied = copy(self)
+        copied._lhs = self._lhs.conjugate_basis()  # noqa: SLF001
+        copied._rhs = self._rhs.conjugate_basis()  # noqa: SLF001
+
+        return copied
 
     @override
-    def conjugate_basis(self) -> SplitBasis[M, DT, Basis[M, DT], Basis[M, DT]]:
-        return SplitBasis(self.lhs.conjugate_basis(), self.rhs.conjugate_basis())
+    def __hash__(self) -> int:
+        return hash((1, hash(self._lhs), hash(self._rhs), self.conjugate))
 
     @property
     @override

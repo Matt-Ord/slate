@@ -18,7 +18,6 @@ from slate.basis._tuple import (
     as_tuple_basis,
     fundamental_tuple_basis_from_metadata,
     fundamental_tuple_basis_from_shape,
-    stacked_basis_as_fundamental,
     tuple_basis,
     tuple_basis_is_variadic,
     tuple_basis_with_child,
@@ -31,6 +30,7 @@ from slate.basis.fundamental import FundamentalBasis
 from slate.basis.recast import RecastBasis
 from slate.basis.split import SplitBasis
 from slate.basis.transformed import (
+    TransformDirection,
     TransformedBasis,
     fundamental_transformed_tuple_basis_from_metadata,
     fundamental_transformed_tuple_basis_from_shape,
@@ -59,6 +59,7 @@ __all__ = [
     "RecastBasis",
     "SplitBasis",
     "StackedBasis",
+    "TransformDirection",
     "TransformedBasis",
     "TruncatedBasis",
     "Truncation",
@@ -82,7 +83,6 @@ __all__ = [
     "get_common_basis",
     "get_wrapped_basis_super_inner",
     "isotropic_basis",
-    "stacked_basis_as_fundamental",
     "tuple_basis",
     "tuple_basis_is_variadic",
     "tuple_basis_with_child",

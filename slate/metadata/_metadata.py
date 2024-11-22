@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Iterator, Protocol, Self, SupportsIndex, override
+from typing import TYPE_CHECKING, Any, Protocol, Self, SupportsIndex, override
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class BasisMetadata(Protocol):

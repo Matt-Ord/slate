@@ -34,9 +34,9 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
         return self.children[index]
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, StackedMetadata):
-            return (self.extra == value.extra) and self.children == value.children  # type: ignore unknown
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, StackedMetadata):
+            return (self.extra == other.extra) and self.children == other.children  # type: ignore unknown
         return False
 
     @override

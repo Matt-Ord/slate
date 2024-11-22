@@ -3,11 +3,14 @@ from __future__ import annotations
 import itertools
 import math
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from slate.util._index import slice_along_axis
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def pad_ft_points[DT: np.generic](

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Sequence, overload
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from types import EllipsisType
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from copy import copy
 from typing import (
     Any,
     Literal,
@@ -31,8 +32,9 @@ This specify certain operations that can be performed on the basis.
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
     """Base class for a basis."""
 
-    def __init__(self, metadata: M) -> None:
+    def __init__(self, metadata: M, *, conjugate: bool = False) -> None:
         self._metadata = metadata
+        self._conjugate = conjugate
 
     @property
     @abstractmethod
@@ -81,17 +83,25 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        """Convert a vector in the non conjugate basis into the fundamental basis."""
 
     @abstractmethod
     def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]: ...
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        """Convert a vector into the non conjugate basis from the fundamental basis."""
 
-    @abstractmethod
-    def conjugate_basis(self) -> Basis[M, DT]: ...
+    @property
+    def conjugate(self: Self) -> bool:
+        return self._conjugate
+
+    def conjugate_basis(self) -> Self:
+        copied = copy(self)
+        copied._conjugate = not copied._conjugate  # noqa: SLF001
+        return copied
 
     def __convert_vector_into__[
         DT1: np.generic,
@@ -106,8 +116,10 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         if self == basis:
             return vectors
 
+        vectors = np.conj(vectors) if self.conjugate else vectors
         fundamental = self.__into_fundamental__(vectors, axis)
-        return basis.__from_fundamental__(fundamental, axis)
+        out = basis.__from_fundamental__(fundamental, axis)
+        return np.conj(out) if basis.conjugate else out
 
     def add_data[DT1: np.number[Any]](  # noqa: PLR6301
         self: Self,

@@ -6,11 +6,18 @@ import numpy as np
 import pytest
 
 from slate.array import SlateArray, convert_array
-from slate.linalg import eig, eig_vals, eigh, eigh_vals
+from slate.basis._tuple import fundamental_tuple_basis_from_shape
+from slate.linalg import into_diagonal
+from slate.linalg._eig import (
+    get_eigenvalues,
+    get_eigenvalues_hermitian,
+    into_diagonal_hermitian,
+)
 
 if TYPE_CHECKING:
-    from slate.basis import Basis, TupleBasis
+    from slate.basis import TupleBasis
     from slate.metadata import BasisMetadata, SimpleMetadata, StackedMetadata
+    from slate.metadata.stacked import Metadata2D
 
 
 @pytest.fixture
@@ -27,16 +34,15 @@ def slate_array_stacked() -> (
     return SlateArray.from_array(data)
 
 
-def _test_eig(
+def _test_into_diagonal(
     array: SlateArray[
-        Any,
+        Metadata2D[BasisMetadata, BasisMetadata, None],
         np.complexfloating[Any, Any],
-        Basis[StackedMetadata[BasisMetadata, None], Any],
     ],
 ) -> None:
-    diagonal = eig(array)
+    diagonal = into_diagonal(array)
 
-    eigenvalues = eig_vals(array)
+    eigenvalues = get_eigenvalues(array)
     np.testing.assert_allclose(eigenvalues.as_array(), diagonal.raw_data)
 
     full_as_diagonal = convert_array(array, diagonal.basis)
@@ -51,21 +57,20 @@ def _test_eig(
 def test_linalg_complex() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray.from_array(data)
+    array = SlateArray(fundamental_tuple_basis_from_shape((10, 10)), data)
 
-    _test_eig(array)
+    _test_into_diagonal(array)
 
 
-def _test_eigh(
+def _test_into_diagonal_hermitian(
     array: SlateArray[
-        Any,
+        Metadata2D[BasisMetadata, BasisMetadata, None],
         np.complexfloating[Any, Any],
-        Basis[StackedMetadata[BasisMetadata, None], Any],
     ],
 ) -> None:
-    diagonal = eigh(array)
+    diagonal = into_diagonal_hermitian(array)
 
-    eigenvalues = eigh_vals(array)
+    eigenvalues = get_eigenvalues_hermitian(array)
     np.testing.assert_allclose(eigenvalues.as_array(), diagonal.raw_data)
 
     full_as_diagonal = convert_array(array, diagonal.basis)
@@ -80,23 +85,26 @@ def _test_eigh(
 def test_linalg_diagonal() -> None:
     rng = np.random.default_rng()
     data = rng.random(10)
-    array = SlateArray.from_array(np.diag(data).astype(np.complex128))
+    array = SlateArray(
+        fundamental_tuple_basis_from_shape((10, 10)),
+        np.diag(data).astype(np.complex128),
+    )
 
-    _test_eigh(array)
+    _test_into_diagonal_hermitian(array)
 
 
 def test_linalg_complex_hermitian() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
     data += np.conj(np.transpose(data))
-    array = SlateArray.from_array(data)
+    array = SlateArray(fundamental_tuple_basis_from_shape((10, 10)), data)
 
-    _test_eigh(array)
+    _test_into_diagonal_hermitian(array)
 
 
 def test_linalg_real_hermitian() -> None:
     data = np.array([[1, 1, 2], [-1, 1, 0], [0, 0, 2]])
     data += np.conj(np.transpose(data))
-    array = SlateArray.from_array(data)
+    array = SlateArray(fundamental_tuple_basis_from_shape((3, 3)), data)
 
-    _test_eigh(array)
+    _test_into_diagonal_hermitian(array)
