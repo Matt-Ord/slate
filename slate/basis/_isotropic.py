@@ -4,8 +4,9 @@ from typing import Any, Callable, Self, overload, override
 
 import numpy as np
 
-from slate.basis import Basis, BasisFeature, WrappedBasis
+from slate.basis._basis import Basis, BasisFeature
 from slate.basis._tuple import TupleBasis2D, tuple_basis
+from slate.basis.wrapped import WrappedBasis
 from slate.metadata import StackedMetadata
 from slate.metadata.util import nx_points
 

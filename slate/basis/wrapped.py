@@ -5,7 +5,8 @@ from typing import Any, Callable, Iterator, Never, Self, cast, override
 
 import numpy as np
 
-from slate.basis import Basis, BasisFeature, FundamentalBasis
+from slate.basis._basis import Basis, BasisFeature
+from slate.basis.fundamental import FundamentalBasis
 from slate.metadata import BasisMetadata
 
 
