@@ -84,7 +84,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        """Convert a vector in the non conjugate basis into the fundamental basis."""
+        """Convert a vector in the non-conjugate basis into the fundamental basis."""
 
     @abstractmethod
     def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
