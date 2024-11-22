@@ -29,7 +29,7 @@ def test_split_array_equals_diagonal() -> None:
 def test_split_array_equals_transformed() -> None:
     data = np.diag(np.arange(1, 4)).astype(np.complex128)
     basis_k = TransformedBasis(FundamentalBasis.from_size(3))
-    array = SlateArray(tuple_basis((basis_k, basis_k.conjugate_basis())), data)
+    array = SlateArray(tuple_basis((basis_k, basis_k)), data)
 
     diagonal = array.with_basis(DiagonalBasis(array.basis))
     fundamental = DiagonalBasis(

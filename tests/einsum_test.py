@@ -13,7 +13,9 @@ from slate.basis import (
     TupleBasis,
     tuple_basis_with_child,
 )
-from slate.linalg import eig
+from slate.basis._tuple import tuple_basis
+from slate.basis.fundamental import FundamentalBasis
+from slate.linalg import into_diagonal
 
 if TYPE_CHECKING:
     from slate.basis import Basis
@@ -21,7 +23,7 @@ if TYPE_CHECKING:
 
 def _test_einsum_in_basis(
     array: SlateArray[Any, Any, TupleBasis[Any, None, Any]],
-    vector: SlateArray[Any, Any, TupleBasis[Any, None, Any]],
+    vector: SlateArray[Any, Any, Any],
     basis: Basis[Any, Any],
 ) -> None:
     transformed_array = convert_array(
@@ -30,19 +32,19 @@ def _test_einsum_in_basis(
     )
     transformed_vector = convert_array(
         vector,
-        tuple_basis_with_child(vector.basis, basis, 0),
+        basis,
     )
 
     np.testing.assert_allclose(
         np.einsum(  # type: ignore libary
             "ij,j->i",
             array.raw_data.reshape(array.basis.shape),
-            vector.raw_data.reshape(vector.basis.shape),
+            vector.raw_data.reshape(vector.basis.size),
         ),
         np.einsum(  # type: ignore libary
             "ij,j->i",
             transformed_array.raw_data.reshape(array.basis.shape),
-            transformed_vector.raw_data.reshape(vector.basis.shape),
+            transformed_vector.raw_data.reshape(vector.basis.size),
         ),
     )
 
@@ -50,34 +52,48 @@ def _test_einsum_in_basis(
 def test_einsum() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray.from_array(data)
+    array = SlateArray(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(10),
+                FundamentalBasis.from_size(10).conjugate_basis(),
+            )
+        ),
+        data,
+    )
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = SlateArray.from_array(data)
+    vector = SlateArray(array.basis[0], data)
 
-    _test_einsum_in_basis(array, vector, TransformedBasis(vector.basis[0]))
+    _test_einsum_in_basis(array, vector, TransformedBasis(vector.basis))
+    _test_einsum_in_basis(array, vector, CroppedBasis(vector.basis.size, vector.basis))
     _test_einsum_in_basis(
-        array, vector, CroppedBasis(vector.basis.size, vector.basis[0])
+        array,
+        vector,
+        TruncatedBasis(Truncation(vector.basis.size, 1, 0), vector.basis),
     )
     _test_einsum_in_basis(
         array,
         vector,
-        TruncatedBasis(Truncation(vector.basis[0].size, 1, 0), vector.basis[0]),
-    )
-    _test_einsum_in_basis(
-        array,
-        vector,
-        TruncatedBasis(Truncation(vector.basis[0].size, 1, 10), vector.basis[0]),
+        TruncatedBasis(Truncation(vector.basis.size, 1, 10), vector.basis),
     )
 
 
 def test_einsum_diagonal() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray.from_array(data)
+    array = SlateArray(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(10),
+                FundamentalBasis.from_size(10).conjugate_basis(),
+            )
+        ),
+        data,
+    )
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = SlateArray.from_array(data)
+    vector = SlateArray(array.basis[0], data)
 
-    diagonal_array = eig(array)
+    diagonal_array = into_diagonal(array)
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, Iterator, Never, Self, cast, override
+from typing import TYPE_CHECKING, Any, Callable, Never, Self, cast, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
 from slate.metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 class WrappedBasis[
@@ -17,9 +20,10 @@ class WrappedBasis[
 ](Basis[M, DT]):
     """Represents a truncated basis."""
 
-    def __init__(self: Self, inner: Basis[M, DT]) -> None:
+    def __init__(self: Self, inner: Basis[M, DT], *, conjugate: bool = False) -> None:
         self._inner = cast(B, inner)
         self._metadata = inner.metadata()
+        super().__init__(inner.metadata(), conjugate=conjugate)
 
     @property
     def inner(self: Self) -> B:
@@ -38,7 +42,7 @@ class WrappedBasis[
     def with_modified_inner[
         _M: BasisMetadata,
         _DT: np.generic,
-        _B: Basis[BasisMetadata, Any] = Basis[_M, _DT],
+        _B: Basis[BasisMetadata, Any] = Basis[_M, Any],
     ](
         self: WrappedBasis[_M, _DT, B], wrapper: Callable[[B], _B]
     ) -> WrappedBasis[_M, _DT, _B]:
@@ -90,10 +94,12 @@ class WrappedBasis[
         if self == basis:
             return vectors
 
+        vectors = np.conj(vectors) if self.conjugate else vectors
         as_inner = self.__into_inner__(vectors, axis)
 
         if isinstance(basis, WrappedBasis) and self.inner == basis.inner:  # type: ignore unknown
-            return basis.__from_inner__(as_inner, axis)
+            out = basis.__from_inner__(as_inner, axis)
+            return np.conj(out) if basis.conjugate else out
         return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown
 
 

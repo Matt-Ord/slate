@@ -3,15 +3,16 @@ from __future__ import annotations
 import numpy as np
 
 from slate.array import SlateArray
-from slate.linalg import eig, eig_vals
+from slate.basis import fundamental_tuple_basis_from_shape
+from slate.linalg import get_eigenvalues, into_diagonal
 
 if __name__ == "__main__":
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray.from_array(data)
+    array = SlateArray(fundamental_tuple_basis_from_shape((10, 10)), data)
 
-    diagonal = eig(array)
-    eigenvalues = eig_vals(array)
+    diagonal = into_diagonal(array)
+    eigenvalues = get_eigenvalues(array)
 
     # Diagonal is a matrix with the eigenvalues along the diagonal
     np.testing.assert_allclose(diagonal.raw_data, eigenvalues.as_array())

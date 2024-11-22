@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Literal, cast, override
+from typing import TYPE_CHECKING, Any, Literal, cast, override
 
 import numpy as np
 
@@ -18,6 +18,8 @@ from matplotlib.scale import LinearScale, LogScale, ScaleBase, SymmetricalLogSca
 from slate.plot._squared_scale import SquaredScale
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from matplotlib.cm import ScalarMappable
     from matplotlib.collections import QuadMesh
     from matplotlib.colorbar import Colorbar
@@ -99,14 +101,14 @@ class Figure(MPLFigure):
     ) -> Colorbar: ...
 
 
-def get_figure(ax: Axes | None) -> tuple[Figure, Axes]:
+def get_figure(ax: Axes | None = None) -> tuple[Figure, Axes]:
     """Get the figure of the given axis.
 
     If no figure exists, a new figure is created
-    """
+    """  # noqa: DOC501
     if plt is None:
         msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
-        raise ImportError(msg)  # noqa: DOC501
+        raise ImportError(msg)  # noqa: RUF100
 
     if ax is None:
         return cast(tuple[Figure, Axes], plt.subplots())  # type: ignore plt.subplots Unknown type
@@ -119,10 +121,10 @@ def get_figure(ax: Axes | None) -> tuple[Figure, Axes]:
 
 
 def get_axis_colorbar(axis: Axes) -> Colorbar | None:
-    """Get a colorbar attached to the axis."""
+    """Get a colorbar attached to the axis."""  # noqa: DOC501
     if plt is None:
         msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
-        raise ImportError(msg)  # noqa: DOC501
+        raise ImportError(msg)
     for artist in axis.get_children():
         if isinstance(artist, plt.cm.ScalarMappable) and artist.colorbar is not None:
             return artist.colorbar
@@ -146,9 +148,6 @@ def get_measured_data[DT: np.number[Any]](
             return np.abs(data)  # type: ignore[no-any-return]
         case "angle":
             return np.unwrap(np.angle(data))  # type: ignore[no-any-return]
-
-    msg = f"Unknown measure: {measure}"
-    raise ValueError(msg)  # noqa: DOC501
 
 
 def _get_default_lim(

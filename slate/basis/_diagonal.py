@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, cast, overload, override
+from typing import Any, Callable, Self, TypeGuard, cast, overload, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis._tuple import TupleBasis2D, tuple_basis
-from slate.basis.wrapped import WrappedBasis
+from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata import Metadata2D
+from slate.metadata._metadata import BasisMetadata
 
 
 class DiagonalBasis[
@@ -26,10 +27,6 @@ class DiagonalBasis[
     ) -> None:
         super().__init__(cast(Any, inner))
         assert self.inner.children[0].size == self.inner.children[1].size
-
-    @override
-    def conjugate_basis(self) -> DiagonalBasis[DT, B0, B1, E]:
-        return DiagonalBasis[DT, B0, B1, E](self.inner.conjugate_basis())
 
     @property
     @override
@@ -83,11 +80,15 @@ class DiagonalBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, DiagonalBasis) and (other.inner == self.inner)  # type: ignore unknown
+        return (
+            isinstance(other, DiagonalBasis)
+            and (other.inner == self.inner)  # type: ignore unknown
+            and self.conjugate == other.conjugate
+        )
 
     @override
     def __hash__(self) -> int:
-        return hash((2, self.inner))
+        return hash((2, self.inner, self.conjugate))
 
     @override
     def with_inner[  # type: ignore there is no way to bound inner in parent
@@ -189,3 +190,25 @@ def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
 ) -> DiagonalBasis[Any, _B0, _B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
     return DiagonalBasis(tuple_basis(children, extra_metadata))
+
+
+def _is_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+    basis: Basis[Metadata2D[M0, M1, E], DT],
+) -> TypeGuard[DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E]]:
+    return isinstance(basis, DiagonalBasis)
+
+
+def as_diagonal_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[Metadata2D[M0, M1, E], DT],
+) -> DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E] | None:
+    """Get the closest basis that supports the feature set."""
+    assert len(basis.metadata().fundamental_shape) == 2  # noqa: PLR2004
+    return next(
+        (b for b in wrapped_basis_iter_inner(basis) if _is_diagonal_basis(b)),
+        None,
+    )

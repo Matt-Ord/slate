@@ -12,6 +12,11 @@ from slate.metadata.stacked import StackedMetadata
 class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     """Represents a full fundamental basis."""
 
+    def __init__[_M: BasisMetadata](
+        self: FundamentalBasis[_M], metadata: _M, *, conjugate: bool = False
+    ) -> None:
+        super().__init__(metadata, conjugate=conjugate)
+
     @property
     @override
     def size(self: Self) -> int:
@@ -34,18 +39,17 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         return vectors
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, FundamentalBasis):
-            return value.metadata() == self.metadata()  # type: ignore unknown
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, FundamentalBasis):
+            return (
+                other.metadata() == self.metadata()  # type: ignore unknown
+                and self.conjugate == other.conjugate
+            )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash(self.metadata())
-
-    @override
-    def conjugate_basis(self) -> FundamentalBasis[M]:
-        return self
+        return hash((self.metadata(), self.conjugate))
 
     @staticmethod
     def from_size(

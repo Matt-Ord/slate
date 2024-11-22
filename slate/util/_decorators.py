@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import datetime
 import pickle  # noqa: S403
+from collections.abc import Mapping
 from functools import update_wrapper, wraps
-from typing import TYPE_CHECKING, Any, Callable, Literal, Mapping, overload
+from typing import TYPE_CHECKING, Any, Callable, Literal, overload
 
 if TYPE_CHECKING:
     from pathlib import Path

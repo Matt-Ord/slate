@@ -34,7 +34,6 @@ preview = true
 ignore = [
     "COM812",
     "E501",
-    "ANN101",
     "S101",
     "PT009",
     "D100",

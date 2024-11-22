@@ -33,30 +33,25 @@ class TransformedBasis[M: BasisMetadata](
         inner: Basis[M, np.complex128],
         *,
         direction: TransformDirection = "forward",
+        conjugate: bool = False,
     ) -> None:
         self._direction: TransformDirection = direction
-        super().__init__(inner)
+        super().__init__(inner, conjugate=conjugate)
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, TransformedBasis):
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, TransformedBasis):
             return (
-                self.size == value.size
-                and value.inner == self.inner  # type: ignore unknown
-                and value.direction == self.direction
+                self.size == other.size
+                and other.inner == self.inner  # type: ignore unknown
+                and other.direction == self.direction
+                and self.conjugate == other.conjugate
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((1, self.inner, self.direction))
-
-    @override
-    def conjugate_basis(self) -> TransformedBasis[M]:
-        return TransformedBasis(
-            self.inner,
-            direction="forward" if self.direction == "backward" else "backward",
-        )
+        return hash((1, self.inner, self.direction, self.conjugate))
 
     @property
     @override

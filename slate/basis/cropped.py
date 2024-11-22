@@ -13,9 +13,11 @@ from slate.util import pad_ft_points
 class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
     """Represents a cropped basis."""
 
-    def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:
+    def __init__(
+        self: Self, size: int, inner: Basis[M, DT], *, conjugate: bool = False
+    ) -> None:
         self._size = size
-        super().__init__(inner)
+        super().__init__(inner, conjugate=conjugate)
 
     @property
     @override
@@ -23,14 +25,18 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
         return self._size
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, CroppedBasis):
-            return self._size == value._size and value._inner == self._inner  # type: ignore unknown
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, CroppedBasis):
+            return (
+                self._size == other._size
+                and other._inner == self._inner  # type: ignore unknown
+                and self.conjugate == other.conjugate
+            )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((self._size, self._inner))
+        return hash((self._size, self._inner, self.conjugate))
 
     @override
     def __into_inner__[DT1: np.generic](  # [DT1: DT]
@@ -63,7 +69,8 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
             return vectors
 
         if isinstance(basis, CroppedBasis) and self.inner == basis.inner:
-            return pad_ft_points(vectors, s=(basis.size,), axes=(axis,))
+            out = pad_ft_points(vectors, s=(basis.size,), axes=(axis,))
+            return np.conj(out) if (self.conjugate != basis.conjugate) else out
 
         return super().__convert_vector_into__(vectors, basis, axis)
 
@@ -83,10 +90,6 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
     ) -> CroppedBasis[M1, DT1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return CroppedBasis(self.size, wrapper(self.inner))
-
-    @override
-    def conjugate_basis(self) -> CroppedBasis[M, DT]:
-        return CroppedBasis(self.size, self.inner.conjugate_basis())
 
     @property
     @override

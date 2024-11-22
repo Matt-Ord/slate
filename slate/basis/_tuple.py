@@ -5,7 +5,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Iterator,
     Literal,
     Never,
     Self,
@@ -30,21 +29,13 @@ from slate.metadata import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from slate.metadata import SimpleMetadata
 
 type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[
     StackedMetadata[M, E], DT
 ]
-
-
-def stacked_basis_as_fundamental[M: BasisMetadata, E, DT: np.generic](
-    basis: StackedBasis[M, E, DT],
-) -> TupleBasis[M, E, DT]:
-    """Get the equivalent Tuple of Fundamental Basis."""
-    return TupleBasis[M, E, DT](
-        tuple(FundamentalBasis(basis.metadata()[i]) for i in range(basis.n_dim)),
-        basis.metadata().extra,
-    )
 
 
 def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
@@ -84,16 +75,21 @@ class TupleBasis[
     """Represents a Tuple of independent basis."""
 
     def __init__(
-        self: Self, children: tuple[Basis[M, Any], ...], extra_metadata: E
+        self: Self,
+        children: tuple[Basis[M, Any], ...],
+        extra_metadata: E,
+        *,
+        conjugate: bool = False,
     ) -> None:
         self._children = children
-        self._metadata = StackedMetadata(
-            tuple(i.metadata() for i in children), extra_metadata
-        )
 
-    @override
-    def conjugate_basis(self) -> TupleBasis[M, E, Any, _InnerM]:
-        return self
+        super().__init__(
+            cast(
+                _InnerM,
+                StackedMetadata(tuple(i.metadata() for i in children), extra_metadata),
+            ),
+            conjugate=conjugate,
+        )
 
     @property
     def children(self) -> tuple[Basis[M, Any], ...]:
@@ -116,7 +112,7 @@ class TupleBasis[
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        basis = stacked_basis_as_fundamental(self)
+        basis = fundamental_tuple_basis_from_metadata(self.metadata())
         return _convert_tuple_basis_vector(
             vectors,
             cast(TupleBasis[M, E, DT1], self),
@@ -130,7 +126,7 @@ class TupleBasis[
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        basis = stacked_basis_as_fundamental(self)
+        basis = fundamental_tuple_basis_from_metadata(self.metadata())
         return _convert_tuple_basis_vector(
             vectors,
             cast(TupleBasis[M, E, DT1], basis),
@@ -162,17 +158,20 @@ class TupleBasis[
             return super().__convert_vector_into__(vectors, basis, axis)
 
         # We overload __convert_vector_into__, more likely to get the 'happy path'
-        return _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
+
+        vectors = np.conj(vectors) if self.conjugate else vectors
+        out = _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
+        return np.conj(out) if basis.conjugate else out
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, TupleBasis):
-            return value.children == self.children  # type: ignore unknown
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, TupleBasis):
+            return other.children == self.children and self.conjugate == other.conjugate  # type: ignore unknown
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((self.metadata().extra, self.children))
+        return hash((self.metadata().extra, self.children, self.conjugate))
 
     @property
     @override
@@ -259,10 +258,6 @@ class TupleBasisND[
     def metadata(self) -> _InnerM:
         return super().metadata()
 
-    @override
-    def conjugate_basis(self) -> TupleBasisND[DT, E, _InnerM]:
-        return self
-
     @property
     def children(self) -> tuple[Basis[BasisMetadata, DT], ...]:  # type: ignore inconsistent type
         """Inner basis."""
@@ -306,10 +301,6 @@ class TupleBasis1D[
         self: TupleBasis1D[Any, Basis[_M0, Any], E],
     ) -> Metadata1D[_M0, E]:
         return cast(Metadata1D[_M0, E], super().metadata())
-
-    @override
-    def conjugate_basis(self) -> TupleBasis1D[DT, B0, E]:
-        return cast(TupleBasis1D[DT, B0, E], super().conjugate_basis())
 
     @property
     def children(self) -> tuple[B0]:  # type: ignore inconsistent type
@@ -359,10 +350,6 @@ class TupleBasis2D[
         self: TupleBasis2D[Any, Basis[_M0, Any], Basis[_M1, Any], E],
     ) -> Metadata2D[_M0, _M1, E]:
         return cast(Metadata2D[_M0, _M1, E], super().metadata())
-
-    @override
-    def conjugate_basis(self) -> TupleBasis2D[DT, B0, B1, E]:
-        return cast(TupleBasis2D[DT, B0, B1, E], super().conjugate_basis())
 
     @property
     def children(self) -> tuple[B0, B1]:  # type: ignore inconsistent type
@@ -417,10 +404,6 @@ class TupleBasis3D[
         self: TupleBasis3D[Any, Basis[_M0, Any], Basis[_M1, Any], Basis[_M2, Any], E],
     ) -> Metadata3D[_M0, _M1, _M2, E]:
         return cast(Metadata3D[_M0, _M1, _M2, E], super().metadata())
-
-    @override
-    def conjugate_basis(self) -> TupleBasis3D[DT, B0, B1, B2, E]:
-        return cast(TupleBasis3D[DT, B0, B1, B2, E], super().conjugate_basis())
 
     @property
     def children(self) -> tuple[B0, B1, B2]:  # type: ignore inconsistent type

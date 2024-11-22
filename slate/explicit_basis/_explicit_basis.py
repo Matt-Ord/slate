@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, override
 
 import numpy as np
 
-from slate.array import SlateArray, convert_array
+from slate.array import SlateArray
 from slate.basis import (
     Basis,
     BasisFeature,
-    TupleBasis2D,
     WrappedBasis,
     as_tuple_basis,
     tuple_basis,
 )
+from slate.basis._diagonal import DiagonalBasis, diagonal_basis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
@@ -34,6 +34,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         self: Self,
         states: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
+        conjugate: bool = False,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
@@ -41,50 +42,46 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         self._states = converted
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
-        super().__init__(converted.basis[1])
+        super().__init__(converted.basis[1], conjugate=conjugate)
 
     @property
     def data_id(self: Self) -> uuid.UUID:
         return self._data_id
 
+    def inverse_basis(self: Self) -> ExplicitBasis[M, DT]:
+        return ExplicitBasis(
+            self.states,
+            direction="backward" if self.direction == "forward" else "forward",
+            conjugate=self.conjugate,
+            data_id=self.data_id,
+        )
+
     @property
     def states(
         self: Self,
-    ) -> SlateArray[
-        Metadata2D[BasisMetadata, M, Any],
-        DT,
-        TupleBasis2D[Any, Basis[BasisMetadata, DT], Basis[M, DT], Any],
-    ]:
+    ) -> SlateArray[Metadata2D[BasisMetadata, M, Any], DT]:
         return self._states
 
     @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, ExplicitBasis):
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, ExplicitBasis):
             return (
-                self.size == value.size
-                and value.inner == self.inner  # type: ignore unknown
-                and value.direction == self.direction
-                and value._data_id == self._data_id
+                self.size == other.size
+                and other.inner == self.inner  # type: ignore unknown
+                and other.direction == self.direction
+                and other._data_id == self._data_id
+                and self.conjugate == other.conjugate
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((1, self.inner, self.direction, self._data_id))
+        return hash((1, self.inner, self.direction, self._data_id, self.conjugate))
 
     @property
     @override
     def size(self: Self) -> int:
-        """Number of elements in the basis."""
-        return self._states.basis[0].size
-
-    @override
-    def conjugate_basis(self) -> ExplicitBasis[M, DT]:
-        return ExplicitBasis(
-            self._states,
-            direction="forward" if self.direction == "backward" else "backward",
-            data_id=self._data_id,
-        )
+        return self.states.basis.fundamental_shape[0]
 
     @property
     def direction(self: Self) -> Direction:
@@ -93,11 +90,15 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     def _transform_matrix(self) -> np.ndarray[Any, Any]:
+        # TODO: We should be able to use einsum to do this, but it is not implemented yet.  # noqa: FIX002
+        # TODO: inv() on sparse matrices is not implemented yet.  # noqa: FIX002
+        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+
         return (
-            self._states.raw_data.reshape(self._states.basis.shape)
+            states_tuple.raw_data.reshape(states_tuple.basis.shape)
             if self.direction == "forward"
             else np.transpose(
-                np.linalg.inv(self._states.raw_data.reshape(self._states.basis.shape))  # type: ignore unknown
+                np.linalg.inv(states_tuple.raw_data.reshape(states_tuple.basis.shape))  # type: ignore unknown
             )  # type: ignore unknown
         )
 
@@ -116,10 +117,11 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
+        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
         return (
-            np.linalg.inv(self._states.raw_data.reshape(self._states.basis.shape))  # type: ignore inv
+            np.linalg.inv(states_tuple.raw_data.reshape(states_tuple.basis.shape))  # type: ignore inv
             if self.direction == "forward"
-            else np.transpose(self._states.raw_data.reshape(self._states.basis.shape))
+            else np.transpose(states_tuple.raw_data.reshape(states_tuple.basis.shape))
         )
 
     @override
@@ -139,20 +141,24 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     def with_inner[
         M1: BasisMetadata,
         DT1: np.generic,
-    ](self: Self, inner: Basis[M1, DT1]) -> ExplicitBasis[M1, DT1]:
+        _B: Basis[BasisMetadata, Any] = Basis[M1, Any],
+    ](self: ExplicitBasis[M1, DT1], inner: _B) -> ExplicitBasis[M1, Any]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
     def with_modified_inner[
         M1: BasisMetadata,
         DT1: np.generic,
+        _B: Basis[BasisMetadata, Any] = Basis[M1, Any],
     ](
-        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
-    ) -> ExplicitBasis[M1, DT1]:
+        self: ExplicitBasis[M1, DT1], wrapper: Callable[[Basis[M1, DT]], _B]
+    ) -> ExplicitBasis[M1, Any]:
         """Get the wrapped basis after wrapper is applied to inner."""
-        new_basis = tuple_basis((self._states.basis[0], wrapper(self.inner)))
+        converted = self.states.with_basis(
+            tuple_basis((as_tuple_basis(self.states.basis)[0], wrapper(self.inner)))
+        )
         return ExplicitBasis(
-            cast(SlateArray[Any, DT1], convert_array(self._states, new_basis)),
+            converted,
             direction=self.direction,
             data_id=self._data_id,
         )
@@ -224,42 +230,102 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
+        conjugate: bool = False,
         data_id: uuid.UUID | None = None,
     ) -> None:
-        super().__init__(data, direction=direction, data_id=data_id)
+        super().__init__(
+            data, direction=direction, data_id=data_id, conjugate=conjugate
+        )
         if assert_unitary:
-            _assert_unitary(self._states.raw_data.reshape(self._states.basis.shape))
+            states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+            _assert_unitary(states_tuple.raw_data.reshape(states_tuple.basis.shape))
 
     @override
-    def conjugate_basis(self) -> ExplicitUnitaryBasis[M, DT]:
+    def inverse_basis(self: Self) -> ExplicitUnitaryBasis[M, DT]:
         return ExplicitUnitaryBasis(
-            self._states,
-            direction="forward" if self.direction == "backward" else "backward",
-            data_id=self._data_id,
+            self.states,
+            direction="backward" if self.direction == "forward" else "forward",
+            conjugate=self.conjugate,
+            data_id=self.data_id,
         )
 
     @property
     @override
-    def size(self: Self) -> int:
-        """Number of elements in the basis."""
-        return self._states.basis[0].size
-
-    @property
-    @override
     def _transform_matrix(self) -> np.ndarray[Any, Any]:
+        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
         return (
-            self._states.raw_data.reshape(self._states.basis.shape)
+            states_tuple.raw_data.reshape(states_tuple.basis.shape)
             if self.direction == "forward"
-            else np.conj(self._states.raw_data.reshape(self._states.basis.shape))
+            else np.conj(states_tuple.raw_data.reshape(states_tuple.basis.shape))
         )
 
     @property
     @override
     def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
+        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
         return (
             np.transpose(
-                np.conj(self._states.raw_data.reshape(self._states.basis.shape))
+                np.conj(states_tuple.raw_data.reshape(states_tuple.basis.shape))
             )
             if self.direction == "forward"
-            else np.transpose(self._states.raw_data.reshape(self._states.basis.shape))
+            else np.transpose(states_tuple.raw_data.reshape(states_tuple.basis.shape))
+        )
+
+
+class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
+    ExplicitUnitaryBasis[M, DT]
+):
+    def __init__(
+        self: Self,
+        inner: Basis[M, DT],
+        *,
+        conjugate: bool = False,
+    ) -> None:
+        self._direction: Direction = "forward"
+        self._data_id = uuid.UUID(int=0)
+        WrappedBasis[M, DT, Basis[M, DT]].__init__(self, inner, conjugate=conjugate)
+
+    @override
+    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+        self,
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        axis: int = -1,
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return vectors
+
+    @override
+    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+        self,
+        vectors: np.ndarray[Any, np.dtype[DT1]],
+        axis: int = -1,
+    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        return vectors
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, TrivialExplicitBasis):
+            return self.inner == other.inner and self.conjugate == other.conjugate  # type: ignore unknown
+        return False
+
+    @override
+    def __hash__(self) -> int:
+        return hash((1, self.inner, self.conjugate))
+
+    @property
+    @override
+    def size(self: Self) -> int:
+        return self.inner.size
+
+    @property
+    @override
+    def states(
+        self: Self,
+    ) -> SlateArray[
+        Metadata2D[M, M, Any],
+        Any,
+        DiagonalBasis[Any, Basis[M, DT], Basis[M, DT], Any],
+    ]:
+        return SlateArray(
+            diagonal_basis((self.inner, self.inner), self.inner.metadata()),
+            np.ones(self.size),
         )

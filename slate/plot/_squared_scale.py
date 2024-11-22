@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self, Sequence, override
+from typing import TYPE_CHECKING, Self, override
 
 import numpy as np
 from matplotlib.scale import ScaleBase
@@ -8,6 +8,8 @@ from matplotlib.ticker import Locator
 from matplotlib.transforms import Transform
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from matplotlib.axis import Axis
     from matplotlib.pylab import ArrayLike
 

@@ -30,7 +30,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def __hash__(self) -> int:
-        return hash((self._inner, self._truncation))
+        return hash((self._inner, self._truncation, self.conjugate))
 
     @property
     def truncation(self: Self) -> Truncation:
@@ -44,13 +44,13 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         return self._truncation.n
 
     @override
-    def conjugate_basis(self) -> TruncatedBasis[M, DT]:
-        return self
-
-    @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, TruncatedBasis):
-            return self._truncation == value._truncation and value._inner == self._inner  # type: ignore unknown
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, TruncatedBasis):
+            return (
+                self._truncation == other._truncation
+                and other._inner == self._inner  # type: ignore unknown
+                and self.conjugate == other.conjugate
+            )
         return False
 
     @property

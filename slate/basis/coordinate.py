@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, Sequence, override
+from typing import TYPE_CHECKING, Any, Callable, Self, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
@@ -18,9 +21,11 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         self: Self,
         points: Sequence[int] | np.ndarray[Any, np.dtype[np.int_]],
         inner: Basis[M, DT],
+        *,
+        conjugate: bool = False,
     ) -> None:
         self._inner_points = np.sort(points)
-        super().__init__(inner)
+        super().__init__(inner, conjugate=conjugate)
         assert np.unique(self._inner_points).size == self._inner_points.size
 
     @property
@@ -34,15 +39,12 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         return self.inner_points.size
 
     @override
-    def conjugate_basis(self) -> CoordinateBasis[M, DT]:
-        return self
-
-    @override
-    def __eq__(self, value: object) -> bool:
-        if isinstance(value, CoordinateBasis):
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, CoordinateBasis):
             return (
-                np.allclose(self.inner_points, value.inner_points)
-                and value._inner == self._inner  # type: ignore unknown
+                np.allclose(self.inner_points, other.inner_points)
+                and other._inner == self._inner  # type: ignore unknown
+                and self.conjugate == other.conjugate
             )
         return False
 
