@@ -19,7 +19,19 @@ from slate.metadata.stacked import (
     MetadataND,
     StackedMetadata,
 )
-from slate.metadata.volume import AxisDirections, SpacedVolumeMetadata, VolumeMetadata
+from slate.metadata.util import (
+    fundamental_ndim,
+    fundamental_nk_points,
+    fundamental_nx_points,
+    fundamental_size,
+    fundamental_stacked_nk_points,
+    fundamental_stacked_nx_points,
+)
+from slate.metadata.volume import (
+    AxisDirections,
+    SpacedVolumeMetadata,
+    VolumeMetadata,
+)
 
 __all__ = [
     "AxisDirections",
@@ -40,4 +52,10 @@ __all__ = [
     "SpacedVolumeMetadata",
     "StackedMetadata",
     "VolumeMetadata",
+    "fundamental_ndim",
+    "fundamental_nk_points",
+    "fundamental_nx_points",
+    "fundamental_size",
+    "fundamental_stacked_nk_points",
+    "fundamental_stacked_nx_points",
 ]
