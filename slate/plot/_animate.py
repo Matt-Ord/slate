@@ -5,19 +5,19 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
+from slate.plot._plot import (
+    plot_data_1d_k,
+    plot_data_1d_n,
+    plot_data_1d_x,
+    plot_data_2d_k,
+    plot_data_2d_x,
+)
 from slate.plot._util import (
     Axes,
     Figure,
     Measure,
     Scale,
     get_figure,
-)
-from slate.plot.plot import (
-    plot_data_1d_k,
-    plot_data_1d_n,
-    plot_data_1d_x,
-    plot_data_2d_k,
-    plot_data_2d_x,
 )
 
 if TYPE_CHECKING:
