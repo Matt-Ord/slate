@@ -32,14 +32,14 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     def __init__(
         self: Self,
-        states: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
+        eigenvectors: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         conjugate: bool = False,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
-        converted = states.with_basis(as_tuple_basis(states.basis))
-        self._states = converted
+        converted = eigenvectors.with_basis(as_tuple_basis(eigenvectors.basis))
+        self._eigenvectors = converted
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
         super().__init__(converted.basis[1], conjugate=conjugate)
@@ -50,17 +50,17 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     def inverse_basis(self: Self) -> ExplicitBasis[M, DT]:
         return ExplicitBasis(
-            self.states,
+            self.eigenvectors,
             direction="backward" if self.direction == "forward" else "forward",
             conjugate=self.conjugate,
             data_id=self.data_id,
         )
 
     @property
-    def states(
+    def eigenvectors(
         self: Self,
-    ) -> SlateArray[Metadata2D[BasisMetadata, M, Any], DT]:
-        return self._states
+    ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
+        return self._eigenvectors
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -81,7 +81,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     @property
     @override
     def size(self: Self) -> int:
-        return self.states.basis.fundamental_shape[0]
+        return self.eigenvectors.basis.fundamental_shape[0]
 
     @property
     def direction(self: Self) -> Direction:
@@ -92,7 +92,9 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     def _transform_matrix(self) -> np.ndarray[Any, Any]:
         # TODO: We should be able to use einsum to do this, but it is not implemented yet.  # noqa: FIX002
         # TODO: inv() on sparse matrices is not implemented yet.  # noqa: FIX002
-        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+        states_tuple = self.eigenvectors.with_basis(
+            as_tuple_basis(self.eigenvectors.basis)
+        )
 
         return (
             states_tuple.raw_data.reshape(states_tuple.basis.shape)
@@ -117,7 +119,9 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
-        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+        states_tuple = self.eigenvectors.with_basis(
+            as_tuple_basis(self.eigenvectors.basis)
+        )
         return (
             np.linalg.inv(states_tuple.raw_data.reshape(states_tuple.basis.shape))  # type: ignore inv
             if self.direction == "forward"
@@ -154,8 +158,10 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         self: ExplicitBasis[M1, DT1], wrapper: Callable[[Basis[M1, DT]], _B]
     ) -> ExplicitBasis[M1, Any]:
         """Get the wrapped basis after wrapper is applied to inner."""
-        converted = self.states.with_basis(
-            tuple_basis((as_tuple_basis(self.states.basis)[0], wrapper(self.inner)))
+        converted = self.eigenvectors.with_basis(
+            tuple_basis(
+                (as_tuple_basis(self.eigenvectors.basis)[0], wrapper(self.inner))
+            )
         )
         return ExplicitBasis(
             converted,
@@ -226,7 +232,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 
     def __init__(
         self: Self,
-        data: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
+        eigenvectors: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
@@ -234,16 +240,18 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         data_id: uuid.UUID | None = None,
     ) -> None:
         super().__init__(
-            data, direction=direction, data_id=data_id, conjugate=conjugate
+            eigenvectors, direction=direction, data_id=data_id, conjugate=conjugate
         )
         if assert_unitary:
-            states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+            states_tuple = self.eigenvectors.with_basis(
+                as_tuple_basis(self.eigenvectors.basis)
+            )
             _assert_unitary(states_tuple.raw_data.reshape(states_tuple.basis.shape))
 
     @override
     def inverse_basis(self: Self) -> ExplicitUnitaryBasis[M, DT]:
         return ExplicitUnitaryBasis(
-            self.states,
+            self.eigenvectors,
             direction="backward" if self.direction == "forward" else "forward",
             conjugate=self.conjugate,
             data_id=self.data_id,
@@ -252,7 +260,9 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     @property
     @override
     def _transform_matrix(self) -> np.ndarray[Any, Any]:
-        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+        states_tuple = self.eigenvectors.with_basis(
+            as_tuple_basis(self.eigenvectors.basis)
+        )
         return (
             states_tuple.raw_data.reshape(states_tuple.basis.shape)
             if self.direction == "forward"
@@ -262,7 +272,9 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     @property
     @override
     def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
-        states_tuple = self.states.with_basis(as_tuple_basis(self.states.basis))
+        states_tuple = self.eigenvectors.with_basis(
+            as_tuple_basis(self.eigenvectors.basis)
+        )
         return (
             np.transpose(
                 np.conj(states_tuple.raw_data.reshape(states_tuple.basis.shape))
@@ -318,10 +330,10 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     @override
-    def states(
+    def eigenvectors(
         self: Self,
     ) -> SlateArray[
-        Metadata2D[M, M, Any],
+        Metadata2D[M, M, None],
         Any,
         DiagonalBasis[Any, Basis[M, DT], Basis[M, DT], Any],
     ]:

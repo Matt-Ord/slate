@@ -123,6 +123,22 @@ def into_diagonal[
     return _eig_from_tuple(convert_array(array, tuple_basis))
 
 
+def get_eigenvectors[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.complexfloating[Any, Any],
+](
+    array: SlateArray[Metadata2D[M0, M1, E], DT],
+) -> SlateArray[
+    Metadata2D[BasisMetadata, M0, None],
+    np.complex128,
+]:
+    # TODO: how do we deal with the fact that we have two different bases?
+    # TODO: what is the api for the other eigenvectors?
+    return into_diagonal(array).basis.inner[0].eigenvectors
+
+
 def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[StackedMetadata[M, E], DT],
 ) -> SlateArray[BasisMetadata, np.float64, FundamentalBasis[BasisMetadata]]:
@@ -188,3 +204,18 @@ def into_diagonal_hermitian[
 
     tuple_basis = as_tuple_basis(array.basis)
     return _eigh_from_tuple(convert_array(array, tuple_basis))
+
+
+def get_eigenvectors_hermitian[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.complexfloating[Any, Any],
+](
+    array: SlateArray[Metadata2D[M0, M1, E], DT],
+) -> SlateArray[
+    Metadata2D[BasisMetadata, M0, None],
+    np.complex128,
+]:
+    # TODO: how do we deal with the fact that we have two different bases?
+    return into_diagonal_hermitian(array).basis.inner[0].eigenvectors
