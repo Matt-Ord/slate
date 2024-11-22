@@ -52,10 +52,7 @@ def fundamental_stacked_nx_points(
 ) -> tuple[np.ndarray[Any, np.dtype[np.int_]], ...]:
     """Get the stacked index, using the x convention (0...N)."""
     mesh = np.meshgrid(
-        *(
-            fundamental_nx_points(SimpleMetadata((n,)))
-            for n in metadata.fundamental_shape
-        ),
+        *(fundamental_nx_points(SimpleMetadata(n)) for n in metadata.fundamental_shape),
         indexing="ij",
     )
     return tuple(nki.ravel() for nki in mesh)
@@ -66,10 +63,7 @@ def fundamental_stacked_nk_points(
 ) -> tuple[np.ndarray[Any, np.dtype[np.int_]], ...]:
     """Get the stacked index, using the kx convention (0...N/2-N/2...)."""
     mesh = np.meshgrid(
-        *(
-            fundamental_nk_points(SimpleMetadata((n,)))
-            for n in metadata.fundamental_shape
-        ),
+        *(fundamental_nk_points(SimpleMetadata(n)) for n in metadata.fundamental_shape),
         indexing="ij",
     )
     return tuple(nki.ravel() for nki in mesh)

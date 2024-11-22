@@ -7,18 +7,17 @@ from typing import (
 import numpy as np
 
 from slate.metadata import LabelSpacing, SpacedLengthMetadata, StackedMetadata
-from slate.util import (
-    get_position_in_sorted,
-    slice_ignoring_axes,
-)
-
-from ._volume import (
+from slate.metadata.volume._volume import (
     AxisDirections,
     SpacedVolumeMetadata,
     fundamental_stacked_delta_k,
     fundamental_stacked_delta_x,
     fundamental_stacked_k_points,
     fundamental_stacked_x_points,
+)
+from slate.util import (
+    get_position_in_sorted,
+    slice_ignoring_axes,
 )
 
 
@@ -126,7 +125,7 @@ def spaced_volume_metadata_from_stacked_delta_x(
     normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v))
     return StackedMetadata(
         tuple(
-            SpacedLengthMetadata((s,), spacing=LabelSpacing(delta=delta))
+            SpacedLengthMetadata(s, spacing=LabelSpacing(delta=delta))
             for (s, delta) in zip(shape, delta_v, strict=True)
         ),
         AxisDirections(vectors=normalized_vectors),

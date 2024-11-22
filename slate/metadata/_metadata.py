@@ -17,10 +17,16 @@ class BasisMetadata(Protocol):
 
 
 @dataclass(frozen=True)
-class SimpleMetadata:
+class SimpleMetadata(BasisMetadata):
     """Basic Metadata for a Fundamental Basis."""
 
-    fundamental_shape: tuple[int, ...]
+    fundamental_size: int
+
+    @property
+    @override
+    def fundamental_shape(self: Self) -> tuple[int, ...]:
+        """Shape of the full data."""
+        return (self.fundamental_size,)
 
 
 class LabelCollection[DT](Protocol):
@@ -31,8 +37,6 @@ class LabelCollection[DT](Protocol):
 
 class LabeledMetadata[DT](SimpleMetadata, ABC):
     """A metadata with some data associated to each location."""
-
-    fundamental_shape: tuple[int, ...]
 
     @property
     @abstractmethod

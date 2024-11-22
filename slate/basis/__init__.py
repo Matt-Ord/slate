@@ -29,7 +29,7 @@ from slate.basis.coordinate import CoordinateBasis
 from slate.basis.cropped import CroppedBasis
 from slate.basis.fundamental import FundamentalBasis
 from slate.basis.recast import RecastBasis
-from slate.basis.split import SplitBasis, split_basis
+from slate.basis.split import SplitBasis
 from slate.basis.transformed import (
     TransformedBasis,
     fundamental_transformed_tuple_basis_from_metadata,
@@ -43,6 +43,7 @@ from slate.basis.wrapped import (
     as_index_basis,
     as_mul_basis,
     as_sub_basis,
+    get_common_basis,
     get_wrapped_basis_super_inner,
 )
 
@@ -78,9 +79,9 @@ __all__ = [
     "fundamental_transformed_tuple_basis_from_shape",
     "fundamental_tuple_basis_from_metadata",
     "fundamental_tuple_basis_from_shape",
+    "get_common_basis",
     "get_wrapped_basis_super_inner",
     "isotropic_basis",
-    "split_basis",
     "stacked_basis_as_fundamental",
     "tuple_basis",
     "tuple_basis_is_variadic",
