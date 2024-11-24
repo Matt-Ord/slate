@@ -76,12 +76,21 @@ def _eig_from_tuple[
     ],
 ]:
     eig = np.linalg.eig(array.raw_data.reshape(array.basis.shape))
-    states_basis = tuple_basis(
-        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[1])
-    )
 
-    basis_0 = ExplicitBasis(SlateArray(states_basis, np.transpose(eig.eigenvectors)))
-    basis_1 = basis_0.inverse_basis()
+    states_basis_0 = tuple_basis(
+        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+    )
+    basis_0 = ExplicitBasis(
+        SlateArray(states_basis_0, np.transpose(eig.eigenvectors)),
+    )
+    states_basis_1 = tuple_basis(
+        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+    )
+    basis_1 = ExplicitBasis(
+        SlateArray(states_basis_1, np.transpose(eig.eigenvectors)),
+        data_id=basis_0.data_id,
+        direction="backward",
+    )
 
     return SlateArray(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
@@ -167,13 +176,21 @@ def _eigh_from_tuple[
 ]:
     eig = np.linalg.eigh(array.raw_data.reshape(array.basis.shape))
 
-    states_basis = tuple_basis(
-        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[1])
+    states_basis_0 = tuple_basis(
+        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
     )
     basis_0 = ExplicitUnitaryBasis(
-        SlateArray(states_basis, np.transpose(eig.eigenvectors))
+        SlateArray(states_basis_0, np.transpose(eig.eigenvectors)),
     )
-    basis_1 = basis_0.inverse_basis()
+    states_basis_1 = tuple_basis(
+        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+    )
+    basis_1 = ExplicitUnitaryBasis(
+        SlateArray(states_basis_1, np.transpose(eig.eigenvectors)),
+        data_id=basis_0.data_id,
+        direction="backward",
+        assert_unitary=False,
+    )
 
     return SlateArray(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),

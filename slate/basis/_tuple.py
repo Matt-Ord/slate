@@ -79,7 +79,7 @@ class TupleBasis[
         children: tuple[Basis[M, Any], ...],
         extra_metadata: E,
         *,
-        conjugate: bool = False,
+        is_dual: bool = False,
     ) -> None:
         self._children = children
 
@@ -88,7 +88,7 @@ class TupleBasis[
                 _InnerM,
                 StackedMetadata(tuple(i.metadata() for i in children), extra_metadata),
             ),
-            conjugate=conjugate,
+            is_dual=is_dual,
         )
 
     @property
@@ -159,19 +159,19 @@ class TupleBasis[
 
         # We overload __convert_vector_into__, more likely to get the 'happy path'
 
-        vectors = np.conj(vectors) if self.conjugate else vectors
+        vectors = np.conj(vectors) if self.is_dual else vectors
         out = _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
-        return np.conj(out) if basis.conjugate else out
+        return np.conj(out) if basis.is_dual else out
 
     @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TupleBasis):
-            return other.children == self.children and self.conjugate == other.conjugate  # type: ignore unknown
+            return other.children == self.children and self.is_dual == other.is_dual  # type: ignore unknown
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((self.metadata().extra, self.children, self.conjugate))
+        return hash((self.metadata().extra, self.children, self.is_dual))
 
     @property
     @override

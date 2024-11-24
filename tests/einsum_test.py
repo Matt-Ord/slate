@@ -15,7 +15,7 @@ from slate.basis import (
 )
 from slate.basis._tuple import tuple_basis
 from slate.basis.fundamental import FundamentalBasis
-from slate.linalg import into_diagonal
+from slate.linalg._eig import into_diagonal, into_diagonal_hermitian
 
 if TYPE_CHECKING:
     from slate.basis import Basis
@@ -26,9 +26,12 @@ def _test_einsum_in_basis(
     vector: SlateArray[Any, Any, Any],
     basis: Basis[Any, Any],
 ) -> None:
+    # TODO: we need the dual or reciprocal basis to do this properly
+    # This is not the same as the conjugate_basis if the basis is not hermitian
+    # https://math.stackexchange.com/q/1286148
     transformed_array = convert_array(
         array,
-        tuple_basis_with_child(array.basis, basis.conjugate_basis(), 1),
+        tuple_basis_with_child(array.basis, basis.dual_basis(), 1),
     )
     transformed_vector = convert_array(
         vector,
@@ -56,7 +59,7 @@ def test_einsum() -> None:
         tuple_basis(
             (
                 FundamentalBasis.from_size(10),
-                FundamentalBasis.from_size(10).conjugate_basis(),
+                FundamentalBasis.from_size(10).dual_basis(),
             )
         ),
         data,
@@ -86,7 +89,7 @@ def test_einsum_diagonal() -> None:
         tuple_basis(
             (
                 FundamentalBasis.from_size(10),
-                FundamentalBasis.from_size(10).conjugate_basis(),
+                FundamentalBasis.from_size(10).dual_basis(),
             )
         ),
         data,
@@ -94,6 +97,21 @@ def test_einsum_diagonal() -> None:
 
     data = rng.random((10,)) + 1j * rng.random((10,))
     vector = SlateArray(array.basis[0], data)
-
     diagonal_array = into_diagonal(array)
+    # TODO: some assumption about how the conjugate_basis is implemented
+    # for non hermitian explicit bases is wrong
+    _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
+
+    data = array.raw_data.reshape(array.basis.shape)
+    data += np.conj(data.T)
+    array = SlateArray(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(10),
+                FundamentalBasis.from_size(10).dual_basis(),
+            )
+        ),
+        data,
+    )
+    diagonal_array = into_diagonal_hermitian(array)
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])

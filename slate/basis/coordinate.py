@@ -21,11 +21,9 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         self: Self,
         points: Sequence[int] | np.ndarray[Any, np.dtype[np.int_]],
         inner: Basis[M, DT],
-        *,
-        conjugate: bool = False,
     ) -> None:
         self._inner_points = np.sort(points)
-        super().__init__(inner, conjugate=conjugate)
+        super().__init__(inner)
         assert np.unique(self._inner_points).size == self._inner_points.size
 
     @property
@@ -44,7 +42,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
             return (
                 np.allclose(self.inner_points, other.inner_points)
                 and other._inner == self._inner  # type: ignore unknown
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 

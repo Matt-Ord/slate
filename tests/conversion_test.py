@@ -57,11 +57,11 @@ def test_transformed_basis() -> None:
     )
 
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis.conjugate_basis()).raw_data, np.conj(data)
+        array.with_basis(fundamental_basis.dual_basis()).raw_data, np.conj(data)
     )
-    array = SlateArray(fundamental_basis.conjugate_basis(), data)
+    array = SlateArray(fundamental_basis.dual_basis(), data)
     np.testing.assert_array_almost_equal(
-        array.with_basis(transformed_basis.conjugate_basis()).raw_data,
+        array.with_basis(transformed_basis.dual_basis()).raw_data,
         np.conj(np.fft.fft(np.conj(data), norm="ortho")),
     )
 
@@ -71,17 +71,17 @@ def test_transformed_basis() -> None:
         array.with_basis(fundamental_basis).raw_data, np.fft.ifft(data, norm="ortho")
     )
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis.conjugate_basis()).raw_data,
+        array.with_basis(fundamental_basis.dual_basis()).raw_data,
         np.conj(np.fft.ifft(data, norm="ortho")),
     )
 
-    array = SlateArray(transformed_basis.conjugate_basis(), data)
+    array = SlateArray(transformed_basis.dual_basis(), data)
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis).raw_data,
         np.fft.ifft(np.conj(data), norm="ortho"),
     )
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis.conjugate_basis()).raw_data,
+        array.with_basis(fundamental_basis.dual_basis()).raw_data,
         np.conj(np.fft.ifft(np.conj(data), norm="ortho")),
     )
 

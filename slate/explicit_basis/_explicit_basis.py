@@ -34,7 +34,6 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         self: Self,
         eigenvectors: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
-        conjugate: bool = False,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
@@ -42,7 +41,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         self._eigenvectors = converted
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
-        super().__init__(converted.basis[1], conjugate=conjugate)
+        super().__init__(converted.basis[1])
 
     @property
     def data_id(self: Self) -> uuid.UUID:
@@ -52,7 +51,6 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         return ExplicitBasis(
             self.eigenvectors,
             direction="backward" if self.direction == "forward" else "forward",
-            conjugate=self.conjugate,
             data_id=self.data_id,
         )
 
@@ -70,13 +68,13 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
                 and other.inner == self.inner  # type: ignore unknown
                 and other.direction == self.direction
                 and other._data_id == self._data_id
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((1, self.inner, self.direction, self._data_id, self.conjugate))
+        return hash((1, self.inner, self.direction, self._data_id, self.is_dual))
 
     @property
     @override
@@ -95,13 +93,12 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         states_tuple = self.eigenvectors.with_basis(
             as_tuple_basis(self.eigenvectors.basis)
         )
+        states_raw = states_tuple.raw_data.reshape(states_tuple.basis.shape)
 
         return (
-            states_tuple.raw_data.reshape(states_tuple.basis.shape)
-            if self.direction == "forward"
-            else np.transpose(
-                np.linalg.inv(states_tuple.raw_data.reshape(states_tuple.basis.shape))  # type: ignore unknown
-            )  # type: ignore unknown
+            states_raw
+            if (self.direction == "forward") ^ self.is_dual
+            else np.transpose(np.linalg.inv(states_raw))  # type: ignore unknown
         )
 
     @override
@@ -122,10 +119,12 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         states_tuple = self.eigenvectors.with_basis(
             as_tuple_basis(self.eigenvectors.basis)
         )
+        states_raw = states_tuple.raw_data.reshape(states_tuple.basis.shape)
+
         return (
-            np.linalg.inv(states_tuple.raw_data.reshape(states_tuple.basis.shape))  # type: ignore inv
-            if self.direction == "forward"
-            else np.transpose(states_tuple.raw_data.reshape(states_tuple.basis.shape))
+            np.linalg.inv(states_raw)  # type: ignore inv
+            if (self.direction == "forward") ^ self.is_dual
+            else np.transpose(states_raw)
         )
 
     @override
@@ -236,12 +235,9 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
-        conjugate: bool = False,
         data_id: uuid.UUID | None = None,
     ) -> None:
-        super().__init__(
-            eigenvectors, direction=direction, data_id=data_id, conjugate=conjugate
-        )
+        super().__init__(eigenvectors, direction=direction, data_id=data_id)
         if assert_unitary:
             states_tuple = self.eigenvectors.with_basis(
                 as_tuple_basis(self.eigenvectors.basis)
@@ -253,7 +249,6 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         return ExplicitUnitaryBasis(
             self.eigenvectors,
             direction="backward" if self.direction == "forward" else "forward",
-            conjugate=self.conjugate,
             data_id=self.data_id,
         )
 
@@ -287,15 +282,10 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
     ExplicitUnitaryBasis[M, DT]
 ):
-    def __init__(
-        self: Self,
-        inner: Basis[M, DT],
-        *,
-        conjugate: bool = False,
-    ) -> None:
+    def __init__(self: Self, inner: Basis[M, DT]) -> None:
         self._direction: Direction = "forward"
         self._data_id = uuid.UUID(int=0)
-        WrappedBasis[M, DT, Basis[M, DT]].__init__(self, inner, conjugate=conjugate)
+        WrappedBasis[M, DT, Basis[M, DT]].__init__(self, inner)
 
     @override
     def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
@@ -316,12 +306,12 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
     @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TrivialExplicitBasis):
-            return self.inner == other.inner and self.conjugate == other.conjugate  # type: ignore unknown
+            return self.inner == other.inner and self.is_dual == other.is_dual  # type: ignore unknown
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((1, self.inner, self.conjugate))
+        return hash((1, self.inner, self.is_dual))
 
     @property
     @override

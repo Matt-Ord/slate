@@ -60,21 +60,21 @@ class SplitBasis[
             return (
                 other.lhs == self.lhs  # type: ignore unknown
                 and other.rhs == self.rhs  # type: ignore unknown
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 
     @override
-    def conjugate_basis(self) -> Self:
+    def dual_basis(self) -> Self:
         copied = copy(self)
-        copied._lhs = self._lhs.conjugate_basis()  # noqa: SLF001
-        copied._rhs = self._rhs.conjugate_basis()  # noqa: SLF001
+        copied._lhs = self._lhs.dual_basis()  # noqa: SLF001
+        copied._rhs = self._rhs.dual_basis()  # noqa: SLF001
 
         return copied
 
     @override
     def __hash__(self) -> int:
-        return hash((1, hash(self._lhs), hash(self._rhs), self.conjugate))
+        return hash((1, hash(self._lhs), hash(self._rhs), self.is_dual))
 
     @property
     @override

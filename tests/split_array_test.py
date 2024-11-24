@@ -47,7 +47,7 @@ def test_split_array_equals_transformed() -> None:
         diagonal.raw_data,
     )
     np.testing.assert_allclose(
-        split.with_basis(diagonal.basis.conjugate_basis()).raw_data,
-        diagonal.with_basis(diagonal.basis.conjugate_basis()).raw_data,
+        split.with_basis(diagonal.basis.dual_basis()).raw_data,
+        diagonal.with_basis(diagonal.basis.dual_basis()).raw_data,
     )
     np.testing.assert_allclose(diagonal.as_array(), split.as_array())
