@@ -13,11 +13,9 @@ from slate.util import pad_ft_points
 class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
     """Represents a cropped basis."""
 
-    def __init__(
-        self: Self, size: int, inner: Basis[M, DT], *, conjugate: bool = False
-    ) -> None:
+    def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:
         self._size = size
-        super().__init__(inner, conjugate=conjugate)
+        super().__init__(inner)
 
     @property
     @override
@@ -30,13 +28,13 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
             return (
                 self._size == other._size
                 and other._inner == self._inner  # type: ignore unknown
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((self._size, self._inner, self.conjugate))
+        return hash((self._size, self._inner, self.is_dual))
 
     @override
     def __into_inner__[DT1: np.generic](  # [DT1: DT]
@@ -70,7 +68,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
 
         if isinstance(basis, CroppedBasis) and self.inner == basis.inner:
             out = pad_ft_points(vectors, s=(basis.size,), axes=(axis,))
-            return np.conj(out) if (self.conjugate != basis.conjugate) else out
+            return np.conj(out) if (self.is_dual != basis.is_dual) else out
 
         return super().__convert_vector_into__(vectors, basis, axis)
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, override
+from typing import TYPE_CHECKING, Any, Callable, Self, cast, overload, override
 
 import numpy as np
 
@@ -20,23 +20,14 @@ if TYPE_CHECKING:
     from slate.basis._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
     from slate.metadata import SimpleMetadata
 
-type TransformDirection = Literal["forward", "backward"]
-
 
 class TransformedBasis[M: BasisMetadata](
     WrappedBasis[M, np.complex128, Basis[M, np.complex128]],
 ):
     """Represents a fourier transformed basis."""
 
-    def __init__(
-        self: Self,
-        inner: Basis[M, np.complex128],
-        *,
-        direction: TransformDirection = "forward",
-        conjugate: bool = False,
-    ) -> None:
-        self._direction: TransformDirection = direction
-        super().__init__(inner, conjugate=conjugate)
+    def __init__(self: Self, inner: Basis[M, np.complex128]) -> None:
+        super().__init__(inner)
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -44,25 +35,19 @@ class TransformedBasis[M: BasisMetadata](
             return (
                 self.size == other.size
                 and other.inner == self.inner  # type: ignore unknown
-                and other.direction == self.direction
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((1, self.inner, self.direction, self.conjugate))
+        return hash((1, self.inner, self.is_dual))
 
     @property
     @override
     def size(self: Self) -> int:
         """Number of elements in the basis."""
         return self.inner.size
-
-    @property
-    def direction(self: Self) -> TransformDirection:
-        """The convention used to select the direction for the forward transform."""
-        return self._direction
 
     @classmethod
     def _transform_backward[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
@@ -94,7 +79,7 @@ class TransformedBasis[M: BasisMetadata](
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return (
             self._transform_backward(vectors, axis)
-            if self.direction == "forward"
+            if not self.is_dual
             else self._transform_forward(vectors, axis)
         )
 
@@ -106,7 +91,7 @@ class TransformedBasis[M: BasisMetadata](
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return (
             self._transform_forward(vectors, axis)
-            if self.direction == "forward"
+            if not self.is_dual
             else self._transform_backward(vectors, axis)
         )
 

@@ -30,7 +30,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def __hash__(self) -> int:
-        return hash((self._inner, self._truncation, self.conjugate))
+        return hash((self._inner, self._truncation, self.is_dual))
 
     @property
     def truncation(self: Self) -> Truncation:
@@ -49,7 +49,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
             return (
                 self._truncation == other._truncation
                 and other._inner == self._inner  # type: ignore unknown
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 

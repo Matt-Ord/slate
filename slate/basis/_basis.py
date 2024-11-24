@@ -32,9 +32,9 @@ This specify certain operations that can be performed on the basis.
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
     """Base class for a basis."""
 
-    def __init__(self, metadata: M, *, conjugate: bool = False) -> None:
+    def __init__(self, metadata: M, *, is_dual: bool = False) -> None:
         self._metadata = metadata
-        self._conjugate = conjugate
+        self._is_dual = is_dual
 
     @property
     @abstractmethod
@@ -95,12 +95,12 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         """Convert a vector into the non-conjugate basis from the fundamental basis."""
 
     @property
-    def conjugate(self: Self) -> bool:
-        return self._conjugate
+    def is_dual(self: Self) -> bool:
+        return self._is_dual
 
-    def conjugate_basis(self) -> Self:
+    def dual_basis(self) -> Self:
         copied = copy(self)
-        copied._conjugate = not copied._conjugate  # noqa: SLF001
+        copied._is_dual = not copied._is_dual  # noqa: SLF001
         return copied
 
     def __convert_vector_into__[
@@ -116,10 +116,8 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         if self == basis:
             return vectors
 
-        vectors = np.conj(vectors) if self.conjugate else vectors
         fundamental = self.__into_fundamental__(vectors, axis)
-        out = basis.__from_fundamental__(fundamental, axis)
-        return np.conj(out) if basis.conjugate else out
+        return basis.__from_fundamental__(fundamental, axis)
 
     def add_data[DT1: np.number[Any]](  # noqa: PLR6301
         self: Self,

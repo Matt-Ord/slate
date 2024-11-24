@@ -13,9 +13,9 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
     """Represents a full fundamental basis."""
 
     def __init__[_M: BasisMetadata](
-        self: FundamentalBasis[_M], metadata: _M, *, conjugate: bool = False
+        self: FundamentalBasis[_M], metadata: _M, *, is_dual: bool = False
     ) -> None:
-        super().__init__(metadata, conjugate=conjugate)
+        super().__init__(metadata, is_dual=is_dual)
 
     @property
     @override
@@ -28,7 +28,7 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return vectors
+        return np.conj(vectors) if self.is_dual else vectors
 
     @override
     def __from_fundamental__[DT1: np.generic](
@@ -36,20 +36,20 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return vectors
+        return np.conj(vectors) if self.is_dual else vectors
 
     @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, FundamentalBasis):
             return (
                 other.metadata() == self.metadata()  # type: ignore unknown
-                and self.conjugate == other.conjugate
+                and self.is_dual == other.is_dual
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((self.metadata(), self.conjugate))
+        return hash((self.metadata(), self.is_dual))
 
     @staticmethod
     def from_size(

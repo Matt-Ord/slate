@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from copy import copy
 from typing import TYPE_CHECKING, Any, Callable, Never, Self, cast, override
 
 import numpy as np
@@ -18,12 +19,24 @@ class WrappedBasis[
     DT: np.generic,
     B: Basis[BasisMetadata, Any] = Basis[M, DT],  # : Basis[M, DT]
 ](Basis[M, DT]):
-    """Represents a truncated basis."""
+    """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
-    def __init__(self: Self, inner: Basis[M, DT], *, conjugate: bool = False) -> None:
+    def __init__(self: Self, inner: Basis[M, DT]) -> None:
         self._inner = cast(B, inner)
         self._metadata = inner.metadata()
-        super().__init__(inner.metadata(), conjugate=conjugate)
+        super().__init__(inner.metadata(), is_dual=inner.is_dual)
+
+    @property
+    @override
+    def is_dual(self: Self) -> bool:
+        return self.inner.is_dual
+
+    @override
+    def dual_basis(self) -> Self:
+        copied = copy(self)
+        copied._inner = self._inner.dual_basis()  # noqa: SLF001
+        copied._is_dual = copied.inner.is_dual  # noqa: SLF001
+        return copied
 
     @property
     def inner(self: Self) -> B:
@@ -94,12 +107,9 @@ class WrappedBasis[
         if self == basis:
             return vectors
 
-        vectors = np.conj(vectors) if self.conjugate else vectors
         as_inner = self.__into_inner__(vectors, axis)
-
         if isinstance(basis, WrappedBasis) and self.inner == basis.inner:  # type: ignore unknown
-            out = basis.__from_inner__(as_inner, axis)
-            return np.conj(out) if basis.conjugate else out
+            return basis.__from_inner__(as_inner, axis)
         return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown
 
 

@@ -83,12 +83,12 @@ class DiagonalBasis[
         return (
             isinstance(other, DiagonalBasis)
             and (other.inner == self.inner)  # type: ignore unknown
-            and self.conjugate == other.conjugate
+            and self.is_dual == other.is_dual
         )
 
     @override
     def __hash__(self) -> int:
-        return hash((2, self.inner, self.conjugate))
+        return hash((2, self.inner, self.is_dual))
 
     @override
     def with_inner[  # type: ignore there is no way to bound inner in parent

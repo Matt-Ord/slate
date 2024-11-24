@@ -30,7 +30,6 @@ from slate.basis.fundamental import FundamentalBasis
 from slate.basis.recast import RecastBasis
 from slate.basis.split import SplitBasis
 from slate.basis.transformed import (
-    TransformDirection,
     TransformedBasis,
     fundamental_transformed_tuple_basis_from_metadata,
     fundamental_transformed_tuple_basis_from_shape,
@@ -59,7 +58,6 @@ __all__ = [
     "RecastBasis",
     "SplitBasis",
     "StackedBasis",
-    "TransformDirection",
     "TransformedBasis",
     "TruncatedBasis",
     "Truncation",
