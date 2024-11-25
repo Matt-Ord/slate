@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING, Any, Callable, Never, Self, cast, override
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
+from slate.basis._tuple import get_common_basis
 from slate.basis.transformed import TransformedBasis
-from slate.basis.wrapped import WrappedBasis, get_common_basis
+from slate.basis.wrapped import WrappedBasis
 from slate.util import Padding, pad_along_axis, slice_along_axis
 
 if TYPE_CHECKING:

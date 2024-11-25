@@ -135,23 +135,6 @@ def get_wrapped_basis_super_inner[
     return last
 
 
-def get_common_basis[M: BasisMetadata, E, DT: np.generic](
-    rhs: Basis[M, DT],
-    lhs: Basis[M, DT],
-) -> Basis[M, DT]:
-    """Get the closest common basis of two bases."""
-    assert lhs.metadata() == rhs.metadata()
-    lhs_rev = reversed(list(wrapped_basis_iter_inner(lhs)))
-    rhs_rev = reversed(list(wrapped_basis_iter_inner(rhs)))
-
-    last_common = FundamentalBasis(lhs.metadata())
-    for a, b in zip(lhs_rev, rhs_rev):
-        if a != b:
-            return last_common
-        last_common = a
-    return last_common
-
-
 def as_feature_basis[M: BasisMetadata, DT: np.generic](
     basis: Basis[M, DT], features: set[BasisFeature]
 ) -> Basis[M, DT]:

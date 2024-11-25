@@ -18,6 +18,7 @@ from slate.basis._tuple import (
     as_tuple_basis,
     fundamental_tuple_basis_from_metadata,
     fundamental_tuple_basis_from_shape,
+    get_common_basis,
     tuple_basis,
     tuple_basis_is_variadic,
     tuple_basis_with_child,
@@ -42,7 +43,6 @@ from slate.basis.wrapped import (
     as_index_basis,
     as_mul_basis,
     as_sub_basis,
-    get_common_basis,
     get_wrapped_basis_super_inner,
 )
 

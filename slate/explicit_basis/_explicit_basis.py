@@ -33,12 +33,12 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     def __init__(
         self: Self,
-        transform: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
+        matrix: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
-        self._matrix = transform
+        self._matrix = matrix
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
         super().__init__(as_tuple_basis(self.eigenvectors.basis)[1])
@@ -245,13 +245,13 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 
     def __init__(
         self: Self,
-        eigenvectors: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
+        matrix: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
-        super().__init__(eigenvectors, direction=direction, data_id=data_id)
+        super().__init__(matrix, direction=direction, data_id=data_id)
         if assert_unitary:
             states_tuple = self.eigenvectors.with_basis(
                 as_tuple_basis(self.eigenvectors.basis)

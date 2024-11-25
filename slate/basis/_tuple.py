@@ -829,3 +829,36 @@ def as_tuple_basis[
     return fundamental_tuple_basis_from_metadata(
         cast(StackedMetadata[Any, Any], basis.metadata())
     )
+
+
+def get_common_basis[M: BasisMetadata, E, DT: np.generic](
+    lhs: Basis[M, DT],
+    rhs: Basis[M, DT],
+) -> Basis[M, DT]:
+    """Get the closest common basis of two bases."""
+    assert rhs.metadata() == lhs.metadata()
+    lhs_rev = list(wrapped_basis_iter_inner(lhs))
+    rhs_rev = list(wrapped_basis_iter_inner(rhs))
+
+    if (
+        isinstance(lhs_rev[-1], TupleBasis)
+        and isinstance(rhs_rev[-1], TupleBasis)
+        and lhs_rev != rhs_rev
+    ):
+        # For a TupleBasis, we can do a bit better
+        # By finding the common basis of the children
+        lhs_children = cast(tuple[Basis[Any, Any], ...], lhs_rev[-1].children)  # type: ignore unknown
+        rhs_children = cast(tuple[Basis[Any, Any], ...], rhs_rev[-1].children)  # type: ignore unknown
+
+        basis = tuple_basis(
+            tuple(starmap(get_common_basis, zip(lhs_children, rhs_children))),
+            cast(StackedMetadata[Any, Any], rhs.metadata()).extra,
+        )
+        return cast(Basis[M, DT], basis)
+
+    last_common = FundamentalBasis(rhs.metadata(), is_dual=rhs.is_dual)
+    for a, b in zip(reversed(lhs_rev), reversed(rhs_rev)):
+        if a != b:
+            return last_common
+        last_common = a
+    return last_common
