@@ -232,10 +232,12 @@ def _assert_unitary[DT: np.generic](vectors: np.ndarray[Any, np.dtype[DT]]) -> N
     )
 
 
-def _conj_raw_data[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def _dual_unitary_data[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     array: SlateArray[Metadata2D[M1, M2, E], DT],
 ) -> SlateArray[Metadata2D[M1, M2, E], DT]:
-    return SlateArray(array.basis, np.conjugate(array.raw_data))
+    # This assumes that transposed basis is 'index-like'
+    # compared to the original (list, inner) basis.
+    return SlateArray(array.basis.dual_basis(), np.conjugate(array.raw_data))
 
 
 class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT]):
@@ -264,7 +266,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
         return (
             self._matrix
             if self.direction == "forward"
-            else _conj_raw_data(self._matrix)
+            else _dual_unitary_data(self._matrix)
         )
 
     @property
@@ -272,10 +274,8 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     def inverse_transform(
         self: Self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
-        # This assumes that transposed basis is 'index-like'
-        # compared to the original (list, inner) basis.
         return (
-            _conj_raw_data(transpose(self.transform))
+            _dual_unitary_data(transpose(self.transform))
             if self.direction == "forward"
             else transpose(self._matrix)
         )

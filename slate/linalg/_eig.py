@@ -97,7 +97,7 @@ def _eig_from_tuple[
             FundamentalBasis.from_size(
                 eig.eigenvalues.size, is_dual=array.basis[1].is_dual
             ),
-            array.basis[1].dual_basis(),
+            array.basis[1],
         )
     )
     basis_1 = ExplicitBasis(
@@ -192,7 +192,7 @@ def _eigh_from_tuple[
             FundamentalBasis.from_size(
                 eig.eigenvalues.size, is_dual=array.basis[1].is_dual
             ),
-            array.basis[1].dual_basis(),
+            array.basis[1],
         )
     )
     basis_1 = ExplicitUnitaryBasis(
