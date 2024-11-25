@@ -6,7 +6,7 @@ from slate.basis._basis import (
     Basis,
     BasisFeature,
 )
-from slate.basis._diagonal import DiagonalBasis, diagonal_basis
+from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
 from slate.basis._isotropic import IsotropicBasis, isotropic_basis
 from slate.basis._tuple import (
     StackedBasis,
@@ -68,6 +68,7 @@ __all__ = [
     "TupleBasisND",
     "WrappedBasis",
     "as_add_basis",
+    "as_diagonal_basis",
     "as_feature_basis",
     "as_index_basis",
     "as_mul_basis",

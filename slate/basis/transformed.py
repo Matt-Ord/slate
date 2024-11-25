@@ -280,5 +280,5 @@ def fundamental_transformed_tuple_basis_from_shape[E](
 ) -> TupleBasis[BasisMetadata, E | None, np.complex128]:
     """Get a basis with the basis at idx set to inner."""
     return fundamental_transformed_tuple_basis_from_metadata(
-        StackedMetadata.from_shape(shape, extra=extra)
+        StackedMetadata.from_shape(shape, extra=extra),
     )

@@ -46,6 +46,39 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
     @overload
     @staticmethod
     def from_shape[E1](
+        shape: tuple[int], *, extra: None = None
+    ) -> Metadata1D[SimpleMetadata, None]: ...
+    @overload
+    @staticmethod
+    def from_shape[E1](
+        shape: tuple[int], *, extra: E1
+    ) -> Metadata1D[SimpleMetadata, E1]: ...
+
+    @overload
+    @staticmethod
+    def from_shape[E1](
+        shape: tuple[int, int], *, extra: None = None
+    ) -> Metadata2D[SimpleMetadata, SimpleMetadata, None]: ...
+    @overload
+    @staticmethod
+    def from_shape[E1](
+        shape: tuple[int, int], *, extra: E1
+    ) -> Metadata2D[SimpleMetadata, SimpleMetadata, E1]: ...
+
+    @overload
+    @staticmethod
+    def from_shape[E1](
+        shape: tuple[int, int, int], *, extra: None = None
+    ) -> Metadata3D[SimpleMetadata, SimpleMetadata, SimpleMetadata, None]: ...
+    @overload
+    @staticmethod
+    def from_shape[E1](
+        shape: tuple[int, int, int], *, extra: E1
+    ) -> Metadata3D[SimpleMetadata, SimpleMetadata, SimpleMetadata, E1]: ...
+
+    @overload
+    @staticmethod
+    def from_shape[E1](
         shape: tuple[int, ...], *, extra: None = None
     ) -> StackedMetadata[SimpleMetadata, None]: ...
 

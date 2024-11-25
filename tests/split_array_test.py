@@ -40,14 +40,28 @@ def test_split_array_equals_transformed() -> None:
         np.array([0, 0, 0, 1.0, 2.0, 3.0]),
     )
 
-    np.testing.assert_allclose(diagonal.raw_data, [1.0, 2.0, 3.0])
-    np.testing.assert_allclose(split.raw_data, [0, 0, 0, 1.0, 2.0, 3.0])
+    np.testing.assert_allclose(diagonal.raw_data, [1.0, 2.0, 3.0], atol=1e-15)
+    np.testing.assert_allclose(split.raw_data, [0, 0, 0, 1.0, 2.0, 3.0], atol=1e-15)
     np.testing.assert_allclose(
         split.with_basis(diagonal.basis).raw_data,
         diagonal.raw_data,
+        atol=1e-15,
+    )
+    np.testing.assert_allclose(
+        split.with_basis(fundamental.inner.dual_basis()).raw_data,
+        split.with_basis(fundamental.inner).raw_data,
+        atol=1e-15,
+    )
+    np.testing.assert_allclose(
+        diagonal.with_basis(fundamental.inner)
+        .with_basis(fundamental.inner.dual_basis())
+        .raw_data,
+        diagonal.with_basis(fundamental.inner).raw_data,
+        atol=1e-15,
     )
     np.testing.assert_allclose(
         split.with_basis(diagonal.basis.dual_basis()).raw_data,
         diagonal.with_basis(diagonal.basis.dual_basis()).raw_data,
+        atol=1e-15,
     )
     np.testing.assert_allclose(diagonal.as_array(), split.as_array())

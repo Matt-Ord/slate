@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -13,8 +13,11 @@ from slate.basis import (
     tuple_basis,
 )
 from slate.basis._diagonal import as_diagonal_basis
-from slate.explicit_basis import ExplicitBasis, ExplicitUnitaryBasis
-from slate.explicit_basis._explicit_basis import TrivialExplicitBasis
+from slate.explicit_basis import (
+    ExplicitBasis,
+    ExplicitUnitaryBasis,
+    TrivialExplicitBasis,
+)
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
@@ -51,7 +54,8 @@ def get_eigenvalues[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
 ) -> SlateArray[BasisMetadata, np.complex128, FundamentalBasis[BasisMetadata]]:
     """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
-    return SlateArray(FundamentalBasis.from_shape(a.shape), a)
+    shape = cast(tuple[int, ...], a.shape)
+    return SlateArray(FundamentalBasis.from_shape(shape), a)
 
 
 def _eig_from_tuple[
@@ -78,20 +82,29 @@ def _eig_from_tuple[
     eig = np.linalg.eig(array.raw_data.reshape(array.basis.shape))
 
     states_basis_0 = tuple_basis(
-        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+        (
+            FundamentalBasis.from_size(
+                eig.eigenvalues.size, is_dual=array.basis[0].is_dual
+            ),
+            array.basis[0].dual_basis(),
+        )
     )
     basis_0 = ExplicitBasis(
         SlateArray(states_basis_0, np.transpose(eig.eigenvectors)),
     )
     states_basis_1 = tuple_basis(
-        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+        (
+            FundamentalBasis.from_size(
+                eig.eigenvalues.size, is_dual=array.basis[1].is_dual
+            ),
+            array.basis[1].dual_basis(),
+        )
     )
     basis_1 = ExplicitBasis(
         SlateArray(states_basis_1, np.transpose(eig.eigenvectors)),
         data_id=basis_0.data_id,
         direction="backward",
     )
-
     return SlateArray(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues,
@@ -132,27 +145,12 @@ def into_diagonal[
     return _eig_from_tuple(convert_array(array, tuple_basis))
 
 
-def get_eigenvectors[
-    M0: BasisMetadata,
-    M1: BasisMetadata,
-    E,
-    DT: np.complexfloating[Any, Any],
-](
-    array: SlateArray[Metadata2D[M0, M1, E], DT],
-) -> SlateArray[
-    Metadata2D[BasisMetadata, M0, None],
-    np.complex128,
-]:
-    # TODO: how do we deal with the fact that we have two different bases?
-    # TODO: what is the api for the other eigenvectors?
-    return into_diagonal(array).basis.inner[0].eigenvectors
-
-
 def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[StackedMetadata[M, E], DT],
 ) -> SlateArray[BasisMetadata, np.float64, FundamentalBasis[BasisMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
-    return SlateArray(FundamentalBasis.from_shape(a.shape), a)
+    shape = cast(tuple[int, ...], a.shape)
+    return SlateArray(FundamentalBasis.from_shape(shape), a)
 
 
 def _eigh_from_tuple[
@@ -177,16 +175,28 @@ def _eigh_from_tuple[
     eig = np.linalg.eigh(array.raw_data.reshape(array.basis.shape))
 
     states_basis_0 = tuple_basis(
-        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+        (
+            FundamentalBasis.from_size(
+                eig.eigenvalues.size, is_dual=array.basis[0].is_dual
+            ),
+            array.basis[0].dual_basis(),
+        )
     )
     basis_0 = ExplicitUnitaryBasis(
         SlateArray(states_basis_0, np.transpose(eig.eigenvectors)),
+        direction="forward",
+        assert_unitary=False,
     )
     states_basis_1 = tuple_basis(
-        (FundamentalBasis.from_shape((eig.eigenvalues.size,)), array.basis[0])
+        (
+            FundamentalBasis.from_size(
+                eig.eigenvalues.size, is_dual=array.basis[1].is_dual
+            ),
+            array.basis[1].dual_basis(),
+        )
     )
     basis_1 = ExplicitUnitaryBasis(
-        SlateArray(states_basis_1, np.transpose(eig.eigenvectors)),
+        SlateArray(states_basis_1, (np.transpose(eig.eigenvectors))),
         data_id=basis_0.data_id,
         direction="backward",
         assert_unitary=False,
@@ -221,18 +231,3 @@ def into_diagonal_hermitian[
 
     tuple_basis = as_tuple_basis(array.basis)
     return _eigh_from_tuple(convert_array(array, tuple_basis))
-
-
-def get_eigenvectors_hermitian[
-    M0: BasisMetadata,
-    M1: BasisMetadata,
-    E,
-    DT: np.complexfloating[Any, Any],
-](
-    array: SlateArray[Metadata2D[M0, M1, E], DT],
-) -> SlateArray[
-    Metadata2D[BasisMetadata, M0, None],
-    np.complex128,
-]:
-    # TODO: how do we deal with the fact that we have two different bases?
-    return into_diagonal_hermitian(array).basis.inner[0].eigenvectors
