@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import copy
 from itertools import starmap
 from typing import (
     TYPE_CHECKING,
@@ -18,7 +19,11 @@ import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis.fundamental import FundamentalBasis
-from slate.basis.wrapped import get_wrapped_basis_super_inner
+from slate.basis.wrapped import (
+    WrappedBasis,
+    get_wrapped_basis_super_inner,
+    wrapped_basis_iter_inner,
+)
 from slate.metadata import (
     BasisMetadata,
     Metadata1D,
@@ -36,6 +41,20 @@ if TYPE_CHECKING:
 type StackedBasis[M: BasisMetadata, E, DT: np.generic] = Basis[
     StackedMetadata[M, E], DT
 ]
+
+
+def _convert_tuple_basis_axes[M: BasisMetadata, E, DT: np.generic](
+    vectors: np.ndarray[Any, np.dtype[DT]],
+    initial_basis: TupleBasis[M, E, DT],
+    final_basis: TupleBasis[M, E, DT],
+    axis: int = -1,
+) -> np.ndarray[Any, np.dtype[DT]]:
+    swapped = vectors.swapaxes(axis, 0)
+    stacked = swapped.reshape(*initial_basis.shape, *swapped.shape[1:])
+    for ax, (initial, final) in enumerate(zip(initial_basis, final_basis, strict=True)):
+        stacked = initial.__convert_vector_into__(stacked, final, axis=ax)
+
+    return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
 
 
 def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
@@ -56,12 +75,27 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
     axis : int, optional
         axis along which to convert, by default -1
     """
-    swapped = vectors.swapaxes(axis, 0)
-    stacked = swapped.reshape(*initial_basis.shape, *swapped.shape[1:])
-    for ax, (initial, final) in enumerate(zip(initial_basis, final_basis, strict=True)):
-        stacked = initial.__convert_vector_into__(stacked, final, axis=ax)
+    if not all(
+        lhs.is_dual == rhs.is_dual for lhs, rhs in zip(initial_basis, final_basis)
+    ):
+        # The conversion of a dual to a non-dual vector must happen in the fundamental basis
+        initial_fundamental = fundamental_tuple_basis_from_metadata(
+            initial_basis.metadata(), tuple(d.is_dual for d in initial_basis)
+        )
+        final_fundamental = fundamental_tuple_basis_from_metadata(
+            initial_basis.metadata(), tuple(d.is_dual for d in final_basis)
+        )
+        converted_0 = _convert_tuple_basis_axes(
+            vectors, initial_basis, initial_fundamental, axis
+        )
+        converted_1 = _convert_tuple_basis_axes(
+            converted_0, initial_fundamental, final_fundamental, axis
+        )
+        return _convert_tuple_basis_axes(
+            converted_1, final_fundamental, final_basis, axis
+        )
 
-    return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
+    return _convert_tuple_basis_axes(vectors, initial_basis, final_basis, axis)
 
 
 class TupleBasis[
@@ -78,8 +112,6 @@ class TupleBasis[
         self: Self,
         children: tuple[Basis[M, Any], ...],
         extra_metadata: E,
-        *,
-        is_dual: bool = False,
     ) -> None:
         self._children = children
 
@@ -88,8 +120,14 @@ class TupleBasis[
                 _InnerM,
                 StackedMetadata(tuple(i.metadata() for i in children), extra_metadata),
             ),
-            is_dual=is_dual,
         )
+
+    @override
+    def dual_basis(self) -> Self:
+        copied = copy(self)
+        copied._children = tuple(c.dual_basis() for c in self.children)  # noqa: SLF001
+        copied._is_dual = not copied.is_dual  # noqa: SLF001
+        return copied
 
     @property
     def children(self) -> tuple[Basis[M, Any], ...]:
@@ -112,11 +150,11 @@ class TupleBasis[
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        basis = fundamental_tuple_basis_from_metadata(self.metadata())
+        fundamental = fundamental_tuple_basis_from_metadata(self.metadata())
         return _convert_tuple_basis_vector(
             vectors,
             cast(TupleBasis[M, E, DT1], self),
-            cast(TupleBasis[M, E, DT1], basis),
+            cast(TupleBasis[M, E, DT1], fundamental),
             axis,
         )
 
@@ -154,14 +192,18 @@ class TupleBasis[
         if self == basis:
             return vectors
 
-        if not isinstance(basis, TupleBasis):
+        *inner, super_inner = wrapped_basis_iter_inner(basis)  # type: ignore unknown
+        if isinstance(super_inner, TupleBasis):
+            basis_as_tuple = cast(TupleBasis[M, E, np.generic], super_inner)
+        else:
             return super().__convert_vector_into__(vectors, basis, axis)
 
-        # We overload __convert_vector_into__, more likely to get the 'happy path'
-
-        vectors = np.conj(vectors) if self.is_dual else vectors
-        out = _convert_tuple_basis_vector(vectors, self, basis, axis)  # type: ignore unknown
-        return np.conj(out) if basis.is_dual else out
+        converted = _convert_tuple_basis_vector(vectors, self, basis_as_tuple, axis)  # type: ignore unknown
+        for wrapped_basis in reversed(inner):
+            converted = cast(WrappedBasis[Any, Any], wrapped_basis).__from_inner__(
+                converted, axis
+            )
+        return converted
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -509,11 +551,29 @@ def tuple_basis[B0, B1, B2, *TS, E](
     return cast(Any, TupleBasis(children, extra_metadata))
 
 
+@overload
 def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
-    _basis: TupleBasis[M, E, DT],
-) -> TypeGuard[TupleBasisND[Any, E]]:
+    basis: TupleBasis[M, E, DT], *, n_dim: Literal[1]
+) -> TypeGuard[TupleBasis1D[DT, Basis[M, DT], E]]: ...
+@overload
+def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
+    basis: TupleBasis[M, E, DT], *, n_dim: Literal[2]
+) -> TypeGuard[TupleBasis2D[DT, Basis[M, DT], Basis[M, DT], E]]: ...
+@overload
+def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
+    basis: TupleBasis[M, E, DT], *, n_dim: Literal[3]
+) -> TypeGuard[TupleBasis3D[DT, Basis[M, DT], Basis[M, DT], Basis[M, DT], E]]: ...
+@overload
+def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
+    basis: TupleBasis[M, E, DT], *, n_dim: int | None = None
+) -> TypeGuard[TupleBasisND[Any, E]]: ...
+
+
+def tuple_basis_is_variadic(
+    basis: TupleBasis[Any, Any, Any], *, n_dim: int | None = None
+) -> TypeGuard[Any]:
     """Cast a TupleBasis as a VariadicTupleBasis."""
-    return True
+    return n_dim is None or basis.n_dim == n_dim
 
 
 def tuple_basis_with_modified_children[
@@ -555,13 +615,13 @@ def tuple_basis_with_child[M: BasisMetadata, E, DT: np.generic](
 
 @overload
 def fundamental_tuple_basis_from_metadata[M0: BasisMetadata, E](
-    metadata: Metadata1D[M0, E],
+    metadata: Metadata1D[M0, E], dual: tuple[bool, ...] | None = None
 ) -> TupleBasis1D[np.generic, FundamentalBasis[M0], E]: ...
 
 
 @overload
 def fundamental_tuple_basis_from_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
-    metadata: Metadata2D[M0, M1, E],
+    metadata: Metadata2D[M0, M1, E], dual: tuple[bool, ...] | None = None
 ) -> TupleBasis2D[np.generic, FundamentalBasis[M0], FundamentalBasis[M1], E]: ...
 
 
@@ -572,7 +632,7 @@ def fundamental_tuple_basis_from_metadata[
     M2: BasisMetadata,
     E,
 ](
-    metadata: Metadata3D[M0, M1, M2, E],
+    metadata: Metadata3D[M0, M1, M2, E], dual: tuple[bool, ...] | None = None
 ) -> TupleBasis3D[
     np.generic,
     FundamentalBasis[M0],
@@ -584,33 +644,37 @@ def fundamental_tuple_basis_from_metadata[
 
 @overload
 def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
-    metadata: StackedMetadata[M, E],
+    metadata: StackedMetadata[M, E], dual: tuple[bool, ...] | None = None
 ) -> TupleBasis[M, E, np.generic]: ...
 
 
 def fundamental_tuple_basis_from_metadata[M: BasisMetadata, E](
-    metadata: StackedMetadata[M, E],
+    metadata: StackedMetadata[M, E], dual: tuple[bool, ...] | None = None
 ) -> TupleBasis[M, E, np.generic]:
     """Get a basis with the basis at idx set to inner."""
-    children = tuple(FundamentalBasis(c) for c in metadata.children)
+    dual = tuple(False for _ in metadata.children) if dual is None else dual
+    children = tuple(
+        FundamentalBasis(c, is_dual=is_dual)
+        for (c, is_dual) in zip(metadata.children, dual)
+    )
     return TupleBasis(children, metadata.extra)
 
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int], *, extra: None = None
+    shape: tuple[int], *, extra: None = None, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis1D[np.generic, Basis[SimpleMetadata, np.generic], None]: ...
 
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int], *, extra: E
+    shape: tuple[int], *, extra: E, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis1D[np.generic, Basis[SimpleMetadata, np.generic], E]: ...
 
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, int], *, extra: None = None
+    shape: tuple[int, int], *, extra: None = None, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis2D[
     np.generic,
     Basis[SimpleMetadata, np.generic],
@@ -621,7 +685,7 @@ def fundamental_tuple_basis_from_shape[E](
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, int], *, extra: E
+    shape: tuple[int, int], *, extra: E, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis2D[
     np.generic,
     Basis[SimpleMetadata, np.generic],
@@ -632,7 +696,10 @@ def fundamental_tuple_basis_from_shape[E](
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, int, int], *, extra: None = None
+    shape: tuple[int, int, int],
+    *,
+    extra: None = None,
+    dual: tuple[bool, ...] | None = None,
 ) -> TupleBasis3D[
     np.generic,
     Basis[SimpleMetadata, np.generic],
@@ -644,7 +711,7 @@ def fundamental_tuple_basis_from_shape[E](
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, int, int], *, extra: E
+    shape: tuple[int, int, int], *, extra: E, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis3D[
     np.generic,
     Basis[SimpleMetadata, np.generic],
@@ -656,22 +723,25 @@ def fundamental_tuple_basis_from_shape[E](
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, ...], *, extra: None = None
+    shape: tuple[int, ...], *, extra: None = None, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis[BasisMetadata, None, np.generic]: ...
 
 
 @overload
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, ...], *, extra: E
+    shape: tuple[int, ...], *, extra: E, dual: tuple[bool, ...] | None = None
 ) -> TupleBasis[BasisMetadata, E, np.generic]: ...
 
 
 def fundamental_tuple_basis_from_shape[E](
-    shape: tuple[int, ...], *, extra: Any | None = None
+    shape: tuple[int, ...],
+    *,
+    extra: Any | None = None,
+    dual: tuple[bool, ...] | None = None,
 ) -> Any:
     """Get a basis with the basis at idx set to inner."""
     return fundamental_tuple_basis_from_metadata(
-        StackedMetadata.from_shape(shape, extra=extra)
+        StackedMetadata.from_shape(shape, extra=extra), dual=dual
     )
 
 
@@ -721,6 +791,18 @@ def as_tuple_basis[
 ](
     basis: Basis[StackedMetadata[M0, E], DT],
 ) -> TupleBasis[M0, E, np.generic]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[BasisMetadata, DT],
+) -> TupleBasis[BasisMetadata, Any, np.generic]: ...
 
 
 def as_tuple_basis[

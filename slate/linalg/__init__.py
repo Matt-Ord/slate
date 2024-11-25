@@ -10,11 +10,10 @@ basis that diagonalizes the array
 
 from __future__ import annotations
 
+from slate.array._transpose import inv, transpose
 from slate.linalg._eig import (
     get_eigenvalues,
     get_eigenvalues_hermitian,
-    get_eigenvectors,
-    get_eigenvectors_hermitian,
     into_diagonal,
     into_diagonal_hermitian,
 )
@@ -24,9 +23,9 @@ __all__ = [
     "einsum",
     "get_eigenvalues",
     "get_eigenvalues_hermitian",
-    "get_eigenvectors",
-    "get_eigenvectors_hermitian",
     "into_diagonal",
     "into_diagonal",
     "into_diagonal_hermitian",
+    "inv",
+    "transpose",
 ]

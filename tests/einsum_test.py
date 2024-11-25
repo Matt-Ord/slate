@@ -26,9 +26,6 @@ def _test_einsum_in_basis(
     vector: SlateArray[Any, Any, Any],
     basis: Basis[Any, Any],
 ) -> None:
-    # TODO: we need the dual or reciprocal basis to do this properly
-    # This is not the same as the conjugate_basis if the basis is not hermitian
-    # https://math.stackexchange.com/q/1286148
     transformed_array = convert_array(
         array,
         tuple_basis_with_child(array.basis, basis.dual_basis(), 1),
@@ -49,6 +46,7 @@ def _test_einsum_in_basis(
             transformed_array.raw_data.reshape(array.basis.shape),
             transformed_vector.raw_data.reshape(vector.basis.size),
         ),
+        atol=1e-15,
     )
 
 
@@ -98,8 +96,7 @@ def test_einsum_diagonal() -> None:
     data = rng.random((10,)) + 1j * rng.random((10,))
     vector = SlateArray(array.basis[0], data)
     diagonal_array = into_diagonal(array)
-    # TODO: some assumption about how the conjugate_basis is implemented
-    # for non hermitian explicit bases is wrong
+
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
 
     data = array.raw_data.reshape(array.basis.shape)

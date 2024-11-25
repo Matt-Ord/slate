@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, TypeGuard, cast, overload, override
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Self,
+    TypeGuard,
+    cast,
+    overload,
+    override,
+)
 
 import numpy as np
 
@@ -9,6 +18,9 @@ from slate.basis._tuple import TupleBasis2D, tuple_basis
 from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata import Metadata2D
 from slate.metadata._metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata.stacked import StackedMetadata
 
 
 class DiagonalBasis[
@@ -192,12 +204,13 @@ def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
     return DiagonalBasis(tuple_basis(children, extra_metadata))
 
 
-def _is_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
-    basis: Basis[Metadata2D[M0, M1, E], DT],
-) -> TypeGuard[DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E]]:
+def _is_diagonal_basis[M: BasisMetadata, E, DT: np.generic](
+    basis: Basis[StackedMetadata[M, E], DT],
+) -> TypeGuard[DiagonalBasis[DT, Basis[M, DT], Basis[M, DT], E]]:
     return isinstance(basis, DiagonalBasis)
 
 
+@overload
 def as_diagonal_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
@@ -205,7 +218,28 @@ def as_diagonal_basis[
     DT: np.generic,
 ](
     basis: Basis[Metadata2D[M0, M1, E], DT],
-) -> DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E] | None:
+) -> DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E] | None: ...
+@overload
+def as_diagonal_basis[
+    M: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    basis: Basis[StackedMetadata[M, E], DT],
+) -> DiagonalBasis[DT, Basis[M, DT], Basis[M, DT], E] | None: ...
+@overload
+def as_diagonal_basis[
+    DT: np.generic,
+](
+    basis: Basis[BasisMetadata, DT],
+) -> (
+    DiagonalBasis[DT, Basis[BasisMetadata, DT], Basis[BasisMetadata, DT], Any] | None
+): ...
+
+
+def as_diagonal_basis(
+    basis: Any,
+) -> Any:
     """Get the closest basis that supports the feature set."""
     assert len(basis.metadata().fundamental_shape) == 2  # noqa: PLR2004
     return next(

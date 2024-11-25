@@ -110,7 +110,7 @@ class WrappedBasis[
         as_inner = self.__into_inner__(vectors, axis)
         if isinstance(basis, WrappedBasis) and self.inner == basis.inner:  # type: ignore unknown
             return basis.__from_inner__(as_inner, axis)
-        return self._inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown
+        return self.inner.__convert_vector_into__(as_inner, basis, axis=axis)  # type: ignore unknown
 
 
 def wrapped_basis_iter_inner[

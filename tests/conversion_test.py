@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import pytest
 
 from slate.array import SlateArray, convert_array
 from slate.basis import (
@@ -15,8 +16,11 @@ from slate.basis import (
     fundamental_tuple_basis_from_shape,
     tuple_basis,
 )
+from slate.basis.transformed import fundamental_transformed_tuple_basis_from_shape
 
 if TYPE_CHECKING:
+    from slate.basis._basis import Basis
+    from slate.basis._tuple import TupleBasis2D
     from slate.metadata import SimpleMetadata
 
 
@@ -158,4 +162,46 @@ def test_transform_spaced_basis() -> None:
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
         array.raw_data,
+    )
+
+
+@pytest.mark.parametrize(
+    "basis",
+    [
+        fundamental_tuple_basis_from_shape((10, 10)),
+        fundamental_tuple_basis_from_shape((10, 10), dual=(False, True)),
+        fundamental_tuple_basis_from_shape((10, 10), dual=(True, False)),
+        fundamental_tuple_basis_from_shape((10, 10), dual=(True, True)),
+        fundamental_transformed_tuple_basis_from_shape((10, 10)),
+    ],
+)
+def test_dual_basis_transform(
+    basis: TupleBasis2D[
+        np.generic,
+        Basis[SimpleMetadata, np.generic],
+        Basis[SimpleMetadata, np.generic],
+        None,
+    ],
+) -> None:
+    basis = fundamental_tuple_basis_from_shape((10, 10))
+
+    dual_basis = basis.dual_basis()
+    dual_child_basis = tuple_basis(
+        tuple(child.dual_basis() for child in basis.children),
+        extra_metadata=dual_basis.metadata().extra,
+    )
+
+    array = SlateArray(basis, np.ones(basis.size))
+
+    np.testing.assert_array_almost_equal(
+        array.with_basis(dual_basis).raw_data,
+        array.with_basis(dual_child_basis).raw_data,
+    )
+    np.testing.assert_array_almost_equal(
+        array.with_basis(dual_basis).as_array(),
+        array.with_basis(dual_child_basis).as_array(),
+    )
+    np.testing.assert_array_almost_equal(
+        array.as_array(),
+        array.with_basis(dual_child_basis).as_array(),
     )
