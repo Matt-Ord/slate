@@ -68,7 +68,8 @@ def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
 ) -> SlateArray[Metadata2D[M0, M1, E], DT]:
     return SlateArray(
         diagonal_basis(
-            (array.basis.inner[1], array.basis.inner[0]), array.basis.metadata().extra
+            (array.basis.inner[1].dual_basis(), array.basis.inner[0].dual_basis()),
+            array.basis.metadata().extra,
         ),
         np.divide(1.0, array.raw_data),
     )
@@ -83,7 +84,10 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
 ) -> SlateArray[Metadata2D[M0, M1, E], DT]:
     raw_data = array.raw_data.reshape(array.basis.shape)
     return SlateArray(
-        tuple_basis((array.basis[1], array.basis[0]), array.basis.metadata().extra),
+        tuple_basis(
+            (array.basis[1].dual_basis(), array.basis[0].dual_basis()),
+            array.basis.metadata().extra,
+        ),
         np.linalg.inv(raw_data),  # type: ignore unknown
     )
 
