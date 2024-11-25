@@ -77,8 +77,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     def eigenvectors(
         self: Self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
-        data = self.transform
-        return data.with_basis(data.basis.dual_basis())
+        return transpose(self.inverse_transform)
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -287,8 +286,8 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
     def __init__(self: Self, inner: Basis[M, DT]) -> None:
         super().__init__(
             SlateArray(
-                diagonal_basis((inner, inner.dual_basis()), self.inner.metadata()),
-                cast(np.ndarray[Any, np.dtype[DT]], np.ones(self.size)),
+                diagonal_basis((inner, inner.dual_basis())),
+                cast(np.ndarray[Any, np.dtype[DT]], np.ones(inner.size)),
             ),
             data_id=uuid.UUID(int=0),
         )

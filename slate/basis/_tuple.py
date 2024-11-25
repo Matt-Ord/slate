@@ -112,6 +112,8 @@ class TupleBasis[
         self: Self,
         children: tuple[Basis[M, Any], ...],
         extra_metadata: E,
+        *,
+        is_dual: bool = False,
     ) -> None:
         self._children = children
 
@@ -120,6 +122,7 @@ class TupleBasis[
                 _InnerM,
                 StackedMetadata(tuple(i.metadata() for i in children), extra_metadata),
             ),
+            is_dual=is_dual,
         )
 
     @override
