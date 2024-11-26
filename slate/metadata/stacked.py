@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Self, cast, overload, override
+from typing import TYPE_CHECKING, Any, Literal, Self, cast, overload, override
 
 import numpy as np
 
@@ -145,6 +145,10 @@ class Metadata1D[M0: BasisMetadata, E](MetadataND[BasisMetadata, E]):
     def children(self: Self) -> tuple[M0]:
         return cast(tuple[M0], super().children)
 
+    @override
+    def __getitem__(self: Self, index: int) -> M0:
+        return super().__getitem__(index)
+
 
 class Metadata2D[M0: BasisMetadata, M1: BasisMetadata, E](
     MetadataND[BasisMetadata, BasisMetadata, E]
@@ -163,6 +167,17 @@ class Metadata2D[M0: BasisMetadata, M1: BasisMetadata, E](
     def children(self: Self) -> tuple[M0, M1]:
         return cast(tuple[M0, M1], super().children)
 
+    @overload
+    def __getitem__(self: Self, index: Literal[0]) -> M0: ...
+    @overload
+    def __getitem__(self: Self, index: Literal[1]) -> M1: ...
+    @overload
+    def __getitem__(self: Self, index: int) -> M0 | M1: ...
+
+    @override
+    def __getitem__(self: Self, index: int) -> M0 | M1:
+        return super().__getitem__(index)
+
 
 class Metadata3D[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
     MetadataND[BasisMetadata, BasisMetadata, BasisMetadata, E]
@@ -180,3 +195,16 @@ class Metadata3D[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
     @override
     def children(self: Self) -> tuple[M0, M1, M2]:
         return cast(tuple[M0, M1, M2], super().children)
+
+    @overload
+    def __getitem__(self: Self, index: Literal[0]) -> M0: ...
+    @overload
+    def __getitem__(self: Self, index: Literal[1]) -> M1: ...
+    @overload
+    def __getitem__(self: Self, index: Literal[2]) -> M2: ...
+    @overload
+    def __getitem__(self: Self, index: int) -> M0 | M1 | M2: ...
+
+    @override
+    def __getitem__(self: Self, index: int) -> M0 | M1 | M2:
+        return super().__getitem__(index)
