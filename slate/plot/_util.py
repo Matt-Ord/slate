@@ -87,6 +87,16 @@ class Axes(MPLAxes):
     def twinx(self) -> Axes: ...
     @override
     def twiny(self) -> Axes: ...
+    @override
+    def set_title(  # type: ignore bad overload
+        self,
+        label: str,
+        fontdict: dict[str, Any] | None = ...,
+        loc: Literal["left", "center", "right"] | None = ...,
+        pad: float | None = ...,
+        *,
+        y: float | None = ...,
+    ) -> Text: ...
 
 
 class Figure(MPLFigure):

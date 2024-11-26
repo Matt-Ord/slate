@@ -56,28 +56,7 @@ def animate_data_1d_n[DT: np.number[Any]](  # noqa: PLR0913
     measure: Measure = "abs",
     periodic: bool = False,
 ) -> tuple[Figure, Axes, ArtistAnimation]:
-    """
-    Given data, animate along the given direction.
-
-    Parameters
-    ----------
-    basis : TupleBasisLike
-    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
-    axes : tuple[int, int, int], optional
-        plot axes (z, y, z), by default (0, 1, 2)
-    idx : SingleStackedIndexLike | None, optional
-        idx in remaining dimensions, by default None
-    ax : Axes | None, optional
-        plot ax, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, ArtistAnimation]
-    """
+    """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
@@ -111,28 +90,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     scale: Scale = "linear",
     measure: Measure = "abs",
 ) -> tuple[Figure, Axes, ArtistAnimation]:
-    """
-    Given data, animate along the given direction.
-
-    Parameters
-    ----------
-    basis : TupleBasisLike
-    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
-    axes : tuple[int, int, int], optional
-        plot axes (z, y, z), by default (0, 1, 2)
-    idx : SingleStackedIndexLike | None, optional
-        idx in remaining dimensions, by default None
-    ax : Axes | None, optional
-        plot ax, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, ArtistAnimation]
-    """
+    """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
 
     basis_x = fundamental_basis_from_metadata(
@@ -170,28 +128,7 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     scale: Scale = "linear",
     measure: Measure = "abs",
 ) -> tuple[Figure, Axes, ArtistAnimation]:
-    """
-    Given data, animate along the given direction.
-
-    Parameters
-    ----------
-    basis : TupleBasisLike
-    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
-    axes : tuple[int, int, int], optional
-        plot axes (z, y, z), by default (0, 1, 2)
-    idx : SingleStackedIndexLike | None, optional
-        idx in remaining dimensions, by default None
-    ax : Axes | None, optional
-        plot ax, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, ArtistAnimation]
-    """
+    """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
@@ -223,28 +160,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     scale: Scale = "linear",
     measure: Measure = "abs",
 ) -> tuple[Figure, Axes, ArtistAnimation]:
-    """
-    Given data, animate along the given direction.
-
-    Parameters
-    ----------
-    basis : TupleBasisLike
-    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
-    axes : tuple[int, int, int], optional
-        plot axes (z, y, z), by default (0, 1, 2)
-    idx : SingleStackedIndexLike | None, optional
-        idx in remaining dimensions, by default None
-    ax : Axes | None, optional
-        plot ax, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, ArtistAnimation]
-    """
+    """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     basis_x = fundamental_transformed_tuple_basis_from_metadata(
         data.basis.metadata()[1], is_dual=data.basis.is_dual
@@ -281,28 +197,7 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     scale: Scale = "linear",
     measure: Measure = "abs",
 ) -> tuple[Figure, Axes, ArtistAnimation]:
-    """
-    Given data, animate along the given direction.
-
-    Parameters
-    ----------
-    basis : TupleBasisLike
-    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
-    axes : tuple[int, int, int], optional
-        plot axes (z, y, z), by default (0, 1, 2)
-    idx : SingleStackedIndexLike | None, optional
-        idx in remaining dimensions, by default None
-    ax : Axes | None, optional
-        plot ax, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, ArtistAnimation]
-    """
+    """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
