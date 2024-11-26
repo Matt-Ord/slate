@@ -9,12 +9,14 @@ import numpy as np
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from slate.metadata._shape import NestedLength
+
 
 class BasisMetadata(Protocol):
     """Protocol that all Metadata should implement."""
 
     @property
-    def fundamental_shape(self: Self) -> tuple[int, ...]:
+    def fundamental_shape(self: Self) -> NestedLength:
         """Shape of the full data."""
         ...
 
@@ -27,9 +29,9 @@ class SimpleMetadata(BasisMetadata):
 
     @property
     @override
-    def fundamental_shape(self: Self) -> tuple[int, ...]:
+    def fundamental_shape(self: Self) -> int:
         """Shape of the full data."""
-        return (self.fundamental_size,)
+        return self.fundamental_size
 
 
 class LabelCollection[DT](Protocol):

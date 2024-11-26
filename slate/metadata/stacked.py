@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Self, cast, overload, override
+from typing import TYPE_CHECKING, Any, Self, cast, overload, override
 
 import numpy as np
 
 from slate.metadata import BasisMetadata, SimpleMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata._shape import NestedLength
 
 
 class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
@@ -88,14 +91,27 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
         shape: tuple[int, ...], *, extra: E1
     ) -> StackedMetadata[SimpleMetadata, E1]: ...
 
+    @overload
+    @staticmethod
+    def from_shape(shape: NestedLength, *, extra: None = None) -> BasisMetadata: ...
+
     @staticmethod
     def from_shape[E1](
-        shape: tuple[int, ...], *, extra: E1 | None = None
-    ) -> StackedMetadata[SimpleMetadata, E1] | StackedMetadata[SimpleMetadata, None]:
+        shape: NestedLength, *, extra: E1 | None = None
+    ) -> (
+        StackedMetadata[SimpleMetadata, E1]
+        | StackedMetadata[SimpleMetadata, None]
+        | BasisMetadata
+    ):
         """Get a basic stacked metadata from a shape and (optional) extra."""
-        return StackedMetadata[SimpleMetadata, Any](
-            tuple(SimpleMetadata(s) for s in shape), extra
+        if isinstance(shape, int):
+            return SimpleMetadata(shape)
+        return StackedMetadata[BasisMetadata, Any](
+            tuple(StackedMetadata.from_shape(s) for s in shape), extra
         )
+
+
+type AnyMetadata = BasisMetadata | StackedMetadata[AnyMetadata, Any]
 
 
 class MetadataND[*M, E](StackedMetadata[Any, E]):

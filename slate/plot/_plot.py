@@ -6,8 +6,8 @@ import numpy as np
 
 from slate.basis import (
     as_tuple_basis,
+    fundamental_basis_from_metadata,
     fundamental_transformed_tuple_basis_from_metadata,
-    fundamental_tuple_basis_from_metadata,
 )
 from slate.metadata.volume import (
     get_k_coordinates_in_axes,
@@ -162,7 +162,9 @@ def plot_data_1d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_k = fundamental_transformed_tuple_basis_from_metadata(data.basis.metadata())
+    basis_k = fundamental_transformed_tuple_basis_from_metadata(
+        data.basis.metadata(), is_dual=data.basis.is_dual
+    )
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -209,7 +211,9 @@ def plot_data_1d_x[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata())
+    basis_x = fundamental_basis_from_metadata(
+        data.basis.metadata(), is_dual=data.basis.is_dual
+    )
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -301,7 +305,9 @@ def plot_data_2d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, QuadMesh]
     """
-    basis_k = fundamental_transformed_tuple_basis_from_metadata(data.basis.metadata())
+    basis_k = fundamental_transformed_tuple_basis_from_metadata(
+        data.basis.metadata(), is_dual=data.basis.is_dual
+    )
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -358,7 +364,9 @@ def plot_data_2d_x[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, QuadMesh]
     """
-    basis_x = fundamental_tuple_basis_from_metadata(data.basis.metadata())
+    basis_x = fundamental_basis_from_metadata(
+        data.basis.metadata(), is_dual=data.basis.is_dual
+    )
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx

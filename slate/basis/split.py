@@ -61,7 +61,6 @@ class SplitBasis[
             return (
                 other.lhs == self.lhs  # type: ignore unknown
                 and other.rhs == self.rhs  # type: ignore unknown
-                and self.is_dual == other.is_dual
             )
         return False
 
@@ -75,7 +74,7 @@ class SplitBasis[
 
     @override
     def __hash__(self) -> int:
-        return hash((1, hash(self._lhs), hash(self._rhs), self.is_dual))
+        return hash((1, hash(self._lhs), hash(self._rhs)))
 
     @property
     @override

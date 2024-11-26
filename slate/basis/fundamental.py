@@ -1,21 +1,38 @@
 from __future__ import annotations
 
-from typing import Any, Self, overload, override
+import copy
+from typing import Any, Self, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
-from slate.metadata import BasisMetadata, SimpleMetadata
-from slate.metadata.stacked import Metadata1D, Metadata2D, Metadata3D, StackedMetadata
+from slate.metadata import SimpleMetadata
 
 
-class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
+class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
     """Represents a full fundamental basis."""
 
-    def __init__[_M: BasisMetadata](
+    def __init__[_M: SimpleMetadata](
         self: FundamentalBasis[_M], metadata: _M, *, is_dual: bool = False
     ) -> None:
-        super().__init__(metadata, is_dual=is_dual)
+        self._is_dual = is_dual
+        super().__init__(metadata)
+
+    @property
+    @override
+    def is_dual(self) -> bool:
+        return self._is_dual
+
+    @override
+    def dual_basis(self) -> Self:
+        copied = copy.copy(self)
+        copied._is_dual = not copied.is_dual  # noqa: SLF001
+        return copied
+
+    @property
+    @override
+    def fundamental_shape(self: Self) -> int:
+        return self.metadata().fundamental_shape
 
     @property
     @override
@@ -58,35 +75,6 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         """Get a fundamental basis from a size."""
         return FundamentalBasis(SimpleMetadata(size), is_dual=is_dual)
 
-    @staticmethod
-    @overload
-    def from_shape(
-        shape: tuple[int],
-    ) -> FundamentalBasis[Metadata1D[SimpleMetadata, None]]: ...
-    @staticmethod
-    @overload
-    def from_shape(
-        shape: tuple[int, int],
-    ) -> FundamentalBasis[Metadata2D[SimpleMetadata, SimpleMetadata, None]]: ...
-    @staticmethod
-    @overload
-    def from_shape(
-        shape: tuple[int, int, int],
-    ) -> FundamentalBasis[
-        Metadata3D[SimpleMetadata, SimpleMetadata, SimpleMetadata, None]
-    ]: ...
-    @staticmethod
-    @overload
-    def from_shape(
-        shape: tuple[int, ...],
-    ) -> FundamentalBasis[StackedMetadata[SimpleMetadata, None]]: ...
-    @staticmethod
-    def from_shape(
-        shape: tuple[int, ...],
-    ) -> FundamentalBasis[StackedMetadata[SimpleMetadata, None]]:
-        """Get a fundamental basis from a shape."""
-        return FundamentalBasis(StackedMetadata.from_shape(shape))
-
     @property
     @override
     def features(self) -> set[BasisFeature]:
@@ -120,7 +108,7 @@ class FundamentalBasis[M: BasisMetadata](Basis[M, np.generic]):
         return np.arange(self.size)
 
 
-def basis_as_fundamental[M: BasisMetadata, DT: np.generic](
+def basis_as_fundamental[M: SimpleMetadata, DT: np.generic](
     basis: Basis[M, DT],
 ) -> FundamentalBasis[M]:
     """Get the fundamental basis for a given basis."""

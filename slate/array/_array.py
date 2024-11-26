@@ -6,14 +6,14 @@ import numpy as np
 
 from slate.basis import (
     Basis,
-    FundamentalBasis,
     TupleBasis,
     as_add_basis,
     as_mul_basis,
     as_sub_basis,
-    fundamental_tuple_basis_from_shape,
+    fundamental_basis_from_shape,
 )
-from slate.metadata import BasisMetadata
+from slate.basis._tuple import fundamental_basis_from_metadata
+from slate.metadata import BasisMetadata, NestedLength, shallow_shape_from_nested
 
 if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata, StackedMetadata
@@ -36,7 +36,7 @@ class SlateArray[
         self._data = data.ravel()
 
     @property
-    def fundamental_shape(self: Self) -> tuple[int, ...]:
+    def fundamental_shape(self: Self) -> NestedLength:
         """Datatype of the data stored in the array."""
         return self.basis.fundamental_shape
 
@@ -65,9 +65,10 @@ class SlateArray[
 
     def as_array(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
         """Get the data as a (full) np.array."""
+        fundamental = fundamental_basis_from_metadata(self.basis.metadata())
         return self.basis.__convert_vector_into__(
-            self._data.ravel(), FundamentalBasis(self.basis.metadata())
-        ).reshape(self.basis.fundamental_shape)
+            self._data.ravel(), fundamental_basis_from_metadata(self.basis.metadata())
+        ).reshape(shallow_shape_from_nested(fundamental.fundamental_shape))
 
     @staticmethod
     def from_array[DT1: np.generic](
@@ -79,7 +80,7 @@ class SlateArray[
     ]:
         """Get a SlateArray from an array."""
         return SlateArray(
-            fundamental_tuple_basis_from_shape(array.shape),
+            fundamental_basis_from_shape(array.shape),
             array,
         )
 

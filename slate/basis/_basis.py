@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from copy import copy
+from itertools import starmap
 from typing import (
     Any,
     Literal,
     Never,
     Self,
+    Union,
 )
 
 import numpy as np
 
-from slate.metadata import BasisMetadata
+from slate.metadata import BasisMetadata, NestedLength
+from slate.metadata._shape import size_from_nested_shape
 
 BasisFeature = Literal[
     "ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB", "INDEX"
@@ -29,12 +31,28 @@ This specify certain operations that can be performed on the basis.
 """
 
 
+type NestedBool = Union[bool, tuple[NestedBool, ...]]
+type NestedBoolOrNone = Union[bool, tuple[NestedBoolOrNone, ...], None]
+
+
+def are_basis_dual(lhs: NestedBool, rhs: NestedBool) -> bool:
+    """Check if two bases are dual to each other.
+
+    The two basis must have the same shape, otherwise a `ValueError` will be raised.
+    """  # noqa: DOC501
+    if isinstance(lhs, tuple) and isinstance(rhs, tuple):
+        return all(starmap(are_basis_dual, zip(lhs, rhs)))
+    if isinstance(lhs, bool) and isinstance(rhs, bool):
+        return lhs != rhs
+    msg = "The two basis have different shapes"
+    raise ValueError(msg)
+
+
 class Basis[M: BasisMetadata, DT: np.generic](ABC):
     """Base class for a basis."""
 
-    def __init__(self, metadata: M, *, is_dual: bool = False) -> None:
+    def __init__(self, metadata: M) -> None:
         self._metadata = metadata
-        self._is_dual = is_dual
 
     @property
     @abstractmethod
@@ -44,17 +62,12 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
     @property
     def fundamental_size(self: Self) -> int:
         """Size of the full data."""
-        return np.prod(self.metadata().fundamental_shape).item()
+        return size_from_nested_shape(self.fundamental_shape)
 
     @property
-    def fundamental_shape(self: Self) -> tuple[int, ...]:
+    def fundamental_shape(self: Self) -> NestedLength:
         """Shape of the full data."""
         return self.metadata().fundamental_shape
-
-    @property
-    def n_dim(self: Self) -> int:
-        """Number of dimensions of the full data."""
-        return len(self.fundamental_shape)
 
     def metadata(self: Self) -> M:
         """Metadata associated with the basis.
@@ -95,13 +108,17 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         """Convert a vector into the non-conjugate basis from the fundamental basis."""
 
     @property
-    def is_dual(self: Self) -> bool:
-        return self._is_dual
+    @abstractmethod
+    def is_dual(self: Self) -> NestedBool: ...
 
+    @abstractmethod
     def dual_basis(self) -> Self:
-        copied = copy(self)
-        copied._is_dual = not copied._is_dual  # noqa: SLF001
-        return copied
+        """Get the dual basis.
+
+        A dual basis is a basis that is conjugate to the current basis, and
+        is the basis that is used in the inner product.
+        """
+        ...
 
     def __convert_vector_into__[
         DT1: np.generic,

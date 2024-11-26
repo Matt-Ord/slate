@@ -26,15 +26,13 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
     def __eq__(self, other: object) -> bool:
         if isinstance(other, CroppedBasis):
             return (
-                self._size == other._size
-                and other._inner == self._inner  # type: ignore unknown
-                and self.is_dual == other.is_dual
+                self._size == other._size and other._inner == self._inner  # type: ignore unknown
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((self._size, self._inner, self.is_dual))
+        return hash((self._size, self._inner))
 
     @override
     def __into_inner__[DT1: np.generic](  # [DT1: DT]
