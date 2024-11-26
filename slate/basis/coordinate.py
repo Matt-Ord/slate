@@ -42,7 +42,6 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
             return (
                 np.allclose(self.inner_points, other.inner_points)
                 and other._inner == self._inner  # type: ignore unknown
-                and self.is_dual == other.is_dual
             )
         return False
 

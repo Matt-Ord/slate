@@ -13,7 +13,7 @@ from slate.basis import (
     TruncatedBasis,
     Truncation,
     diagonal_basis,
-    fundamental_tuple_basis_from_shape,
+    fundamental_basis_from_shape,
     tuple_basis,
 )
 from slate.basis.transformed import fundamental_transformed_tuple_basis_from_shape
@@ -91,7 +91,7 @@ def test_transformed_basis() -> None:
 
 
 def test_diagonal_basis_round_trip() -> None:
-    full_basis = fundamental_tuple_basis_from_shape((10, 10))
+    full_basis = fundamental_basis_from_shape((10, 10))
     basis_diagonal = diagonal_basis(full_basis.children)
 
     array = SlateArray(full_basis, np.diag(np.ones(10)))
@@ -128,7 +128,7 @@ def test_diagonal_basis_round_trip() -> None:
 
 
 def test_transform_spaced_basis() -> None:
-    half_basis = fundamental_tuple_basis_from_shape((105,))
+    half_basis = fundamental_basis_from_shape((105,))
     full_basis = tuple_basis((half_basis, half_basis))
     spaced_basis = TruncatedBasis(Truncation(3, 5, 0), TransformedBasis(half_basis))
 
@@ -168,10 +168,10 @@ def test_transform_spaced_basis() -> None:
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_tuple_basis_from_shape((10, 10)),
-        fundamental_tuple_basis_from_shape((10, 10), dual=(False, True)),
-        fundamental_tuple_basis_from_shape((10, 10), dual=(True, False)),
-        fundamental_tuple_basis_from_shape((10, 10), dual=(True, True)),
+        fundamental_basis_from_shape((10, 10)),
+        fundamental_basis_from_shape((10, 10), is_dual=(False, True)),
+        fundamental_basis_from_shape((10, 10), is_dual=(True, False)),
+        fundamental_basis_from_shape((10, 10), is_dual=(True, True)),
         fundamental_transformed_tuple_basis_from_shape((10, 10)),
     ],
 )
@@ -183,7 +183,7 @@ def test_dual_basis_transform(
         None,
     ],
 ) -> None:
-    basis = fundamental_tuple_basis_from_shape((10, 10))
+    basis = fundamental_basis_from_shape((10, 10))
 
     dual_basis = basis.dual_basis()
     dual_child_basis = tuple_basis(

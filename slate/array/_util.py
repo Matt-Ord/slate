@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from slate.array._array import SlateArray
-from slate.basis.wrapped import as_index_basis
+from slate.basis import as_index_basis
 from slate.metadata import BasisMetadata
 
 

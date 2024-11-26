@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from slate.basis._basis import Basis
     from slate.basis._tuple import TupleBasis2D
     from slate.metadata import StackedMetadata
+    from slate.metadata._metadata import SimpleMetadata
     from slate.metadata.stacked import Metadata2D
 
 
@@ -51,11 +52,10 @@ def _diagonal_basis_as_explicit[
 
 def get_eigenvalues[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[StackedMetadata[M, E], DT],
-) -> SlateArray[BasisMetadata, np.complex128, FundamentalBasis[BasisMetadata]]:
+) -> SlateArray[BasisMetadata, np.complex128, FundamentalBasis[SimpleMetadata]]:
     """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
-    shape = cast(tuple[int, ...], a.shape)
-    return SlateArray(FundamentalBasis.from_shape(shape), a)
+    return SlateArray(FundamentalBasis.from_size(a.size), a)
 
 
 def _eig_from_tuple[
@@ -83,9 +83,7 @@ def _eig_from_tuple[
 
     states_basis_0 = tuple_basis(
         (
-            FundamentalBasis.from_size(
-                eig.eigenvalues.size, is_dual=array.basis[0].is_dual
-            ),
+            FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=False),
             array.basis[0].dual_basis(),
         )
     )
@@ -94,9 +92,7 @@ def _eig_from_tuple[
     )
     states_basis_1 = tuple_basis(
         (
-            FundamentalBasis.from_size(
-                eig.eigenvalues.size, is_dual=array.basis[1].is_dual
-            ),
+            FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=True),
             array.basis[1],
         )
     )
@@ -147,10 +143,9 @@ def into_diagonal[
 
 def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: SlateArray[StackedMetadata[M, E], DT],
-) -> SlateArray[BasisMetadata, np.float64, FundamentalBasis[BasisMetadata]]:
+) -> SlateArray[BasisMetadata, np.float64, FundamentalBasis[SimpleMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
-    shape = cast(tuple[int, ...], a.shape)
-    return SlateArray(FundamentalBasis.from_shape(shape), a)
+    return SlateArray(FundamentalBasis.from_size(a.size), a)
 
 
 def _eigh_from_tuple[
@@ -176,9 +171,7 @@ def _eigh_from_tuple[
 
     states_basis_0 = tuple_basis(
         (
-            FundamentalBasis.from_size(
-                eig.eigenvalues.size, is_dual=array.basis[0].is_dual
-            ),
+            FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=False),
             array.basis[0].dual_basis(),
         )
     )
@@ -189,9 +182,7 @@ def _eigh_from_tuple[
     )
     states_basis_1 = tuple_basis(
         (
-            FundamentalBasis.from_size(
-                eig.eigenvalues.size, is_dual=array.basis[1].is_dual
-            ),
+            FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=True),
             array.basis[1],
         )
     )

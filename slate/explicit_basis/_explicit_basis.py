@@ -16,6 +16,7 @@ from slate.basis import (
 )
 from slate.basis._diagonal import diagonal_basis
 from slate.metadata import BasisMetadata
+from slate.metadata._shape import size_from_nested_shape
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -87,18 +88,19 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
                 and other.inner == self.inner  # type: ignore unknown
                 and other.direction == self.direction
                 and other._data_id == self._data_id
-                and self.is_dual == other.is_dual
             )
         return False
 
     @override
     def __hash__(self) -> int:
-        return hash((1, self.inner, self.direction, self._data_id, self.is_dual))
+        return hash((1, self.inner, self.direction, self._data_id))
 
     @property
     @override
     def size(self: Self) -> int:
-        return self.eigenvectors.basis.fundamental_shape[0]
+        return size_from_nested_shape(
+            self.eigenvectors.basis.metadata().fundamental_shape[0]
+        )
 
     @property
     def direction(self: Self) -> Direction:

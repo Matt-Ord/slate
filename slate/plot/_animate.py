@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
+from slate.metadata._shape import shallow_shape_from_nested
 from slate.plot._plot import (
     plot_data_1d_k,
     plot_data_1d_n,
@@ -70,11 +71,12 @@ def animate_data_1d_n[DT: np.number[Any]](  # noqa: PLR0913
     tuple[Figure, Axes, ArtistAnimation]
     """
     fig, ax = get_figure(ax)
-    idx = tuple(np.zeros(data.basis.n_dim - 2)) if idx is None else idx
+    shape = shallow_shape_from_nested(data.basis.fundamental_shape)
+    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
 
-    for idx_x0 in range(data.basis.fundamental_shape[axes[0]]):
+    for idx_x0 in range(shape[axes[0]]):
         _, _, line = plot_data_1d_n(
             data,
             axes[1:],
@@ -124,11 +126,12 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     tuple[Figure, Axes, ArtistAnimation]
     """
     fig, ax = get_figure(ax)
-    idx = tuple(np.zeros(data.basis.n_dim - 2)) if idx is None else idx
+    shape = shallow_shape_from_nested(data.basis.fundamental_shape)
+    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
 
-    for idx_x0 in range(data.basis.fundamental_shape[axes[0]]):
+    for idx_x0 in range(shape[axes[0]]):
         _, _, line = plot_data_1d_x(
             data,
             axes[1:],
@@ -176,11 +179,12 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     tuple[Figure, Axes, ArtistAnimation]
     """
     fig, ax = get_figure(ax)
-    idx = tuple(np.zeros(data.basis.n_dim - 2)) if idx is None else idx
+    shape = shallow_shape_from_nested(data.basis.fundamental_shape)
+    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
 
-    for idx_x0 in range(data.basis.fundamental_shape[axes[0]]):
+    for idx_x0 in range(shape[axes[0]]):
         _, _, line = plot_data_1d_k(
             data,
             axes[1:],
@@ -229,11 +233,12 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
     tuple[Figure, Axes, ArtistAnimation]
     """
     fig, ax = get_figure(ax)
-    idx = tuple(np.zeros(data.basis.n_dim - 3)) if idx is None else idx
+    shape = shallow_shape_from_nested(data.basis.fundamental_shape)
+    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
     frames: list[list[QuadMesh]] = []
 
-    for idx_x0 in range(data.basis.fundamental_shape[axes[0]]):
+    for idx_x0 in range(shape[axes[0]]):
         _, _, mesh = plot_data_2d_x(
             data,
             axes[1:],
@@ -280,10 +285,11 @@ def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
     tuple[Figure, Axes, ArtistAnimation]
     """
     fig, ax = get_figure(ax)
-    idx = tuple(np.zeros(data.basis.n_dim - 3)) if idx is None else idx
+    shape = shallow_shape_from_nested(data.basis.fundamental_shape)
+    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
     frames: list[list[QuadMesh]] = []
-    for idx_x0 in range(data.basis.fundamental_shape[axes[0]]):
+    for idx_x0 in range(shape[axes[0]]):
         _, _, mesh = plot_data_2d_k(
             data,
             axes[1:],

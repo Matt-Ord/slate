@@ -5,6 +5,9 @@ from __future__ import annotations
 from slate.basis._basis import (
     Basis,
     BasisFeature,
+    NestedBool,
+    NestedBoolOrNone,
+    are_basis_dual,
 )
 from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
 from slate.basis._isotropic import IsotropicBasis, isotropic_basis
@@ -16,14 +19,21 @@ from slate.basis._tuple import (
     TupleBasis3D,
     TupleBasisND,
     as_tuple_basis,
-    fundamental_tuple_basis_from_metadata,
-    fundamental_tuple_basis_from_shape,
+    fundamental_basis_from_metadata,
+    fundamental_basis_from_shape,
     get_common_basis,
     tuple_basis,
     tuple_basis_is_variadic,
     tuple_basis_with_child,
     tuple_basis_with_modified_child,
     tuple_basis_with_modified_children,
+)
+from slate.basis._util import (
+    as_add_basis,
+    as_feature_basis,
+    as_index_basis,
+    as_mul_basis,
+    as_sub_basis,
 )
 from slate.basis.coordinate import CoordinateBasis
 from slate.basis.cropped import CroppedBasis
@@ -38,11 +48,6 @@ from slate.basis.transformed import (
 from slate.basis.truncated import Padding, TruncatedBasis, Truncation
 from slate.basis.wrapped import (
     WrappedBasis,
-    as_add_basis,
-    as_feature_basis,
-    as_index_basis,
-    as_mul_basis,
-    as_sub_basis,
     get_wrapped_basis_super_inner,
 )
 
@@ -54,6 +59,8 @@ __all__ = [
     "DiagonalBasis",
     "FundamentalBasis",
     "IsotropicBasis",
+    "NestedBool",
+    "NestedBoolOrNone",
     "Padding",
     "RecastBasis",
     "SplitBasis",
@@ -67,6 +74,7 @@ __all__ = [
     "TupleBasis3D",
     "TupleBasisND",
     "WrappedBasis",
+    "are_basis_dual",
     "as_add_basis",
     "as_diagonal_basis",
     "as_feature_basis",
@@ -75,10 +83,10 @@ __all__ = [
     "as_sub_basis",
     "as_tuple_basis",
     "diagonal_basis",
+    "fundamental_basis_from_metadata",
+    "fundamental_basis_from_shape",
     "fundamental_transformed_tuple_basis_from_metadata",
     "fundamental_transformed_tuple_basis_from_shape",
-    "fundamental_tuple_basis_from_metadata",
-    "fundamental_tuple_basis_from_shape",
     "get_common_basis",
     "get_wrapped_basis_super_inner",
     "isotropic_basis",

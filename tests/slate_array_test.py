@@ -9,8 +9,7 @@ from slate.array import SlateArray
 from slate.array._transpose import transpose
 from slate.array._util import conjugate
 from slate.basis import (
-    FundamentalBasis,
-    fundamental_tuple_basis_from_shape,
+    fundamental_basis_from_shape,
 )
 from slate.basis.transformed import fundamental_transformed_tuple_basis_from_shape
 
@@ -37,14 +36,14 @@ def test_slate_array_dtype(
 def test_slate_array_basis(
     slate_array_integer: SlateArray[SimpleMetadata, np.int64],
 ) -> None:
-    assert slate_array_integer.basis == fundamental_tuple_basis_from_shape(
+    assert slate_array_integer.basis == fundamental_basis_from_shape(
         slate_array_integer.fundamental_shape
     )
 
 
 def test_create_array_with_wrong_size() -> None:
     with pytest.raises(AssertionError):
-        SlateArray(FundamentalBasis.from_shape((2, 3)), np.array([1, 2, 3, 4]))
+        SlateArray(fundamental_basis_from_shape((2, 3)), np.array([1, 2, 3, 4]))
 
 
 def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) -> None:
@@ -55,8 +54,8 @@ def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) ->
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_tuple_basis_from_shape((2, 3)),
-        fundamental_tuple_basis_from_shape((2, 3), dual=(False, True)),
+        fundamental_basis_from_shape((2, 3)),
+        fundamental_basis_from_shape((2, 3), is_dual=(False, True)),
         fundamental_transformed_tuple_basis_from_shape((2, 3)),
     ],
 )
@@ -81,8 +80,8 @@ def test_transpose_array(
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_tuple_basis_from_shape((2, 3)),
-        fundamental_tuple_basis_from_shape((2, 3), dual=(False, True)),
+        fundamental_basis_from_shape((2, 3)),
+        fundamental_basis_from_shape((2, 3), is_dual=(False, True)),
         fundamental_transformed_tuple_basis_from_shape((2, 3)),
     ],
 )
