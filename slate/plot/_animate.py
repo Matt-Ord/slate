@@ -6,11 +6,12 @@ import numpy as np
 from matplotlib.animation import ArtistAnimation
 
 from slate.array import SlateArray
-from slate.basis._tuple import (
-    as_tuple_basis,
+from slate.basis import (
+    FundamentalBasis,
+    fundamental_basis_from_metadata,
     tuple_basis,
 )
-from slate.basis.fundamental import FundamentalBasis
+from slate.basis.transformed import fundamental_transformed_tuple_basis_from_metadata
 from slate.metadata._shape import shallow_shape_from_nested
 from slate.plot._plot import (
     plot_data_1d_k,
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
 
     from slate.metadata import SpacedVolumeMetadata
-    from slate.metadata._metadata import BasisMetadata
+    from slate.metadata._metadata import SimpleMetadata
     from slate.metadata.stacked import Metadata2D
 
 
@@ -102,7 +103,7 @@ def animate_data_1d_n[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[Metadata2D[BasisMetadata, SpacedVolumeMetadata, Any], DT],
+    data: SlateArray[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -134,18 +135,19 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     """
     fig, ax = get_figure(ax)
 
-    basis = tuple_basis(
-        (FundamentalBasis(data.basis.metadata()[0]), as_tuple_basis(data.basis))
+    basis_x = fundamental_basis_from_metadata(
+        data.basis.metadata()[1], is_dual=data.basis.is_dual
     )
+    basis = tuple_basis((FundamentalBasis(data.basis.metadata()[0]), basis_x))
     data = data.with_basis(basis)
-    shape = shallow_shape_from_nested(data.basis[1].fundamental_shape)
+    shape = shallow_shape_from_nested(basis_x.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = plot_data_1d_x(
-            SlateArray(basis[1], raw_data),
+            SlateArray(basis_x, raw_data),
             axes,
             idx,
             ax=ax,
@@ -213,7 +215,7 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[Metadata2D[BasisMetadata, SpacedVolumeMetadata, Any], DT],
+    data: SlateArray[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -244,11 +246,12 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     tuple[Figure, Axes, ArtistAnimation]
     """
     fig, ax = get_figure(ax)
-    basis = tuple_basis(
-        (FundamentalBasis(data.basis.metadata()[0]), as_tuple_basis(data.basis))
+    basis_x = fundamental_transformed_tuple_basis_from_metadata(
+        data.basis.metadata()[1], is_dual=data.basis.is_dual
     )
+    basis = tuple_basis((FundamentalBasis(data.basis.metadata()[0]), basis_x))
     data = data.with_basis(basis)
-    shape = shallow_shape_from_nested(data.basis[1].fundamental_shape)
+    shape = shallow_shape_from_nested(basis_x.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
