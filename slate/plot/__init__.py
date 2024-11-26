@@ -8,6 +8,8 @@ from slate.plot._animate import (
     animate_data_1d_x,
     animate_data_2d_k,
     animate_data_2d_x,
+    animate_data_over_list_1d_k,
+    animate_data_over_list_1d_x,
 )
 from slate.plot._plot import (
     plot_data_1d,
@@ -33,6 +35,8 @@ __all__ = [
     "animate_data_2d_k",
     "animate_data_2d_x",
     "animate_data_2d_x",
+    "animate_data_over_list_1d_k",
+    "animate_data_over_list_1d_x",
     "get_figure",
     "get_measured_data",
     "plot_data_1d",

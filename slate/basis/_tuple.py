@@ -606,7 +606,7 @@ def tuple_basis_with_modified_child[
 ) -> TupleBasis[M, E, DT | DT1]:
     """Get the basis with modified child."""
     return tuple_basis_with_modified_children(
-        basis, lambda i, b: cast(Basis[M, DT | DT1], b if i != idx else wrapper(b))
+        basis, lambda i, b: cast(Basis[Any, Any], b if i != idx else wrapper(b))
     )
 
 
