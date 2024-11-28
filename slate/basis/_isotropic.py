@@ -7,7 +7,7 @@ import numpy as np
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis._tuple import TupleBasis2D, tuple_basis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata import StackedMetadata
+from slate.metadata.stacked import Metadata2D
 from slate.metadata.util import nx_points
 
 
@@ -17,7 +17,7 @@ class IsotropicBasis[
     B1: Basis[Any, Any],
     E,
 ](
-    WrappedBasis[StackedMetadata[Any, E], DT, TupleBasis2D[DT, B0, B1, E]],
+    WrappedBasis[Metadata2D[Any, Any, E], DT, TupleBasis2D[DT, B0, B1, E]],
 ):
     """Represents an isotropic basis."""
 
