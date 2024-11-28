@@ -13,22 +13,24 @@ class RecastBasis[
     M0: BasisMetadata,
     M1: BasisMetadata,
     DT: np.generic,
-    B: Basis[BasisMetadata, Any] = Basis[M0, DT],
-](WrappedBasis[M0, DT, B]):
+    BInner: Basis[BasisMetadata, Any] = Basis[M0, DT],
+    BOuter: Basis[BasisMetadata, Any] = Basis[M1, DT],
+](WrappedBasis[M0, DT, BInner]):
     """Represents a truncated basis."""
 
     def __init__[
         _M1: BasisMetadata,
         _DT: np.generic,
-        _B: Basis[BasisMetadata, Any],
+        _BInner: Basis[BasisMetadata, Any],
+        _BOuter: Basis[BasisMetadata, Any] = Basis[_M1, _DT],
     ](
-        self: RecastBasis[Any, _M1, _DT, _B],
-        inner: _B,
+        self: RecastBasis[Any, _M1, _DT, _BInner, _BOuter],
+        inner: _BInner,
         inner_recast: Basis[_M1, _DT],
-        outer_recast: Basis[_M1, _DT],
+        outer_recast: _BOuter,
     ) -> None:
         self._inner_recast: Basis[M1, DT] = inner_recast
-        self._outer_recast: Basis[M1, DT] = outer_recast
+        self._outer_recast: BOuter = outer_recast
         super().__init__(inner)
 
         assert self._inner_recast.size == self.inner.size
@@ -45,7 +47,7 @@ class RecastBasis[
         return self._inner_recast
 
     @property
-    def outer_recast(self: Self) -> Basis[M1, DT]:
+    def outer_recast(self: Self) -> BOuter:
         """The basis the inner recast was transformed to."""
         return self._outer_recast
 
@@ -74,7 +76,7 @@ class RecastBasis[
         _M: BasisMetadata,
         _DT: np.generic,
         _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
-    ](self: RecastBasis[_M, M1, DT, B], inner: _B) -> RecastBasis[_M, M1, DT, _B]:
+    ](self: RecastBasis[_M, M1, DT, BInner], inner: _B) -> RecastBasis[_M, M1, DT, _B]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
@@ -83,7 +85,7 @@ class RecastBasis[
         _DT: np.generic,
         _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
     ](
-        self: RecastBasis[_M, M1, DT, B], wrapper: Callable[[B], _B]
+        self: RecastBasis[_M, M1, DT, BInner], wrapper: Callable[[BInner], _B]
     ) -> RecastBasis[_M, M1, DT, _B]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return RecastBasis(wrapper(self.inner), self.inner_recast, self.outer_recast)
