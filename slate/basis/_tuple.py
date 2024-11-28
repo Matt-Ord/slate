@@ -903,3 +903,11 @@ def get_common_basis[M: BasisMetadata, E, DT: np.generic](
             return last_common
         last_common = a
     return last_common
+
+
+def flatten_basis[M: BasisMetadata, DT: np.generic](
+    basis: Basis[StackedMetadata[StackedMetadata[M, Any], Any], DT],
+) -> TupleBasis[M, None, DT]:
+    as_tuple = as_tuple_basis(basis)
+    children = tuple(c for b in as_tuple.children for c in as_tuple_basis(b).children)
+    return tuple_basis(children)

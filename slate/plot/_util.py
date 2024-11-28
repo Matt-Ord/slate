@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, cast, override
+from typing import TYPE_CHECKING, Any, Literal, cast, overload, override
 
 import numpy as np
 
@@ -20,10 +20,12 @@ from slate.plot._squared_scale import SquaredScale
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+    from matplotlib.artist import Artist
     from matplotlib.cm import ScalarMappable
     from matplotlib.collections import QuadMesh
     from matplotlib.colorbar import Colorbar
     from matplotlib.container import ErrorbarContainer
+    from matplotlib.legend import Legend
     from matplotlib.text import Text
     from matplotlib.transforms import Transform
     from matplotlib.typing import ColorType
@@ -97,6 +99,20 @@ class Axes(MPLAxes):
         *,
         y: float | None = ...,
     ) -> Text: ...
+
+    @overload
+    def legend(self) -> Legend: ...
+    @overload
+    def legend(
+        self, handles: Iterable[Artist | tuple[Artist, ...]], labels: Iterable[str]
+    ) -> Legend: ...
+    @overload
+    def legend(self, *, handles: Iterable[Artist | tuple[Artist, ...]]) -> Legend: ...
+    @overload
+    def legend(self, labels: Iterable[str]) -> Legend: ...
+
+    @override
+    def legend(self, *args: Any, **kwargs: Any) -> Legend: ...  # type: ignore overload
 
 
 class Figure(MPLFigure):

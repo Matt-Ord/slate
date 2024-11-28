@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Never, Self, override
+from typing import Any, Callable, Never, Self, cast, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
+from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
+from slate.metadata.stacked import Metadata2D
 
 
 class RecastBasis[
@@ -135,3 +137,59 @@ class RecastBasis[
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+
+def recast_basis_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+    basis: DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
+) -> RecastBasis[
+    Metadata2D[M0, M1, E], M1, DT, DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E]
+]:
+    """Recast a diagonal basis to the lhs basis."""
+    return RecastBasis(basis, basis.inner[1], basis.inner[1])
+
+
+def as_recast_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+    basis: Basis[Metadata2D[M0, M1, E], DT],
+) -> (
+    RecastBasis[
+        Metadata2D[M0, M1, E],
+        M1,
+        DT,
+        DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
+    ]
+    | None
+):
+    """Get the basis as a recast diagonal basis."""
+    basis_as_diagonal = as_diagonal_basis(basis)
+    if basis_as_diagonal is None:
+        return None
+    return recast_basis_from_diagonal(basis_as_diagonal)
+
+
+type RecastDiagonalBasis[
+    M: BasisMetadata,
+    DT: np.generic,
+    BInner: Basis[BasisMetadata, Any] = Basis[M, DT],  # noqa: E251
+    BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],  # noqa: E251
+] = RecastBasis[
+    Metadata2D[M, M, None], M, DT, DiagonalBasis[Any, BInner, BInner, None], BOuter
+]
+
+
+def recast_diagonal_basis[
+    M: BasisMetadata,
+    DT: np.generic,
+    BInner: Basis[BasisMetadata, Any] = Basis[M, DT],
+    BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
+](
+    inner_basis: BInner, outer_basis: BOuter
+) -> RecastDiagonalBasis[Any, Any, BInner, BOuter]:
+    """Recast a basis which is diagonal in the inner basis."""
+    return cast(
+        RecastDiagonalBasis[M, DT, BInner, BOuter],
+        RecastBasis(
+            diagonal_basis((inner_basis.dual_basis(), inner_basis)),
+            inner_basis,
+            outer_basis,
+        ),
+    )
