@@ -3,19 +3,21 @@
 from __future__ import annotations
 
 from slate.array._array import SlateArray
-from slate.array._conversion import convert_array
+from slate.array._conversion import with_basis
+from slate.array._transpose import transpose
 from slate.array._util import (
-    array_as_flatten_basis,
-    array_as_outer_basis,
-    array_as_tuple_basis,
+    as_flatten_basis,
+    as_outer_basis,
+    as_tuple_basis,
     conjugate,
 )
 
 __all__ = [
     "SlateArray",
-    "array_as_flatten_basis",
-    "array_as_outer_basis",
-    "array_as_tuple_basis",
+    "as_flatten_basis",
+    "as_outer_basis",
+    "as_tuple_basis",
     "conjugate",
-    "convert_array",
+    "transpose",
+    "with_basis",
 ]

@@ -8,7 +8,7 @@ from matplotlib.animation import ArtistAnimation
 from slate.array import SlateArray
 from slate.basis import (
     FundamentalBasis,
-    fundamental_basis_from_metadata,
+    from_metadata,
     tuple_basis,
 )
 from slate.basis.transformed import fundamental_transformed_tuple_basis_from_metadata
@@ -93,9 +93,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
 
-    basis_x = fundamental_basis_from_metadata(
-        data.basis.metadata()[1], is_dual=data.basis.is_dual
-    )
+    basis_x = from_metadata(data.basis.metadata()[1], is_dual=data.basis.is_dual)
     basis = tuple_basis((FundamentalBasis(data.basis.metadata()[0]), basis_x))
     data = data.with_basis(basis)
     shape = shallow_shape_from_nested(basis_x.fundamental_shape)

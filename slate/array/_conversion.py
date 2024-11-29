@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from slate.basis import Basis
 
 
-def convert_array[
+def with_basis[
     M: BasisMetadata,
     DT: np.generic,
     B1: Basis[Any, Any],

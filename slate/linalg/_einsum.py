@@ -6,7 +6,7 @@ import numpy as np
 
 from slate.array import SlateArray
 from slate.basis._diagonal import as_diagonal_basis
-from slate.basis._tuple import as_tuple_basis, tuple_basis, tuple_basis_with_child
+from slate.basis._tuple import as_tuple_basis, tuple_basis, with_child
 
 if TYPE_CHECKING:
     from slate.metadata import BasisMetadata
@@ -31,12 +31,12 @@ def _einsum_1[DT: np.number[Any]](
     array_1_tuple = as_tuple_basis(array_1.basis)
 
     array_2_tuple = as_tuple_basis(array_2.basis)
-    array_2_converted_basis = tuple_basis_with_child(
+    array_2_converted_basis = with_child(
         array_2_tuple, array_1_tuple[1].dual_basis(), 0
     )
     array_2_converted = array_2.with_basis(array_2_converted_basis)
 
-    final_basis = tuple_basis_with_child(array_2_tuple, array_1_tuple[0], 0)
+    final_basis = with_child(array_2_tuple, array_1_tuple[0], 0)
     if array_1_diag is not None:
         array_1_converted = array_1.with_basis(array_1_diag)
         data = _einsum_numpy(
@@ -74,7 +74,6 @@ def _einsum_2[DT: np.number[Any]](
     array_1_converted = array_1.with_basis(array_1_basis)
     array_2_converted = array_2.with_basis(array_2_basis)
 
-    array_1_converted = array_1.with_basis(array_1_tuple)
     data = _einsum_numpy(
         "mik,kj->mij",
         array_1_converted.raw_data.reshape(m_basis.size, i_basis.size, k_basis.size),
@@ -91,7 +90,7 @@ def _einsum_3[DT: np.number[Any]](
 
     array_1_tuple = as_tuple_basis(array_1.basis)
     array_2_tuple = as_tuple_basis(array_2.basis)
-    k_basis = array_1_tuple[0].dual_basis()
+    k_basis = array_1_tuple[1].dual_basis()
     m_basis = array_2_tuple[0]
     i_basis = array_1_tuple[0]
     j_basis = as_tuple_basis(array_2_tuple[1])[1]
@@ -103,7 +102,6 @@ def _einsum_3[DT: np.number[Any]](
     array_1_converted = array_1.with_basis(array_1_basis)
     array_2_converted = array_2.with_basis(array_2_basis)
 
-    array_1_converted = array_1.with_basis(array_1_tuple)
     data = _einsum_numpy(
         "ik,mkj->mij",
         array_1_converted.raw_data.reshape(i_basis.size, k_basis.size),
@@ -119,9 +117,9 @@ def einsum[DT: np.number[Any]](
 ) -> SlateArray[BasisMetadata, DT]:
     if idx == "(i j),i...->j...":
         return _einsum_1(array_1, array_2)
-    if idx == "(m (i k')),(k j) -> m (i j)":
+    if idx == "(m (i k')),(k j) -> (m (i j))":
         return _einsum_2(array_1, array_2)
-    if idx == "(i k'),(m (k j)) -> m (i j)":
+    if idx == "(i k'),(m (k j)) -> (m (i j))":
         return _einsum_3(array_1, array_2)
     msg = "Not implemented yet."
     raise NotImplementedError(msg)

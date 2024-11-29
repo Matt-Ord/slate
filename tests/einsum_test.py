@@ -4,14 +4,14 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array import SlateArray, convert_array
+from slate.array import SlateArray, with_basis
 from slate.basis import (
     CroppedBasis,
     TransformedBasis,
     TruncatedBasis,
     Truncation,
     TupleBasis,
-    tuple_basis_with_child,
+    with_child,
 )
 from slate.basis._tuple import tuple_basis
 from slate.basis.fundamental import FundamentalBasis
@@ -26,11 +26,11 @@ def _test_einsum_in_basis(
     vector: SlateArray[Any, Any, Any],
     basis: Basis[Any, Any],
 ) -> None:
-    transformed_array = convert_array(
+    transformed_array = with_basis(
         array,
-        tuple_basis_with_child(array.basis, basis.dual_basis(), 1),
+        with_child(array.basis, basis.dual_basis(), 1),
     )
-    transformed_vector = convert_array(
+    transformed_vector = with_basis(
         vector,
         basis,
     )

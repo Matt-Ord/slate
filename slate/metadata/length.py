@@ -10,6 +10,7 @@ from slate.metadata import (
 )
 from slate.metadata.util import (
     fundamental_nk_points,
+    fundamental_nx_points,
     fundamental_size,
 )
 
@@ -46,7 +47,7 @@ def fundamental_x_points(
     metadata: SpacedLengthMetadata,
 ) -> np.ndarray[Any, np.dtype[np.float64]]:
     """Get the coordinates, using the x convention (0...N)."""
-    return fundamental_delta_k(metadata) * fundamental_nk_points(metadata)
+    return fundamental_delta_x(metadata) * fundamental_nx_points(metadata)
 
 
 def fundamental_k_points(
