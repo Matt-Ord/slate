@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array import SlateArray, convert_array
+from slate.array import SlateArray, with_basis
 from slate.basis import (
     FundamentalBasis,
     RecastBasis,
@@ -13,7 +13,7 @@ from slate.basis import (
     TruncatedBasis,
     Truncation,
     diagonal_basis,
-    fundamental_basis_from_shape,
+    from_shape,
     tuple_basis,
 )
 from slate.basis.transformed import fundamental_transformed_tuple_basis_from_shape
@@ -31,7 +31,7 @@ def test_transformed_basis_round_trip(
 ) -> None:
     basis = TransformedBasis(slate_array_complex.basis)
 
-    converted_array = convert_array(
+    converted_array = with_basis(
         slate_array_complex, TransformedBasis(slate_array_complex.basis)
     )
     assert converted_array.basis == basis
@@ -40,7 +40,7 @@ def test_transformed_basis_round_trip(
         slate_array_complex.as_array(),
     )
 
-    round_trip_array = convert_array(converted_array, slate_array_complex.basis)
+    round_trip_array = with_basis(converted_array, slate_array_complex.basis)
     assert round_trip_array.basis == slate_array_complex.basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
@@ -91,19 +91,19 @@ def test_transformed_basis() -> None:
 
 
 def test_diagonal_basis_round_trip() -> None:
-    full_basis = fundamental_basis_from_shape((10, 10))
+    full_basis = from_shape((10, 10))
     basis_diagonal = diagonal_basis(full_basis.children)
 
     array = SlateArray(full_basis, np.diag(np.ones(10)))
 
-    converted_array = convert_array(array, basis_diagonal)
+    converted_array = with_basis(array, basis_diagonal)
     assert converted_array.basis == basis_diagonal
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
         array.as_array(),
     )
 
-    round_trip_array = convert_array(converted_array, full_basis)
+    round_trip_array = with_basis(converted_array, full_basis)
     assert round_trip_array.basis == full_basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
@@ -112,14 +112,14 @@ def test_diagonal_basis_round_trip() -> None:
 
     array = SlateArray(full_basis, np.ones(full_basis.shape))
 
-    converted_array = convert_array(array, basis_diagonal)
+    converted_array = with_basis(array, basis_diagonal)
     assert converted_array.basis == basis_diagonal
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
         np.diag(np.diag(array.as_array())),
     )
 
-    round_trip_array = convert_array(converted_array, full_basis)
+    round_trip_array = with_basis(converted_array, full_basis)
     assert round_trip_array.basis == full_basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
@@ -128,7 +128,7 @@ def test_diagonal_basis_round_trip() -> None:
 
 
 def test_transform_spaced_basis() -> None:
-    half_basis = fundamental_basis_from_shape((105,))
+    half_basis = from_shape((105,))
     full_basis = tuple_basis((half_basis, half_basis))
     spaced_basis = TruncatedBasis(Truncation(3, 5, 0), TransformedBasis(half_basis))
 
@@ -141,7 +141,7 @@ def test_transform_spaced_basis() -> None:
         np.ones(spaced_basis.size),
     )
 
-    converted_array = convert_array(array, full_basis)
+    converted_array = with_basis(array, full_basis)
     assert converted_array.basis == tuple_basis((half_basis, half_basis))
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
@@ -157,7 +157,7 @@ def test_transform_spaced_basis() -> None:
         array.as_array().ravel(),
     )
 
-    round_trip_array = convert_array(converted_array, array.basis)
+    round_trip_array = with_basis(converted_array, array.basis)
     assert round_trip_array.basis == array.basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
@@ -168,10 +168,10 @@ def test_transform_spaced_basis() -> None:
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_basis_from_shape((10, 10)),
-        fundamental_basis_from_shape((10, 10), is_dual=(False, True)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, False)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, True)),
+        from_shape((10, 10)),
+        from_shape((10, 10), is_dual=(False, True)),
+        from_shape((10, 10), is_dual=(True, False)),
+        from_shape((10, 10), is_dual=(True, True)),
         fundamental_transformed_tuple_basis_from_shape((10, 10)),
     ],
 )
@@ -183,7 +183,7 @@ def test_dual_basis_transform(
         None,
     ],
 ) -> None:
-    basis = fundamental_basis_from_shape((10, 10))
+    basis = from_shape((10, 10))
 
     dual_basis = basis.dual_basis()
     dual_child_basis = tuple_basis(

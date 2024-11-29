@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array import SlateArray, convert_array
+from slate.array import SlateArray, with_basis
 from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
@@ -138,7 +138,7 @@ def into_diagonal[
         return array.with_basis(_diagonal_basis_as_explicit(diagonal))
 
     tuple_basis = as_tuple_basis(array.basis)
-    return _eig_from_tuple(convert_array(array, tuple_basis))
+    return _eig_from_tuple(with_basis(array, tuple_basis))
 
 
 def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
@@ -221,4 +221,4 @@ def into_diagonal_hermitian[
         return array.with_basis(_diagonal_basis_as_explicit(diagonal))
 
     tuple_basis = as_tuple_basis(array.basis)
-    return _eigh_from_tuple(convert_array(array, tuple_basis))
+    return _eigh_from_tuple(with_basis(array, tuple_basis))

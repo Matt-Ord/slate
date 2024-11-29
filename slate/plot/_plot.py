@@ -6,9 +6,10 @@ import numpy as np
 
 from slate.basis import (
     as_tuple_basis,
-    fundamental_basis_from_metadata,
+    from_metadata,
     fundamental_transformed_tuple_basis_from_metadata,
 )
+from slate.metadata.length import fundamental_k_points, fundamental_x_points
 from slate.metadata.volume import (
     get_k_coordinates_in_axes,
     get_x_coordinates_in_axes,
@@ -214,9 +215,7 @@ def plot_data_1d_x[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_x = fundamental_basis_from_metadata(
-        data.basis.metadata(), is_dual=data.basis.is_dual
-    )
+    basis_x = from_metadata(data.basis.metadata(), is_dual=data.basis.is_dual)
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -269,7 +268,7 @@ def _get_lengths_in_axes(
     axes: tuple[int, ...],
 ) -> np.ndarray[tuple[int, int], np.dtype[np.float64]]:
     """Get the lengths from each axis in a grid."""
-    points = tuple(np.asarray(metadata.children[ax].values) for ax in axes)
+    points = tuple(fundamental_x_points(metadata.children[ax]) for ax in axes)
     aa = np.meshgrid(*points, indexing="ij")
     return np.asarray(aa)
 
@@ -305,7 +304,7 @@ def plot_data_2d_x[DT: np.number[Any], E](
     tuple[Figure, Axes, QuadMesh]
     """
     metadata = data.basis.metadata()
-    basis_x = fundamental_basis_from_metadata(metadata, is_dual=data.basis.is_dual)
+    basis_x = from_metadata(metadata, is_dual=data.basis.is_dual)
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -336,8 +335,18 @@ def plot_data_2d_x[DT: np.number[Any], E](
     return fig, ax, mesh
 
 
-def plot_data_2d_k[DT: np.number[Any]](
-    data: SlateArray[SpacedVolumeMetadata, DT],
+def _get_frequencies_in_axes(
+    metadata: StackedMetadata[SpacedLengthMetadata, Any],
+    axes: tuple[int, ...],
+) -> np.ndarray[tuple[int, int], np.dtype[np.float64]]:
+    """Get the lengths from each axis in a grid."""
+    points = tuple(fundamental_k_points(metadata.children[ax]) for ax in axes)
+    aa = np.meshgrid(*points, indexing="ij")
+    return np.asarray(aa)
+
+
+def plot_data_2d_k[DT: np.number[Any], E](
+    data: SlateArray[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -364,14 +373,19 @@ def plot_data_2d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, QuadMesh]
     """
+    metadata = data.basis.metadata()
     basis_k = fundamental_transformed_tuple_basis_from_metadata(
-        data.basis.metadata(), is_dual=data.basis.is_dual
+        metadata, is_dual=data.basis.is_dual
     )
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
-    coordinates = get_k_coordinates_in_axes(basis_k.metadata(), axes, idx)
+    if isinstance(metadata.extra, AxisDirections):
+        metadata = cast(SpacedVolumeMetadata, metadata)
+        coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
+    else:
+        coordinates = _get_frequencies_in_axes(metadata, axes)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
     shifted_data = np.fft.fftshift(data_in_axis)

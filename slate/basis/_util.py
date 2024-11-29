@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from slate.basis._tuple import fundamental_basis_from_metadata
+from slate.basis._tuple import from_metadata
 from slate.basis.wrapped import wrapped_basis_iter_inner
 from slate.metadata import BasisMetadata
 
@@ -18,7 +18,7 @@ def as_feature_basis[M: BasisMetadata, DT: np.generic](
     """Get the closest basis that supports the feature set."""
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if features <= b.features),
-        fundamental_basis_from_metadata(basis.metadata()),
+        from_metadata(basis.metadata()),
     )
 
 

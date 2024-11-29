@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array import SlateArray, convert_array
+from slate.array import SlateArray, with_basis
 from slate.basis._tuple import (
     TupleBasis2D,
     as_tuple_basis,
-    fundamental_basis_from_shape,
+    from_shape,
 )
 from slate.linalg import into_diagonal
 from slate.linalg._eig import (
@@ -60,10 +60,10 @@ def _test_into_diagonal(
         == original_as_tuple[1].is_dual
     )
 
-    full_as_diagonal = convert_array(array, diagonal.basis)
+    full_as_diagonal = with_basis(array, diagonal.basis)
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data, atol=1e-15)
 
-    diagonal_as_full = convert_array(diagonal, array.basis)
+    diagonal_as_full = with_basis(diagonal, array.basis)
     np.testing.assert_allclose(diagonal_as_full.raw_data, array.raw_data, atol=1e-15)
 
     np.testing.assert_allclose(diagonal.as_array(), array.as_array(), atol=1e-15)
@@ -72,10 +72,10 @@ def _test_into_diagonal(
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_basis_from_shape((10, 10)),
-        fundamental_basis_from_shape((10, 10), is_dual=(False, True)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, False)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, True)),
+        from_shape((10, 10)),
+        from_shape((10, 10), is_dual=(False, True)),
+        from_shape((10, 10), is_dual=(True, False)),
+        from_shape((10, 10), is_dual=(True, True)),
     ],
 )
 def test_linalg_complex(
@@ -130,10 +130,10 @@ def _test_into_diagonal_hermitian(
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_basis_from_shape((10, 10)),
-        fundamental_basis_from_shape((10, 10), is_dual=(False, True)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, False)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, True)),
+        from_shape((10, 10)),
+        from_shape((10, 10), is_dual=(False, True)),
+        from_shape((10, 10), is_dual=(True, False)),
+        from_shape((10, 10), is_dual=(True, True)),
     ],
 )
 def test_linalg_diagonal(
@@ -157,10 +157,10 @@ def test_linalg_diagonal(
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_basis_from_shape((10, 10)),
-        fundamental_basis_from_shape((10, 10), is_dual=(False, True)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, False)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, True)),
+        from_shape((10, 10)),
+        from_shape((10, 10), is_dual=(False, True)),
+        from_shape((10, 10), is_dual=(True, False)),
+        from_shape((10, 10), is_dual=(True, True)),
     ],
 )
 def test_linalg_complex_hermitian(
@@ -182,10 +182,10 @@ def test_linalg_complex_hermitian(
 @pytest.mark.parametrize(
     "basis",
     [
-        fundamental_basis_from_shape((10, 10)),
-        fundamental_basis_from_shape((10, 10), is_dual=(False, True)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, False)),
-        fundamental_basis_from_shape((10, 10), is_dual=(True, True)),
+        from_shape((10, 10)),
+        from_shape((10, 10), is_dual=(False, True)),
+        from_shape((10, 10), is_dual=(True, False)),
+        from_shape((10, 10), is_dual=(True, True)),
     ],
 )
 def test_linalg_real_hermitian(

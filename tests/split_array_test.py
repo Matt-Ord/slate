@@ -10,7 +10,7 @@ from slate.basis import (
     diagonal_basis,
     tuple_basis,
 )
-from slate.basis._tuple import fundamental_basis_from_metadata
+from slate.basis._tuple import from_metadata
 from slate.basis.split import SplitBasis
 
 
@@ -33,7 +33,7 @@ def test_split_array_equals_transformed() -> None:
 
     diagonal = array.with_basis(DiagonalBasis(array.basis))
     fundamental = DiagonalBasis(
-        fundamental_basis_from_metadata(array.basis.metadata()),
+        from_metadata(array.basis.metadata()),
     )
     split = SlateArray(
         SplitBasis(fundamental, diagonal.basis),

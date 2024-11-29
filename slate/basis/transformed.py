@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, NestedBoolOrNone
-from slate.basis._tuple import TupleBasis, fundamental_basis_from_metadata
+from slate.basis._tuple import TupleBasis, from_metadata
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import (
     AnyMetadata,
@@ -225,7 +225,7 @@ def fundamental_transformed_tuple_basis_from_metadata[M: AnyMetadata, E](
         else tuple(is_dual for _ in metadata.children)
     )
     children = tuple(
-        TransformedBasis(fundamental_basis_from_metadata(c, is_dual=dual))
+        TransformedBasis(from_metadata(c, is_dual=dual))
         for c, dual in zip(metadata.children, is_dual)
     )
     return TupleBasis(children, metadata.extra)
