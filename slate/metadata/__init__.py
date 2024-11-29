@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from slate.metadata import length, volume
 from slate.metadata._metadata import (
     BasisMetadata,
     DeltaMetadata,
@@ -36,6 +37,7 @@ from slate.metadata.volume import (
     AxisDirections,
     SpacedVolumeMetadata,
     VolumeMetadata,
+    spaced_volume_metadata_from_stacked_delta_x,
 )
 
 __all__ = [
@@ -64,6 +66,9 @@ __all__ = [
     "fundamental_size",
     "fundamental_stacked_nk_points",
     "fundamental_stacked_nx_points",
+    "length",
     "shallow_shape_from_nested",
     "size_from_nested_shape",
+    "spaced_volume_metadata_from_stacked_delta_x",
+    "volume",
 ]
