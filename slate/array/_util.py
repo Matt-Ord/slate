@@ -6,12 +6,9 @@ import numpy as np
 
 from slate import basis
 from slate.array._array import SlateArray
-from slate.basis import (
-    Basis,
-    TupleBasis,
-    tuple_basis,
-)
+from slate.basis import Basis, BasisFeature, DiagonalBasis, TupleBasis, tuple_basis
 from slate.metadata import BasisMetadata
+from slate.metadata.stacked import Metadata2D
 
 if TYPE_CHECKING:
     from slate.basis.recast import RecastBasis
@@ -26,6 +23,53 @@ def conjugate[M: BasisMetadata, DT: np.generic](
     return SlateArray(converted.basis, np.conj(converted.raw_data)).with_basis(
         array.basis
     )
+
+
+def as_feature_basis[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[M, DT], features: set[BasisFeature]
+) -> SlateArray[M, DT]:
+    return array.with_basis(basis.as_feature_basis(array.basis, features))
+
+
+def as_index_basis[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[M, DT],
+) -> SlateArray[M, DT]:
+    return array.with_basis(basis.as_index_basis(array.basis))
+
+
+def as_mul_basis[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[M, DT],
+) -> SlateArray[M, DT]:
+    return array.with_basis(basis.as_mul_basis(array.basis))
+
+
+def as_sub_basis[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[M, DT],
+) -> SlateArray[M, DT]:
+    return array.with_basis(basis.as_sub_basis(array.basis))
+
+
+def as_add_basis[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[M, DT],
+) -> SlateArray[M, DT]:
+    return array.with_basis(basis.as_add_basis(array.basis))
+
+
+def as_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+    array: SlateArray[Metadata2D[M0, M1, E], DT],
+) -> (
+    SlateArray[
+        Metadata2D[M0, M1, E],
+        DT,
+        DiagonalBasis[Any, Basis[M0, Any], Basis[M1, Any], E],
+    ]
+    | None
+):
+    b = basis.as_diagonal_basis(array.basis)
+    if b is None:
+        return None
+
+    return array.with_basis(b)
 
 
 def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
