@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-from slate.metadata import (
+from slate.metadata._metadata import (
     DeltaMetadata,
     SpacedLabeledMetadata,
 )

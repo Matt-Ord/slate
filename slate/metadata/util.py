@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-from slate.metadata import BasisMetadata, SimpleMetadata
+from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 from slate.metadata._shape import shallow_shape_from_nested, size_from_nested_shape
 
 
