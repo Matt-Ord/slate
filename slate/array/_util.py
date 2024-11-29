@@ -7,7 +7,7 @@ import numpy as np
 from slate.array._array import SlateArray
 from slate.basis import as_index_basis
 from slate.basis._basis import Basis
-from slate.basis._tuple import TupleBasis, as_tuple_basis, flatten_basis
+from slate.basis._tuple import TupleBasis, as_tuple_basis, flatten_basis, tuple_basis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
@@ -34,14 +34,19 @@ def array_as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
     return array.with_basis(basis)
 
 
-def flatten_array[M: BasisMetadata, DT: np.generic](
+def array_as_flatten_basis[M: BasisMetadata, DT: np.generic](
     array: SlateArray[
         StackedMetadata[StackedMetadata[M, Any], Any],
         DT,
     ],
 ) -> SlateArray[StackedMetadata[M, None], DT, TupleBasis[M, None, DT]]:
     basis = flatten_basis(array.basis)
-    return SlateArray(basis, array.raw_data)
+    final_basis = tuple_basis(
+        tuple(as_tuple_basis(c) for c in as_tuple_basis(array.basis).children),
+        array.basis.metadata().extra,
+    )
+    converted = array.with_basis(final_basis)
+    return SlateArray(basis, converted.raw_data)
 
 
 def array_as_outer_basis[
