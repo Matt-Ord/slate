@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Literal, Self, cast, overload, override
 
 import numpy as np
 
-from slate.metadata import BasisMetadata, SimpleMetadata
+from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 
 if TYPE_CHECKING:
     from slate.metadata._shape import NestedLength
