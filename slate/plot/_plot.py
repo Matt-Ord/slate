@@ -4,17 +4,14 @@ from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 
 import numpy as np
 
-from slate.basis import (
-    as_tuple_basis,
-    from_metadata,
-    fundamental_transformed_tuple_basis_from_metadata,
-)
+from slate import array, basis
+from slate.metadata._metadata import LabeledMetadata
 from slate.metadata.length import fundamental_k_points, fundamental_x_points
 from slate.metadata.volume import (
+    AxisDirections,
     get_k_coordinates_in_axes,
     get_x_coordinates_in_axes,
 )
-from slate.metadata.volume._volume import AxisDirections
 from slate.plot._util import (
     Axes,
     Figure,
@@ -27,9 +24,9 @@ from slate.plot._util import (
     get_scale_with_lim,
 )
 from slate.util import (
+    get_data_in_axes,
     get_max_idx,
 )
-from slate.util._index import get_data_in_axes
 
 if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
@@ -50,7 +47,7 @@ class PlotKwargs(TypedDict, total=False):
     measure: Measure
 
 
-def plot_data_1d[DT: np.number[Any]](  # noqa: PLR0913
+def _plot_raw_data_1d[DT: np.number[Any]](  # noqa: PLR0913
     data: np.ndarray[tuple[int], np.dtype[DT]],
     coordinates: np.ndarray[tuple[int], np.dtype[np.float64]],
     y_errors: np.ndarray[tuple[int], np.dtype[np.float64]] | None = None,
@@ -99,10 +96,8 @@ def plot_data_1d[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, line
 
 
-def plot_data_1d_n[DT: np.number[Any]](
-    data: SlateArray[StackedMetadata[BasisMetadata, Any], DT],
-    axes: tuple[int,] = (0,),
-    idx: tuple[int, ...] | None = None,
+def plot_array[DT: np.number[Any]](
+    data: SlateArray[BasisMetadata, DT],
     *,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
@@ -125,16 +120,16 @@ def plot_data_1d_n[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis = as_tuple_basis(data.basis)
-    converted_data = data.with_basis(basis).raw_data.reshape(basis.shape)
+    converted = array.as_index_basis(data)
 
-    idx = get_max_idx(converted_data, axes) if idx is None else idx
+    if isinstance(converted.basis, LabeledMetadata):
+        values = converted.basis.values.astype(np.float64)  # type: ignore unknown
+        coordinates = values[converted.basis.points]
+    else:
+        coordinates = converted.basis.points.astype(np.float64)
 
-    return plot_data_1d(
-        get_data_in_axes(converted_data, axes, idx),
-        np.arange(basis[axes[0]].size, dtype=np.float64),
-        periodic=periodic,
-        **kwargs,
+    return _plot_raw_data_1d(
+        converted.raw_data, coordinates, periodic=periodic, **kwargs
     )
 
 
@@ -166,7 +161,7 @@ def plot_data_1d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_k = fundamental_transformed_tuple_basis_from_metadata(
+    basis_k = basis.fundamental_transformed_tuple_basis_from_metadata(
         data.basis.metadata(), is_dual=data.basis.is_dual
     )
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
@@ -179,7 +174,7 @@ def plot_data_1d_k[DT: np.number[Any]](
     shifted_data = np.fft.fftshift(data_in_axis)
     shifted_coordinates = np.fft.fftshift(coordinates[0])
 
-    fig, ax, line = plot_data_1d(
+    fig, ax, line = _plot_raw_data_1d(
         shifted_data, shifted_coordinates, periodic=True, **kwargs
     )
 
@@ -215,7 +210,7 @@ def plot_data_1d_x[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    basis_x = from_metadata(data.basis.metadata(), is_dual=data.basis.is_dual)
+    basis_x = basis.from_metadata(data.basis.metadata(), is_dual=data.basis.is_dual)
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -223,7 +218,9 @@ def plot_data_1d_x[DT: np.number[Any]](
     coordinates = get_x_coordinates_in_axes(basis_x.metadata(), axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
-    fig, ax, line = plot_data_1d(data_in_axis, coordinates[0], periodic=True, **kwargs)
+    fig, ax, line = _plot_raw_data_1d(
+        data_in_axis, coordinates[0], periodic=True, **kwargs
+    )
 
     ax.set_xlabel(f"x{(axes[0] % 3)} axis")
 
@@ -304,7 +301,7 @@ def plot_data_2d_x[DT: np.number[Any], E](
     tuple[Figure, Axes, QuadMesh]
     """
     metadata = data.basis.metadata()
-    basis_x = from_metadata(metadata, is_dual=data.basis.is_dual)
+    basis_x = basis.from_metadata(metadata, is_dual=data.basis.is_dual)
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes) if idx is None else idx
@@ -374,7 +371,7 @@ def plot_data_2d_k[DT: np.number[Any], E](
     tuple[Figure, Axes, QuadMesh]
     """
     metadata = data.basis.metadata()
-    basis_k = fundamental_transformed_tuple_basis_from_metadata(
+    basis_k = basis.fundamental_transformed_tuple_basis_from_metadata(
         metadata, is_dual=data.basis.is_dual
     )
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)

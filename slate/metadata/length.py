@@ -15,7 +15,7 @@ from slate.metadata.util import (
 )
 
 
-class LengthMetadata(DeltaMetadata[float]):
+class LengthMetadata(DeltaMetadata[np.float64]):
     """Metadata with the addition of length."""
 
 

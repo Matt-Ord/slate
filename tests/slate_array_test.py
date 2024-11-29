@@ -6,8 +6,7 @@ import numpy as np
 import pytest
 
 from slate.array import SlateArray
-from slate.array._transpose import transpose
-from slate.array._util import conjugate
+from slate.array._transpose import conjugate, transpose
 from slate.basis import (
     from_shape,
 )

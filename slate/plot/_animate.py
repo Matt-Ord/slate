@@ -11,11 +11,13 @@ from slate.basis import (
     from_metadata,
     tuple_basis,
 )
+from slate.basis._tuple import as_fundamental, as_tuple_basis
 from slate.basis.transformed import fundamental_transformed_tuple_basis_from_metadata
+from slate.metadata._metadata import BasisMetadata
 from slate.metadata._shape import shallow_shape_from_nested
 from slate.plot._plot import (
+    plot_array,
     plot_data_1d_k,
-    plot_data_1d_n,
     plot_data_1d_x,
     plot_data_2d_k,
     plot_data_2d_x,
@@ -46,10 +48,20 @@ def _get_slice_idx(
     return idx[:insert_pos] + (x_0_idx,) + idx[insert_pos:]
 
 
-def animate_data_1d_n[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[SpacedVolumeMetadata, DT],
-    axes: tuple[int, int] = (0, 1),
-    idx: tuple[int, ...] | None = None,
+def _index_array[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[Metadata2D[BasisMetadata, M, Any], DT], idx: int
+) -> SlateArray[M, DT]:
+    as_tuple = as_tuple_basis(array.basis)
+    converted = array.with_basis(
+        tuple_basis((as_fundamental(as_tuple[0]), as_tuple[1]))
+    )
+    return SlateArray(
+        as_tuple[1], converted.raw_data.reshape(converted.basis.shape)[idx]
+    )
+
+
+def animate_array_over_list[DT: np.number[Any]](
+    data: SlateArray[Metadata2D[SimpleMetadata, BasisMetadata, Any], DT],
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -59,15 +71,12 @@ def animate_data_1d_n[DT: np.number[Any]](  # noqa: PLR0913
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
 
-    for idx_x0 in range(shape[axes[0]]):
-        _, _, line = plot_data_1d_n(
-            data,
-            axes[1:],
-            _get_slice_idx(axes, idx_x0, idx),
+    for idx_x0 in range(shape[0]):
+        _, _, line = plot_array(
+            _index_array(data, idx_x0),
             ax=ax,
             scale=scale,
             measure=measure,

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from slate import basis
 from slate.array._array import SlateArray
 from slate.basis import (
     Basis,
@@ -17,6 +18,16 @@ from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate.metadata.stacked import Metadata2D
+
+
+def conjugate[M: BasisMetadata, DT: np.generic](
+    array: SlateArray[M, DT],
+) -> SlateArray[M, DT]:
+    """Conjugate a slate array."""
+    converted = array.with_basis(basis.as_index_basis(array.basis))
+    return SlateArray(converted.basis, np.conj(converted.raw_data)).with_basis(
+        array.basis
+    )
 
 
 def _transpose_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
