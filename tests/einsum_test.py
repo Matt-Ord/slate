@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import pytest
 
 from slate.array import Array, with_basis
 from slate.basis import (
@@ -16,6 +17,7 @@ from slate.basis import (
     with_child,
 )
 from slate.linalg import into_diagonal, into_diagonal_hermitian
+from slate.linalg._einsum import EinsteinIndex, NestedEinsteinIndex, parse_einsum_index
 
 if TYPE_CHECKING:
     from slate.basis import Basis
@@ -112,3 +114,71 @@ def test_einsum_diagonal() -> None:
     )
     diagonal_array = into_diagonal_hermitian(array)
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
+
+
+def test_einsum_specification_parse() -> None: ...
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        (
+            "(i   j)",
+            (
+                EinsteinIndex(label="i", is_dual=False),
+                EinsteinIndex(label="j", is_dual=False),
+            ),
+        ),
+        (
+            "(m (i j))",
+            (
+                EinsteinIndex(label="m", is_dual=False),
+                (
+                    EinsteinIndex(label="i", is_dual=False),
+                    EinsteinIndex(label="j", is_dual=False),
+                ),
+            ),
+        ),
+        (
+            "(m (i j) k)",
+            (
+                EinsteinIndex(label="m", is_dual=False),
+                (
+                    EinsteinIndex(label="i", is_dual=False),
+                    EinsteinIndex(label="j", is_dual=False),
+                ),
+                EinsteinIndex(label="k", is_dual=False),
+            ),
+        ),
+        (
+            "(m (i (k l)) (k l))",
+            (
+                EinsteinIndex(label="m", is_dual=False),
+                (
+                    EinsteinIndex(label="i", is_dual=False),
+                    (
+                        EinsteinIndex(label="k", is_dual=False),
+                        EinsteinIndex(label="l", is_dual=False),
+                    ),
+                ),
+                (
+                    EinsteinIndex(label="k", is_dual=False),
+                    EinsteinIndex(label="l", is_dual=False),
+                ),
+            ),
+        ),
+        (
+            "(i   j')",
+            (
+                EinsteinIndex(label="i", is_dual=False),
+                EinsteinIndex(label="j", is_dual=True),
+            ),
+        ),
+        ("i", EinsteinIndex(label="i", is_dual=False)),
+        ("i'", EinsteinIndex(label="i", is_dual=True)),
+    ],
+)
+def test_einsum_nested_index_parse(case: tuple[str, NestedEinsteinIndex]) -> None:
+    string, expected = case
+    parsed = parse_einsum_index(string)
+    assert parsed == expected
