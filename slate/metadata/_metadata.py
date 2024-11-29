@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, Self, SupportsIndex, override
+from typing import TYPE_CHECKING, Any, Protocol, Self, override
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from slate.metadata._shape import NestedLength
 
 
@@ -34,25 +32,19 @@ class SimpleMetadata(BasisMetadata):
         return self.fundamental_size
 
 
-class LabelCollection[DT](Protocol):
-    def __getitem__(self: Self, i: SupportsIndex, /) -> DT: ...
-
-    def __iter__(self: Self) -> Iterator[DT]: ...
-
-
-class LabeledMetadata[DT](SimpleMetadata, ABC):
+class LabeledMetadata[DT: np.generic](SimpleMetadata, ABC):
     """A metadata with some data associated to each location."""
 
     @property
     @abstractmethod
-    def values(self: Self) -> LabelCollection[DT]:
+    def values(self: Self) -> np.ndarray[Any, np.dtype[DT]]:
         """Shape of the full data."""
 
 
-class DeltaMetadata[DT](LabeledMetadata[DT], ABC):
+class DeltaMetadata[DT: np.generic](LabeledMetadata[DT], ABC):
     @property
     @abstractmethod
-    def delta(self: Self) -> DT:
+    def delta(self: Self) -> float:
         """Shape of the full data."""
 
 
@@ -77,14 +69,14 @@ class LabelSpacing:
 
 
 @dataclass(frozen=True, kw_only=True)
-class SpacedLabeledMetadata(DeltaMetadata[float]):
+class SpacedLabeledMetadata(DeltaMetadata[np.float64]):
     """A metadata with some data associated to each location."""
 
     spacing: LabelSpacing
 
     @property
     @override
-    def values(self: Self) -> LabelCollection[float]:
+    def values(self: Self) -> np.ndarray[Any, np.dtype[np.float64]]:
         """Shape of the full data."""
         return np.linspace(
             self.spacing.start,

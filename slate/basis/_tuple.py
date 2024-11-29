@@ -688,6 +688,12 @@ def from_metadata(
     return TupleBasis(children, metadata.extra)
 
 
+def as_fundamental[M: AnyMetadata, DT: np.generic](
+    basis: Basis[M, DT],
+) -> Basis[M, np.generic]:
+    return from_metadata(basis.metadata(), is_dual=basis.is_dual)
+
+
 @overload
 def from_shape[E](
     shape: tuple[int], *, extra: None = None, is_dual: tuple[bool, ...] | None = None
