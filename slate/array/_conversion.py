@@ -97,7 +97,7 @@ def as_flatten_basis[M: BasisMetadata, DT: np.generic](
     return SlateArray(basis_flat, converted.raw_data)
 
 
-def as_outer_basis[
+def as_outer_array[
     M: BasisMetadata,
     DT: np.generic,
     BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
@@ -105,3 +105,11 @@ def as_outer_basis[
     array: SlateArray[Any, DT, RecastBasis[Any, M, DT, Any, BOuter]],
 ) -> SlateArray[M, DT, BOuter]:
     return SlateArray(array.basis.outer_recast, array.raw_data)
+
+
+def as_diagonal_array[M: BasisMetadata, E, DT: np.generic](
+    array: SlateArray[
+        Metadata2D[M, M, E], DT, DiagonalBasis[DT, Basis[M, DT], Basis[M, DT], E]
+    ],
+) -> SlateArray[M, DT, Basis[M, Any]] | None:
+    return SlateArray(array.basis.inner[1], array.raw_data)

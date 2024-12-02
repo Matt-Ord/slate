@@ -630,6 +630,12 @@ def from_metadata[M0: SimpleMetadata, M1: SimpleMetadata, E](
 
 
 @overload
+def from_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+    metadata: Metadata2D[M0, M1, E], *, is_dual: NestedBoolOrNone = None
+) -> TupleBasis2D[np.generic, Basis[M0, np.generic], Basis[M1, np.generic], E]: ...
+
+
+@overload
 def from_metadata[
     M0: SimpleMetadata,
     M1: SimpleMetadata,

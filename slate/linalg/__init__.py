@@ -18,9 +18,11 @@ from slate.linalg._eig import (
     into_diagonal_hermitian,
 )
 from slate.linalg._einsum import einsum
+from slate.linalg._misc import extract_diagonal
 
 __all__ = [
     "einsum",
+    "extract_diagonal",
     "get_eigenvalues",
     "get_eigenvalues_hermitian",
     "into_diagonal",
