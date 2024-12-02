@@ -66,20 +66,20 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
 
     @property
     @abstractmethod
-    def size(self: Self) -> int:
+    def size(self) -> int:
         """Number of elements in the basis."""
 
     @property
-    def fundamental_size(self: Self) -> int:
+    def fundamental_size(self) -> int:
         """Size of the full data."""
         return size_from_nested_shape(self.fundamental_shape)
 
     @property
-    def fundamental_shape(self: Self) -> NestedLength:
+    def fundamental_shape(self) -> NestedLength:
         """Shape of the full data."""
         return self.metadata().fundamental_shape
 
-    def metadata(self: Self) -> M:
+    def metadata(self) -> M:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -87,7 +87,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         return self._metadata
 
     @property
-    def features(self: Self) -> set[BasisFeature]:
+    def features(self) -> set[BasisFeature]:
         """Features of the basis."""
         return set()
 
@@ -119,7 +119,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
 
     @property
     @abstractmethod
-    def is_dual(self: Self) -> NestedBool: ...
+    def is_dual(self) -> NestedBool: ...
 
     @abstractmethod
     def dual_basis(self) -> Self:
@@ -147,7 +147,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         return basis.__from_fundamental__(fundamental, axis)
 
     def add_data[DT1: np.number[Any]](  # noqa: PLR6301
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -155,7 +155,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         raise NotImplementedError(msg)
 
     def sub_data[DT1: np.number[Any]](  # noqa: PLR6301
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -163,7 +163,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         raise NotImplementedError(msg)
 
     def mul_data[DT1: np.number[Any]](  # noqa: PLR6301
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: float,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -172,7 +172,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
 
     @property
     def points(
-        self: Self,
+        self,
     ) -> np.ndarray[Any, np.dtype[np.int_]]:
         msg = "points not implemented for this basis, requires the INDEX feature"
         raise NotImplementedError(msg)

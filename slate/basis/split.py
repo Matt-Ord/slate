@@ -46,12 +46,12 @@ class SplitBasis[
         super().__init__(get_common_basis(lhs, rhs))
 
     @property
-    def lhs(self: Self) -> B0:
+    def lhs(self) -> B0:
         """Left hand side of the split basis."""
         return self._lhs
 
     @property
-    def rhs(self: Self) -> B1:
+    def rhs(self) -> B1:
         """Right hand side of the split basis."""
         return self._rhs
 
@@ -78,11 +78,11 @@ class SplitBasis[
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         return self.lhs.size + self.rhs.size
 
     def _get_lhs_vectors[DT1: np.complex128](
-        self: Self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
+        self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         r"""Get the vector corresponding to ..math::`\hat{A}`."""
         start = 0
@@ -90,7 +90,7 @@ class SplitBasis[
         return vectors[slice_along_axis(slice(start, end), axis)]
 
     def _get_rhs_vectors[DT1: np.complex128](
-        self: Self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
+        self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         r"""Get the vector corresponding to ..math::`\hat{B}`."""
         start = self.lhs.size
@@ -125,12 +125,12 @@ class SplitBasis[
         return pad_along_axis(lhs_vector, Padding(self.size, 1, 0), axis)
 
     @override
-    def with_inner(self: Self, inner: Any) -> SplitBasis[Never, Never, Never, Never]:
+    def with_inner(self, inner: Any) -> SplitBasis[Never, Never, Never, Never]:
         return self.with_modified_inner(lambda _: 0)
 
     @override
     def with_modified_inner(
-        self: Self,
+        self,
         wrapper: Callable[
             [Never],
             Any,
@@ -156,7 +156,7 @@ class SplitBasis[
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -167,7 +167,7 @@ class SplitBasis[
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -176,7 +176,7 @@ class SplitBasis[
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:

@@ -31,12 +31,12 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
 
     @property
     @override
-    def fundamental_shape(self: Self) -> int:
+    def fundamental_shape(self) -> int:
         return self.metadata().fundamental_shape
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         return self.fundamental_size
 
     @override
@@ -82,7 +82,7 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -90,13 +90,13 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -104,7 +104,7 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         return np.arange(self.size)
 
 

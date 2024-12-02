@@ -109,7 +109,7 @@ class TupleBasis[
     """Represents a Tuple of independent basis."""
 
     def __init__(
-        self: Self,
+        self,
         children: tuple[Basis[M, Any], ...],
         extra_metadata: E,
     ) -> None:
@@ -130,7 +130,7 @@ class TupleBasis[
 
     @property
     @override
-    def is_dual(self: Self) -> tuple[NestedBool, ...]:
+    def is_dual(self) -> tuple[NestedBool, ...]:
         return tuple(c.is_dual for c in self.children)
 
     @property
@@ -179,7 +179,7 @@ class TupleBasis[
     def __iter__(self) -> Iterator[Basis[M, DT]]:
         return self.children.__iter__()
 
-    def __getitem__(self: Self, index: int) -> Basis[M, DT]:
+    def __getitem__(self, index: int) -> Basis[M, DT]:
         return self.children[index]
 
     @override
@@ -238,7 +238,7 @@ class TupleBasis[
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -249,7 +249,7 @@ class TupleBasis[
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -258,7 +258,7 @@ class TupleBasis[
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -269,7 +269,7 @@ class TupleBasis[
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
@@ -292,7 +292,7 @@ class TupleBasisND[
     """
 
     def __init__(
-        self: Self, children: tuple[Basis[BasisMetadata, DT], ...], extra_metadata: E
+        self, children: tuple[Basis[BasisMetadata, DT], ...], extra_metadata: E
     ) -> None:
         msg = "TupleBasisND is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
@@ -310,7 +310,7 @@ class TupleBasisND[
         return cast(tuple[Basis[BasisMetadata, DT], ...], super().children)
 
     @override
-    def __getitem__(self: Self, index: int) -> Basis[BasisMetadata, DT]:
+    def __getitem__(self, index: int) -> Basis[BasisMetadata, DT]:
         return super().__getitem__(index)
 
 
@@ -357,9 +357,9 @@ class TupleBasis1D[
     def __getitem__(self, index: Literal[0]) -> B0: ...
 
     @overload
-    def __getitem__(self: Self, index: int) -> B0: ...
+    def __getitem__(self, index: int) -> B0: ...
 
-    def __getitem__(self: Self, index: int) -> B0:  # type: ignore inconsistent type
+    def __getitem__(self, index: int) -> B0:  # type: ignore inconsistent type
         return cast(B0, super().__getitem__(index))
 
 
@@ -409,9 +409,9 @@ class TupleBasis2D[
     def __getitem__(self, index: Literal[1]) -> B1: ...
 
     @overload
-    def __getitem__(self: Self, index: int) -> B0 | B1: ...
+    def __getitem__(self, index: int) -> B0 | B1: ...
 
-    def __getitem__(self: Self, index: int) -> B0 | B1:  # type: ignore overload
+    def __getitem__(self, index: int) -> B0 | B1:  # type: ignore overload
         return cast(B0 | B1, super().__getitem__(index))
 
 
@@ -466,9 +466,9 @@ class TupleBasis3D[
     def __getitem__(self, index: Literal[2]) -> B2: ...
 
     @overload
-    def __getitem__(self: Self, index: int) -> B0 | B1 | B2: ...
+    def __getitem__(self, index: int) -> B0 | B1 | B2: ...
 
-    def __getitem__(self: Self, index: int) -> B0 | B1 | B2:  # type: ignore overload
+    def __getitem__(self, index: int) -> B0 | B1 | B2:  # type: ignore overload
         return cast(B0 | B1 | B2, super().__getitem__(index))
 
 

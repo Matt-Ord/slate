@@ -5,6 +5,7 @@ from typing import Any, cast
 
 import numpy as np
 
+from slate.metadata._shape import shallow_shape_from_nested
 from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
 from slate.metadata.stacked import StackedMetadata
 from slate.metadata.util import (
@@ -62,7 +63,7 @@ def fundamental_stacked_dx(
         np.einsum(  # type: ignore unknown
             "ij,i->ij",
             fundamental_stacked_delta_x(metadata),
-            [1 / s for s in metadata.fundamental_shape],
+            [1 / s for s in shallow_shape_from_nested(metadata.fundamental_shape)],
         ),
     )
     return tuple(scaled)

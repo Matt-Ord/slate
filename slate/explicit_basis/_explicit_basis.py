@@ -16,7 +16,7 @@ from slate.basis import (
 )
 from slate.basis._diagonal import diagonal_basis
 from slate.metadata import BasisMetadata
-from slate.metadata._shape import size_from_nested_shape
+from slate.metadata._shape import shallow_shape_from_nested
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -33,7 +33,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     """Represents an explicit basis."""
 
     def __init__(
-        self: Self,
+        self,
         matrix: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         direction: Direction = "forward",
@@ -45,18 +45,18 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         super().__init__(as_tuple_basis(self.eigenvectors.basis)[1])
 
     @property
-    def data_id(self: Self) -> uuid.UUID:
+    def data_id(self) -> uuid.UUID:
         return self._data_id
 
     @override
-    def dual_basis(self: Self) -> Self:
+    def dual_basis(self) -> Self:
         dual = super().dual_basis()
         dual._direction = "backward" if self.direction == "forward" else "forward"  # noqa: SLF001
         return dual
 
     @property
     def transform(
-        self: Self,
+        self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             self._matrix
@@ -66,7 +66,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     def inverse_transform(
-        self: Self,
+        self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             inv(self._matrix)
@@ -76,7 +76,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     def eigenvectors(
-        self: Self,
+        self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
         return transpose(self.inverse_transform)
 
@@ -97,13 +97,13 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     @override
-    def size(self: Self) -> int:
-        return size_from_nested_shape(
-            self.eigenvectors.basis.metadata().fundamental_shape[0]
-        )
+    def size(self) -> int:
+        return shallow_shape_from_nested(
+            self.eigenvectors.basis.metadata().fundamental_shape
+        )[0]
 
     @property
-    def direction(self: Self) -> Direction:
+    def direction(self) -> Direction:
         """The convention used to select the direction for the forward transform."""
         return self._direction
 
@@ -192,7 +192,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -203,7 +203,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -212,7 +212,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -245,7 +245,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     """Represents a truncated basis."""
 
     def __init__(
-        self: Self,
+        self,
         matrix: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         assert_unitary: bool = False,
@@ -262,7 +262,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     @property
     @override
     def transform(
-        self: Self,
+        self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             self._matrix
@@ -273,7 +273,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     @property
     @override
     def inverse_transform(
-        self: Self,
+        self,
     ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             _dual_unitary_data(transpose(self.transform))
@@ -285,7 +285,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
     ExplicitUnitaryBasis[M, DT]
 ):
-    def __init__(self: Self, inner: Basis[M, DT]) -> None:
+    def __init__(self, inner: Basis[M, DT]) -> None:
         super().__init__(
             SlateArray(
                 diagonal_basis((inner, inner.dual_basis())),

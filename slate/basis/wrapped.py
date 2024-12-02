@@ -20,14 +20,14 @@ class WrappedBasis[
 ](Basis[M, DT]):
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
-    def __init__(self: Self, inner: Basis[M, DT]) -> None:
+    def __init__(self, inner: Basis[M, DT]) -> None:
         self._inner = cast(B, inner)
         self._metadata = inner.metadata()
         super().__init__(inner.metadata())
 
     @property
     @override
-    def is_dual(self: Self) -> NestedBool:
+    def is_dual(self) -> NestedBool:
         return self.inner.is_dual
 
     @override
@@ -37,7 +37,7 @@ class WrappedBasis[
         return copied
 
     @property
-    def inner(self: Self) -> B:
+    def inner(self) -> B:
         """Inner basis."""
         return self._inner
 

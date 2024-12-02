@@ -4,7 +4,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Self,
     TypeGuard,
     cast,
     overload,
@@ -42,7 +41,7 @@ class DiagonalBasis[
 
     @property
     @override
-    def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
+    def inner(self) -> TupleBasis2D[DT, B0, B1, E]:
         return cast(TupleBasis2D[DT, B0, B1, E], self._inner)
 
     @property
@@ -108,9 +107,7 @@ class DiagonalBasis[
         B01: Basis[Any, Any],
         B11: Basis[Any, Any],
         E1,
-    ](
-        self: Self, inner: TupleBasis2D[DT1, B01, B11, E1]
-    ) -> DiagonalBasis[DT1, B01, B11, E1]:
+    ](self, inner: TupleBasis2D[DT1, B01, B11, E1]) -> DiagonalBasis[DT1, B01, B11, E1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
@@ -120,7 +117,7 @@ class DiagonalBasis[
         B11: Basis[Any, Any],
         E1,
     ](
-        self: Self,
+        self,
         wrapper: Callable[
             [TupleBasis2D[DT, Any, Any, E]], TupleBasis2D[DT1, B01, B11, E1]
         ],
@@ -147,7 +144,7 @@ class DiagonalBasis[
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -158,7 +155,7 @@ class DiagonalBasis[
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -167,7 +164,7 @@ class DiagonalBasis[
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -178,7 +175,7 @@ class DiagonalBasis[
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)

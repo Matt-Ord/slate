@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Self, override
+from typing import TYPE_CHECKING, Any, Callable, override
 
 import numpy as np
 
@@ -18,7 +18,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
     """Represents a basis sampled evenly along an axis."""
 
     def __init__(
-        self: Self,
+        self,
         points: Sequence[int] | np.ndarray[Any, np.dtype[np.int_]],
         inner: Basis[M, DT],
     ) -> None:
@@ -27,13 +27,13 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         assert np.unique(self._inner_points).size == self._inner_points.size
 
     @property
-    def inner_points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def inner_points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         """Truncation of the basis."""
         return self._inner_points
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         return self.inner_points.size
 
     @override
@@ -68,7 +68,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
     def with_inner[
         M1: BasisMetadata,
         DT1: np.generic,
-    ](self: Self, inner: Basis[M1, DT1]) -> CoordinateBasis[M1, DT1]:
+    ](self, inner: Basis[M1, DT1]) -> CoordinateBasis[M1, DT1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
@@ -76,7 +76,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         M1: BasisMetadata,
         DT1: np.generic,
     ](
-        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
+        self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
     ) -> CoordinateBasis[M1, DT1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return CoordinateBasis(self.inner_points, wrapper(self.inner))
@@ -100,7 +100,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -111,7 +111,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -120,7 +120,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -131,7 +131,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
