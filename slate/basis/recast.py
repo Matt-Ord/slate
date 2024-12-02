@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Never, Self, cast, override
+from typing import Any, Callable, Never, cast, override
 
 import numpy as np
 
@@ -39,17 +39,17 @@ class RecastBasis[
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         """The size of the basis."""
         return self.outer_recast.size
 
     @property
-    def inner_recast(self: Self) -> Basis[M1, DT]:
+    def inner_recast(self) -> Basis[M1, DT]:
         """The basis the inner was recast to."""
         return self._inner_recast
 
     @property
-    def outer_recast(self: Self) -> BOuter:
+    def outer_recast(self) -> BOuter:
         """The basis the inner recast was transformed to."""
         return self._outer_recast
 
@@ -109,7 +109,7 @@ class RecastBasis[
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -120,7 +120,7 @@ class RecastBasis[
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -129,7 +129,7 @@ class RecastBasis[
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:

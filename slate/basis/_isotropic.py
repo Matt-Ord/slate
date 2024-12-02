@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, overload, override
+from typing import Any, Callable, overload, override
 
 import numpy as np
 
@@ -29,7 +29,7 @@ class IsotropicBasis[
 
     @property
     @override
-    def inner(self: Self) -> TupleBasis2D[DT, B0, B1, E]:
+    def inner(self) -> TupleBasis2D[DT, B0, B1, E]:
         return self._inner
 
     @property
@@ -82,7 +82,7 @@ class IsotropicBasis[
         B11: Basis[Any, Any],
         E1,
     ](
-        self: Self, inner: TupleBasis2D[DT1, B01, B11, E1]
+        self, inner: TupleBasis2D[DT1, B01, B11, E1]
     ) -> IsotropicBasis[DT1, B01, B11, E1]:
         return self.with_modified_inner(lambda _: inner)
 
@@ -93,7 +93,7 @@ class IsotropicBasis[
         B11: Basis[Any, Any],
         E1,
     ](
-        self: Self,
+        self,
         wrapper: Callable[
             [TupleBasis2D[DT, Any, Any, E]], TupleBasis2D[DT1, B01, B11, E1]
         ],
@@ -120,7 +120,7 @@ class IsotropicBasis[
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -131,7 +131,7 @@ class IsotropicBasis[
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -140,7 +140,7 @@ class IsotropicBasis[
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -151,7 +151,7 @@ class IsotropicBasis[
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)

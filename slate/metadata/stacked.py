@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Self, cast, overload, override
-
-import numpy as np
+from typing import TYPE_CHECKING, Any, Literal, cast, overload, override
 
 from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 
@@ -13,27 +11,27 @@ if TYPE_CHECKING:
 class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
     """Metadata built from a tuple of individual metadata entries."""
 
-    def __init__(self: Self, children: tuple[M, ...], extra: E) -> None:
+    def __init__(self, children: tuple[M, ...], extra: E) -> None:
         self._children = children
         self._extra = extra
 
     @property
-    def children(self: Self) -> tuple[M, ...]:
+    def children(self) -> tuple[M, ...]:
         """Children metadata."""
         return self._children
 
     @property
-    def extra(self: Self) -> E:
+    def extra(self) -> E:
         """Extra metadata."""
         return self._extra
 
     @property
     @override
-    def fundamental_shape(self: Self) -> tuple[int, ...]:
+    def fundamental_shape(self) -> tuple[NestedLength, ...]:
         """Shape of the full data."""
-        return tuple(np.prod(i.fundamental_shape).item() for i in self.children)
+        return tuple(i.fundamental_shape for i in self.children)
 
-    def __getitem__(self: Self, index: int) -> M:
+    def __getitem__(self, index: int) -> M:
         return self.children[index]
 
     @override
@@ -126,7 +124,7 @@ class MetadataND[*M, E](StackedMetadata[Any, E]):
 
     @property
     @override
-    def children(self: Self) -> tuple[*M]:  # type: ignore not allowed to put bounds on m
+    def children(self) -> tuple[*M]:  # type: ignore not allowed to put bounds on m
         return cast(tuple[*M], super().children)
 
 
@@ -142,11 +140,11 @@ class Metadata1D[M0: BasisMetadata, E](MetadataND[BasisMetadata, E]):
 
     @property
     @override
-    def children(self: Self) -> tuple[M0]:
+    def children(self) -> tuple[M0]:
         return cast(tuple[M0], super().children)
 
     @override
-    def __getitem__(self: Self, index: int) -> M0:
+    def __getitem__(self, index: int) -> M0:
         return super().__getitem__(index)
 
 
@@ -164,18 +162,18 @@ class Metadata2D[M0: BasisMetadata, M1: BasisMetadata, E](
 
     @property
     @override
-    def children(self: Self) -> tuple[M0, M1]:
+    def children(self) -> tuple[M0, M1]:
         return cast(tuple[M0, M1], super().children)
 
     @overload
-    def __getitem__(self: Self, index: Literal[0]) -> M0: ...
+    def __getitem__(self, index: Literal[0]) -> M0: ...
     @overload
-    def __getitem__(self: Self, index: Literal[1]) -> M1: ...
+    def __getitem__(self, index: Literal[1]) -> M1: ...
     @overload
-    def __getitem__(self: Self, index: int) -> M0 | M1: ...
+    def __getitem__(self, index: int) -> M0 | M1: ...
 
     @override
-    def __getitem__(self: Self, index: int) -> M0 | M1:
+    def __getitem__(self, index: int) -> M0 | M1:
         return super().__getitem__(index)
 
 
@@ -193,18 +191,18 @@ class Metadata3D[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
 
     @property
     @override
-    def children(self: Self) -> tuple[M0, M1, M2]:
+    def children(self) -> tuple[M0, M1, M2]:
         return cast(tuple[M0, M1, M2], super().children)
 
     @overload
-    def __getitem__(self: Self, index: Literal[0]) -> M0: ...
+    def __getitem__(self, index: Literal[0]) -> M0: ...
     @overload
-    def __getitem__(self: Self, index: Literal[1]) -> M1: ...
+    def __getitem__(self, index: Literal[1]) -> M1: ...
     @overload
-    def __getitem__(self: Self, index: Literal[2]) -> M2: ...
+    def __getitem__(self, index: Literal[2]) -> M2: ...
     @overload
-    def __getitem__(self: Self, index: int) -> M0 | M1 | M2: ...
+    def __getitem__(self, index: int) -> M0 | M1 | M2: ...
 
     @override
-    def __getitem__(self: Self, index: int) -> M0 | M1 | M2:
+    def __getitem__(self, index: int) -> M0 | M1 | M2:
         return super().__getitem__(index)

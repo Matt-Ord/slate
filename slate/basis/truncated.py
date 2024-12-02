@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Self, override
+from typing import Any, Callable, override
 
 import numpy as np
 
@@ -21,7 +21,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 ):
     """Represents a basis sampled evenly along an axis."""
 
-    def __init__(self: Self, truncation: Truncation, inner: Basis[M, DT]) -> None:
+    def __init__(self, truncation: Truncation, inner: Basis[M, DT]) -> None:
         self._truncation = truncation
         super().__init__(inner)
         assert_unique_indices(
@@ -33,13 +33,13 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         return hash((self._inner, self._truncation))
 
     @property
-    def truncation(self: Self) -> Truncation:
+    def truncation(self) -> Truncation:
         """Truncation of the basis."""
         return self._truncation
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         """Number of elements in the basis."""
         return self._truncation.n
 
@@ -52,7 +52,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         return False
 
     @property
-    def _inner_padding(self: Self) -> Padding:
+    def _inner_padding(self) -> Padding:
         return Padding(self._inner.size, self._truncation.step, self._truncation.offset)
 
     @override
@@ -75,7 +75,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
     def with_inner[
         M1: BasisMetadata,
         DT1: np.generic,
-    ](self: Self, inner: Basis[M1, DT1]) -> TruncatedBasis[M1, DT1]:
+    ](self, inner: Basis[M1, DT1]) -> TruncatedBasis[M1, DT1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
@@ -83,7 +83,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         M1: BasisMetadata,
         DT1: np.generic,
     ](
-        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
+        self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
     ) -> TruncatedBasis[M1, DT1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return TruncatedBasis(self.truncation, wrapper(self.inner))
@@ -107,7 +107,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -118,7 +118,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -127,7 +127,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -138,7 +138,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)

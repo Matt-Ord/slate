@@ -29,7 +29,7 @@ class TransformedBasis[M: BasisMetadata](
     """Represents a fourier transformed basis."""
 
     def __init__(
-        self: Self,
+        self,
         inner: Basis[M, np.complex128],
         direction: TransformDirection = "forward",
     ) -> None:
@@ -37,7 +37,7 @@ class TransformedBasis[M: BasisMetadata](
         super().__init__(inner)
 
     @property
-    def direction(self: Self) -> TransformDirection:
+    def direction(self) -> TransformDirection:
         """Direction of the transformation."""
         return self._direction
 
@@ -63,7 +63,7 @@ class TransformedBasis[M: BasisMetadata](
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         """Number of elements in the basis."""
         return self.inner.size
 
@@ -115,7 +115,7 @@ class TransformedBasis[M: BasisMetadata](
 
     @override
     def with_inner[M1: BasisMetadata](
-        self: Self, inner: Basis[M1, np.complex128]
+        self, inner: Basis[M1, np.complex128]
     ) -> TransformedBasis[M1]:
         return self.with_modified_inner(lambda _: inner)
 
@@ -123,7 +123,7 @@ class TransformedBasis[M: BasisMetadata](
     def with_modified_inner[
         M1: BasisMetadata,
     ](
-        self: Self,
+        self,
         wrapper: Callable[[Basis[M, np.complex128]], Basis[M1, np.complex128]],
     ) -> TransformedBasis[M1]:
         """Get the wrapped basis after wrapper is applied to inner."""
@@ -146,7 +146,7 @@ class TransformedBasis[M: BasisMetadata](
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -157,7 +157,7 @@ class TransformedBasis[M: BasisMetadata](
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -166,7 +166,7 @@ class TransformedBasis[M: BasisMetadata](
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:

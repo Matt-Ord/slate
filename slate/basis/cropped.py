@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Never, Self, override
+from typing import Any, Callable, Never, override
 
 import numpy as np
 
@@ -13,13 +13,13 @@ from slate.util import pad_ft_points
 class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
     """Represents a cropped basis."""
 
-    def __init__(self: Self, size: int, inner: Basis[M, DT]) -> None:
+    def __init__(self, size: int, inner: Basis[M, DT]) -> None:
         self._size = size
         super().__init__(inner)
 
     @property
     @override
-    def size(self: Self) -> int:
+    def size(self) -> int:
         return self._size
 
     @override
@@ -74,16 +74,14 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
     def with_inner[
         M1: BasisMetadata,
         DT1: np.generic,
-    ](self: Self, inner: Basis[M1, DT1]) -> CroppedBasis[M1, DT1]:
+    ](self, inner: Basis[M1, DT1]) -> CroppedBasis[M1, DT1]:
         return self.with_modified_inner(lambda _: inner)
 
     @override
     def with_modified_inner[
         M1: BasisMetadata,
         DT1: np.generic,
-    ](
-        self: Self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
-    ) -> CroppedBasis[M1, DT1]:
+    ](self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]) -> CroppedBasis[M1, DT1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return CroppedBasis(self.size, wrapper(self.inner))
 
@@ -106,7 +104,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
 
     @override
     def add_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -117,7 +115,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
 
     @override
     def mul_data[DT1: np.number[Any]](
-        self: Self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "SIMPLE_MUL" not in self.features:
             msg = "mul_data not implemented for this basis"
@@ -126,7 +124,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
 
     @override
     def sub_data[DT1: np.number[Any]](
-        self: Self,
+        self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
@@ -137,7 +135,7 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
 
     @property
     @override
-    def points(self: Self) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)

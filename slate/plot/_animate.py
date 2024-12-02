@@ -5,14 +5,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
+from slate import basis
 from slate.array import SlateArray
 from slate.basis import (
-    FundamentalBasis,
-    from_metadata,
     tuple_basis,
 )
-from slate.basis._tuple import as_fundamental, as_tuple_basis
-from slate.basis.transformed import fundamental_transformed_tuple_basis_from_metadata
 from slate.metadata._metadata import BasisMetadata
 from slate.metadata._shape import shallow_shape_from_nested
 from slate.plot._plot import (
@@ -51,9 +48,9 @@ def _get_slice_idx(
 def _index_array[M: BasisMetadata, DT: np.generic](
     array: SlateArray[Metadata2D[BasisMetadata, M, Any], DT], idx: int
 ) -> SlateArray[M, DT]:
-    as_tuple = as_tuple_basis(array.basis)
+    as_tuple = basis.as_tuple_basis(array.basis)
     converted = array.with_basis(
-        tuple_basis((as_fundamental(as_tuple[0]), as_tuple[1]))
+        tuple_basis((basis.as_fundamental(as_tuple[0]), as_tuple[1]))
     )
     return SlateArray(
         as_tuple[1], converted.raw_data.reshape(converted.basis.shape)[idx]
@@ -102,9 +99,11 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
 
-    basis_x = from_metadata(data.basis.metadata()[1], is_dual=data.basis.is_dual)
-    basis = tuple_basis((FundamentalBasis(data.basis.metadata()[0]), basis_x))
-    data = data.with_basis(basis)
+    basis_as_tuple = basis.as_tuple_basis(data.basis)
+    basis_x = basis.from_metadata(data.basis.metadata()[1], is_dual=data.basis.is_dual)
+    final_basis = tuple_basis((basis.as_index_basis(basis_as_tuple[0]), basis_x))
+
+    data = data.with_basis(final_basis)
     shape = shallow_shape_from_nested(basis_x.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
 
@@ -169,19 +168,22 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
 ) -> tuple[Figure, Axes, ArtistAnimation]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
-    basis_x = fundamental_transformed_tuple_basis_from_metadata(
+
+    basis_as_tuple = basis.as_tuple_basis(data.basis)
+    basis_k = basis.fundamental_transformed_tuple_basis_from_metadata(
         data.basis.metadata()[1], is_dual=data.basis.is_dual
     )
-    basis = tuple_basis((FundamentalBasis(data.basis.metadata()[0]), basis_x))
-    data = data.with_basis(basis)
-    shape = shallow_shape_from_nested(basis_x.fundamental_shape)
+    final_basis = tuple_basis((basis.as_index_basis(basis_as_tuple[0]), basis_k))
+
+    data = data.with_basis(final_basis)
+    shape = shallow_shape_from_nested(basis_k.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
 
     frames: list[list[Line2D]] = []
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = plot_data_1d_k(
-            SlateArray(basis[1], raw_data),
+            SlateArray(final_basis[1], raw_data),
             axes,
             idx,
             ax=ax,
