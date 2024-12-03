@@ -233,7 +233,7 @@ def _has_colorbar(axis: Axes) -> bool:
     return colourbar is not None
 
 
-def plot_data_2d[DT: np.number[Any]](
+def _plot_raw_data_2d[DT: np.number[Any]](
     data: np.ndarray[Any, np.dtype[DT]],
     coordinates: np.ndarray[tuple[int, int], np.dtype[np.float64]] | None = None,
     *,
@@ -315,7 +315,7 @@ def plot_data_2d_x[DT: np.number[Any], E](
 
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
-    fig, ax, mesh = plot_data_2d(
+    fig, ax, mesh = _plot_raw_data_2d(
         data_in_axis.reshape(coordinates.shape[1:]), coordinates, **kwargs
     )
 
@@ -389,7 +389,7 @@ def plot_data_2d_k[DT: np.number[Any], E](
     shifted_data = np.fft.fftshift(data_in_axis)
     shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))
 
-    fig, ax, mesh = plot_data_2d(shifted_data, shifted_coordinates, **kwargs)
+    fig, ax, mesh = _plot_raw_data_2d(shifted_data, shifted_coordinates, **kwargs)
 
     ax.set_xlabel(f"k{axes[0]} axis / $m^-1$")
     ax.set_ylabel(f"k{axes[1]} axis / $m^-1$")

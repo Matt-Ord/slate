@@ -15,7 +15,6 @@ from slate.plot._plot import (
     plot_array,
     plot_data_1d_k,
     plot_data_1d_x,
-    plot_data_2d,
     plot_data_2d_k,
     plot_data_2d_x,
 )
@@ -52,7 +51,6 @@ __all__ = [
     "plot_array",
     "plot_data_1d_k",
     "plot_data_1d_x",
-    "plot_data_2d",
     "plot_data_2d_k",
     "plot_data_2d_x",
 ]
