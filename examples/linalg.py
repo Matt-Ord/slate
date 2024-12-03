@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.array import SlateArray
+from slate.array import Array
 from slate.basis import from_shape
 from slate.linalg import get_eigenvalues, into_diagonal
 
 if __name__ == "__main__":
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray(from_shape((10, 10)), data)
+    array = Array(from_shape((10, 10)), data)
 
     diagonal = into_diagonal(array)
     eigenvalues = get_eigenvalues(array)

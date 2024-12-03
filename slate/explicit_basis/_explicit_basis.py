@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, override
 
 import numpy as np
 
-from slate.array import SlateArray
+from slate.array import Array
 from slate.array._transpose import inv, transpose
 from slate.basis import (
     Basis,
@@ -34,7 +34,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
 
     def __init__(
         self,
-        matrix: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
+        matrix: Array[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
@@ -57,7 +57,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     @property
     def transform(
         self,
-    ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
+    ) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             self._matrix
             if self.direction == "forward"
@@ -67,7 +67,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     @property
     def inverse_transform(
         self,
-    ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
+    ) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             inv(self._matrix)
             if self.direction == "forward"
@@ -77,7 +77,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
     @property
     def eigenvectors(
         self,
-    ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
+    ) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
         return transpose(self.inverse_transform)
 
     @override
@@ -234,11 +234,11 @@ def _assert_unitary[DT: np.generic](vectors: np.ndarray[Any, np.dtype[DT]]) -> N
 
 
 def _dual_unitary_data[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[Metadata2D[M1, M2, E], DT],
-) -> SlateArray[Metadata2D[M1, M2, E], DT]:
+    array: Array[Metadata2D[M1, M2, E], DT],
+) -> Array[Metadata2D[M1, M2, E], DT]:
     # This assumes that transposed basis is 'index-like'
     # compared to the original (list, inner) basis.
-    return SlateArray(array.basis.dual_basis(), np.conjugate(array.raw_data))
+    return Array(array.basis.dual_basis(), np.conjugate(array.raw_data))
 
 
 class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT]):
@@ -246,7 +246,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
 
     def __init__(
         self,
-        matrix: SlateArray[Metadata2D[BasisMetadata, M, Any], DT],
+        matrix: Array[Metadata2D[BasisMetadata, M, Any], DT],
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
@@ -263,7 +263,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     @override
     def transform(
         self,
-    ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
+    ) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             self._matrix
             if self.direction == "forward"
@@ -274,7 +274,7 @@ class ExplicitUnitaryBasis[M: BasisMetadata, DT: np.generic](ExplicitBasis[M, DT
     @override
     def inverse_transform(
         self,
-    ) -> SlateArray[Metadata2D[BasisMetadata, M, None], DT]:
+    ) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
         return (
             _dual_unitary_data(transpose(self.transform))
             if self.direction == "forward"
@@ -287,7 +287,7 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
 ):
     def __init__(self, inner: Basis[M, DT]) -> None:
         super().__init__(
-            SlateArray(
+            Array(
                 diagonal_basis((inner, inner.dual_basis())),
                 cast(np.ndarray[Any, np.dtype[DT]], np.ones(inner.size)),
             ),

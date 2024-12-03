@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from slate.array._array import SlateArray
+from slate.array._array import Array
 from slate.array._conversion import (
     as_add_basis,
     as_diagonal_array,
@@ -13,6 +13,7 @@ from slate.array._conversion import (
     as_outer_array,
     as_sub_basis,
     as_tuple_basis,
+    cast_basis,
     flatten,
     nest,
     with_basis,
@@ -21,7 +22,7 @@ from slate.array._stats import average, standard_deviation
 from slate.array._transpose import conjugate, transpose
 
 __all__ = [
-    "SlateArray",
+    "Array",
     "as_add_basis",
     "as_diagonal_array",
     "as_diagonal_basis",
@@ -32,6 +33,7 @@ __all__ = [
     "as_sub_basis",
     "as_tuple_basis",
     "average",
+    "cast_basis",
     "conjugate",
     "flatten",
     "nest",

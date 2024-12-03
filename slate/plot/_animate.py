@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from slate import basis
-from slate.array import SlateArray
+from slate.array import Array
 from slate.basis import (
     tuple_basis,
 )
@@ -46,19 +46,17 @@ def _get_slice_idx(
 
 
 def _index_array[M: BasisMetadata, DT: np.generic](
-    array: SlateArray[Metadata2D[BasisMetadata, M, Any], DT], idx: int
-) -> SlateArray[M, DT]:
+    array: Array[Metadata2D[BasisMetadata, M, Any], DT], idx: int
+) -> Array[M, DT]:
     as_tuple = basis.as_tuple_basis(array.basis)
     converted = array.with_basis(
         tuple_basis((basis.as_fundamental(as_tuple[0]), as_tuple[1]))
     )
-    return SlateArray(
-        as_tuple[1], converted.raw_data.reshape(converted.basis.shape)[idx]
-    )
+    return Array(as_tuple[1], converted.raw_data.reshape(converted.basis.shape)[idx])
 
 
 def animate_array_over_list[DT: np.number[Any]](
-    data: SlateArray[Metadata2D[SimpleMetadata, BasisMetadata, Any], DT],
+    data: Array[Metadata2D[SimpleMetadata, BasisMetadata, Any], DT],
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -88,7 +86,7 @@ def animate_array_over_list[DT: np.number[Any]](
 
 
 def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
+    data: Array[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -111,7 +109,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = plot_data_1d_x(
-            SlateArray(basis_x, raw_data),
+            Array(basis_x, raw_data),
             axes,
             idx,
             ax=ax,
@@ -126,7 +124,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[SpacedVolumeMetadata, DT],
+    data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -158,7 +156,7 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
+    data: Array[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -183,7 +181,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = plot_data_1d_k(
-            SlateArray(final_basis[1], raw_data),
+            Array(final_basis[1], raw_data),
             axes,
             idx,
             ax=ax,
@@ -198,7 +196,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[SpacedVolumeMetadata, DT],
+    data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -231,7 +229,7 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[SpacedVolumeMetadata, DT],
+    data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
@@ -283,7 +281,7 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
-    data: SlateArray[SpacedVolumeMetadata, DT],
+    data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,

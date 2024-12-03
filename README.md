@@ -26,21 +26,21 @@ pip install slate-core
 
 ## Usage Examples
 
-### Creating a SlateArray
+### Creating a Array
 
-To create a `SlateArray` with a given basis and data:
+To create a `Array` with a given basis and data:
 
 ```python
 import numpy as np
-from slate.array import SlateArray
+from slate.array import Array
 from slate.basis import FundamentalBasis
 from slate.metadata import SimpleMetadata
 
 # Create some data
 data = np.array([[1, 2], [3, 4]])
 
-# Create a SlateArray
-new_slate_array = SlateArray.from_array(data)
+# Create a Array
+new_slate_array = Array.from_array(data)
 
 print(slate_array.raw_data)
 ```
@@ -56,13 +56,13 @@ from slate.metadata import BasisMetadata
 # Create a truncated basis
 truncated_basis = CroppedBasis(10, FundamentalBasis(SimpleMetadata((20,))))
 
-# Create a SlateArray with the truncated basis
-truncated_slate_array = SlateArray(truncated_basis, data)
+# Create a Array with the truncated basis
+truncated_slate_array = Array(truncated_basis, data)
 ```
 
 ### Converting Back to a Full NumPy Array
 
-To convert the `SlateArray` back to a full NumPy array:
+To convert the `Array` back to a full NumPy array:
 
 ```python
 full_array = slate_array.as_array()

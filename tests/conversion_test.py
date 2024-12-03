@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array import SlateArray, with_basis
+from slate.array import Array, with_basis
 from slate.basis import (
     FundamentalBasis,
     RecastBasis,
@@ -25,9 +25,7 @@ if TYPE_CHECKING:
 
 
 def test_transformed_basis_round_trip(
-    slate_array_complex: SlateArray[
-        Any, np.complex128, FundamentalBasis[SimpleMetadata]
-    ],
+    slate_array_complex: Array[Any, np.complex128, FundamentalBasis[SimpleMetadata]],
 ) -> None:
     basis = TransformedBasis(slate_array_complex.basis)
 
@@ -54,7 +52,7 @@ def test_transformed_basis() -> None:
 
     rng = np.random.default_rng()
     data = rng.random(fundamental_basis.size) + 1j * rng.random(fundamental_basis.size)
-    array = SlateArray(fundamental_basis, data)
+    array = Array(fundamental_basis, data)
     np.testing.assert_array_almost_equal(array.raw_data, data)
     np.testing.assert_array_almost_equal(
         array.with_basis(transformed_basis).raw_data, np.fft.fft(data, norm="ortho")
@@ -63,13 +61,13 @@ def test_transformed_basis() -> None:
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis.dual_basis()).raw_data, np.conj(data)
     )
-    array = SlateArray(fundamental_basis.dual_basis(), data)
+    array = Array(fundamental_basis.dual_basis(), data)
     np.testing.assert_array_almost_equal(
         array.with_basis(transformed_basis.dual_basis()).raw_data,
         np.conj(np.fft.fft(np.conj(data), norm="ortho")),
     )
 
-    array = SlateArray(transformed_basis, data)
+    array = Array(transformed_basis, data)
     np.testing.assert_array_almost_equal(array.raw_data, data)
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis).raw_data, np.fft.ifft(data, norm="ortho")
@@ -79,7 +77,7 @@ def test_transformed_basis() -> None:
         np.conj(np.fft.ifft(data, norm="ortho")),
     )
 
-    array = SlateArray(transformed_basis.dual_basis(), data)
+    array = Array(transformed_basis.dual_basis(), data)
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis).raw_data,
         np.fft.ifft(np.conj(data), norm="ortho"),
@@ -94,7 +92,7 @@ def test_diagonal_basis_round_trip() -> None:
     full_basis = from_shape((10, 10))
     basis_diagonal = diagonal_basis(full_basis.children)
 
-    array = SlateArray(full_basis, np.diag(np.ones(10)))
+    array = Array(full_basis, np.diag(np.ones(10)))
 
     converted_array = with_basis(array, basis_diagonal)
     assert converted_array.basis == basis_diagonal
@@ -110,7 +108,7 @@ def test_diagonal_basis_round_trip() -> None:
         array.raw_data,
     )
 
-    array = SlateArray(full_basis, np.ones(full_basis.shape))
+    array = Array(full_basis, np.ones(full_basis.shape))
 
     converted_array = with_basis(array, basis_diagonal)
     assert converted_array.basis == basis_diagonal
@@ -132,7 +130,7 @@ def test_transform_spaced_basis() -> None:
     full_basis = tuple_basis((half_basis, half_basis))
     spaced_basis = TruncatedBasis(Truncation(3, 5, 0), TransformedBasis(half_basis))
 
-    array = SlateArray(
+    array = Array(
         RecastBasis(
             diagonal_basis((half_basis, half_basis)),
             half_basis,
@@ -191,7 +189,7 @@ def test_dual_basis_transform(
         extra_metadata=dual_basis.metadata().extra,
     )
 
-    array = SlateArray(basis, np.ones(basis.size))
+    array = Array(basis, np.ones(basis.size))
 
     np.testing.assert_array_almost_equal(
         array.with_basis(dual_basis).raw_data,

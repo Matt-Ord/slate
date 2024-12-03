@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array import SlateArray, with_basis
+from slate.array import Array, with_basis
 from slate.basis import (
     CroppedBasis,
     FundamentalBasis,
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 
 def _test_einsum_in_basis(
-    array: SlateArray[Any, Any, TupleBasis[Any, None, Any]],
-    vector: SlateArray[Any, Any, Any],
+    array: Array[Any, Any, TupleBasis[Any, None, Any]],
+    vector: Array[Any, Any, Any],
     basis: Basis[Any, Any],
 ) -> None:
     transformed_array = with_basis(
@@ -53,7 +53,7 @@ def _test_einsum_in_basis(
 def test_einsum() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray(
+    array = Array(
         tuple_basis(
             (
                 FundamentalBasis.from_size(10),
@@ -64,7 +64,7 @@ def test_einsum() -> None:
     )
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = SlateArray(array.basis[0], data)
+    vector = Array(array.basis[0], data)
 
     _test_einsum_in_basis(array, vector, TransformedBasis(vector.basis))
     _test_einsum_in_basis(array, vector, CroppedBasis(vector.basis.size, vector.basis))
@@ -83,7 +83,7 @@ def test_einsum() -> None:
 def test_einsum_diagonal() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = SlateArray(
+    array = Array(
         tuple_basis(
             (
                 FundamentalBasis.from_size(10),
@@ -94,14 +94,14 @@ def test_einsum_diagonal() -> None:
     )
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = SlateArray(array.basis[0], data)
+    vector = Array(array.basis[0], data)
     diagonal_array = into_diagonal(array)
 
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
 
     data = array.raw_data.reshape(array.basis.shape)
     data += np.conj(data.T)
-    array = SlateArray(
+    array = Array(
         tuple_basis(
             (
                 FundamentalBasis.from_size(10),
