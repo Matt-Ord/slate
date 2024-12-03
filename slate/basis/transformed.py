@@ -31,9 +31,13 @@ class TransformedBasis[M: BasisMetadata](
     def __init__(
         self,
         inner: Basis[M, np.complex128],
-        direction: TransformDirection = "forward",
+        direction: TransformDirection | None = None,
     ) -> None:
-        self._direction: TransformDirection = direction
+        self._direction: TransformDirection = (
+            ("backward" if inner.is_dual is True else "forward")
+            if direction is None
+            else direction
+        )
         super().__init__(inner)
 
     @property
