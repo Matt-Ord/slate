@@ -20,7 +20,16 @@ from slate.plot._plot import (
     plot_data_2d_x,
 )
 from slate.plot._squared_scale import SquaredScale
-from slate.plot._util import Axes, Figure, Measure, Scale, get_figure, get_measured_data
+from slate.plot._util import (
+    Axes,
+    Figure,
+    Measure,
+    Scale,
+    TupleAnimation,
+    combine_animations,
+    get_figure,
+    get_measured_data,
+)
 
 __all__ = [
     "Axes",
@@ -28,6 +37,7 @@ __all__ = [
     "Measure",
     "Scale",
     "SquaredScale",
+    "TupleAnimation",
     "animate_array_over_list",
     "animate_data_1d_k",
     "animate_data_1d_x",
@@ -36,6 +46,7 @@ __all__ = [
     "animate_data_2d_x",
     "animate_data_over_list_1d_k",
     "animate_data_over_list_1d_x",
+    "combine_animations",
     "get_figure",
     "get_measured_data",
     "plot_array",
