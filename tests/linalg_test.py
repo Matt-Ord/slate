@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array import SlateArray, with_basis
+from slate.array import Array, with_basis
 from slate.basis._tuple import (
     TupleBasis2D,
     as_tuple_basis,
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def slate_array_stacked() -> (
-    SlateArray[
+    Array[
         StackedMetadata[SimpleMetadata, None],
         np.complex128,
         TupleBasis[BasisMetadata, None, np.generic],
@@ -35,11 +35,11 @@ def slate_array_stacked() -> (
     rng = np.random.default_rng()
     shape = (10, 10)
     data = rng.random(shape) + 1j * rng.random(shape)
-    return SlateArray.from_array(data)
+    return Array.from_array(data)
 
 
 def _test_into_diagonal(
-    array: SlateArray[
+    array: Array[
         Metadata2D[BasisMetadata, BasisMetadata, None],
         np.complexfloating[Any, Any],
     ],
@@ -89,12 +89,12 @@ def test_linalg_complex(
     rng = np.random.default_rng()
     data = rng.random(basis.shape) + 1j * rng.random(basis.shape)
 
-    array = SlateArray(basis, data)
+    array = Array(basis, data)
     _test_into_diagonal(array)
 
 
 def _test_into_diagonal_hermitian(
-    array: SlateArray[
+    array: Array[
         Metadata2D[BasisMetadata, BasisMetadata, None],
         np.complexfloating[Any, Any],
     ],
@@ -146,7 +146,7 @@ def test_linalg_diagonal(
 ) -> None:
     rng = np.random.default_rng()
     data = rng.random(10)
-    array = SlateArray(
+    array = Array(
         basis,
         np.diag(data).astype(np.complex128),
     )
@@ -175,7 +175,7 @@ def test_linalg_complex_hermitian(
     data = rng.random(basis.shape) + 1j * rng.random(basis.shape)
     data += np.conj(np.transpose(data))
 
-    array = SlateArray(basis, data)
+    array = Array(basis, data)
     _test_into_diagonal_hermitian(array)
 
 
@@ -199,6 +199,6 @@ def test_linalg_real_hermitian(
     rng = np.random.default_rng()
     data = rng.random(basis.shape).astype(np.complex128)
     data += np.conj(np.transpose(data))
-    array = SlateArray(basis, data)
+    array = Array(basis, data)
 
     _test_into_diagonal_hermitian(array)

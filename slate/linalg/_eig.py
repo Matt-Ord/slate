@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array import SlateArray, with_basis
+from slate.array import Array, with_basis
 from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
@@ -51,11 +51,11 @@ def _diagonal_basis_as_explicit[
 
 
 def get_eigenvalues[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
-    array: SlateArray[StackedMetadata[M, E], DT],
-) -> SlateArray[BasisMetadata, np.complex128, FundamentalBasis[SimpleMetadata]]:
+    array: Array[StackedMetadata[M, E], DT],
+) -> Array[BasisMetadata, np.complex128, FundamentalBasis[SimpleMetadata]]:
     """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
-    return SlateArray(FundamentalBasis.from_size(a.size), a)
+    return Array(FundamentalBasis.from_size(a.size), a)
 
 
 def _eig_from_tuple[
@@ -64,12 +64,12 @@ def _eig_from_tuple[
     E,
     DT: np.complexfloating[Any, Any],
 ](
-    array: SlateArray[
+    array: Array[
         Metadata2D[M0, M1, E],
         DT,
         TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E],
     ],
-) -> SlateArray[
+) -> Array[
     Metadata2D[M0, M1, E],
     np.complex128,
     DiagonalBasis[
@@ -88,7 +88,7 @@ def _eig_from_tuple[
         )
     )
     basis_0 = ExplicitBasis(
-        SlateArray(states_basis_0, np.transpose(eig.eigenvectors)),
+        Array(states_basis_0, np.transpose(eig.eigenvectors)),
     )
     states_basis_1 = tuple_basis(
         (
@@ -97,11 +97,11 @@ def _eig_from_tuple[
         )
     )
     basis_1 = ExplicitBasis(
-        SlateArray(states_basis_1, np.transpose(eig.eigenvectors)),
+        Array(states_basis_1, np.transpose(eig.eigenvectors)),
         data_id=basis_0.data_id,
         direction="backward",
     )
-    return SlateArray(
+    return Array(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues,
     )
@@ -113,8 +113,8 @@ def into_diagonal[
     E,
     DT: np.complexfloating[Any, Any],
 ](
-    array: SlateArray[Metadata2D[M0, M1, E], DT],
-) -> SlateArray[
+    array: Array[Metadata2D[M0, M1, E], DT],
+) -> Array[
     Metadata2D[M0, M1, E],
     np.complex128,
     DiagonalBasis[
@@ -142,10 +142,10 @@ def into_diagonal[
 
 
 def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
-    array: SlateArray[StackedMetadata[M, E], DT],
-) -> SlateArray[BasisMetadata, np.float64, FundamentalBasis[SimpleMetadata]]:
+    array: Array[StackedMetadata[M, E], DT],
+) -> Array[BasisMetadata, np.float64, FundamentalBasis[SimpleMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
-    return SlateArray(FundamentalBasis.from_size(a.size), a)
+    return Array(FundamentalBasis.from_size(a.size), a)
 
 
 def _eigh_from_tuple[
@@ -154,10 +154,10 @@ def _eigh_from_tuple[
     E,
     DT: np.complexfloating[Any, Any],
 ](
-    array: SlateArray[
+    array: Array[
         Metadata2D[M0, M1, E], DT, TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E]
     ],
-) -> SlateArray[
+) -> Array[
     Metadata2D[M0, M1, E],
     np.complex128,
     DiagonalBasis[
@@ -176,7 +176,7 @@ def _eigh_from_tuple[
         )
     )
     basis_0 = ExplicitUnitaryBasis(
-        SlateArray(states_basis_0, np.transpose(eig.eigenvectors)),
+        Array(states_basis_0, np.transpose(eig.eigenvectors)),
         direction="forward",
         assert_unitary=False,
     )
@@ -187,13 +187,13 @@ def _eigh_from_tuple[
         )
     )
     basis_1 = ExplicitUnitaryBasis(
-        SlateArray(states_basis_1, (np.transpose(eig.eigenvectors))),
+        Array(states_basis_1, (np.transpose(eig.eigenvectors))),
         data_id=basis_0.data_id,
         direction="backward",
         assert_unitary=False,
     )
 
-    return SlateArray(
+    return Array(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues.astype(np.complex128),
     )
@@ -205,8 +205,8 @@ def into_diagonal_hermitian[
     E,
     DT: np.complexfloating[Any, Any],
 ](
-    array: SlateArray[Metadata2D[M0, M1, E], DT],
-) -> SlateArray[
+    array: Array[Metadata2D[M0, M1, E], DT],
+) -> Array[
     Metadata2D[M0, M1, E],
     np.complex128,
     DiagonalBasis[

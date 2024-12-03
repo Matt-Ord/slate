@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate.array import SlateArray
+from slate.array import Array
 from slate.basis._diagonal import as_diagonal_basis
 from slate.basis._tuple import as_tuple_basis, tuple_basis, with_child
 
@@ -24,9 +24,9 @@ def _einsum_numpy[DT: np.number[Any]](
 
 
 def _einsum_1[DT: np.number[Any]](
-    array_1: SlateArray[BasisMetadata, DT],
-    array_2: SlateArray[BasisMetadata, DT],
-) -> SlateArray[BasisMetadata, DT]:
+    array_1: Array[BasisMetadata, DT],
+    array_2: Array[BasisMetadata, DT],
+) -> Array[BasisMetadata, DT]:
     array_1_diag = as_diagonal_basis(array_1.basis)
     array_1_tuple = as_tuple_basis(array_1.basis)
 
@@ -44,20 +44,20 @@ def _einsum_1[DT: np.number[Any]](
             array_1_converted.raw_data,
             array_2_converted.raw_data.reshape(array_2_converted.basis.shape),
         )
-        return SlateArray(final_basis, data)
+        return Array(final_basis, data)
     array_1_converted = array_1.with_basis(array_1_tuple)
     data = _einsum_numpy(
         "ij,i...->j...",
         array_1_converted.raw_data.reshape(array_1_converted.basis.shape),
         array_2_converted.raw_data.reshape(array_2_converted.basis.shape),
     )
-    return SlateArray(final_basis, data)
+    return Array(final_basis, data)
 
 
 def _einsum_2[DT: np.number[Any]](
-    array_1: SlateArray[BasisMetadata, DT],
-    array_2: SlateArray[BasisMetadata, DT],
-) -> SlateArray[BasisMetadata, DT]:
+    array_1: Array[BasisMetadata, DT],
+    array_2: Array[BasisMetadata, DT],
+) -> Array[BasisMetadata, DT]:
     # (m (i k')),(k j) -> m (i j)
 
     array_1_tuple = as_tuple_basis(array_1.basis)
@@ -79,13 +79,13 @@ def _einsum_2[DT: np.number[Any]](
         array_1_converted.raw_data.reshape(m_basis.size, i_basis.size, k_basis.size),
         array_2_converted.raw_data.reshape(k_basis.size, j_basis.size),
     )
-    return SlateArray(out_basis, data)
+    return Array(out_basis, data)
 
 
 def _einsum_3[DT: np.number[Any]](
-    array_1: SlateArray[BasisMetadata, DT],
-    array_2: SlateArray[BasisMetadata, DT],
-) -> SlateArray[BasisMetadata, DT]:
+    array_1: Array[BasisMetadata, DT],
+    array_2: Array[BasisMetadata, DT],
+) -> Array[BasisMetadata, DT]:
     # (i k'),(m (k j)) -> m (i j)
 
     array_1_tuple = as_tuple_basis(array_1.basis)
@@ -107,14 +107,14 @@ def _einsum_3[DT: np.number[Any]](
         array_1_converted.raw_data.reshape(i_basis.size, k_basis.size),
         array_2_converted.raw_data.reshape(m_basis.size, k_basis.size, j_basis.size),
     )
-    return SlateArray(out_basis, data)
+    return Array(out_basis, data)
 
 
 def einsum[DT: np.number[Any]](
     idx: str,
-    array_1: SlateArray[BasisMetadata, DT],
-    array_2: SlateArray[BasisMetadata, DT],
-) -> SlateArray[BasisMetadata, DT]:
+    array_1: Array[BasisMetadata, DT],
+    array_2: Array[BasisMetadata, DT],
+) -> Array[BasisMetadata, DT]:
     if idx == "(i j),i...->j...":
         return _einsum_1(array_1, array_2)
     if idx == "(m (i k')),(k j) -> (m (i j))":

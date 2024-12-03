@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from slate import basis
-from slate.array._array import SlateArray
+from slate.array._array import Array
 from slate.basis._diagonal import DiagonalBasis
 from slate.metadata._metadata import BasisMetadata
 
@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 
 
 def extract_diagonal[M: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[Metadata2D[M, M, E], DT],
-) -> SlateArray[M, DT, Basis[M, Any]] | None:
+    array: Array[Metadata2D[M, M, E], DT],
+) -> Array[M, DT, Basis[M, Any]] | None:
     b = DiagonalBasis(basis.from_metadata(array.basis.metadata()))
     converted = array.with_basis(b)
 
-    return SlateArray(converted.basis.inner[1], converted.raw_data)
+    return Array(converted.basis.inner[1], converted.raw_data)

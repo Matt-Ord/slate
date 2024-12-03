@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
-    from slate.array import SlateArray
+    from slate.array import Array
     from slate.metadata import BasisMetadata, StackedMetadata
     from slate.metadata.length import SpacedLengthMetadata
 from slate.metadata import SpacedVolumeMetadata
@@ -97,7 +97,7 @@ def _plot_raw_data_1d[DT: np.number[Any]](  # noqa: PLR0913
 
 
 def plot_array[DT: np.number[Any]](
-    data: SlateArray[BasisMetadata, DT],
+    data: Array[BasisMetadata, DT],
     *,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
@@ -135,7 +135,7 @@ def plot_array[DT: np.number[Any]](
 
 
 def plot_data_1d_k[DT: np.number[Any]](
-    data: SlateArray[SpacedVolumeMetadata, DT],
+    data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -184,7 +184,7 @@ def plot_data_1d_k[DT: np.number[Any]](
 
 
 def plot_data_1d_x[DT: np.number[Any]](
-    data: SlateArray[SpacedVolumeMetadata, DT],
+    data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -272,7 +272,7 @@ def _get_lengths_in_axes(
 
 
 def plot_data_2d_x[DT: np.number[Any], E](
-    data: SlateArray[StackedMetadata[SpacedLengthMetadata, E], DT],
+    data: Array[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -344,7 +344,7 @@ def _get_frequencies_in_axes(
 
 
 def plot_data_2d_k[DT: np.number[Any], E](
-    data: SlateArray[StackedMetadata[SpacedLengthMetadata, E], DT],
+    data: Array[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],

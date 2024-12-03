@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from slate import basis
-from slate.array._array import SlateArray
+from slate.array._array import Array
 from slate.basis import (
     Basis,
     TupleBasis2D,
@@ -21,23 +21,21 @@ if TYPE_CHECKING:
 
 
 def conjugate[M: BasisMetadata, DT: np.generic](
-    array: SlateArray[M, DT],
-) -> SlateArray[M, DT]:
+    array: Array[M, DT],
+) -> Array[M, DT]:
     """Conjugate a slate array."""
     converted = array.with_basis(basis.as_index_basis(array.basis))
-    return SlateArray(converted.basis, np.conj(converted.raw_data)).with_basis(
-        array.basis
-    )
+    return Array(converted.basis, np.conj(converted.raw_data)).with_basis(array.basis)
 
 
 def _transpose_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[
+    array: Array[
         Metadata2D[M0, M1, E],
         DT,
         DiagonalBasis[np.generic, Basis[M0, Any], Basis[M1, Any], E],
     ],
-) -> SlateArray[Metadata2D[M0, M1, E], DT]:
-    return SlateArray(
+) -> Array[Metadata2D[M0, M1, E], DT]:
+    return Array(
         diagonal_basis(
             (array.basis.inner[1], array.basis.inner[0]), array.basis.metadata().extra
         ),
@@ -46,21 +44,21 @@ def _transpose_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.gen
 
 
 def _transpose_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[
+    array: Array[
         Metadata2D[M0, M1, E],
         DT,
         TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E],
     ],
-) -> SlateArray[Metadata2D[M0, M1, E], DT]:
-    return SlateArray(
+) -> Array[Metadata2D[M0, M1, E], DT]:
+    return Array(
         tuple_basis((array.basis[1], array.basis[0]), array.basis.metadata().extra),
         array.raw_data.reshape(array.basis.shape).transpose(),
     )
 
 
 def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[Metadata2D[M1, M2, E], DT],
-) -> SlateArray[Metadata2D[M1, M2, E], DT]:
+    array: Array[Metadata2D[M1, M2, E], DT],
+) -> Array[Metadata2D[M1, M2, E], DT]:
     """Transpose a slate array."""
     basis_as_diagonal = as_diagonal_basis(array.basis)
     if basis_as_diagonal is not None:
@@ -71,13 +69,13 @@ def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
 
 
 def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[
+    array: Array[
         Metadata2D[M0, M1, E],
         DT,
         DiagonalBasis[np.generic, Basis[M0, Any], Basis[M1, Any], E],
     ],
-) -> SlateArray[Metadata2D[M0, M1, E], DT]:
-    return SlateArray(
+) -> Array[Metadata2D[M0, M1, E], DT]:
+    return Array(
         diagonal_basis(
             (array.basis.inner[1].dual_basis(), array.basis.inner[0].dual_basis()),
             array.basis.metadata().extra,
@@ -87,14 +85,14 @@ def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
 
 
 def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[
+    array: Array[
         Metadata2D[M0, M1, E],
         DT,
         TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E],
     ],
-) -> SlateArray[Metadata2D[M0, M1, E], DT]:
+) -> Array[Metadata2D[M0, M1, E], DT]:
     raw_data = array.raw_data.reshape(array.basis.shape)
-    return SlateArray(
+    return Array(
         tuple_basis(
             (array.basis[1].dual_basis(), array.basis[0].dual_basis()),
             array.basis.metadata().extra,
@@ -104,8 +102,8 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
 
 
 def inv[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
-    array: SlateArray[Metadata2D[M1, M2, E], DT],
-) -> SlateArray[Metadata2D[M1, M2, E], DT]:
+    array: Array[Metadata2D[M1, M2, E], DT],
+) -> Array[Metadata2D[M1, M2, E], DT]:
     """Inverse a slate array."""
     basis_as_diagonal = as_diagonal_basis(array.basis)
     if basis_as_diagonal is not None:

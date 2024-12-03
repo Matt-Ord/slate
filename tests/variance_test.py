@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate.array import SlateArray
+from slate.array import Array
 from slate.basis import (
     Basis,
     DiagonalBasis,
@@ -54,15 +54,15 @@ def fundamental_basis_variance() -> None:
 
 def slate_array_basis_variance() -> None:
     a = cast(
-        SlateArray[SimpleMetadata, np.float64, FundamentalBasis[SimpleMetadata]],
+        Array[SimpleMetadata, np.float64, FundamentalBasis[SimpleMetadata]],
         {},
     )
-    _b: SlateArray[BasisMetadata, np.generic] = a
-    _c: SlateArray[BasisMetadata, np.floating[Any]] = a
-    _d: SlateArray[BasisMetadata, np.float128] = a  # type: ignore should fail
-    _d: SlateArray[BasisMetadata, np.float64, TransformedBasis[SimpleMetadata]] = a  # type: ignore should fail
-    _e: SlateArray[BasisMetadata, np.float64] = a
-    _f: SlateArray[LengthMetadata, np.float64] = a  # type: ignore should fail
+    _b: Array[BasisMetadata, np.generic] = a
+    _c: Array[BasisMetadata, np.floating[Any]] = a
+    _d: Array[BasisMetadata, np.float128] = a  # type: ignore should fail
+    _d: Array[BasisMetadata, np.float64, TransformedBasis[SimpleMetadata]] = a  # type: ignore should fail
+    _e: Array[BasisMetadata, np.float64] = a
+    _f: Array[LengthMetadata, np.float64] = a  # type: ignore should fail
 
 
 def wrappeed_basis_variance() -> None:

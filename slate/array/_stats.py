@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from slate import basis
-from slate.array._array import SlateArray
+from slate.array._array import Array
 from slate.basis._tuple import TupleBasis, TupleBasis1D, tuple_basis
 from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 
@@ -16,27 +16,25 @@ if TYPE_CHECKING:
 
 @overload
 def standard_deviation[M: SimpleMetadata, DT: np.number[Any]](
-    array: SlateArray[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
-) -> SlateArray[
-    Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]
-]: ...
+    array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
+) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
 def standard_deviation[M: BasisMetadata, DT: np.number[Any]](
-    array: SlateArray[StackedMetadata[M, Any], DT], *, axis: int
-) -> SlateArray[StackedMetadata[M, None], DT]: ...
+    array: Array[StackedMetadata[M, Any], DT], *, axis: int
+) -> Array[StackedMetadata[M, None], DT]: ...
 
 
 @overload
 def standard_deviation[DT: np.number[Any]](
-    array: SlateArray[Any, DT], *, axis: None = ...
+    array: Array[Any, DT], *, axis: None = ...
 ) -> DT: ...
 
 
 def standard_deviation[DT: np.number[Any]](
-    array: SlateArray[Any, DT], axis: int | None = None
-) -> SlateArray[Any, DT] | DT:
+    array: Array[Any, DT], axis: int | None = None
+) -> Array[Any, DT] | DT:
     if axis is None:
         return np.std(array.as_array(), axis=axis)  # type: ignore unknown
     data = np.asarray(
@@ -51,32 +49,28 @@ def standard_deviation[DT: np.number[Any]](
     out_basis = tuple_basis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return SlateArray(out_basis, data)
+    return Array(out_basis, data)
 
 
 @overload
 def average[M: SimpleMetadata, DT: np.number[Any]](
-    array: SlateArray[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
-) -> SlateArray[
-    Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]
-]: ...
+    array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
+) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
 def average[M: BasisMetadata, DT: np.number[Any]](
-    array: SlateArray[StackedMetadata[M, Any], DT], *, axis: int
-) -> SlateArray[StackedMetadata[M, None], DT]: ...
+    array: Array[StackedMetadata[M, Any], DT], *, axis: int
+) -> Array[StackedMetadata[M, None], DT]: ...
 
 
 @overload
-def average[DT: np.number[Any]](
-    array: SlateArray[Any, DT], *, axis: None = ...
-) -> DT: ...
+def average[DT: np.number[Any]](array: Array[Any, DT], *, axis: None = ...) -> DT: ...
 
 
 def average[DT: np.number[Any]](
-    array: SlateArray[Any, DT], axis: int | None = None
-) -> SlateArray[Any, DT] | DT:
+    array: Array[Any, DT], axis: int | None = None
+) -> Array[Any, DT] | DT:
     if axis is None:
         return np.average(array.as_array(), axis=axis)  # type: ignore unknown
     data = np.asarray(
@@ -91,4 +85,4 @@ def average[DT: np.number[Any]](
     out_basis = tuple_basis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return SlateArray(out_basis, data)
+    return Array(out_basis, data)
