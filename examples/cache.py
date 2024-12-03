@@ -17,7 +17,7 @@ if __name__ == "__main__":
         def _my_expensive_function() -> Array[BasisMetadata, np.float64]:
             global count  # noqa: PLW0603
             count += 1
-            return Array.from_array(np.zeros((100000, 1000)))
+            return Array.from_array(np.zeros((300000, 1000)))
 
         _my_expensive_function()
         # The second call will be cached
@@ -26,19 +26,19 @@ if __name__ == "__main__":
 
         # call_uncached will always call the function
         _my_expensive_function.call_uncached()
-        assert count == 2  # noqa: PLR2004
+        assert count == 2
 
     # Just to compare it to the numpy save and load
     with tempfile.TemporaryDirectory() as dir_name:
 
         @timed
         def _save_numpy() -> None:
-            data = Array.from_array(np.zeros((100000, 1000)))
+            data = Array.from_array(np.zeros((300000, 1000)))
             np.savez(Path(dir_name) / "out.npz", data.raw_data)
 
         @timed
         def _load_numpy() -> None:
-            np.load(Path(dir_name) / "out.npz")
+            np.load(Path(dir_name) / "out.npz")[f"arr_{0}"]
 
         _save_numpy()
         _load_numpy()
