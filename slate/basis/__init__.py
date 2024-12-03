@@ -10,7 +10,9 @@ from slate.basis._basis import (
     are_dual,
     are_dual_shapes,
 )
+from slate.basis._basis_state_metadata import BasisStateMetadata
 from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
+from slate.basis._fundamental import FundamentalBasis, as_state_list
 from slate.basis._isotropic import IsotropicBasis, isotropic_basis
 from slate.basis._tuple import (
     StackedBasis,
@@ -21,7 +23,7 @@ from slate.basis._tuple import (
     TupleBasisND,
     as_fundamental,
     as_tuple_basis,
-    flatten_basis,
+    flatten,
     from_metadata,
     from_shape,
     get_common_basis,
@@ -40,7 +42,6 @@ from slate.basis._util import (
 )
 from slate.basis.coordinate import CoordinateBasis
 from slate.basis.cropped import CroppedBasis
-from slate.basis.fundamental import FundamentalBasis
 from slate.basis.recast import RecastBasis
 from slate.basis.split import SplitBasis
 from slate.basis.transformed import (
@@ -57,6 +58,7 @@ from slate.basis.wrapped import (
 __all__ = [
     "Basis",
     "BasisFeature",
+    "BasisStateMetadata",
     "CoordinateBasis",
     "CroppedBasis",
     "DiagonalBasis",
@@ -85,10 +87,11 @@ __all__ = [
     "as_fundamental",
     "as_index_basis",
     "as_mul_basis",
+    "as_state_list",
     "as_sub_basis",
     "as_tuple_basis",
     "diagonal_basis",
-    "flatten_basis",
+    "flatten",
     "from_metadata",
     "from_shape",
     "fundamental_transformed_tuple_basis_from_metadata",

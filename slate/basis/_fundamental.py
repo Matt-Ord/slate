@@ -6,7 +6,7 @@ from typing import Any, Self, override
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
-from slate.metadata import SimpleMetadata
+from slate.basis._basis_state_metadata import BasisStateMetadata, SimpleMetadata
 
 
 class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
@@ -108,8 +108,8 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
         return np.arange(self.size)
 
 
-def basis_as_fundamental[M: SimpleMetadata, DT: np.generic](
-    basis: Basis[M, DT],
-) -> FundamentalBasis[M]:
+def as_state_list[B: Basis[Any, Any]](
+    basis: B,
+) -> FundamentalBasis[BasisStateMetadata[B]]:
     """Get the fundamental basis for a given basis."""
-    return FundamentalBasis(basis.metadata())
+    return FundamentalBasis(BasisStateMetadata(basis))
