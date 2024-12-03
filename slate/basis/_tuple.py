@@ -18,7 +18,7 @@ from typing import (
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, NestedBool, NestedBoolOrNone
-from slate.basis.fundamental import FundamentalBasis
+from slate.basis._fundamental import FundamentalBasis
 from slate.basis.wrapped import (
     WrappedBasis,
     get_wrapped_basis_super_inner,
@@ -914,9 +914,29 @@ def get_common_basis[M: BasisMetadata, E, DT: np.generic](
     return last_common
 
 
-def flatten_basis[M: BasisMetadata, DT: np.generic](
+@overload
+def flatten[B: Basis[Any, Any], DT: np.generic](
+    basis: TupleBasis1D[Any, B, Any],
+) -> B: ...
+
+
+@overload
+def flatten[M: BasisMetadata, DT: np.generic](
+    basis: Basis[Metadata1D[M, Any], DT],
+) -> Basis[M, DT]: ...
+
+
+@overload
+def flatten[M: BasisMetadata, DT: np.generic](
     basis: Basis[StackedMetadata[StackedMetadata[M, Any], Any], DT],
-) -> TupleBasis[M, None, DT]:
+) -> TupleBasis[M, None, DT]: ...
+
+
+def flatten(
+    basis: Basis[BasisMetadata, Any],
+) -> Basis[Any, Any]:
     as_tuple = as_tuple_basis(basis)
+    if len(as_tuple.shape) == 1:
+        return as_tuple.children[0]
     children = tuple(c for b in as_tuple.children for c in as_tuple_basis(b).children)
     return tuple_basis(children)

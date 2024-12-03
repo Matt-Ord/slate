@@ -12,8 +12,8 @@ from typing import (
 
 import numpy as np
 
-from slate.metadata import BasisMetadata, NestedLength
-from slate.metadata._shape import size_from_nested_shape
+from slate.metadata._metadata import BasisMetadata
+from slate.metadata._shape import NestedLength, size_from_nested_shape
 
 BasisFeature = Literal[
     "ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB", "INDEX"

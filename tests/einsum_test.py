@@ -7,15 +7,15 @@ import numpy as np
 from slate.array import SlateArray, with_basis
 from slate.basis import (
     CroppedBasis,
+    FundamentalBasis,
     TransformedBasis,
     TruncatedBasis,
     Truncation,
     TupleBasis,
+    tuple_basis,
     with_child,
 )
-from slate.basis._tuple import tuple_basis
-from slate.basis.fundamental import FundamentalBasis
-from slate.linalg._eig import into_diagonal, into_diagonal_hermitian
+from slate.linalg import into_diagonal, into_diagonal_hermitian
 
 if TYPE_CHECKING:
     from slate.basis import Basis

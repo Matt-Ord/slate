@@ -1,17 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 
 from slate import basis
 from slate.array._array import SlateArray
 from slate.basis import Basis, BasisFeature, DiagonalBasis, TupleBasis, tuple_basis
+from slate.basis._basis_state_metadata import BasisStateMetadata
+from slate.basis._fundamental import FundamentalBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
+    from slate.basis._tuple import TupleBasis1D
     from slate.basis.recast import RecastBasis
-    from slate.metadata.stacked import Metadata2D, StackedMetadata
+    from slate.metadata.stacked import Metadata1D, Metadata2D, StackedMetadata
 
 
 def with_basis[
@@ -81,20 +84,61 @@ def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
     return array.with_basis(basis.as_tuple_basis(array.basis))
 
 
-def as_flatten_basis[M: BasisMetadata, DT: np.generic](
+def nest[
+    M: BasisMetadata,
+    DT: np.generic,
+    B: Basis[Any, Any] = Basis[M, DT],
+](
+    array: SlateArray[M, DT, B],
+) -> SlateArray[Metadata1D[M, None], DT, TupleBasis1D[DT, B, None]]:
+    return SlateArray(tuple_basis((array.basis,)), array.raw_data)
+
+
+@overload
+def flatten[
+    M: BasisMetadata,
+    DT: np.generic,
+    B: Basis[Any, Any] = Basis[M, DT],
+](
+    array: SlateArray[Metadata1D[M, Any], DT, TupleBasis1D[DT, B, Any]],
+) -> SlateArray[M, DT, B]: ...
+
+
+@overload
+def flatten[
+    M: BasisMetadata,
+    DT: np.generic,
+    B: Basis[Any, Any] = Basis[M, DT],
+](
+    array: SlateArray[Metadata1D[M, Any], DT],
+) -> SlateArray[M, DT, B]: ...
+
+
+@overload
+def flatten[M: BasisMetadata, DT: np.generic](
     array: SlateArray[
         StackedMetadata[StackedMetadata[M, Any], Any],
         DT,
     ],
-) -> SlateArray[StackedMetadata[M, None], DT, TupleBasis[M, None, DT]]:
-    basis_flat = basis.flatten_basis(array.basis)
-    children = basis.as_tuple_basis(array.basis).children
-    final_basis = tuple_basis(
-        tuple(basis.as_tuple_basis(c) for c in children),
-        array.basis.metadata().extra,
-    )
-    converted = array.with_basis(final_basis)
-    return SlateArray(basis_flat, converted.raw_data)
+) -> SlateArray[StackedMetadata[M, None], DT]: ...
+
+
+def flatten[DT: np.generic](
+    array: SlateArray[
+        StackedMetadata[StackedMetadata[BasisMetadata, Any], Any],
+        DT,
+    ],
+) -> SlateArray[Any, DT, Any]:
+    basis_as_tuple = basis.as_tuple_basis(array.basis)
+    if len(basis_as_tuple.children) == 1:
+        converted = array.with_basis(basis_as_tuple)
+    else:
+        final_basis = tuple_basis(
+            tuple(basis.as_tuple_basis(c) for c in basis_as_tuple.children),
+            array.basis.metadata().extra,
+        )
+        converted = array.with_basis(final_basis)
+    return SlateArray(basis.flatten(array.basis), converted.raw_data)
 
 
 def as_outer_array[
@@ -111,5 +155,11 @@ def as_diagonal_array[M: BasisMetadata, E, DT: np.generic](
     array: SlateArray[
         Metadata2D[M, M, E], DT, DiagonalBasis[DT, Basis[M, DT], Basis[M, DT], E]
     ],
-) -> SlateArray[M, DT, Basis[M, Any]] | None:
+) -> SlateArray[M, DT, Basis[M, Any]]:
     return SlateArray(array.basis.inner[1], array.raw_data)
+
+
+def as_raw_array[DT: np.generic, B: Basis[Any, Any]](
+    array: SlateArray[Any, DT, B],
+) -> SlateArray[BasisStateMetadata[B], DT, FundamentalBasis[BasisStateMetadata[B]]]:
+    return SlateArray(FundamentalBasis(BasisStateMetadata(array.basis)), array.raw_data)
