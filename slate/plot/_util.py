@@ -252,17 +252,14 @@ def set_ymargin(ax: Axes, bottom: float = 0.0, top: float = 0.3) -> None:
 
 
 class TupleAnimation[*TS](ArtistAnimation):
+    frame_seq: Iterable[tuple[*TS]]  # type: ignore overload
+
     def __init__(
         self,
         fig: MPLFigure,
         artists: Sequence[tuple[*TS]],
     ) -> None:
         super().__init__(fig, artists)  # type: ignore unknown
-
-    @property
-    @override
-    def frame_seq(self) -> Iterable[tuple[*TS]]:  # type: ignore bad parent type
-        return cast(Iterable[tuple[*TS]], super().frame_seq)
 
     @override
     def new_frame_seq(self) -> Iterable[tuple[*TS]]:  # type: ignore bad parent type

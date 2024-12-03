@@ -4,15 +4,8 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate.basis import (
-    Basis,
-    TupleBasis,
-    as_add_basis,
-    as_mul_basis,
-    as_sub_basis,
-    from_shape,
-)
-from slate.basis._tuple import from_metadata
+from slate import basis
+from slate.basis import Basis, TupleBasis
 from slate.metadata import BasisMetadata, NestedLength, shallow_shape_from_nested
 
 if TYPE_CHECKING:
@@ -65,10 +58,11 @@ class SlateArray[
 
     def as_array(self) -> np.ndarray[Any, np.dtype[DT]]:
         """Get the data as a (full) np.array."""
-        fundamental = from_metadata(self.basis.metadata())
-        return self.basis.__convert_vector_into__(
-            self._data.ravel(), from_metadata(self.basis.metadata())
-        ).reshape(shallow_shape_from_nested(fundamental.fundamental_shape))
+        metadata = self.basis.metadata()
+        fundamental = basis.from_metadata(metadata, is_dual=self.basis.is_dual)
+        shape = shallow_shape_from_nested(fundamental.fundamental_shape)
+        converted = self.basis.__convert_vector_into__(self._data, fundamental)
+        return converted.reshape(shape)
 
     @staticmethod
     def from_array[DT1: np.generic](
@@ -79,10 +73,7 @@ class SlateArray[
         TupleBasis[BasisMetadata, None, np.generic],
     ]:
         """Get a SlateArray from an array."""
-        return SlateArray(
-            from_shape(array.shape),
-            array,
-        )
+        return SlateArray(basis.from_shape(array.shape), array)
 
     def with_basis[B1: Basis[Any, Any]](  # B1: B
         self, basis: B1
@@ -96,30 +87,30 @@ class SlateArray[
         self: SlateArray[M1, DT1],
         other: SlateArray[M1, DT1],
     ) -> SlateArray[M1, DT1]:
-        basis = as_add_basis(self.basis)
-        data = basis.add_data(
-            self.with_basis(basis).raw_data,
-            other.with_basis(basis).raw_data,
+        as_add_basis = basis.as_add_basis(self.basis)
+        data = as_add_basis.add_data(
+            self.with_basis(as_add_basis).raw_data,
+            other.with_basis(as_add_basis).raw_data,
         )
 
-        return SlateArray(basis, data)
+        return SlateArray(as_add_basis, data)
 
     def __sub__[M1: BasisMetadata, DT1: np.number[Any]](
         self: SlateArray[M1, DT1],
         other: SlateArray[M1, DT1],
     ) -> SlateArray[M1, DT1]:
-        basis = as_sub_basis(self.basis)
-        data = basis.sub_data(
-            self.with_basis(basis).raw_data,
-            other.with_basis(basis).raw_data,
+        as_sub_basis = basis.as_sub_basis(self.basis)
+        data = as_sub_basis.sub_data(
+            self.with_basis(as_sub_basis).raw_data,
+            other.with_basis(as_sub_basis).raw_data,
         )
 
-        return SlateArray(basis, data)
+        return SlateArray(as_sub_basis, data)
 
     def __mul__[M1: BasisMetadata, DT1: np.number[Any]](
         self: SlateArray[M1, DT1],
         other: float,
     ) -> SlateArray[M1, DT1]:
-        basis = as_mul_basis(self.basis)
-        data = basis.mul_data(self.with_basis(basis).raw_data, other)
-        return SlateArray(basis, data)
+        as_mul_basis = basis.as_mul_basis(self.basis)
+        data = as_mul_basis.mul_data(self.with_basis(as_mul_basis).raw_data, other)
+        return SlateArray(as_mul_basis, data)
