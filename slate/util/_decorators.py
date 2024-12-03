@@ -5,8 +5,10 @@ import pickle  # noqa: S403
 from functools import update_wrapper, wraps
 from typing import TYPE_CHECKING, Callable, Literal, overload
 
+import numpy as np
+
 if TYPE_CHECKING:
-    import io
+    from collections.abc import Generator
     from pathlib import Path
 
 
@@ -61,14 +63,6 @@ class CachedFunction[**P, R]:
 
         self.default_call: CallType = default_call
 
-    @classmethod
-    def _pickler(cls, f: io.BufferedIOBase) -> pickle.Pickler:
-        return pickle.Pickler(f, pickle.HIGHEST_PROTOCOL)
-
-    @classmethod
-    def _unpickler(cls, f: io.BufferedIOBase) -> pickle.Unpickler:
-        return pickle.Unpickler(f)  # noqa: S301
-
     def _get_cache_path(self, *args: P.args, **kw: P.kwargs) -> Path | None:
         cache_path = self.Path(*args, **kw) if callable(self.Path) else self.Path
         if cache_path is None:
@@ -84,8 +78,16 @@ class CachedFunction[**P, R]:
         obj = self.call_uncached(*args, **kw)
         cache_path = self._get_cache_path(*args, **kw)
         if cache_path is not None:
+            buffers = list[pickle.PickleBuffer]()
             with cache_path.open("wb") as f:
-                self._pickler(f).dump(obj)
+                pickler = pickle.Pickler(
+                    f,
+                    pickle.HIGHEST_PROTOCOL,
+                    buffer_callback=buffers.append,
+                )
+                pickler.dump(obj)
+
+            np.savez(cache_path.with_suffix(".buffer.npz"), *buffers)
         return obj
 
     def _load_cache(self, *args: P.args, **kw: P.kwargs) -> R | None:
@@ -93,9 +95,27 @@ class CachedFunction[**P, R]:
         cache_path = self._get_cache_path(*args, **kw)
         if cache_path is None:
             return None
+
+        try:
+            buffer_data = np.load(cache_path.with_suffix(".buffer.npz"))
+
+            def _get_buffer() -> Generator[memoryview, memoryview, None]:
+                i = 0
+                while True:
+                    try:
+                        yield buffer_data[f"arr_{i}"]
+                    except KeyError:
+                        break
+                    i += 1
+
+            buffers = _get_buffer()
+        except FileNotFoundError:
+            buffers = list[pickle.PickleBuffer]()
+
         try:
             with cache_path.open("rb") as f:
-                return self._unpickler(f).load()
+                unpickler = pickle.Unpickler(f, buffers=buffers)  # noqa: S301
+                return unpickler.load()
         except FileNotFoundError:
             return None
 
