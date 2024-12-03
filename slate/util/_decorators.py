@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import datetime
 import pickle  # noqa: S403
-from collections.abc import Mapping
 from functools import update_wrapper, wraps
-from typing import TYPE_CHECKING, Any, Callable, Literal, overload
+from typing import TYPE_CHECKING, Callable, Literal, overload
 
 if TYPE_CHECKING:
+    import io
     from pathlib import Path
 
 
@@ -61,6 +61,14 @@ class CachedFunction[**P, R]:
 
         self.default_call: CallType = default_call
 
+    @classmethod
+    def _pickler(cls, f: io.BufferedIOBase) -> pickle.Pickler:
+        return pickle.Pickler(f, pickle.HIGHEST_PROTOCOL)
+
+    @classmethod
+    def _unpickler(cls, f: io.BufferedIOBase) -> pickle.Unpickler:
+        return pickle.Unpickler(f)  # noqa: S301
+
     def _get_cache_path(self, *args: P.args, **kw: P.kwargs) -> Path | None:
         cache_path = self.Path(*args, **kw) if callable(self.Path) else self.Path
         if cache_path is None:
@@ -77,7 +85,7 @@ class CachedFunction[**P, R]:
         cache_path = self._get_cache_path(*args, **kw)
         if cache_path is not None:
             with cache_path.open("wb") as f:
-                pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+                self._pickler(f).dump(obj)
         return obj
 
     def _load_cache(self, *args: P.args, **kw: P.kwargs) -> R | None:
@@ -87,7 +95,7 @@ class CachedFunction[**P, R]:
             return None
         try:
             with cache_path.open("rb") as f:
-                return pickle.load(f)  # noqa: S301
+                return self._unpickler(f).load()
         except FileNotFoundError:
             return None
 
@@ -121,7 +129,7 @@ class CachedFunction[**P, R]:
 
 
 @overload
-def cached[**P, R: Mapping[Any, Any]](
+def cached[**P, R](
     path: Path | None,
     *,
     default_call: CallType = "load_or_call_cached",
@@ -129,14 +137,14 @@ def cached[**P, R: Mapping[Any, Any]](
 
 
 @overload
-def cached[**P, R: Mapping[Any, Any]](
+def cached[**P, R](
     path: Callable[P, Path | None],
     *,
     default_call: CallType = "load_or_call_cached",
 ) -> Callable[[Callable[P, R]], CachedFunction[P, R]]: ...
 
 
-def cached[**P, R: Mapping[Any, Any]](
+def cached[**P, R](
     path: Path | Callable[P, Path | None] | None,
     *,
     default_call: CallType = "load_or_call_cached",

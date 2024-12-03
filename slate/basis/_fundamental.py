@@ -108,6 +108,7 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
         return np.arange(self.size)
 
 
+# TODO: better name ie cast_fundamental_basis  # noqa: FIX002
 def as_state_list[B: Basis[Any, Any]](
     basis: B,
 ) -> FundamentalBasis[BasisStateMetadata[B]]:

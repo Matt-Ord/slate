@@ -118,7 +118,9 @@
 					"yerr",
 					"ylabel",
 					"ylim",
-					"yscale"
+					"yscale",
+					"pytest",
+					"savez"
 				]
 			},
 			"extensions": [
