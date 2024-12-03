@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from matplotlib.animation import ArtistAnimation
 
 from slate import basis
 from slate.array import SlateArray
@@ -24,6 +23,7 @@ from slate.plot._util import (
     Figure,
     Measure,
     Scale,
+    TupleAnimation,
     get_figure,
 )
 
@@ -64,12 +64,12 @@ def animate_array_over_list[DT: np.number[Any]](
     scale: Scale = "linear",
     measure: Measure = "abs",
     periodic: bool = False,
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
 
-    frames: list[list[Line2D]] = []
+    frames: list[tuple[Line2D]] = []
 
     for idx_x0 in range(shape[0]):
         _, _, line = plot_array(
@@ -80,10 +80,10 @@ def animate_array_over_list[DT: np.number[Any]](
             periodic=periodic,
         )
 
-        frames.append([line])
+        frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
     return fig, ax, ani
 
 
@@ -95,7 +95,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "abs",
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
 
@@ -107,7 +107,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     shape = shallow_shape_from_nested(basis_x.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
 
-    frames: list[list[Line2D]] = []
+    frames: list[tuple[Line2D]] = []
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = plot_data_1d_x(
@@ -118,10 +118,10 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
             scale=scale,
             measure=measure,
         )
-        frames.append([line])
+        frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
     return fig, ax, ani
 
 
@@ -133,13 +133,13 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "abs",
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
-    frames: list[list[Line2D]] = []
+    frames: list[tuple[Line2D]] = []
 
     for idx_x0 in range(shape[axes[0]]):
         _, _, line = plot_data_1d_x(
@@ -150,10 +150,10 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
             scale=scale,
             measure=measure,
         )
-        frames.append([line])
+        frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
     return fig, ax, ani
 
 
@@ -165,7 +165,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "abs",
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
 
@@ -179,7 +179,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     shape = shallow_shape_from_nested(basis_k.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
 
-    frames: list[list[Line2D]] = []
+    frames: list[tuple[Line2D]] = []
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = plot_data_1d_k(
@@ -190,10 +190,10 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
             scale=scale,
             measure=measure,
         )
-        frames.append([line])
+        frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
     return fig, ax, ani
 
 
@@ -205,13 +205,13 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "abs",
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
-    frames: list[list[Line2D]] = []
+    frames: list[tuple[Line2D]] = []
 
     for idx_x0 in range(shape[axes[0]]):
         _, _, line = plot_data_1d_k(
@@ -222,10 +222,10 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
             scale=scale,
             measure=measure,
         )
-        frames.append([line])
+        frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
 
     return fig, ax, ani
 
@@ -238,7 +238,7 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "abs",
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[QuadMesh]]:
     """
     Given data, animate along the given direction.
 
@@ -265,7 +265,7 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
-    frames: list[list[QuadMesh]] = []
+    frames: list[tuple[QuadMesh]] = []
 
     for idx_x0 in range(shape[axes[0]]):
         _, _, mesh = plot_data_2d_x(
@@ -276,9 +276,9 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
             scale=scale,
             measure=measure,
         )
-        frames.append([mesh])
+        frames.append((mesh,))
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
     return fig, ax, ani
 
 
@@ -290,7 +290,7 @@ def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "abs",
-) -> tuple[Figure, Axes, ArtistAnimation]:
+) -> tuple[Figure, Axes, TupleAnimation[QuadMesh]]:
     """
     Given data, animate along the given direction.
 
@@ -317,7 +317,7 @@ def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
     idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
 
-    frames: list[list[QuadMesh]] = []
+    frames: list[tuple[QuadMesh]] = []
     for idx_x0 in range(shape[axes[0]]):
         _, _, mesh = plot_data_2d_k(
             data,
@@ -327,7 +327,7 @@ def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
             scale=scale,
             measure=measure,
         )
-        frames.append([mesh])
+        frames.append((mesh,))
 
-    ani = ArtistAnimation(fig, frames)
+    ani = TupleAnimation(fig, frames)
     return fig, ax, ani

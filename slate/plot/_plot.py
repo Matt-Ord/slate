@@ -122,8 +122,9 @@ def plot_array[DT: np.number[Any]](
     """
     converted = array.as_index_basis(data)
 
-    if isinstance(converted.basis, LabeledMetadata):
-        values = converted.basis.values.astype(np.float64)  # type: ignore unknown
+    metadata = converted.basis.metadata()
+    if isinstance(metadata, LabeledMetadata):
+        values = metadata.values.astype(np.float64)  # type: ignore unknown
         coordinates = values[converted.basis.points]
     else:
         coordinates = converted.basis.points.astype(np.float64)
