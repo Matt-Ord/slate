@@ -17,7 +17,11 @@ from slate.basis import (
     with_child,
 )
 from slate.linalg import into_diagonal, into_diagonal_hermitian
-from slate.linalg._einsum import EinsteinIndex, NestedEinsteinIndex, parse_einsum_index
+from slate.linalg._einstein_index import (
+    EinsteinIndex,
+    NestedEinsteinIndex,
+    parse_einsum_index,
+)
 
 if TYPE_CHECKING:
     from slate.basis import Basis
