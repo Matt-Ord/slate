@@ -21,7 +21,7 @@ class WrappedBasis[
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
     def __init__(self, inner: Basis[M, DT]) -> None:
-        self._inner = cast(B, inner)
+        self._inner = cast("B", inner)
         self._metadata = inner.metadata()
         super().__init__(inner.metadata())
 

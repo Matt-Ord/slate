@@ -25,8 +25,8 @@ def extract_diagonal[M: BasisMetadata, E, DT: np.generic](
 
 
 def abs[M: BasisMetadata, DT: np.generic](  # noqa: A001
-    array: Array[BasisMetadata, DT],
-) -> Array[BasisMetadata, np.float64]:
+    array: Array[M, DT],
+) -> Array[M, np.float64]:
     """Calculate the absolute value of the array."""
     converted = _array.as_index_basis(array)
     return Array(converted.basis, np.abs(converted.raw_data))

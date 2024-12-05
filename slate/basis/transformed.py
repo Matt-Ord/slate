@@ -78,7 +78,7 @@ class TransformedBasis[M: BasisMetadata](
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return cast(
-            np.ndarray[Any, np.dtype[DT1]],
+            "np.ndarray[Any, np.dtype[DT1]]",
             np.fft.ifft(vectors, axis=axis, norm="ortho"),
         )
 
@@ -89,7 +89,7 @@ class TransformedBasis[M: BasisMetadata](
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return cast(
-            np.ndarray[Any, np.dtype[DT1]],
+            "np.ndarray[Any, np.dtype[DT1]]",
             np.fft.fft(vectors, axis=axis, norm="ortho"),
         )
 

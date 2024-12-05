@@ -25,7 +25,7 @@ class Array[
         data: np.ndarray[Any, np.dtype[DT]],
     ) -> None:
         assert basis.size == data.size
-        self._basis = cast(B, basis)
+        self._basis = cast("B", basis)
         self._data = data.ravel()
 
     @property
@@ -54,7 +54,7 @@ class Array[
     ) -> None:
         """Set the raw data for the array."""
         assert self.basis.size == data.size
-        self._data = cast(np.ndarray[Any, np.dtype[DT]], data).ravel()
+        self._data = cast("np.ndarray[Any, np.dtype[DT]]", data).ravel()
 
     def as_array(self) -> np.ndarray[Any, np.dtype[DT]]:
         """Get the data as a (full) np.array."""

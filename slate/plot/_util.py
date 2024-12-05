@@ -12,8 +12,6 @@ except ImportError:
     plt = None
 
 
-from collections.abc import Iterable
-
 from matplotlib.axes import Axes as MPLAxes
 from matplotlib.colors import Colormap, LogNorm, Normalize, SymLogNorm
 from matplotlib.figure import Figure as MPLFigure
@@ -22,7 +20,7 @@ from matplotlib.scale import LinearScale, LogScale, ScaleBase, SymmetricalLogSca
 from slate.plot._squared_scale import SquaredScale
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterable, Sequence
 
     from matplotlib.artist import Artist
     from matplotlib.cm import ScalarMappable
@@ -141,11 +139,11 @@ def get_figure(ax: Axes | None = None) -> tuple[Figure, Axes]:
         raise ImportError(msg)  # noqa: RUF100
 
     if ax is None:
-        return cast(tuple[Figure, Axes], plt.subplots())  # type: ignore plt.subplots Unknown type
+        return cast("tuple[Figure, Axes]", plt.subplots())  # type: ignore plt.subplots Unknown type
 
     fig = ax.get_figure()
     if fig is None:
-        fig = cast(Figure, plt.figure())  # type: ignore plt.figure Unknown type
+        fig = cast("Figure", plt.figure())  # type: ignore plt.figure Unknown type
         ax.set_figure(fig)
     return fig, ax
 
@@ -263,11 +261,11 @@ class TupleAnimation[*TS](ArtistAnimation):
 
     @override
     def new_frame_seq(self) -> Iterable[tuple[*TS]]:  # type: ignore bad parent type
-        return cast(Iterable[tuple[*TS]], super().new_frame_seq())
+        return cast("Iterable[tuple[*TS,]]", super().new_frame_seq())
 
     @override
     def new_saved_frame_seq(self) -> Iterable[tuple[*TS]]:  # type: ignore bad parent type
-        return cast(Iterable[tuple[*TS]], super().new_saved_frame_seq())
+        return cast("Iterable[tuple[*TS,]]", super().new_saved_frame_seq())
 
 
 def combine_animations[*TS0, *TS1](
@@ -275,6 +273,6 @@ def combine_animations[*TS0, *TS1](
 ) -> TupleAnimation[*TS0, *TS1]:
     """Combine multiple animations into a single animation."""
     artists = [
-        cast(tuple[Any, ...], a + b) for a, b in zip(lhs.frame_seq, rhs.frame_seq)
+        cast("tuple[Any, ...]", a + b) for a, b in zip(lhs.frame_seq, rhs.frame_seq)
     ]
     return TupleAnimation(fig, artists)

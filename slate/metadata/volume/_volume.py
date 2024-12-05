@@ -46,7 +46,7 @@ def fundamental_stacked_delta_x(
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
     """Get the fundamental stacked delta x."""
     scaled = cast(
-        np.ndarray[Any, np.dtype[np.float64]],
+        "np.ndarray[Any, np.dtype[np.float64]]",
         np.einsum(  # type: ignore unknown
             "ij,i->ij", metadata.extra.vectors, [c.delta for c in metadata.children]
         ),
@@ -59,7 +59,7 @@ def fundamental_stacked_dx(
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
     """Get the fundamental stacked dx."""
     scaled = cast(
-        np.ndarray[Any, np.dtype[np.float64]],
+        "np.ndarray[Any, np.dtype[np.float64]]",
         np.einsum(  # type: ignore unknown
             "ij,i->ij",
             fundamental_stacked_delta_x(metadata),
@@ -81,7 +81,7 @@ def fundamental_stacked_delta_k(
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
     """Get the fundamental stacked delta k."""
     scaled = cast(
-        np.ndarray[Any, np.dtype[np.float64]],
+        "np.ndarray[Any, np.dtype[np.float64]]",
         np.einsum(  # type: ignore unknown
             "ij,i->ij", fundamental_stacked_dk(metadata), metadata.fundamental_shape
         ),
@@ -106,7 +106,7 @@ def fundamental_stacked_x_points(
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
     """Get the stacked coordinates, using the x convention (0...N)."""
     scaled = cast(
-        np.ndarray[Any, np.dtype[np.float64]],
+        "np.ndarray[Any, np.dtype[np.float64]]",
         np.einsum(  # type: ignore unknown
             "ij,ik->jk",
             fundamental_stacked_dx(metadata),
@@ -121,7 +121,7 @@ def fundamental_stacked_k_points(
 ) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
     """Get the stacked coordinates, using the kx convention (0...N/2-N/2...)."""
     scaled = cast(
-        np.ndarray[Any, np.dtype[np.float64]],
+        "np.ndarray[Any, np.dtype[np.float64]]",
         np.einsum(  # type: ignore unknown
             "ij,ik->jk",
             fundamental_stacked_dk(metadata),

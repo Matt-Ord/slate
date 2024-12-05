@@ -27,7 +27,7 @@ def _einsum_numpy[DT: np.number[Any]](
     *arrays: np.ndarray[Any, Any],
 ) -> np.ndarray[Any, Any]:
     return cast(
-        np.ndarray[Any, Any],
+        "np.ndarray[Any, Any]",
         np.einsum(idx, *arrays),  # type: ignore unknown
     )
 
@@ -51,7 +51,7 @@ class EinsumBasisMap:
         return current.dual_basis() if idx.is_dual else current
 
     def __setitem__(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
-        self._map[idx.label] = basis if idx.is_dual else basis.dual_basis()
+        self._map[idx.label] = basis.dual_basis() if idx.is_dual else basis
 
 
 def _resolve_einsum_basis(
@@ -69,7 +69,7 @@ def _resolve_einsum_basis(
     basis = (
         None
         if basis is None
-        else as_tuple_basis(cast(Basis[StackedMetadata[Any, Any], Any], basis))
+        else as_tuple_basis(cast("Basis[StackedMetadata[Any, Any], Any]", basis))
     )
 
     children = list[Basis[Any, Any]]()
@@ -95,7 +95,7 @@ def _flatten_nested[T](nested: NestedData[T]) -> tuple[T, ...]:
 def einsum[DT: np.number[Any]](
     idx: str,
     *arrays: Array[BasisMetadata, DT],
-) -> Array[BasisMetadata, DT]:
+) -> Array[Any, DT, Any]:
     specification = parse_einsum_specification(idx)
     # For now, we don't support any optimization
     # we just do the naive einsum in the fundamental basis

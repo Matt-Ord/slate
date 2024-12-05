@@ -36,13 +36,13 @@ class DiagonalBasis[
         self: DiagonalBasis[_DT, _B0, _B1, _E],
         inner: TupleBasis2D[_DT, _B0, _B1, _E],
     ) -> None:
-        super().__init__(cast(Any, inner))
+        super().__init__(cast("Any", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 
     @property
     @override
     def inner(self) -> TupleBasis2D[DT, B0, B1, E]:
-        return cast(TupleBasis2D[DT, B0, B1, E], self._inner)
+        return cast("TupleBasis2D[DT, B0, B1, E]", self._inner)
 
     @property
     @override
@@ -60,7 +60,7 @@ class DiagonalBasis[
 
         return (
             cast(
-                np.ndarray[Any, np.dtype[DT]],
+                "np.ndarray[Any, np.dtype[DT]]",
                 np.einsum(  # type: ignore lib
                     "i...,ij->ij...",
                     stacked,  # type: ignore lib
@@ -82,7 +82,7 @@ class DiagonalBasis[
 
         return (
             cast(
-                np.ndarray[Any, np.dtype[DT]],
+                "np.ndarray[Any, np.dtype[DT]]",
                 np.einsum("ii...->i...", stacked),  # type: ignore lib
             )
             .reshape(self.size, *swapped.shape[1:])

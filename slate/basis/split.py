@@ -111,7 +111,7 @@ class SplitBasis[
         )
 
         return cast(
-            np.ndarray[Any, np.dtype[DT1]],
+            "np.ndarray[Any, np.dtype[DT1]]",
             lhs_fundamental + rhs_fundamental,
         )
 

@@ -117,7 +117,7 @@ class TupleBasis[
 
         super().__init__(
             cast(
-                _InnerM,
+                "_InnerM",
                 StackedMetadata(tuple(i.metadata() for i in children), extra_metadata),
             ),
         )
@@ -157,8 +157,8 @@ class TupleBasis[
         fundamental = from_metadata(self.metadata())
         return _convert_tuple_basis_vector(
             vectors,
-            cast(TupleBasis[M, E, DT1], self),
-            cast(TupleBasis[M, E, DT1], fundamental),
+            cast("TupleBasis[M, E, DT1]", self),
+            cast("TupleBasis[M, E, DT1]", fundamental),
             axis,
         )
 
@@ -171,8 +171,8 @@ class TupleBasis[
         basis = from_metadata(self.metadata())
         return _convert_tuple_basis_vector(
             vectors,
-            cast(TupleBasis[M, E, DT1], basis),
-            cast(TupleBasis[M, E, DT1], self),
+            cast("TupleBasis[M, E, DT1]", basis),
+            cast("TupleBasis[M, E, DT1]", self),
             axis,
         )
 
@@ -198,13 +198,13 @@ class TupleBasis[
 
         *inner, super_inner = wrapped_basis_iter_inner(basis)  # type: ignore unknown
         if isinstance(super_inner, TupleBasis):
-            basis_as_tuple = cast(TupleBasis[M, E, np.generic], super_inner)
+            basis_as_tuple = cast("TupleBasis[M, E, np.generic]", super_inner)
         else:
             return super().__convert_vector_into__(vectors, basis, axis)
 
         converted = _convert_tuple_basis_vector(vectors, self, basis_as_tuple, axis)  # type: ignore unknown
         for wrapped_basis in reversed(inner):
-            converted = cast(WrappedBasis[Any, Any], wrapped_basis).__from_inner__(
+            converted = cast("WrappedBasis[Any, Any]", wrapped_basis).__from_inner__(
                 converted, axis
             )
         return converted
@@ -297,7 +297,7 @@ class TupleBasisND[
         msg = "TupleBasisND is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
         super().__init__(
-            cast(tuple[Basis[BasisMetadata, DT], ...], children), extra_metadata
+            cast("tuple[Basis[BasisMetadata, DT], ...]", children), extra_metadata
         )
 
     @override
@@ -307,7 +307,7 @@ class TupleBasisND[
     @property
     def children(self) -> tuple[Basis[BasisMetadata, DT], ...]:  # type: ignore inconsistent type
         """Inner basis."""
-        return cast(tuple[Basis[BasisMetadata, DT], ...], super().children)
+        return cast("tuple[Basis[BasisMetadata, DT], ...]", super().children)
 
     @override
     def __getitem__(self, index: int) -> Basis[BasisMetadata, DT]:
@@ -339,19 +339,19 @@ class TupleBasis1D[
         msg = "TupleBasis1D is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
         super().__init__(
-            cast(tuple[Basis[BasisMetadata, _DT]], children), extra_metadata
+            cast("tuple[Basis[BasisMetadata, _DT]]", children), extra_metadata
         )
 
     @override
     def metadata[_M0: BasisMetadata](
         self: TupleBasis1D[Any, Basis[_M0, Any], E],
     ) -> Metadata1D[_M0, E]:
-        return cast(Metadata1D[_M0, E], super().metadata())
+        return cast("Metadata1D[_M0, E]", super().metadata())
 
     @property
     def children(self) -> tuple[B0]:  # type: ignore inconsistent type
         """Inner basis."""
-        return cast(tuple[B0], super().children)
+        return cast("tuple[B0]", super().children)
 
     @overload
     def __getitem__(self, index: Literal[0]) -> B0: ...
@@ -360,7 +360,7 @@ class TupleBasis1D[
     def __getitem__(self, index: int) -> B0: ...
 
     def __getitem__(self, index: int) -> B0:  # type: ignore inconsistent type
-        return cast(B0, super().__getitem__(index))
+        return cast("B0", super().__getitem__(index))
 
 
 class TupleBasis2D[
@@ -395,12 +395,12 @@ class TupleBasis2D[
     def metadata[_M0: BasisMetadata, _M1: BasisMetadata](
         self: TupleBasis2D[Any, Basis[_M0, Any], Basis[_M1, Any], E],
     ) -> Metadata2D[_M0, _M1, E]:
-        return cast(Metadata2D[_M0, _M1, E], super().metadata())
+        return cast("Metadata2D[_M0, _M1, E]", super().metadata())
 
     @property
     def children(self) -> tuple[B0, B1]:  # type: ignore inconsistent type
         """Inner basis."""
-        return cast(tuple[B0, B1], super().children)
+        return cast("tuple[B0, B1]", super().children)
 
     @overload
     def __getitem__(self, index: Literal[0]) -> B0: ...
@@ -412,7 +412,7 @@ class TupleBasis2D[
     def __getitem__(self, index: int) -> B0 | B1: ...
 
     def __getitem__(self, index: int) -> B0 | B1:  # type: ignore overload
-        return cast(B0 | B1, super().__getitem__(index))
+        return cast("B0 | B1", super().__getitem__(index))
 
 
 class TupleBasis3D[
@@ -449,12 +449,12 @@ class TupleBasis3D[
     def metadata[_M0: BasisMetadata, _M1: BasisMetadata, _M2: BasisMetadata](
         self: TupleBasis3D[Any, Basis[_M0, Any], Basis[_M1, Any], Basis[_M2, Any], E],
     ) -> Metadata3D[_M0, _M1, _M2, E]:
-        return cast(Metadata3D[_M0, _M1, _M2, E], super().metadata())
+        return cast("Metadata3D[_M0, _M1, _M2, E]", super().metadata())
 
     @property
     def children(self) -> tuple[B0, B1, B2]:  # type: ignore inconsistent type
         """Inner basis."""
-        return cast(tuple[B0, B1, B2], super().children)
+        return cast("tuple[B0, B1, B2]", super().children)
 
     @overload
     def __getitem__(self, index: Literal[0]) -> B0: ...
@@ -469,7 +469,7 @@ class TupleBasis3D[
     def __getitem__(self, index: int) -> B0 | B1 | B2: ...
 
     def __getitem__(self, index: int) -> B0 | B1 | B2:  # type: ignore overload
-        return cast(B0 | B1 | B2, super().__getitem__(index))
+        return cast("B0 | B1 | B2", super().__getitem__(index))
 
 
 @overload
@@ -552,7 +552,7 @@ def tuple_basis[B0, B1, B2, *TS, E](
     children: Any, extra_metadata: Any | None = None
 ) -> Any:
     """Build a VariadicTupleBasis from a tuple."""
-    return cast(Any, TupleBasis(children, extra_metadata))
+    return cast("Any", TupleBasis(children, extra_metadata))
 
 
 @overload
@@ -606,7 +606,7 @@ def with_modified_child[
 ) -> TupleBasis[M, E, DT | DT1]:
     """Get the basis with modified child."""
     return with_modified_children(
-        basis, lambda i, b: cast(Basis[Any, Any], b if i != idx else wrapper(b))
+        basis, lambda i, b: cast("Basis[Any, Any]", b if i != idx else wrapper(b))
     )
 
 
@@ -681,7 +681,7 @@ def from_metadata(
         assert isinstance(is_dual, bool)
         return FundamentalBasis(metadata, is_dual=is_dual)
 
-    metadata = cast(StackedMetadata[AnyMetadata, Any], metadata)
+    metadata = cast("StackedMetadata[AnyMetadata, Any]", metadata)
     is_dual = (
         is_dual
         if isinstance(is_dual, tuple)
@@ -876,9 +876,9 @@ def as_tuple_basis[
     """
     super_inner = get_wrapped_basis_super_inner(basis)  # type: ignore unknown
     if isinstance(super_inner, TupleBasis):
-        return cast(TupleBasis[M0, E, np.generic], super_inner)
+        return cast("TupleBasis[M0, E, np.generic]", super_inner)
 
-    return from_metadata(cast(StackedMetadata[Any, Any], basis.metadata()))
+    return from_metadata(cast("StackedMetadata[Any, Any]", basis.metadata()))
 
 
 def get_common_basis[M: BasisMetadata, E, DT: np.generic](
@@ -897,14 +897,14 @@ def get_common_basis[M: BasisMetadata, E, DT: np.generic](
     ):
         # For a TupleBasis, we can do a bit better
         # By finding the common basis of the children
-        lhs_children = cast(tuple[Basis[Any, Any], ...], lhs_rev[-1].children)  # type: ignore unknown
-        rhs_children = cast(tuple[Basis[Any, Any], ...], rhs_rev[-1].children)  # type: ignore unknown
+        lhs_children = cast("tuple[Basis[Any, Any], ...]", lhs_rev[-1].children)  # type: ignore unknown
+        rhs_children = cast("tuple[Basis[Any, Any], ...]", rhs_rev[-1].children)  # type: ignore unknown
 
         basis = tuple_basis(
             tuple(starmap(get_common_basis, zip(lhs_children, rhs_children))),
-            cast(StackedMetadata[Any, Any], rhs.metadata()).extra,
+            cast("StackedMetadata[Any, Any]", rhs.metadata()).extra,
         )
-        return cast(Basis[M, DT], basis)
+        return cast("Basis[M, DT]", basis)
 
     last_common = from_metadata(rhs.metadata(), is_dual=rhs.is_dual)
     for a, b in zip(reversed(lhs_rev), reversed(rhs_rev)):
