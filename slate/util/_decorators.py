@@ -91,7 +91,7 @@ class CachedFunction[**P, R]:
         return obj
 
     def _load_cache(self, *args: P.args, **kw: P.kwargs) -> R | None:
-        """Call the function, delete and ."""
+        """Load data from cache."""
         cache_path = self._get_cache_path(*args, **kw)
         if cache_path is None:
             return None
