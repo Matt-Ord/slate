@@ -38,11 +38,11 @@ def standard_deviation[DT: np.number[Any]](
     if axis is None:
         return np.std(array.as_array(), axis=axis)  # type: ignore unknown
     data = np.asarray(
-        cast(Any, np.std(array.as_array(), axis=axis)),  # type: ignore unknown
+        cast("Any", np.std(array.as_array(), axis=axis)),  # type: ignore unknown
         dtype=array.raw_data.dtype,
     )
     full_basis = cast(
-        TupleBasis[Any, Any, np.generic], basis.from_metadata(array.basis.metadata())
+        "TupleBasis[Any, Any, np.generic]", basis.from_metadata(array.basis.metadata())
     )
 
     axis %= len(full_basis.children)
@@ -74,11 +74,11 @@ def average[DT: np.number[Any]](
     if axis is None:
         return np.average(array.as_array(), axis=axis)  # type: ignore unknown
     data = np.asarray(
-        cast(Any, np.average(array.as_array(), axis=axis)),  # type: ignore unknown
+        cast("Any", np.average(array.as_array(), axis=axis)),  # type: ignore unknown
         dtype=array.raw_data.dtype,
     )
     full_basis = cast(
-        TupleBasis[Any, Any, np.generic], basis.from_metadata(array.basis.metadata())
+        "TupleBasis[Any, Any, np.generic]", basis.from_metadata(array.basis.metadata())
     )
 
     axis %= len(full_basis.children)

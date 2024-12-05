@@ -33,9 +33,8 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
 
     from slate.array import Array
-    from slate.metadata import BasisMetadata, StackedMetadata
+    from slate.metadata import BasisMetadata, SpacedVolumeMetadata, StackedMetadata
     from slate.metadata.length import SpacedLengthMetadata
-from slate.metadata import SpacedVolumeMetadata
 from slate.plot._util import Scale, set_ymargin
 
 
@@ -308,7 +307,7 @@ def plot_data_2d_x[DT: np.number[Any], E](
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
     if isinstance(metadata.extra, AxisDirections):
-        metadata = cast(SpacedVolumeMetadata, metadata)
+        metadata = cast("SpacedVolumeMetadata", metadata)
         coordinates = get_x_coordinates_in_axes(metadata, axes, idx)
     else:
         coordinates = _get_lengths_in_axes(metadata, axes)
@@ -380,7 +379,7 @@ def plot_data_2d_k[DT: np.number[Any], E](
     idx = get_max_idx(converted_data, axes) if idx is None else idx
 
     if isinstance(metadata.extra, AxisDirections):
-        metadata = cast(SpacedVolumeMetadata, metadata)
+        metadata = cast("SpacedVolumeMetadata", metadata)
         coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
     else:
         coordinates = _get_frequencies_in_axes(metadata, axes)

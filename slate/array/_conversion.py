@@ -6,15 +6,23 @@ import numpy as np
 
 from slate import basis
 from slate.array._array import Array
-from slate.basis import Basis, BasisFeature, DiagonalBasis, TupleBasis, tuple_basis
-from slate.basis._basis_state_metadata import BasisStateMetadata
-from slate.basis._fundamental import FundamentalBasis
+from slate.basis import (
+    Basis,
+    BasisFeature,
+    BasisStateMetadata,
+    DiagonalBasis,
+    FundamentalBasis,
+    RecastBasis,
+    TupleBasis,
+    TupleBasis1D,
+    TupleBasis2D,
+    TupleBasis3D,
+    tuple_basis,
+)
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.basis._tuple import TupleBasis1D
-    from slate.basis.recast import RecastBasis
-    from slate.metadata.stacked import Metadata1D, Metadata2D, StackedMetadata
+    from slate.metadata import Metadata1D, Metadata2D, Metadata3D, StackedMetadata
 
 
 def with_basis[
@@ -81,6 +89,57 @@ def as_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
         return None
 
     return array.with_basis(b)
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    array: Array[Any, DT, Basis[Metadata1D[M0, E], DT]],
+) -> Array[
+    Metadata1D[M0, E],
+    DT,
+    TupleBasis1D[np.generic, Basis[M0, Any], E],
+]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    array: Array[Any, DT, Basis[Metadata2D[M0, M1, E], DT]],
+) -> Array[
+    Metadata2D[M0, M1, E],
+    DT,
+    TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E],
+]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.generic,
+](
+    array: Array[Any, DT, Basis[Metadata3D[M0, M1, M2, E], DT]],
+) -> Array[
+    Metadata3D[M0, M1, M2, E],
+    DT,
+    TupleBasis3D[np.generic, Basis[M0, Any], Basis[M1, Any], Basis[M2, Any], E],
+]: ...
+
+
+@overload
+def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
+    array: Array[StackedMetadata[M, E], DT],
+) -> Array[StackedMetadata[M, E], DT, TupleBasis[M, E, Any, StackedMetadata[M, E]]]: ...
 
 
 def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](

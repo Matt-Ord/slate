@@ -120,12 +120,12 @@ class MetadataND[*M, E](StackedMetadata[Any, E]):
         children: tuple[*M1],
         extra: _E,
     ) -> None:
-        super().__init__(cast(tuple[BasisMetadata, ...], children), extra)
+        super().__init__(cast("tuple[BasisMetadata, ...]", children), extra)
 
     @property
     @override
     def children(self) -> tuple[*M]:  # type: ignore not allowed to put bounds on m
-        return cast(tuple[*M], super().children)
+        return cast("tuple[*M,]", super().children)
 
 
 class Metadata1D[M0: BasisMetadata, E](MetadataND[BasisMetadata, E]):
@@ -136,12 +136,12 @@ class Metadata1D[M0: BasisMetadata, E](MetadataND[BasisMetadata, E]):
         children: tuple[_M0],
         extra: _E,
     ) -> None:
-        super().__init__(children, cast(E, extra))
+        super().__init__(children, cast("E", extra))
 
     @property
     @override
     def children(self) -> tuple[M0]:
-        return cast(tuple[M0], super().children)
+        return cast("tuple[M0]", super().children)
 
     @override
     def __getitem__(self, index: int) -> M0:
@@ -158,12 +158,12 @@ class Metadata2D[M0: BasisMetadata, M1: BasisMetadata, E](
         children: tuple[_M0, _M1],
         extra: _E,
     ) -> None:
-        super().__init__(children, cast(E, extra))
+        super().__init__(children, cast("E", extra))
 
     @property
     @override
     def children(self) -> tuple[M0, M1]:
-        return cast(tuple[M0, M1], super().children)
+        return cast("tuple[M0, M1]", super().children)
 
     @overload
     def __getitem__(self, index: Literal[0]) -> M0: ...
@@ -187,12 +187,12 @@ class Metadata3D[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
         children: tuple[_M0, _M1, _M2],
         extra: _E,
     ) -> None:
-        super().__init__(children, cast(E, extra))
+        super().__init__(children, cast("E", extra))
 
     @property
     @override
     def children(self) -> tuple[M0, M1, M2]:
-        return cast(tuple[M0, M1, M2], super().children)
+        return cast("tuple[M0, M1, M2]", super().children)
 
     @overload
     def __getitem__(self, index: Literal[0]) -> M0: ...

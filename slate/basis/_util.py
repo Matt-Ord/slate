@@ -18,7 +18,7 @@ def as_feature_basis[M: BasisMetadata, DT: np.generic](
     """Get the closest basis that supports the feature set."""
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if features <= b.features),
-        from_metadata(basis.metadata()),
+        from_metadata(basis.metadata(), is_dual=basis.is_dual),
     )
 
 

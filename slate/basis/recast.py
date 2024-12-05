@@ -186,7 +186,7 @@ def recast_diagonal_basis[
 ) -> RecastDiagonalBasis[Any, Any, BInner, BOuter]:
     """Recast a basis which is diagonal in the inner basis."""
     return cast(
-        RecastDiagonalBasis[M, DT, BInner, BOuter],
+        "RecastDiagonalBasis[M, DT, BInner, BOuter]",
         RecastBasis(
             diagonal_basis((inner_basis.dual_basis(), inner_basis)),
             inner_basis,

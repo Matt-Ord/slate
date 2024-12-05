@@ -121,7 +121,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = np.tensordot(
-            cast(np.ndarray[Any, np.dtype[Never]], vectors),
+            cast("np.ndarray[Any, np.dtype[Never]]", vectors),
             self._transform_matrix,
             axes=([axis], [0]),
         )
@@ -141,7 +141,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         transformed = np.tensordot(
-            cast(np.ndarray[Any, np.dtype[Never]], vectors),
+            cast("np.ndarray[Any, np.dtype[Never]]", vectors),
             self._inverse_transform_matrix,
             axes=([axis], [0]),
         )
@@ -289,7 +289,7 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
         super().__init__(
             Array(
                 diagonal_basis((inner, inner.dual_basis())),
-                cast(np.ndarray[Any, np.dtype[DT]], np.ones(inner.size)),
+                cast("np.ndarray[Any, np.dtype[DT]]", np.ones(inner.size)),
             ),
             data_id=uuid.UUID(int=0),
         )
