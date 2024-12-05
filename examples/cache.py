@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
         # call_uncached will always call the function
         _my_expensive_function.call_uncached()
-        assert count == 2
+        assert count == 2  # noqa: PLR2004
 
     # Just to compare it to the numpy save and load
     with tempfile.TemporaryDirectory() as dir_name:
