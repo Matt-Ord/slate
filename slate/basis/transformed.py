@@ -189,6 +189,12 @@ def fundamental_transformed_tuple_basis_from_metadata[M0: SimpleMetadata, E](
 
 
 @overload
+def fundamental_transformed_tuple_basis_from_metadata[M0: BasisMetadata, E](
+    metadata: Metadata1D[M0, E], *, is_dual: NestedBoolOrNone = None
+) -> TupleBasis1D[np.generic, Basis[M0, np.complex128], E]: ...
+
+
+@overload
 def fundamental_transformed_tuple_basis_from_metadata[
     M0: SimpleMetadata,
     M1: SimpleMetadata,
@@ -196,6 +202,18 @@ def fundamental_transformed_tuple_basis_from_metadata[
 ](
     metadata: Metadata2D[M0, M1, E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis2D[np.generic, TransformedBasis[M0], TransformedBasis[M1], E]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+](
+    metadata: Metadata2D[M0, M1, E], *, is_dual: NestedBoolOrNone = None
+) -> TupleBasis2D[
+    np.generic, Basis[M0, np.complex128], Basis[M1, np.complex128], E
+]: ...
 
 
 @overload
@@ -211,6 +229,23 @@ def fundamental_transformed_tuple_basis_from_metadata[
     TransformedBasis[M0],
     TransformedBasis[M1],
     TransformedBasis[M2],
+    E,
+]: ...
+
+
+@overload
+def fundamental_transformed_tuple_basis_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+](
+    metadata: Metadata3D[M0, M1, M2, E], *, is_dual: NestedBoolOrNone = None
+) -> TupleBasis3D[
+    np.generic,
+    Basis[M0, np.complex128],
+    Basis[M1, np.complex128],
+    Basis[M2, np.complex128],
     E,
 ]: ...
 
