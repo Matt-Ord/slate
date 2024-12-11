@@ -8,11 +8,11 @@ import numpy as np
 from slate.array import Array
 from slate.basis import (
     Basis,
+    as_fundamental,
     as_index_basis,
     as_tuple_basis,
     tuple_basis,
 )
-from slate.basis._tuple import as_fundamental
 from slate.linalg._einstein_index import (
     EinsteinIndex,
     NestedEinsteinIndex,
@@ -75,18 +75,19 @@ def _resolve_einsum_basis(
 
 class EinsumBasisHints:
     def __init__(self) -> None:
-        self._map = defaultdict[str, list[Basis[Any, Any]]](list)
+        self._map = defaultdict[str, set[Basis[Any, Any]]](set)
 
     def add_hint(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
-        self._map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
+        self._map[idx.label].add(basis.dual_basis() if idx.is_dual else basis)
 
     def resolve_basis_map(self) -> EinsumBasisMap:
         basis_map = EinsumBasisMap()
         for idx, bases in self._map.items():
-            if len(bases) == 1:
-                basis_map[EinsteinIndex(idx)] = as_index_basis(bases[0])
+            bases_list = list(bases)
+            if len(bases_list) == 1:
+                basis_map[EinsteinIndex(idx)] = as_index_basis(bases_list[0])
             else:
-                basis_map[EinsteinIndex(idx)] = as_fundamental(bases[0])
+                basis_map[EinsteinIndex(idx)] = as_fundamental(bases_list[0])
         return basis_map
 
 
