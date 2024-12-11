@@ -29,7 +29,7 @@ def _parse_einsum_tokens(tokens: list[str], idx: int = 0) -> tuple[NestedTokens,
 @dataclass(frozen=True)
 class EinsteinIndex:
     label: str
-    is_dual: bool
+    is_dual: bool = False
 
 
 type NestedEinsteinIndex = EinsteinIndex | tuple[NestedEinsteinIndex, ...]

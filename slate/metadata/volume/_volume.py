@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, cast
+from itertools import starmap
+from typing import Any, cast, override
 
 import numpy as np
 
@@ -35,6 +36,16 @@ class AxisDirections:
 
     def __post_init__(self) -> None:
         _assert_orthonormal(self.vectors)
+
+    @override
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, AxisDirections):
+            return all(starmap(np.allclose, zip(self.vectors, value.vectors)))
+        return False
+
+    @override
+    def __hash__(self) -> int:
+        return hash(tuple(tuple(x) for x in self.vectors))
 
 
 type VolumeMetadata = StackedMetadata[LengthMetadata, AxisDirections]

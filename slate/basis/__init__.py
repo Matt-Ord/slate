@@ -21,24 +21,25 @@ from slate.basis._tuple import (
     TupleBasis2D,
     TupleBasis3D,
     TupleBasisND,
-    as_fundamental,
+    as_feature_basis,
+    as_index_basis,
     as_tuple_basis,
-    flatten,
     from_metadata,
+    tuple_basis,
+)
+from slate.basis._util import (
+    as_add_basis,
+    as_fundamental,
+    as_is_dual_basis,
+    as_mul_basis,
+    as_sub_basis,
+    flatten,
     from_shape,
     get_common_basis,
-    tuple_basis,
     tuple_basis_is_variadic,
     with_child,
     with_modified_child,
     with_modified_children,
-)
-from slate.basis._util import (
-    as_add_basis,
-    as_feature_basis,
-    as_index_basis,
-    as_mul_basis,
-    as_sub_basis,
 )
 from slate.basis.coordinate import CoordinateBasis
 from slate.basis.cropped import CroppedBasis
@@ -86,6 +87,7 @@ __all__ = [
     "as_feature_basis",
     "as_fundamental",
     "as_index_basis",
+    "as_is_dual_basis",
     "as_mul_basis",
     "as_state_list",
     "as_sub_basis",

@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 from copy import copy
-from itertools import starmap
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     Never,
     Self,
-    TypeGuard,
     cast,
     overload,
     override,
@@ -31,10 +28,9 @@ from slate.metadata import (
     Metadata2D,
     Metadata3D,
     MetadataND,
-    NestedLength,
-    SimpleMetadata,
     StackedMetadata,
 )
+from slate.metadata._metadata import SimpleMetadata
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -78,13 +74,9 @@ def _convert_tuple_basis_vector[M: BasisMetadata, E, DT: np.generic](
         axis along which to convert, by default -1
     """
     if initial_basis.is_dual != final_basis.is_dual:
-        # The conversion of a dual to a non-dual vector must happen in the fundamental basis
-        initial_fundamental = from_metadata(
-            initial_basis.metadata(), is_dual=initial_basis.is_dual
-        )
-        final_fundamental = from_metadata(
-            initial_basis.metadata(), is_dual=final_basis.is_dual
-        )
+        # The conversion of a dual to a non-dual vector must happen in an index basis
+        initial_fundamental = as_tuple_basis(as_index_basis(initial_basis))
+        final_fundamental = as_tuple_basis(as_index_basis(final_basis))
         converted_0 = _convert_tuple_basis_axes(
             vectors, initial_basis, initial_fundamental, axis
         )
@@ -556,68 +548,6 @@ def tuple_basis[B0, B1, B2, *TS, E](
 
 
 @overload
-def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
-    basis: TupleBasis[M, E, DT], *, n_dim: Literal[1]
-) -> TypeGuard[TupleBasis1D[DT, Basis[M, DT], E]]: ...
-@overload
-def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
-    basis: TupleBasis[M, E, DT], *, n_dim: Literal[2]
-) -> TypeGuard[TupleBasis2D[DT, Basis[M, DT], Basis[M, DT], E]]: ...
-@overload
-def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
-    basis: TupleBasis[M, E, DT], *, n_dim: Literal[3]
-) -> TypeGuard[TupleBasis3D[DT, Basis[M, DT], Basis[M, DT], Basis[M, DT], E]]: ...
-@overload
-def tuple_basis_is_variadic[M: BasisMetadata, E, DT: np.generic](
-    basis: TupleBasis[M, E, DT], *, n_dim: int | None = None
-) -> TypeGuard[TupleBasisND[Any, E]]: ...
-
-
-def tuple_basis_is_variadic(
-    basis: TupleBasis[Any, Any, Any], *, n_dim: int | None = None
-) -> TypeGuard[Any]:
-    """Cast a TupleBasis as a VariadicTupleBasis."""
-    return n_dim is None or len(basis.shape) == n_dim
-
-
-def with_modified_children[
-    M: BasisMetadata,
-    E,
-    DT: np.generic,
-    DT1: np.generic,
-](
-    basis: TupleBasis[M, E, DT1], wrapper: Callable[[int, Basis[M, DT1]], Basis[M, DT]]
-) -> TupleBasis[M, E, DT]:
-    """Get the basis with modified children."""
-    return TupleBasis[M, E, DT](
-        tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata().extra
-    )
-
-
-def with_modified_child[
-    M: BasisMetadata,
-    E,
-    DT: np.generic,
-    DT1: np.generic,
-](
-    basis: TupleBasis[M, E, DT],
-    wrapper: Callable[[Basis[M, DT]], Basis[M, DT1]],
-    idx: int,
-) -> TupleBasis[M, E, DT | DT1]:
-    """Get the basis with modified child."""
-    return with_modified_children(
-        basis, lambda i, b: cast("Basis[Any, Any]", b if i != idx else wrapper(b))
-    )
-
-
-def with_child[M: BasisMetadata, E, DT: np.generic](
-    basis: TupleBasis[M, E, DT], inner: Basis[M, DT], idx: int
-) -> TupleBasis[M, E, DT]:
-    """Get a basis with the basis at idx set to inner."""
-    return with_modified_child(basis, lambda _: inner, idx)
-
-
-@overload
 def from_metadata[M0: SimpleMetadata, E](
     metadata: Metadata1D[M0, E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis1D[np.generic, FundamentalBasis[M0], E]: ...
@@ -692,109 +622,6 @@ def from_metadata(
         from_metadata(c, is_dual=dual) for (c, dual) in zip(metadata.children, is_dual)
     )
     return TupleBasis(children, metadata.extra)
-
-
-def as_fundamental[M: AnyMetadata, DT: np.generic](
-    basis: Basis[M, DT],
-) -> Basis[M, np.generic]:
-    return from_metadata(basis.metadata(), is_dual=basis.is_dual)
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int], *, extra: None = None, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis1D[np.generic, Basis[SimpleMetadata, np.generic], None]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int], *, extra: E, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis1D[np.generic, Basis[SimpleMetadata, np.generic], E]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int, int],
-    *,
-    extra: None = None,
-    is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis2D[
-    np.generic,
-    Basis[SimpleMetadata, np.generic],
-    Basis[SimpleMetadata, np.generic],
-    None,
-]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int, int], *, extra: E, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis2D[
-    np.generic,
-    Basis[SimpleMetadata, np.generic],
-    Basis[SimpleMetadata, np.generic],
-    E,
-]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int, int, int],
-    *,
-    extra: None = None,
-    is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis3D[
-    np.generic,
-    Basis[SimpleMetadata, np.generic],
-    Basis[SimpleMetadata, np.generic],
-    Basis[SimpleMetadata, np.generic],
-    None,
-]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int, int, int], *, extra: E, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis3D[
-    np.generic,
-    Basis[SimpleMetadata, np.generic],
-    Basis[SimpleMetadata, np.generic],
-    Basis[SimpleMetadata, np.generic],
-    E,
-]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int, ...],
-    *,
-    extra: None = None,
-    is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[BasisMetadata, None, np.generic]: ...
-
-
-@overload
-def from_shape[E](
-    shape: tuple[int, ...], *, extra: E, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis[BasisMetadata, E, np.generic]: ...
-
-
-@overload
-def from_shape[E](
-    shape: NestedLength, *, extra: None = None, is_dual: tuple[bool, ...] | None = None
-) -> Basis[BasisMetadata, np.generic]: ...
-
-
-def from_shape[E](
-    shape: NestedLength,
-    *,
-    extra: Any | None = None,
-    is_dual: tuple[bool, ...] | None = None,
-) -> Any:
-    """Get a basis with the basis at idx set to inner."""
-    return from_metadata(
-        StackedMetadata.from_shape(shape, extra=extra), is_dual=is_dual
-    )
 
 
 @overload
@@ -881,62 +708,33 @@ def as_tuple_basis[
     return from_metadata(cast("StackedMetadata[Any, Any]", basis.metadata()))
 
 
-def get_common_basis[M: BasisMetadata, E, DT: np.generic](
-    lhs: Basis[M, DT],
-    rhs: Basis[M, DT],
+def as_feature_basis[M: BasisMetadata, DT: np.generic](
+    basis: Basis[M, DT], features: set[BasisFeature]
 ) -> Basis[M, DT]:
-    """Get the closest common basis of two bases."""
-    assert rhs.metadata() == lhs.metadata()
-    lhs_rev = list(wrapped_basis_iter_inner(lhs))
-    rhs_rev = list(wrapped_basis_iter_inner(rhs))
-
-    if (
-        isinstance(lhs_rev[-1], TupleBasis)
-        and isinstance(rhs_rev[-1], TupleBasis)
-        and lhs_rev != rhs_rev
-    ):
-        # For a TupleBasis, we can do a bit better
-        # By finding the common basis of the children
-        lhs_children = cast("tuple[Basis[Any, Any], ...]", lhs_rev[-1].children)  # type: ignore unknown
-        rhs_children = cast("tuple[Basis[Any, Any], ...]", rhs_rev[-1].children)  # type: ignore unknown
-
-        basis = tuple_basis(
-            tuple(starmap(get_common_basis, zip(lhs_children, rhs_children))),
-            cast("StackedMetadata[Any, Any]", rhs.metadata()).extra,
+    """Get the closest basis that supports the feature set."""
+    inner_basis = from_metadata(basis.metadata(), is_dual=basis.is_dual)
+    for inner_basis in wrapped_basis_iter_inner(basis):
+        if features <= inner_basis.features:
+            return inner_basis
+    if isinstance(inner_basis, TupleBasis):
+        inner_basis = cast("TupleBasis[Any, Any, Any]", inner_basis)
+        return cast(
+            "Basis[M, DT]",
+            tuple_basis(
+                tuple(as_feature_basis(b, features) for b in inner_basis),
+                inner_basis.metadata().extra,
+            ),
         )
-        return cast("Basis[M, DT]", basis)
-
-    last_common = from_metadata(rhs.metadata(), is_dual=rhs.is_dual)
-    for a, b in zip(reversed(lhs_rev), reversed(rhs_rev)):
-        if a != b:
-            return last_common
-        last_common = a
-    return last_common
+    return inner_basis
 
 
-@overload
-def flatten[B: Basis[Any, Any], DT: np.generic](
-    basis: TupleBasis1D[Any, B, Any],
-) -> B: ...
+def as_index_basis[M: BasisMetadata, DT: np.generic](
+    basis: Basis[M, DT],
+) -> Basis[M, DT]:
+    """Get the closest basis that supports INDEX.
 
-
-@overload
-def flatten[M: BasisMetadata, DT: np.generic](
-    basis: Basis[Metadata1D[M, Any], DT],
-) -> Basis[M, DT]: ...
-
-
-@overload
-def flatten[M: BasisMetadata, DT: np.generic](
-    basis: Basis[StackedMetadata[StackedMetadata[M, Any], Any], DT],
-) -> TupleBasis[M, None, DT]: ...
-
-
-def flatten(
-    basis: Basis[BasisMetadata, Any],
-) -> Basis[Any, Any]:
-    as_tuple = as_tuple_basis(basis)
-    if len(as_tuple.shape) == 1:
-        return as_tuple.children[0]
-    children = tuple(c for b in as_tuple.children for c in as_tuple_basis(b).children)
-    return tuple_basis(children)
+    If the basis is already an INDEX basis, return it.
+    If it wraps a INDEX basis, return the inner basis.
+    Otherwise, return the fundamental.
+    """
+    return as_feature_basis(basis, {"INDEX"})

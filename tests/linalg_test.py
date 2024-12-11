@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from slate.array import Array, with_basis
-from slate.basis._tuple import (
+from slate.basis import (
     TupleBasis2D,
     as_tuple_basis,
     from_shape,
@@ -18,8 +18,7 @@ from slate.linalg._eig import (
 )
 
 if TYPE_CHECKING:
-    from slate.basis import TupleBasis
-    from slate.basis._basis import Basis
+    from slate.basis import Basis, TupleBasis
     from slate.metadata import BasisMetadata, SimpleMetadata, StackedMetadata
     from slate.metadata.stacked import Metadata2D
 

@@ -48,7 +48,7 @@ class IsotropicBasis[
         displacement_matrix = np.mod(indices[:, None] - indices[None, :], self.size)
         return (
             swapped[displacement_matrix]
-            .reshape(-1, swapped.shape[1:])
+            .reshape(-1, *swapped.shape[1:])
             .swapaxes(axis, 0)
         )
 
