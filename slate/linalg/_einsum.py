@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
@@ -11,6 +12,7 @@ from slate.basis import (
     as_tuple_basis,
     tuple_basis,
 )
+from slate.basis._tuple import as_fundamental
 from slate.linalg._einstein_index import (
     EinsteinIndex,
     NestedEinsteinIndex,
@@ -71,22 +73,35 @@ def _resolve_einsum_basis(
     return tuple_basis(tuple(children), None), tuple(lengths)
 
 
+class EinsumBasisHints:
+    def __init__(self) -> None:
+        self._map = defaultdict[str, list[Basis[Any, Any]]](list)
+
+    def add_hint(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
+        self._map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
+
+    def resolve_basis_map(self) -> EinsumBasisMap:
+        basis_map = EinsumBasisMap()
+        for idx, bases in self._map.items():
+            if len(bases) == 1:
+                basis_map[EinsteinIndex(idx)] = as_index_basis(bases[0])
+            else:
+                basis_map[EinsteinIndex(idx)] = as_fundamental(bases[0])
+        return basis_map
+
+
 def _collect_einsum_basis_hints(
-    basis: Basis[Any, Any], idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
+    basis: Basis[Any, Any], idx: NestedEinsteinIndex, hints: EinsumBasisHints
 ) -> None:
     if isinstance(idx, EinsteinIndex):
-        try:
-            basis_map[idx]
-        except KeyError:
-            assert basis is not None
-            basis_map[idx] = as_index_basis(basis)
+        hints.add_hint(idx, basis)
         return
 
     basis = as_tuple_basis(cast("Basis[StackedMetadata[Any, Any], Any]", basis))
 
     for n, i in enumerate(idx):
         child = basis.children[n]
-        _collect_einsum_basis_hints(child, i, basis_map)
+        _collect_einsum_basis_hints(child, i, hints)
 
 
 type NestedData[T] = T | tuple[NestedData[T], ...]
@@ -105,11 +120,13 @@ def einsum[DT: np.number[Any]](
     specification = parse_einsum_specification(idx)
     # For now, we don't support any optimization
     # we just do the naive einsum in the fundamental basis
-    basis_map = EinsumBasisMap()
+    hints = EinsumBasisHints()
+    for arr, part in zip(arrays, specification.parts):
+        _collect_einsum_basis_hints(arr.basis, part, hints)
+    basis_map = hints.resolve_basis_map()
     raw_arrays = list[np.ndarray[Any, Any]]()
     raw_idx = list[str]()
     for arr, part in zip(arrays, specification.parts):
-        _collect_einsum_basis_hints(arr.basis, part, basis_map)
         basis, shape = _resolve_einsum_basis(part, basis_map)
         converted = arr.with_basis(basis)
         raw_arrays.append(converted.raw_data.reshape(_flatten_nested(shape)))
