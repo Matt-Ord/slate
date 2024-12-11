@@ -55,32 +55,38 @@ class EinsumBasisMap:
 
 
 def _resolve_einsum_basis(
-    basis: Basis[Any, Any] | None, idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
+    idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
 ) -> tuple[Basis[Any, Any], NestedLength]:
     if isinstance(idx, EinsteinIndex):
-        try:
-            resolved = basis_map[idx]
-        except KeyError:
-            assert basis is not None
-            basis_map[idx] = as_index_basis(basis)
-            resolved = basis_map[idx]
+        resolved = basis_map[idx]
         return resolved, resolved.size
-
-    basis = (
-        None
-        if basis is None
-        else as_tuple_basis(cast("Basis[StackedMetadata[Any, Any], Any]", basis))
-    )
 
     children = list[Basis[Any, Any]]()
     lengths = list[NestedLength]()
-    for n, i in enumerate(idx):
-        child = None if basis is None else basis.children[n]
-        resolved = _resolve_einsum_basis(child, i, basis_map)
+    for i in idx:
+        resolved = _resolve_einsum_basis(i, basis_map)
         children.append(resolved[0])
         lengths.append(resolved[1])
-    extra = None if basis is None else basis.metadata().extra
-    return tuple_basis(tuple(children), extra), tuple(lengths)
+
+    return tuple_basis(tuple(children), None), tuple(lengths)
+
+
+def _collect_einsum_basis_hints(
+    basis: Basis[Any, Any], idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
+) -> None:
+    if isinstance(idx, EinsteinIndex):
+        try:
+            basis_map[idx]
+        except KeyError:
+            assert basis is not None
+            basis_map[idx] = as_index_basis(basis)
+        return
+
+    basis = as_tuple_basis(cast("Basis[StackedMetadata[Any, Any], Any]", basis))
+
+    for n, i in enumerate(idx):
+        child = basis.children[n]
+        _collect_einsum_basis_hints(child, i, basis_map)
 
 
 type NestedData[T] = T | tuple[NestedData[T], ...]
@@ -103,14 +109,15 @@ def einsum[DT: np.number[Any]](
     raw_arrays = list[np.ndarray[Any, Any]]()
     raw_idx = list[str]()
     for arr, part in zip(arrays, specification.parts):
-        basis, shape = _resolve_einsum_basis(arr.basis, part, basis_map)
+        _collect_einsum_basis_hints(arr.basis, part, basis_map)
+        basis, shape = _resolve_einsum_basis(part, basis_map)
         converted = arr.with_basis(basis)
         raw_arrays.append(converted.raw_data.reshape(_flatten_nested(shape)))
 
         flat_idx = _flatten_nested(part)
         raw_idx.append("".join(i.label for i in flat_idx))
 
-    out_basis, _shape = _resolve_einsum_basis(None, specification.result, basis_map)
+    out_basis, _shape = _resolve_einsum_basis(specification.result, basis_map)
     out_shape_flat = _flatten_nested(specification.result)
 
     final_idx = ",".join(raw_idx) + "->" + "".join(i.label for i in out_shape_flat)
