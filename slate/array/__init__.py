@@ -19,7 +19,7 @@ from slate.array._conversion import (
     with_basis,
 )
 from slate.array._stats import average, standard_deviation
-from slate.array._transpose import conjugate, transpose
+from slate.array._transpose import conjugate, dagger, transpose
 
 __all__ = [
     "Array",
@@ -35,6 +35,7 @@ __all__ = [
     "average",
     "cast_basis",
     "conjugate",
+    "dagger",
     "flatten",
     "nest",
     "standard_deviation",

@@ -4,13 +4,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate import basis
 from slate.array._array import Array
+from slate.array._conversion import as_diagonal_basis, as_index_basis, as_tuple_basis
 from slate.basis import (
     Basis,
     TupleBasis2D,
-    as_diagonal_basis,
-    as_tuple_basis,
     tuple_basis,
 )
 from slate.basis._diagonal import DiagonalBasis, diagonal_basis
@@ -24,7 +22,7 @@ def conjugate[M: BasisMetadata, DT: np.generic](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     """Conjugate a slate array."""
-    converted = array.with_basis(basis.as_index_basis(array.basis))
+    converted = as_index_basis(array)
     return Array(converted.basis, np.conj(converted.raw_data)).with_basis(array.basis)
 
 
@@ -60,12 +58,11 @@ def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M1, M2, E], DT]:
     """Transpose a slate array."""
-    basis_as_diagonal = as_diagonal_basis(array.basis)
-    if basis_as_diagonal is not None:
-        return _transpose_from_diagonal(array.with_basis(basis_as_diagonal))
+    as_diagonal = as_diagonal_basis(array)
+    if as_diagonal is not None:
+        return _transpose_from_diagonal(as_diagonal)
 
-    basis_as_tuple = as_tuple_basis(array.basis)
-    return _transpose_from_tuple(array.with_basis(basis_as_tuple))
+    return _transpose_from_tuple(as_tuple_basis(array))
 
 
 def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
@@ -105,9 +102,15 @@ def inv[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M1, M2, E], DT]:
     """Inverse a slate array."""
-    basis_as_diagonal = as_diagonal_basis(array.basis)
-    if basis_as_diagonal is not None:
-        return _inv_from_diagonal(array.with_basis(basis_as_diagonal))
+    as_diagonal = as_diagonal_basis(array)
+    if as_diagonal is not None:
+        return _inv_from_diagonal(as_diagonal)
 
-    basis_as_tuple = as_tuple_basis(array.basis)
-    return _inv_from_tuple(array.with_basis(basis_as_tuple))
+    return _inv_from_tuple(as_tuple_basis(array))
+
+
+def dagger[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+    array: Array[Metadata2D[M1, M2, E], DT],
+) -> Array[Metadata2D[M1, M2, E], DT]:
+    """Conjugate Transpose a slate array."""
+    return conjugate(transpose(array))
