@@ -37,6 +37,19 @@ class RecastBasis[
 
         assert self._inner_recast.size == self.inner.size
 
+    @override
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, RecastBasis)
+            and self.inner == other.inner  # type: ignore unknown
+            and self.inner_recast == other.inner_recast  # type: ignore unknown
+            and self.outer_recast == other.outer_recast  # type: ignore unknown
+        )
+
+    @override
+    def __hash__(self) -> int:
+        return hash((self.inner, self.inner_recast, self.outer_recast))
+
     @property
     @override
     def size(self) -> int:

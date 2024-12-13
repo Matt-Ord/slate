@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 def extract_diagonal[M: BasisMetadata, E, DT: np.generic](
     array: Array[Metadata2D[M, M, E], DT],
-) -> Array[M, DT, Basis[M, Any]] | None:
-    b = DiagonalBasis(basis.from_metadata(array.basis.metadata()))
+) -> Array[M, DT, Basis[M, Any]]:
+    b = DiagonalBasis(basis.as_tuple_basis(basis.as_fundamental(array.basis)))
     converted = array.with_basis(b)
 
     return Array(converted.basis.inner[1], converted.raw_data)
