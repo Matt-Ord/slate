@@ -108,24 +108,7 @@ def array_against_array[M: BasisMetadata, DT: np.number[Any]](
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
-    """
-    Plot data in 1d.
-
-    Parameters
-    ----------
-    data : np.ndarray[tuple[int], np.dtype[np.complex128]]
-    coordinates : np.ndarray[tuple[int], np.dtype[np.float64]]
-    ax : Axes | None, optional
-        ax, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, Line2D]
-    """
+    """Plot two arrays against each other."""
     common_basis = basis.get_common_basis(
         basis.as_index_basis(x_data.basis), basis.as_index_basis(y_data.basis)
     )
