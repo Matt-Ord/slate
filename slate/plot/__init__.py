@@ -12,11 +12,11 @@ from slate.plot._animate import (
     animate_data_over_list_1d_x,
 )
 from slate.plot._plot import (
-    plot_array,
-    plot_data_1d_k,
-    plot_data_1d_x,
-    plot_data_2d_k,
-    plot_data_2d_x,
+    array_against_array,
+    basis_against_array_1d_k,
+    basis_against_array_1d_x,
+    basis_against_array_2d_k,
+    basis_against_array_2d_x,
 )
 from slate.plot._squared_scale import SquaredScale
 from slate.plot._util import (
@@ -45,12 +45,12 @@ __all__ = [
     "animate_data_2d_x",
     "animate_data_over_list_1d_k",
     "animate_data_over_list_1d_x",
+    "array_against_array",
+    "basis_against_array_1d_k",
+    "basis_against_array_1d_x",
+    "basis_against_array_2d_k",
+    "basis_against_array_2d_x",
     "combine_animations",
     "get_figure",
     "get_measured_data",
-    "plot_array",
-    "plot_data_1d_k",
-    "plot_data_1d_x",
-    "plot_data_2d_k",
-    "plot_data_2d_x",
 ]
