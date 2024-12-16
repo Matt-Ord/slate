@@ -5,10 +5,16 @@ from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 import numpy as np
 
 from slate import array, basis
-from slate.metadata._metadata import LabeledMetadata
-from slate.metadata.length import fundamental_k_points, fundamental_x_points
-from slate.metadata.volume import (
+from slate.array import Array
+from slate.metadata import (
     AxisDirections,
+    LabeledMetadata,
+)
+from slate.metadata.length import (
+    fundamental_k_points,
+    fundamental_x_points,
+)
+from slate.metadata.volume import (
     get_k_coordinates_in_axes,
     get_x_coordinates_in_axes,
 )
@@ -32,7 +38,6 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
-    from slate.array import Array
     from slate.metadata import BasisMetadata, SpacedVolumeMetadata, StackedMetadata
     from slate.metadata.length import SpacedLengthMetadata
 from slate.plot._util import Scale, set_ymargin
@@ -95,9 +100,50 @@ def _plot_raw_data_1d[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, line
 
 
-def plot_array[DT: np.number[Any]](
-    data: Array[BasisMetadata, DT],
+def array_against_array[M: BasisMetadata, DT: np.number[Any]](
+    x_data: Array[M, np.float64],
+    y_data: Array[M, DT],
     *,
+    y_error: Array[M, np.float64] | None = None,
+    periodic: bool = False,
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, Axes, Line2D]:
+    """
+    Plot data in 1d.
+
+    Parameters
+    ----------
+    data : np.ndarray[tuple[int], np.dtype[np.complex128]]
+    coordinates : np.ndarray[tuple[int], np.dtype[np.float64]]
+    ax : Axes | None, optional
+        ax, by default None
+    scale : Scale, optional
+        scale, by default "linear"
+    measure : Measure, optional
+        measure, by default "abs"
+
+    Returns
+    -------
+    tuple[Figure, Axes, Line2D]
+    """
+    common_basis = basis.get_common_basis(
+        basis.as_index_basis(x_data.basis), basis.as_index_basis(y_data.basis)
+    )
+
+    y_errors = None if y_error is None else y_error.with_basis(common_basis).raw_data
+    return _plot_raw_data_1d(
+        y_data.with_basis(common_basis).raw_data,
+        x_data.with_basis(common_basis).raw_data,
+        y_errors,
+        periodic=periodic,
+        **kwargs,
+    )
+
+
+def basis_against_array[M: BasisMetadata, DT: np.number[Any]](
+    data: Array[M, DT],
+    *,
+    y_error: Array[M, np.float64] | None = None,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
@@ -128,12 +174,16 @@ def plot_array[DT: np.number[Any]](
     else:
         coordinates = converted.basis.points.astype(np.float64)
 
-    return _plot_raw_data_1d(
-        converted.raw_data, coordinates, periodic=periodic, **kwargs
+    return array_against_array(
+        Array(converted.basis, coordinates),
+        converted,
+        y_error=y_error,
+        periodic=periodic,
+        **kwargs,
     )
 
 
-def plot_data_1d_k[DT: np.number[Any]](
+def basis_against_array_1d_k[DT: np.number[Any]](
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -182,7 +232,7 @@ def plot_data_1d_k[DT: np.number[Any]](
     return fig, ax, line
 
 
-def plot_data_1d_x[DT: np.number[Any]](
+def basis_against_array_1d_x[DT: np.number[Any]](
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -270,7 +320,7 @@ def _get_lengths_in_axes(
     return np.asarray(aa)
 
 
-def plot_data_2d_x[DT: np.number[Any], E](
+def basis_against_array_2d_x[DT: np.number[Any], E](
     data: Array[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -342,7 +392,7 @@ def _get_frequencies_in_axes(
     return np.asarray(aa)
 
 
-def plot_data_2d_k[DT: np.number[Any], E](
+def basis_against_array_2d_k[DT: np.number[Any], E](
     data: Array[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
