@@ -13,6 +13,7 @@ from slate.basis import (
     as_tuple_basis,
     tuple_basis,
 )
+from slate.basis._fundamental import FundamentalBasis
 from slate.linalg._einstein_index import (
     EinsteinIndex,
     NestedEinsteinIndex,
@@ -135,8 +136,16 @@ def einsum[DT: np.number[Any]](
         flat_idx = _flatten_nested(part)
         raw_idx.append("".join(i.label for i in flat_idx))
 
+    final_idx = ",".join(raw_idx) + "->"
+
+    if specification.result is None:
+        return Array(
+            FundamentalBasis.from_size(1),
+            _einsum_numpy(final_idx, *raw_arrays),
+        )
+
     out_basis, _shape = _resolve_einsum_basis(specification.result, basis_map)
     out_shape_flat = _flatten_nested(specification.result)
 
-    final_idx = ",".join(raw_idx) + "->" + "".join(i.label for i in out_shape_flat)
+    final_idx += "".join(i.label for i in out_shape_flat)
     return Array(out_basis, _einsum_numpy(final_idx, *raw_arrays))

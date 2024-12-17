@@ -65,11 +65,11 @@ def parse_einsum_index(idx: str) -> NestedEinsteinIndex:
 @dataclass
 class EinsumSpecification:
     parts: tuple[NestedEinsteinIndex, ...]
-    result: NestedEinsteinIndex
+    result: NestedEinsteinIndex | None
 
 
 def parse_einsum_specification(specification: str) -> EinsumSpecification:
     parts, result = specification.split("->")
     parts = tuple(parse_einsum_index(p) for p in parts.split(","))
-    result = parse_einsum_index(result)
+    result = parse_einsum_index(result) if result.strip("") else None
     return EinsumSpecification(parts, result)

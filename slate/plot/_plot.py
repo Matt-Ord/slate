@@ -152,10 +152,10 @@ def basis_against_array[M: BasisMetadata, DT: np.number[Any]](
 
     metadata = converted.basis.metadata()
     if isinstance(metadata, LabeledMetadata):
-        values = metadata.values.astype(np.floating[Any])  # type: ignore unknown
+        values = metadata.values.astype(np.float64)  # type: ignore unknown
         coordinates = values[converted.basis.points]
     else:
-        coordinates = converted.basis.points.astype(np.floating[Any])
+        coordinates = converted.basis.points.astype(np.float64)
 
     return array_against_array(
         Array(converted.basis, coordinates),
