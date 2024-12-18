@@ -18,11 +18,14 @@ from slate.array._conversion import (
     nest,
     with_basis,
 )
+from slate.array._misc import abs, angle, imag, real  # noqa: A004
 from slate.array._stats import average, standard_deviation
 from slate.array._transpose import conjugate, dagger, transpose
 
 __all__ = [
     "Array",
+    "abs",
+    "angle",
     "as_add_basis",
     "as_diagonal_array",
     "as_diagonal_basis",
@@ -37,7 +40,9 @@ __all__ = [
     "conjugate",
     "dagger",
     "flatten",
+    "imag",
     "nest",
+    "real",
     "standard_deviation",
     "transpose",
     "with_basis",
