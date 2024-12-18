@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 def slate_array_stacked() -> (
     Array[
         StackedMetadata[SimpleMetadata, None],
-        np.complex128,
+        np.complexfloating,
         TupleBasis[BasisMetadata, None, np.generic],
     ]
 ):

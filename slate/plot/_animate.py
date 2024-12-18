@@ -103,7 +103,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
 
     data = data.with_basis(final_basis)
     shape = shallow_shape_from_nested(basis_x.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 1)) if idx is None else idx
 
     frames: list[tuple[Line2D]] = []
 
@@ -135,7 +135,7 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 1)) if idx is None else idx
 
     frames: list[tuple[Line2D]] = []
 
@@ -175,7 +175,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
 
     data = data.with_basis(final_basis)
     shape = shallow_shape_from_nested(basis_k.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 1)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 1)) if idx is None else idx
 
     frames: list[tuple[Line2D]] = []
 
@@ -207,7 +207,7 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 2)) if idx is None else idx
 
     frames: list[tuple[Line2D]] = []
 
@@ -261,7 +261,7 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
     """
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 2)) if idx is None else idx
 
     frames: list[tuple[QuadMesh]] = []
 
@@ -313,7 +313,7 @@ def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
     """
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
-    idx = tuple(np.zeros(len(shape) - 2)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 2)) if idx is None else idx
 
     frames: list[tuple[QuadMesh]] = []
     for idx_x0 in range(shape[axes[0]]):

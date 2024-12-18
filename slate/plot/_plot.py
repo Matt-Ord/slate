@@ -52,9 +52,9 @@ class PlotKwargs(TypedDict, total=False):
 
 
 def _plot_raw_data_1d[DT: np.number[Any]](  # noqa: PLR0913
-    data: np.ndarray[tuple[int], np.dtype[DT]],
-    coordinates: np.ndarray[tuple[int], np.dtype[np.floating[Any]]],
-    y_errors: np.ndarray[tuple[int], np.dtype[np.floating[Any]]] | None = None,
+    data: np.ndarray[Any, np.dtype[DT]],
+    coordinates: np.ndarray[Any, np.dtype[np.floating[Any]]],
+    y_errors: np.ndarray[Any, np.dtype[np.floating[Any]]] | None = None,
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -267,7 +267,7 @@ def _has_colorbar(axis: Axes) -> bool:
 
 def _plot_raw_data_2d[DT: np.number[Any]](
     data: np.ndarray[Any, np.dtype[DT]],
-    coordinates: np.ndarray[tuple[int, int], np.dtype[np.floating[Any]]] | None = None,
+    coordinates: np.ndarray[tuple[int, ...], np.dtype[np.floating[Any]]] | None = None,
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -296,7 +296,7 @@ def _plot_raw_data_2d[DT: np.number[Any]](
 def _get_lengths_in_axes(
     metadata: StackedMetadata[SpacedLengthMetadata, Any],
     axes: tuple[int, ...],
-) -> np.ndarray[tuple[int, int], np.dtype[np.floating[Any]]]:
+) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
     """Get the lengths from each axis in a grid."""
     points = tuple(fundamental_x_points(metadata.children[ax]) for ax in axes)
     aa = np.meshgrid(*points, indexing="ij")
@@ -368,7 +368,7 @@ def basis_against_array_2d_x[DT: np.number[Any], E](
 def _get_frequencies_in_axes(
     metadata: StackedMetadata[SpacedLengthMetadata, Any],
     axes: tuple[int, ...],
-) -> np.ndarray[tuple[int, int], np.dtype[np.floating[Any]]]:
+) -> np.ndarray[tuple[int, ...], np.dtype[np.floating[Any]]]:
     """Get the lengths from each axis in a grid."""
     points = tuple(fundamental_k_points(metadata.children[ax]) for ax in axes)
     aa = np.meshgrid(*points, indexing="ij")

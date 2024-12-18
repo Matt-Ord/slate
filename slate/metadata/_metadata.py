@@ -69,14 +69,14 @@ class LabelSpacing:
 
 
 @dataclass(frozen=True, kw_only=True)
-class SpacedLabeledMetadata(DeltaMetadata[np.float64]):
+class SpacedLabeledMetadata(DeltaMetadata[np.floating]):
     """A metadata with some data associated to each location."""
 
     spacing: LabelSpacing
 
     @property
     @override
-    def values(self) -> np.ndarray[Any, np.dtype[np.float64]]:
+    def values(self) -> np.ndarray[Any, np.dtype[np.floating]]:
         """Shape of the full data."""
         return np.linspace(
             self.spacing.start,
