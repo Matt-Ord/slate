@@ -26,13 +26,13 @@ type TransformDirection = Literal["forward", "backward"]
 
 
 class TransformedBasis[M: BasisMetadata](
-    WrappedBasis[M, np.complex128, Basis[M, np.complex128]],
+    WrappedBasis[M, np.complexfloating, Basis[M, np.complexfloating]],
 ):
     """Represents a fourier transformed basis."""
 
     def __init__(
         self,
-        inner: Basis[M, np.complex128],
+        inner: Basis[M, np.complexfloating],
         direction: TransformDirection | None = None,
     ) -> None:
         self._direction: TransformDirection = (
@@ -74,7 +74,7 @@ class TransformedBasis[M: BasisMetadata](
         return self.inner.size
 
     @classmethod
-    def _transform_backward[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def _transform_backward[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         cls,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -85,7 +85,7 @@ class TransformedBasis[M: BasisMetadata](
         )
 
     @classmethod
-    def _transform_forward[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def _transform_forward[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         cls,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -96,7 +96,7 @@ class TransformedBasis[M: BasisMetadata](
         )
 
     @override
-    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -108,7 +108,7 @@ class TransformedBasis[M: BasisMetadata](
         )
 
     @override
-    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -121,7 +121,7 @@ class TransformedBasis[M: BasisMetadata](
 
     @override
     def with_inner[M1: BasisMetadata](
-        self, inner: Basis[M1, np.complex128]
+        self, inner: Basis[M1, np.complexfloating]
     ) -> TransformedBasis[M1]:
         return self.with_modified_inner(lambda _: inner)
 
@@ -130,7 +130,9 @@ class TransformedBasis[M: BasisMetadata](
         M1: BasisMetadata,
     ](
         self,
-        wrapper: Callable[[Basis[M, np.complex128]], Basis[M1, np.complex128]],
+        wrapper: Callable[
+            [Basis[M, np.complexfloating]], Basis[M1, np.complexfloating]
+        ],
     ) -> TransformedBasis[M1]:
         """Get the wrapped basis after wrapper is applied to inner."""
         return TransformedBasis(wrapper(self.inner))
@@ -191,7 +193,7 @@ def fundamental_transformed_tuple_basis_from_metadata[M0: SimpleMetadata, E](
 @overload
 def fundamental_transformed_tuple_basis_from_metadata[M0: BasisMetadata, E](
     metadata: Metadata1D[M0, E], *, is_dual: NestedBoolOrNone = None
-) -> TupleBasis1D[np.generic, Basis[M0, np.complex128], E]: ...
+) -> TupleBasis1D[np.generic, Basis[M0, np.complexfloating], E]: ...
 
 
 @overload
@@ -212,7 +214,7 @@ def fundamental_transformed_tuple_basis_from_metadata[
 ](
     metadata: Metadata2D[M0, M1, E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis2D[
-    np.generic, Basis[M0, np.complex128], Basis[M1, np.complex128], E
+    np.generic, Basis[M0, np.complexfloating], Basis[M1, np.complexfloating], E
 ]: ...
 
 
@@ -243,9 +245,9 @@ def fundamental_transformed_tuple_basis_from_metadata[
     metadata: Metadata3D[M0, M1, M2, E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis3D[
     np.generic,
-    Basis[M0, np.complex128],
-    Basis[M1, np.complex128],
-    Basis[M2, np.complex128],
+    Basis[M0, np.complexfloating],
+    Basis[M1, np.complexfloating],
+    Basis[M2, np.complexfloating],
     E,
 ]: ...
 
@@ -259,13 +261,13 @@ def fundamental_transformed_tuple_basis_from_metadata[M: SimpleMetadata](
 @overload
 def fundamental_transformed_tuple_basis_from_metadata[M: AnyMetadata, E](
     metadata: StackedMetadata[M, E], *, is_dual: NestedBoolOrNone = None
-) -> TupleBasis[M, E, np.complex128]: ...
+) -> TupleBasis[M, E, np.complexfloating]: ...
 
 
 @overload
 def fundamental_transformed_tuple_basis_from_metadata[M: AnyMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
-) -> Basis[M, np.complex128]: ...
+) -> Basis[M, np.complexfloating]: ...
 
 
 def fundamental_transformed_tuple_basis_from_metadata(
@@ -294,22 +296,24 @@ def fundamental_transformed_tuple_basis_from_metadata(
 @overload
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int], *, extra: None = None, is_dual: NestedBoolOrNone = None
-) -> TupleBasis1D[np.complex128, Basis[SimpleMetadata, np.complex128], None]: ...
+) -> TupleBasis1D[
+    np.complexfloating, Basis[SimpleMetadata, np.complexfloating], None
+]: ...
 
 
 @overload
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int], *, extra: E, is_dual: NestedBoolOrNone = None
-) -> TupleBasis1D[np.complex128, Basis[SimpleMetadata, np.complex128], E]: ...
+) -> TupleBasis1D[np.complexfloating, Basis[SimpleMetadata, np.complexfloating], E]: ...
 
 
 @overload
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, int], *, extra: None = None, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis2D[
-    np.complex128,
-    Basis[SimpleMetadata, np.complex128],
-    Basis[SimpleMetadata, np.complex128],
+    np.complexfloating,
+    Basis[SimpleMetadata, np.complexfloating],
+    Basis[SimpleMetadata, np.complexfloating],
     None,
 ]: ...
 
@@ -318,9 +322,9 @@ def fundamental_transformed_tuple_basis_from_shape[E](
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, int], *, extra: E, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis2D[
-    np.complex128,
-    Basis[SimpleMetadata, np.complex128],
-    Basis[SimpleMetadata, np.complex128],
+    np.complexfloating,
+    Basis[SimpleMetadata, np.complexfloating],
+    Basis[SimpleMetadata, np.complexfloating],
     E,
 ]: ...
 
@@ -329,10 +333,10 @@ def fundamental_transformed_tuple_basis_from_shape[E](
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, int, int], *, extra: None = None, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis3D[
-    np.complex128,
-    Basis[SimpleMetadata, np.complex128],
-    Basis[SimpleMetadata, np.complex128],
-    Basis[SimpleMetadata, np.complex128],
+    np.complexfloating,
+    Basis[SimpleMetadata, np.complexfloating],
+    Basis[SimpleMetadata, np.complexfloating],
+    Basis[SimpleMetadata, np.complexfloating],
     None,
 ]: ...
 
@@ -341,10 +345,10 @@ def fundamental_transformed_tuple_basis_from_shape[E](
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, int, int], *, extra: E, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis3D[
-    np.complex128,
-    Basis[SimpleMetadata, np.complex128],
-    Basis[SimpleMetadata, np.complex128],
-    Basis[SimpleMetadata, np.complex128],
+    np.complexfloating,
+    Basis[SimpleMetadata, np.complexfloating],
+    Basis[SimpleMetadata, np.complexfloating],
+    Basis[SimpleMetadata, np.complexfloating],
     E,
 ]: ...
 
@@ -352,18 +356,18 @@ def fundamental_transformed_tuple_basis_from_shape[E](
 @overload
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, ...], *, extra: None = None, is_dual: NestedBoolOrNone = None
-) -> TupleBasis[BasisMetadata, None, np.complex128]: ...
+) -> TupleBasis[BasisMetadata, None, np.complexfloating]: ...
 
 
 @overload
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, ...], *, extra: E, is_dual: NestedBoolOrNone = None
-) -> TupleBasis[BasisMetadata, E, np.complex128]: ...
+) -> TupleBasis[BasisMetadata, E, np.complexfloating]: ...
 
 
 def fundamental_transformed_tuple_basis_from_shape[E](
     shape: tuple[int, ...], *, extra: E | None = None, is_dual: NestedBoolOrNone = None
-) -> TupleBasis[BasisMetadata, E | None, np.complex128]:
+) -> TupleBasis[BasisMetadata, E | None, np.complexfloating]:
     """Get a basis with the basis at idx set to inner."""
     return fundamental_transformed_tuple_basis_from_metadata(
         StackedMetadata.from_shape(shape, extra=extra), is_dual=is_dual

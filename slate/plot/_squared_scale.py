@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, override
+from typing import TYPE_CHECKING, cast, override
 
 import numpy as np
 from matplotlib.scale import ScaleBase
@@ -32,7 +32,9 @@ class SquaredLocator(Locator):
             method.
 
         """
-        locs = np.sqrt(np.linspace(vmin**2, vmax**2, 8)).tolist()
+        locs = cast(
+            "Sequence[float]", np.sqrt(np.linspace(vmin**2, vmax**2, 8)).tolist()
+        )
         return self.raise_if_exceeds(locs)
 
 

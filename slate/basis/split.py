@@ -81,7 +81,7 @@ class SplitBasis[
     def size(self) -> int:
         return self.lhs.size + self.rhs.size
 
-    def _get_lhs_vectors[DT1: np.complex128](
+    def _get_lhs_vectors[DT1: np.complexfloating](
         self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         r"""Get the vector corresponding to ..math::`\hat{A}`."""
@@ -89,7 +89,7 @@ class SplitBasis[
         end = self.lhs.size
         return vectors[slice_along_axis(slice(start, end), axis)]
 
-    def _get_rhs_vectors[DT1: np.complex128](
+    def _get_rhs_vectors[DT1: np.complexfloating](
         self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         r"""Get the vector corresponding to ..math::`\hat{B}`."""
@@ -97,11 +97,11 @@ class SplitBasis[
         return vectors[slice_along_axis(slice(start, None), axis)]
 
     @override
-    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[np.complex128]]:
+    ) -> np.ndarray[Any, np.dtype[np.complexfloating]]:
         lhs_fundamental = self.lhs.__convert_vector_into__(
             self._get_lhs_vectors(vectors, axis), self.inner, axis
         )
@@ -116,7 +116,7 @@ class SplitBasis[
         )
 
     @override
-    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -29,7 +29,7 @@ def pad_ft_points[DT: np.generic](
     axes_arr = np.asarray(axes)
 
     padded_shape = shape_arr.copy()
-    padded_shape[axes_arr] = s
+    padded_shape[axes_arr] = tuple(s)
     padded: np.ndarray[Any, np.dtype[DT]] = np.zeros(  # type: ignore can't infer dtype
         shape=padded_shape, dtype=array.dtype
     )
@@ -56,7 +56,8 @@ def pad_ft_points[DT: np.generic](
     # For each combination of start/end region of the array
     # add in the corresponding values to the padded array
     for slices in itertools.product(*np.array([slice_start, slice_end]).T.tolist()):
-        padded[tuple(slices)] = array[tuple(slices)]
+        sl = cast("tuple[Any, ...]", tuple(slices))
+        padded[sl] = array[sl]
 
     return padded
 

@@ -15,7 +15,7 @@ from slate.metadata.util import (
 )
 
 
-class LengthMetadata(DeltaMetadata[np.float64]):
+class LengthMetadata(DeltaMetadata[np.floating]):
     """Metadata with the addition of length."""
 
 
@@ -45,13 +45,13 @@ def fundamental_delta_k(metadata: SpacedLengthMetadata) -> float:
 
 def fundamental_x_points(
     metadata: SpacedLengthMetadata,
-) -> np.ndarray[Any, np.dtype[np.float64]]:
+) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the coordinates, using the x convention (0...N)."""
     return fundamental_delta_x(metadata) * fundamental_nx_points(metadata)
 
 
 def fundamental_k_points(
     metadata: SpacedLengthMetadata,
-) -> np.ndarray[Any, np.dtype[np.float64]]:
+) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the coordinates, using the kx convention (0...N/2-N/2...)."""
     return fundamental_dk(metadata) * fundamental_nk_points(metadata)

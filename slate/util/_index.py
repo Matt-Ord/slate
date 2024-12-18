@@ -115,7 +115,7 @@ def get_data_in_axes[DT: np.generic](
 
 
 def get_max_idx(
-    data: np.ndarray[tuple[Any], np.dtype[np.number[Any]]],
+    data: np.ndarray[tuple[int, ...], np.dtype[np.number[Any]]],
     axes: tuple[int, ...],
 ) -> tuple[int, ...]:
     """Get the index of the max of the data in the given axes."""

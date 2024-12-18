@@ -115,7 +115,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         return states_tuple.raw_data.reshape(states_tuple.basis.shape)
 
     @override
-    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -135,7 +135,7 @@ class ExplicitBasis[M: BasisMetadata, DT: np.generic](
         return states_tuple.raw_data.reshape(states_tuple.basis.shape)
 
     @override
-    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -295,7 +295,7 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
         )
 
     @override
-    def __into_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
@@ -303,7 +303,7 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
         return vectors
 
     @override
-    def __from_inner__[DT1: np.complex128](  # type: ignore we should have stricter bound on parent
+    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
         self,
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,

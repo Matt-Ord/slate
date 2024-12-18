@@ -52,7 +52,7 @@ def _diagonal_basis_as_explicit[
 
 def get_eigenvalues[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: Array[StackedMetadata[M, E], DT],
-) -> Array[BasisMetadata, np.complex128, FundamentalBasis[SimpleMetadata]]:
+) -> Array[BasisMetadata, np.complexfloating, FundamentalBasis[SimpleMetadata]]:
     """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
     return Array(FundamentalBasis.from_size(a.size), a)
@@ -71,7 +71,7 @@ def _eig_from_tuple[
     ],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complex128,
+    np.complexfloating,
     DiagonalBasis[
         DT,
         ExplicitBasis[M0, DT],
@@ -116,7 +116,7 @@ def into_diagonal[
     array: Array[Metadata2D[M0, M1, E], DT],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complex128,
+    np.complexfloating,
     DiagonalBasis[
         DT,
         ExplicitBasis[M0, DT],
@@ -143,7 +143,7 @@ def into_diagonal[
 
 def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
     array: Array[StackedMetadata[M, E], DT],
-) -> Array[BasisMetadata, np.float64, FundamentalBasis[SimpleMetadata]]:
+) -> Array[BasisMetadata, np.floating, FundamentalBasis[SimpleMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
     return Array(FundamentalBasis.from_size(a.size), a)
 
@@ -159,7 +159,7 @@ def _eigh_from_tuple[
     ],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complex128,
+    np.complexfloating,
     DiagonalBasis[
         DT,
         ExplicitUnitaryBasis[M0, Any],
@@ -208,7 +208,7 @@ def into_diagonal_hermitian[
     array: Array[Metadata2D[M0, M1, E], DT],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complex128,
+    np.complexfloating,
     DiagonalBasis[
         DT,
         ExplicitUnitaryBasis[M0, Any],
