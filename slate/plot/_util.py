@@ -38,7 +38,7 @@ Scale = Literal["symlog", "linear", "squared", "log"]
 
 class Axes(MPLAxes):
     @override
-    def get_figure(self) -> Figure | None: ...
+    def get_figure(self) -> Figure | None: ...  # type: ignore bad overload
 
     def set_xlabel(self, xlabel: str) -> None: ...  # type: ignore bad overload
     def set_ylabel(self, xlabel: str) -> None: ...  # type: ignore bad overload
