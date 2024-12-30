@@ -10,7 +10,7 @@ from slate.metadata._metadata import BasisMetadata
 def real[M: BasisMetadata, DT: np.generic](
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
-    """Conjugate a slate array."""
+    """Extract the real part of a slate array."""
     converted = as_index_basis(array)
     return Array(converted.basis, np.real(converted.raw_data)).with_basis(array.basis)
 
@@ -18,7 +18,7 @@ def real[M: BasisMetadata, DT: np.generic](
 def imag[M: BasisMetadata, DT: np.generic](
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
-    """Conjugate a slate array."""
+    """Extract the imag part of a slate array."""
     converted = as_index_basis(array)
     return Array(converted.basis, np.imag(converted.raw_data)).with_basis(array.basis)
 
@@ -26,7 +26,7 @@ def imag[M: BasisMetadata, DT: np.generic](
 def angle[M: BasisMetadata, DT: np.complexfloating](
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
-    """Conjugate a slate array."""
+    """Get the phase of data in the array."""
     converted = as_index_basis(array)
     return Array(converted.basis, np.angle(converted.raw_data)).with_basis(array.basis)
 
@@ -34,6 +34,6 @@ def angle[M: BasisMetadata, DT: np.complexfloating](
 def abs[M: BasisMetadata, DT: np.generic](  # noqa: A001
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
-    """Conjugate a slate array."""
+    """Abs value of data in a slate array."""
     converted = as_index_basis(array)
     return Array(converted.basis, np.abs(converted.raw_data)).with_basis(array.basis)
