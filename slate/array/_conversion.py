@@ -148,6 +148,12 @@ def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
     return array.with_basis(basis.as_tuple_basis(array.basis))
 
 
+def as_fundamental_basis[M: BasisMetadata, DT: np.generic](
+    array: Array[M, DT],
+) -> Array[M, DT]:
+    return array.with_basis(basis.as_fundamental(array.basis))
+
+
 def nest[
     M: BasisMetadata,
     DT: np.generic,
