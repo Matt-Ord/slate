@@ -1,0 +1,48 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal
+
+import numpy as np
+
+from slate.metadata import BasisMetadata
+from slate.plot._util import (
+    Axes,
+    Figure,
+    Measure,
+    Scale,
+    get_figure,
+    get_measured_data,
+    get_scale_with_lim,
+)
+
+if TYPE_CHECKING:
+    from slate.array import Array
+
+Distribution = Literal["normal", "exponential normal", "skew normal"]
+
+
+def array_distribution[M: BasisMetadata, DT: np.number[Any]](
+    array: Array[M, np.floating[Any]],
+    *,
+    ax: Axes | None = None,
+    scale: Scale = "linear",
+    measure: Measure = "real",
+    distribution: Distribution | None = None,
+) -> tuple[Figure, Axes]:
+    """Plot the distribution of data in a slate array."""
+    fig, ax = get_figure(ax)
+    data = get_measured_data(array.as_array(), measure)
+
+    std = np.std(data).item()
+    average = np.average(data).item()
+    x_range = (
+        (average - 4 * std, average + 4 * std)
+        if distribution is not None
+        else (np.min(data).item(), np.max(data).item())
+    )
+    n_bins = np.max([11, data.size // 100]).item()
+
+    ax.hist(data, n_bins, x_range, density=True)  # type: ignore unknown
+    ax.set_ylabel("Occupation")
+    ax.set_yscale(get_scale_with_lim(scale, ax.get_ylim()))
+    return fig, ax
