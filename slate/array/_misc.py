@@ -79,6 +79,14 @@ def sqrt[M: BasisMetadata, DT: np.floating](
     return Array(converted.basis, np.sqrt(converted.raw_data)).with_basis(array.basis)
 
 
+def square[M: BasisMetadata, DT: np.floating](
+    array: Array[M, DT],
+) -> Array[M, np.floating]:
+    """Square of data in a slate array."""
+    converted = as_index_basis(array)
+    return Array(converted.basis, np.square(converted.raw_data)).with_basis(array.basis)
+
+
 def sin[M: BasisMetadata, DT: np.floating](
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
