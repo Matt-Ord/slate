@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import TYPE_CHECKING, Any, Callable, Never, Self, cast, override
+from typing import TYPE_CHECKING, Any, Never, Self, cast, override
 
 import numpy as np
 
@@ -12,6 +12,8 @@ from slate.basis.wrapped import WrappedBasis
 from slate.util import Padding, pad_along_axis, slice_along_axis
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from slate.metadata import BasisMetadata
 
 

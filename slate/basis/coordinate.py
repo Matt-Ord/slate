@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, override
+from typing import TYPE_CHECKING, Any, override
 
 import numpy as np
 
@@ -9,7 +9,7 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
 
 class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641

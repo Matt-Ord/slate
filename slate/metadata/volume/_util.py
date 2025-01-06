@@ -131,7 +131,7 @@ def spaced_volume_metadata_from_stacked_delta_x(
 ) -> SpacedVolumeMetadata:
     """Get the metadata for a spaced volume from the vectors and spacing."""
     delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
-    normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v))
+    normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v, strict=False))
     return StackedMetadata(
         tuple(
             SpacedLengthMetadata(s, spacing=LabelSpacing(delta=delta))

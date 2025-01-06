@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 
-type NestedLength = Union[int, tuple[NestedLength, ...]]
+type NestedLength = int | tuple[NestedLength, ...]
 
 
 def size_from_nested_shape(shape: NestedLength) -> int:

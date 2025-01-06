@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from itertools import starmap
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     TypeGuard,
     cast,
@@ -35,6 +35,9 @@ from slate.metadata import (
     SimpleMetadata,
     StackedMetadata,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @overload
@@ -222,13 +225,13 @@ def get_common_basis[M: BasisMetadata, E, DT: np.generic](
         rhs_children = cast("tuple[Basis[Any, Any], ...]", rhs_rev[-1].children)  # type: ignore unknown
 
         basis = tuple_basis(
-            tuple(starmap(get_common_basis, zip(lhs_children, rhs_children))),
+            tuple(starmap(get_common_basis, zip(lhs_children, rhs_children, strict=False))),
             cast("StackedMetadata[Any, Any]", rhs.metadata()).extra,
         )
         return cast("Basis[M, DT]", basis)
 
     last_common = from_metadata(rhs.metadata(), is_dual=rhs.is_dual)
-    for a, b in zip(reversed(lhs_rev), reversed(rhs_rev)):
+    for a, b in zip(reversed(lhs_rev), reversed(rhs_rev), strict=False):
         if a != b:
             return last_common
         last_common = a
@@ -321,7 +324,7 @@ def as_is_dual_basis[M: BasisMetadata, DT: np.generic](
     return cast(
         "Basis[M, DT]",
         tuple_basis(
-            tuple(starmap(as_is_dual_basis, zip(basis_as_tuple.children, is_dual))),
+            tuple(starmap(as_is_dual_basis, zip(basis_as_tuple.children, is_dual, strict=False))),
             basis_as_tuple.metadata().extra,
         ),
     )

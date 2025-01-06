@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Literal, Self, cast, overload, override
+from typing import TYPE_CHECKING, Any, Literal, Self, cast, overload, override
 
 import numpy as np
 
@@ -19,6 +19,8 @@ from slate.metadata import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from slate.basis._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
 
 
@@ -288,7 +290,7 @@ def fundamental_transformed_tuple_basis_from_metadata(
 
     children = tuple(
         fundamental_transformed_tuple_basis_from_metadata(c, is_dual=dual)
-        for (c, dual) in zip(metadata.children, is_dual)
+        for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
     return tuple_basis(children, metadata.extra)
 

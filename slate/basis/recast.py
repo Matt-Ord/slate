@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Never, cast, override
+from typing import TYPE_CHECKING, Any, Never, cast, override
 
 import numpy as np
 
@@ -9,6 +9,9 @@ from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_bas
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked import Metadata2D
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class RecastBasis[
@@ -182,8 +185,8 @@ def as_recast_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.gen
 type RecastDiagonalBasis[
     M: BasisMetadata,
     DT: np.generic,
-    BInner: Basis[BasisMetadata, Any] = Basis[M, DT],  # noqa: E251
-    BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],  # noqa: E251
+    BInner: Basis[BasisMetadata, Any] = Basis[M, DT],
+    BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
 ] = RecastBasis[
     Metadata2D[M, M, None], M, DT, DiagonalBasis[Any, BInner, BInner, None], BOuter
 ]

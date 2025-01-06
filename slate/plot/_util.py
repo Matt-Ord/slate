@@ -273,6 +273,6 @@ def combine_animations[*TS0, *TS1](
 ) -> TupleAnimation[*TS0, *TS1]:
     """Combine multiple animations into a single animation."""
     artists = [
-        cast("tuple[Any, ...]", a + b) for a, b in zip(lhs.frame_seq, rhs.frame_seq)
+        cast("tuple[Any, ...]", a + b) for a, b in zip(lhs.frame_seq, rhs.frame_seq, strict=False)
     ]
     return TupleAnimation(fig, artists)

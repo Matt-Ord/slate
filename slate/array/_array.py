@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, Union, cast, overload
+from typing import TYPE_CHECKING, Any, Never, cast, overload
 
 import numpy as np
 
@@ -24,8 +24,8 @@ if TYPE_CHECKING:
     from slate.metadata import SimpleMetadata
     from slate.metadata.stacked import Metadata1D, Metadata3D
 
-type Index = Union[int, slice]
-type NestedIndex = Union[Index, tuple[NestedIndex, ...]]
+type Index = int | slice
+type NestedIndex = Index | tuple[NestedIndex, ...]
 
 
 def _index_single_raw_along_axis[DT: np.generic](
@@ -64,7 +64,7 @@ def _index_tuple_raw_along_axis[DT: np.generic](
     data = data.reshape(stacked_shape)
 
     final_meta = list[BasisMetadata]()
-    for child_index, child in zip(index, children):
+    for child_index, child in zip(index, children, strict=False):
         child_axis = axis + len(final_meta)
         meta, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
         if meta is not None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, overload, override
+from typing import TYPE_CHECKING, Any, overload, override
 
 import numpy as np
 
@@ -9,6 +9,9 @@ from slate.basis._tuple import TupleBasis2D, tuple_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata.stacked import Metadata2D
 from slate.metadata.util import nx_points
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class IsotropicBasis[

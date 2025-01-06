@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, override
+from typing import TYPE_CHECKING, Any, override
 
 import numpy as np
 
@@ -14,6 +14,9 @@ from slate.util._pad import (
     pad_along_axis,
     truncate_along_axis,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class TruncatedBasis[M: BasisMetadata, DT: np.generic](
