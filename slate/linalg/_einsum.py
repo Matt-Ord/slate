@@ -123,12 +123,12 @@ def einsum[DT: np.number[Any]](
     # For now, we don't support any optimization
     # we just do the naive einsum in the fundamental basis
     hints = EinsumBasisHints()
-    for arr, part in zip(arrays, specification.parts):
+    for arr, part in zip(arrays, specification.parts, strict=False):
         _collect_einsum_basis_hints(arr.basis, part, hints)
     basis_map = hints.resolve_basis_map()
     raw_arrays = list[np.ndarray[Any, Any]]()
     raw_idx = list[str]()
-    for arr, part in zip(arrays, specification.parts):
+    for arr, part in zip(arrays, specification.parts, strict=False):
         basis, shape = _resolve_einsum_basis(part, basis_map)
         converted = arr.with_basis(basis)
         raw_arrays.append(converted.raw_data.reshape(_flatten_nested(shape)))

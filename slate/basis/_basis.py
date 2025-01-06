@@ -7,7 +7,6 @@ from typing import (
     Literal,
     Never,
     Self,
-    Union,
 )
 
 import numpy as np
@@ -31,8 +30,8 @@ This specify certain operations that can be performed on the basis.
 """
 
 
-type NestedBool = Union[bool, tuple[NestedBool, ...]]
-type NestedBoolOrNone = Union[bool, tuple[NestedBoolOrNone, ...], None]
+type NestedBool = bool | tuple[NestedBool, ...]
+type NestedBoolOrNone = bool | tuple[NestedBoolOrNone, ...] | None
 
 
 def are_dual_shapes(lhs: NestedBool, rhs: NestedBool) -> bool:
@@ -41,7 +40,7 @@ def are_dual_shapes(lhs: NestedBool, rhs: NestedBool) -> bool:
     The two basis must have the same shape, otherwise a `ValueError` will be raised.
     """  # noqa: DOC501
     if isinstance(lhs, tuple) and isinstance(rhs, tuple):
-        return all(starmap(are_dual_shapes, zip(lhs, rhs)))
+        return all(starmap(are_dual_shapes, zip(lhs, rhs, strict=False)))
     if isinstance(lhs, bool) and isinstance(rhs, bool):
         return lhs != rhs
     msg = "The two basis have different shapes"

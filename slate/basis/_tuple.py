@@ -619,7 +619,7 @@ def from_metadata(
     )
 
     children = tuple(
-        from_metadata(c, is_dual=dual) for (c, dual) in zip(metadata.children, is_dual)
+        from_metadata(c, is_dual=dual) for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
     return TupleBasis(children, metadata.extra)
 

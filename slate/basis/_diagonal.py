@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     TypeGuard,
     cast,
     overload,
@@ -19,6 +18,8 @@ from slate.metadata import Metadata2D
 from slate.metadata._metadata import BasisMetadata
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from slate.metadata.stacked import StackedMetadata
 
 

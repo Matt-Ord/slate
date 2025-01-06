@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from copy import copy
-from typing import TYPE_CHECKING, Any, Callable, Never, Self, cast, override
+from typing import TYPE_CHECKING, Any, Never, Self, cast, override
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from slate.basis._basis import Basis, NestedBool
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
 
 class WrappedBasis[

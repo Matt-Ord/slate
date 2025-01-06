@@ -3,12 +3,12 @@ from __future__ import annotations
 import datetime
 import pickle  # noqa: S403
 from functools import update_wrapper, wraps
-from typing import TYPE_CHECKING, Callable, Literal, overload
+from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
     from pathlib import Path
 
 
@@ -99,7 +99,7 @@ class CachedFunction[**P, R]:
         try:
             buffer_data = np.load(cache_path.with_suffix(".buffer.npz"))
 
-            def _get_buffer() -> Generator[memoryview, memoryview, None]:
+            def _get_buffer() -> Generator[memoryview, memoryview]:
                 i = 0
                 while True:
                     try:

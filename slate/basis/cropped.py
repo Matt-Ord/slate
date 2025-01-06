@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Never, override
+from typing import TYPE_CHECKING, Any, Never, override
 
 import numpy as np
 
@@ -8,6 +8,9 @@ from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util import pad_ft_points
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):

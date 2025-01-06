@@ -40,7 +40,7 @@ class AxisDirections:
     @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, AxisDirections):
-            return all(starmap(np.allclose, zip(self.vectors, value.vectors)))
+            return all(starmap(np.allclose, zip(self.vectors, value.vectors, strict=False)))
         return False
 
     @override
