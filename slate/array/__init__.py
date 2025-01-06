@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from slate.array._array import Array
+from slate.array._array import Array, NestedIndex
 from slate.array._conversion import (
     as_add_basis,
     as_diagonal_array,
@@ -50,6 +50,7 @@ from slate.array._transpose import conjugate, dagger, transpose
 
 __all__ = [
     "Array",
+    "NestedIndex",
     "abs",
     "angle",
     "arccos",
