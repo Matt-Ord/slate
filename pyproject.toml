@@ -80,5 +80,5 @@ include = ["tests", "slate", "examples"]
 reportImplicitOverride = true
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
