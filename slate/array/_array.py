@@ -1,24 +1,92 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, cast, overload
+from typing import TYPE_CHECKING, Any, Never, Union, cast, overload
 
 import numpy as np
 
 from slate import basis
 from slate.basis import Basis, TupleBasis
+from slate.basis._fundamental import FundamentalBasis
 from slate.metadata import (
     BasisMetadata,
     Metadata2D,
     NestedLength,
     shallow_shape_from_nested,
 )
+from slate.metadata._shape import size_from_nested_shape
+from slate.metadata.stacked import StackedMetadata
+from slate.util._index import slice_along_axis
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from slate.basis._tuple import TupleBasis2D
-    from slate.metadata import SimpleMetadata, StackedMetadata
+    from slate.metadata import SimpleMetadata
     from slate.metadata.stacked import Metadata1D, Metadata3D
+
+type Index = Union[int, slice]
+type NestedIndex = Union[Index, tuple[NestedIndex, ...]]
+
+
+def _index_single_raw_along_axis[DT: np.generic](
+    index: Index,
+    metadata: BasisMetadata,
+    data: np.ndarray[Any, np.dtype[DT]],
+    *,
+    axis: int = -1,
+) -> tuple[BasisMetadata | None, np.ndarray[Any, np.dtype[DT]]]:
+    if index == slice(None):
+        return metadata, data
+    out = data[slice_along_axis(index, axis=axis)]
+    basis = (
+        FundamentalBasis.from_size(out.shape[axis])
+        if isinstance(index, slice)
+        else None
+    )
+    return basis, out
+
+
+def _index_tuple_raw_along_axis[DT: np.generic](
+    index: tuple[NestedIndex, ...],
+    metadata: BasisMetadata,
+    data: np.ndarray[Any, np.dtype[DT]],
+    *,
+    axis: int = -1,
+) -> tuple[BasisMetadata | None, np.ndarray[Any, np.dtype[DT]]]:
+    axis &= data.ndim
+    assert isinstance(metadata, StackedMetadata)
+    children = cast("tuple[BasisMetadata, ...]", metadata.children)  # type: ignore unknown
+    stacked_shape = (
+        data.shape[:axis]
+        + tuple(size_from_nested_shape(c.fundamental_shape) for c in children)
+        + data.shape[axis + 1 :]
+    )
+    data = data.reshape(stacked_shape)
+
+    final_meta = list[BasisMetadata]()
+    for child_index, child in zip(index, children):
+        child_axis = axis + len(final_meta)
+        meta, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
+        if meta is not None:
+            final_meta.append(meta)
+    if len(final_meta) == 0:
+        return None, data.reshape(data.shape[:axis] + data.shape[axis + 1 :])
+
+    data = data.reshape(data.shape[:axis] + (-1,) + data.shape[axis + 1 :])
+    if len(final_meta) == 1:
+        return final_meta[0], data
+    return StackedMetadata(tuple(final_meta), None), data
+
+
+def _index_raw_along_axis[DT: np.generic](
+    index: NestedIndex,
+    metadata: BasisMetadata,
+    data: np.ndarray[Any, np.dtype[DT]],
+    axis: int,
+) -> tuple[BasisMetadata | None, np.ndarray[Any, np.dtype[DT]]]:
+    if isinstance(index, tuple):
+        return _index_tuple_raw_along_axis(index, metadata, data, axis=axis)
+    return _index_single_raw_along_axis(index, metadata, data, axis=axis)
 
 
 class Array[
@@ -160,3 +228,28 @@ class Array[
             Array(out_basis, row)
             for row in as_tuple.raw_data.reshape(as_tuple.basis.shape)
         )
+
+    @overload
+    def __getitem__[_DT: np.generic](
+        self: Array[Any, _DT],
+        index: int,
+    ) -> _DT: ...
+
+    @overload
+    def __getitem__[_DT: np.generic](
+        self: Array[Any, _DT],
+        index: tuple[NestedIndex, ...] | slice,
+    ) -> Array[Any, _DT]: ...
+
+    def __getitem__[_DT: np.generic](
+        self: Array[Any, _DT],
+        index: NestedIndex,
+    ) -> Array[Any, _DT] | _DT:
+        fundamental_basis = basis.as_fundamental(self.basis)
+        data = self.with_basis(fundamental_basis).raw_data
+        indexed_meta, indexed_data = _index_raw_along_axis(
+            index, fundamental_basis.metadata(), data.reshape(-1, 1), axis=0
+        )
+        if indexed_meta is None:
+            return indexed_data.item()
+        return Array(basis.from_metadata(indexed_meta), indexed_data)
