@@ -21,7 +21,7 @@ def _assert_normal(
     np.testing.assert_allclose(
         np.linalg.norm(vectors, axis=1),
         1,
-        err_msg="The provided axis vectors are not orthonormal.",
+        err_msg="The provided axis vectors are not normal.",
         atol=1e-10,
     )
 
