@@ -40,7 +40,7 @@ def _project_points_along_directions(
 
 
 def _project_k_points_along_axes(
-    points: tuple[np.ndarray[Any, np.dtype[np.float64]], ...],
+    points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     metadata: SpacedVolumeMetadata,
     axes: tuple[int, ...],
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
@@ -83,7 +83,7 @@ def get_k_coordinates_in_axes(
 
 
 def _project_x_points_along_axes(
-    points: tuple[np.ndarray[Any, np.dtype[np.float64]], ...],
+    points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     metadata: SpacedVolumeMetadata,
     axes: tuple[int, ...],
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
@@ -126,7 +126,7 @@ def get_x_coordinates_in_axes(
 
 
 def spaced_volume_metadata_from_stacked_delta_x(
-    vectors: tuple[np.ndarray[Any, np.dtype[np.float64]], ...],
+    vectors: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     shape: tuple[int, ...],
 ) -> SpacedVolumeMetadata:
     """Get the metadata for a spaced volume from the vectors and spacing."""

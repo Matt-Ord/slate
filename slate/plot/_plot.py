@@ -58,7 +58,7 @@ def _plot_raw_data_1d[DT: np.number[Any]](  # noqa: PLR0913
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
     periodic: bool = False,
 ) -> tuple[Figure, Axes, Line2D]:
     """
@@ -271,7 +271,7 @@ def _plot_raw_data_2d[DT: np.number[Any]](
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
 ) -> tuple[Figure, Axes, QuadMesh]:
     """Plot data in 2d."""
     fig, ax = get_figure(ax)

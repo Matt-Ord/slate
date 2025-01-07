@@ -15,16 +15,14 @@ from slate.metadata.util import (
 )
 
 
-def _assert_orthonormal(
+def _assert_normal(
     vectors: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
 ) -> None:
-    identity_matrix = np.eye(len(vectors))
-    result = np.dot(vectors, np.transpose(vectors))
-
     np.testing.assert_allclose(
-        result,
-        identity_matrix,
+        np.linalg.norm(vectors, axis=1),
+        1,
         err_msg="The provided axis vectors are not orthonormal.",
+        atol=1e-10,
     )
 
 
@@ -35,12 +33,14 @@ class AxisDirections:
     vectors: tuple[np.ndarray[Any, np.dtype[np.floating]], ...]
 
     def __post_init__(self) -> None:
-        _assert_orthonormal(self.vectors)
+        _assert_normal(self.vectors)
 
     @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, AxisDirections):
-            return all(starmap(np.allclose, zip(self.vectors, value.vectors, strict=False)))
+            return all(
+                starmap(np.allclose, zip(self.vectors, value.vectors, strict=False))
+            )
         return False
 
     @override
@@ -82,17 +82,17 @@ def fundamental_stacked_dx(
 
 def fundamental_stacked_dk(
     metadata: SpacedVolumeMetadata,
-) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental stacked dk."""
     return tuple(2 * np.pi * np.linalg.inv(fundamental_stacked_delta_x(metadata)).T)
 
 
 def fundamental_stacked_delta_k(
     metadata: SpacedVolumeMetadata,
-) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental stacked delta k."""
     scaled = cast(
-        "np.ndarray[tuple[int, int], np.dtype[np.float64]]",
+        "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
         np.einsum(  # type: ignore unknown
             "ij,i->ij", fundamental_stacked_dk(metadata), metadata.fundamental_shape
         ),
@@ -114,10 +114,10 @@ def fundamental_reciprocal_volume(
 
 def fundamental_stacked_x_points(
     metadata: SpacedVolumeMetadata,
-) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the stacked coordinates, using the x convention (0...N)."""
     scaled = cast(
-        "np.ndarray[tuple[int, int], np.dtype[np.float64]]",
+        "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
         np.einsum(  # type: ignore unknown
             "ij,ik->jk",
             fundamental_stacked_dx(metadata),
@@ -129,10 +129,10 @@ def fundamental_stacked_x_points(
 
 def fundamental_stacked_k_points(
     metadata: SpacedVolumeMetadata,
-) -> tuple[np.ndarray[Any, np.dtype[np.float64]], ...]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the stacked coordinates, using the kx convention (0...N/2-N/2...)."""
     scaled = cast(
-        "np.ndarray[tuple[int, int], np.dtype[np.float64]]",
+        "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
         np.einsum(  # type: ignore unknown
             "ij,ik->jk",
             fundamental_stacked_dk(metadata),
