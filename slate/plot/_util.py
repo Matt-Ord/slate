@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload, override
 
 import numpy as np
@@ -21,6 +20,7 @@ from matplotlib.scale import LinearScale, LogScale, ScaleBase, SymmetricalLogSca
 from slate.plot._squared_scale import SquaredScale
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Iterable, Sequence
 
     from matplotlib.artist import Artist
