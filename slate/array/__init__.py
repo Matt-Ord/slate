@@ -45,7 +45,7 @@ from slate.array._misc import (
     tanh,
     unwrap,
 )
-from slate.array._stats import average, standard_deviation
+from slate.array._stats import average, max, min, standard_deviation  # noqa: A004
 from slate.array._transpose import conjugate, dagger, transpose
 
 __all__ = [
@@ -81,6 +81,8 @@ __all__ = [
     "log",
     "log2",
     "log10",
+    "max",
+    "min",
     "mod",
     "nest",
     "real",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, cast, overload, override
+import os
+from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload, override
 
 import numpy as np
 from matplotlib.animation import ArtistAnimation
@@ -128,6 +129,14 @@ class Figure(MPLFigure):
         format: str = ...,  # noqa: A002
     ) -> Colorbar: ...
 
+    @override
+    def savefig(  # type: ignore override
+        self,
+        fname: str | os.PathLike[Any] | IO[Any],
+        *,
+        transparent: bool | None = ...,
+    ) -> None: ...
+
 
 def get_figure(ax: Axes | None = None) -> tuple[Figure, Axes]:
     """Get the figure of the given axis.
@@ -165,7 +174,7 @@ Measure = Literal["real", "imag", "abs", "angle"]
 def get_measured_data[DT: np.number[Any]](
     data: np.ndarray[Any, np.dtype[DT]],
     measure: Measure,
-) -> np.ndarray[Any, np.dtype[np.float64]]:
+) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Transform data with the given measure."""
     match measure:
         case "real":
@@ -179,7 +188,7 @@ def get_measured_data[DT: np.number[Any]](
 
 
 def _get_default_lim(
-    measure: Measure, data: np.ndarray[Any, np.dtype[np.float64]]
+    measure: Measure, data: np.ndarray[Any, np.dtype[np.floating]]
 ) -> tuple[float, float]:
     if measure == "abs":
         return (0, float(np.max(data)))
@@ -189,7 +198,7 @@ def _get_default_lim(
 def get_lim(
     lim: tuple[float | None, float | None],
     measure: Measure,
-    data: np.ndarray[Any, np.dtype[np.float64]],
+    data: np.ndarray[Any, np.dtype[np.floating]],
 ) -> tuple[float, float]:
     (default_min, default_max) = _get_default_lim(measure, data)
     l_max = default_max if lim[1] is None else lim[1]
@@ -273,6 +282,7 @@ def combine_animations[*TS0, *TS1](
 ) -> TupleAnimation[*TS0, *TS1]:
     """Combine multiple animations into a single animation."""
     artists = [
-        cast("tuple[Any, ...]", a + b) for a, b in zip(lhs.frame_seq, rhs.frame_seq, strict=False)
+        cast("tuple[Any, ...]", a + b)
+        for a, b in zip(lhs.frame_seq, rhs.frame_seq, strict=False)
     ]
     return TupleAnimation(fig, artists)
