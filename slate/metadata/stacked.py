@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal, cast, overload, override
 
 from slate.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate.metadata._shape import size_from_nested_shape
 
 if TYPE_CHECKING:
     from slate.metadata._shape import NestedLength
@@ -14,6 +15,21 @@ class StackedMetadata[M: BasisMetadata, E](BasisMetadata):
     def __init__(self, children: tuple[M, ...], extra: E) -> None:
         self._children = children
         self._extra = extra
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Shape of the metadata."""
+        return tuple(size_from_nested_shape(i.fundamental_shape) for i in self.children)
+
+    @property
+    def n_dim(self) -> int:
+        """Number of dimensions."""
+        return len(self.children)
+
+    @property
+    def fundamental_size(self) -> int:
+        """Size of the full data."""
+        return size_from_nested_shape(self.fundamental_shape)
 
     @property
     def children(self) -> tuple[M, ...]:

@@ -35,10 +35,9 @@ class BlockDiagonalBasis[
     """Represents a diagonal basis."""
 
     def __init__[
-        _DT: np.generic,
         _B: TupleBasis[Any, Any, Any],
     ](
-        self: BlockDiagonalBasis[_DT, Any, Any, _B],
+        self: BlockDiagonalBasis[Any, Any, Any, _B],
         inner: _B,
         block_shape: tuple[int, ...],
     ) -> None:
