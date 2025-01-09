@@ -13,7 +13,7 @@ from slate.util._diagonal import build_diagonal, extract_diagonal
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-# TODO: can we get rid of special block diagonal and generalize Diagonal to support
+# TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
 # arbitrary nested axes? Can we do this in a way which doesn't make the 'SimpleDiagonal'
 # case much harder to use?
 # block diagonal in its current impl is equivalent to re-casting a basis
