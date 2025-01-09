@@ -7,7 +7,6 @@ import numpy as np
 
 from slate import BasisMetadata, TupleBasis
 from slate.basis import BasisFeature, WrappedBasis
-from slate.metadata.stacked import StackedMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
 
 if TYPE_CHECKING:
@@ -29,7 +28,7 @@ class BlockDiagonalBasis[
     E,
     B: TupleBasis[Any, Any, Any] = TupleBasis[M, E, DT],
 ](
-    WrappedBasis[StackedMetadata[M, E], DT, B],
+    WrappedBasis[Any, DT, B],
 ):
     """Represents a diagonal basis."""
 
