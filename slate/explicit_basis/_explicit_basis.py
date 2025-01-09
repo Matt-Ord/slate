@@ -309,3 +309,30 @@ class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic](
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors
+
+
+class ExplicitBlockDiagonalBasis[
+    DT: np.generic,
+    M: BasisMetadata,
+](
+    ExplicitBasis[M, DT],
+):
+    """
+    An explicit basis where the underlying basis is block diagonal.
+
+    Individual states are mixed only within the individual blocks.
+    """
+
+    def __init__(
+        self,
+        inner: B,
+        block_shape: tuple[int, int],
+        *,
+        assert_unitary: bool = False,
+    ) -> None:
+        super().__init__(inner, block_shape)
+        if assert_unitary:
+            states_tuple = self.eigenvectors.with_basis(
+                as_tuple_basis(self.eigenvectors.basis)
+            )
+            _assert_unitary(states_tuple.raw_data.reshape(states_tuple.basis.shape))
