@@ -11,6 +11,7 @@ from slate.basis._basis import (
     are_dual_shapes,
 )
 from slate.basis._basis_state_metadata import BasisStateMetadata
+from slate.basis._block_diagonal import BlockDiagonalBasis
 from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
 from slate.basis._fundamental import FundamentalBasis, as_state_list
 from slate.basis._isotropic import IsotropicBasis, isotropic_basis
@@ -60,6 +61,7 @@ __all__ = [
     "Basis",
     "BasisFeature",
     "BasisStateMetadata",
+    "BlockDiagonalBasis",
     "CoordinateBasis",
     "CroppedBasis",
     "DiagonalBasis",
