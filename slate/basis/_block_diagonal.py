@@ -5,8 +5,10 @@ from typing import TYPE_CHECKING, Any, cast, override
 
 import numpy as np
 
-from slate import BasisMetadata, TupleBasis
-from slate.basis import BasisFeature, WrappedBasis
+from slate.basis._basis import BasisFeature
+from slate.basis._tuple import TupleBasis
+from slate.basis.wrapped import WrappedBasis
+from slate.metadata._metadata import BasisMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
 
 if TYPE_CHECKING:
