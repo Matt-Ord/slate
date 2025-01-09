@@ -4,8 +4,7 @@ from typing import Any, cast
 
 import numpy as np
 
-from slate.basis import Padding, Truncation
-from slate.util import pad_along_axis, truncate_along_axis
+from slate.util._pad import Padding, Truncation, pad_along_axis, truncate_along_axis
 
 
 def _spec_from_indices[DT: int | np.signedinteger](
