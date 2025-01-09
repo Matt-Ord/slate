@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Any, Never, cast, overload
 import numpy as np
 
 from slate import basis
-from slate.basis import Basis, TupleBasis
-from slate.basis._fundamental import FundamentalBasis
+from slate.basis import Basis, FundamentalBasis, TupleBasis, TupleBasis1D, TupleBasis3D
 from slate.metadata import (
     BasisMetadata,
     Metadata2D,
@@ -138,6 +137,57 @@ class Array[
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
         return self.with_basis(fundamental).raw_data.reshape(shape)
+
+    @overload
+    @staticmethod
+    def from_array[DT1: np.generic](
+        array: np.ndarray[tuple[int,], np.dtype[DT1]],
+    ) -> Array[
+        Metadata1D[SimpleMetadata, None],
+        DT1,
+        TupleBasis1D[np.generic, FundamentalBasis[SimpleMetadata], None],
+    ]: ...
+
+    @overload
+    @staticmethod
+    def from_array[DT1: np.generic](
+        array: np.ndarray[tuple[int, int], np.dtype[DT1]],
+    ) -> Array[
+        Metadata2D[SimpleMetadata, SimpleMetadata, None],
+        DT1,
+        TupleBasis2D[
+            np.generic,
+            FundamentalBasis[SimpleMetadata],
+            FundamentalBasis[SimpleMetadata],
+            None,
+        ],
+    ]: ...
+
+    @overload
+    @staticmethod
+    def from_array[DT1: np.generic](
+        array: np.ndarray[tuple[int, int, int], np.dtype[DT1]],
+    ) -> Array[
+        Metadata3D[SimpleMetadata, SimpleMetadata, SimpleMetadata, None],
+        DT1,
+        TupleBasis3D[
+            np.generic,
+            FundamentalBasis[SimpleMetadata],
+            FundamentalBasis[SimpleMetadata],
+            FundamentalBasis[SimpleMetadata],
+            None,
+        ],
+    ]: ...
+
+    @overload
+    @staticmethod
+    def from_array[DT1: np.generic](
+        array: np.ndarray[tuple[int, ...], np.dtype[DT1]],
+    ) -> Array[
+        StackedMetadata[SimpleMetadata, None],
+        DT1,
+        TupleBasis[BasisMetadata, None, np.generic],
+    ]: ...
 
     @staticmethod
     def from_array[DT1: np.generic](
