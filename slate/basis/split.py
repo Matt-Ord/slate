@@ -7,7 +7,6 @@ import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature
 from slate.basis._util import get_common_basis
-from slate.basis.transformed import TransformedBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.util import Padding, pad_along_axis, slice_along_axis
 
@@ -59,7 +58,7 @@ class SplitBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, TransformedBasis):
+        if isinstance(other, SplitBasis):
             return (
                 other.lhs == self.lhs  # type: ignore unknown
                 and other.rhs == self.rhs  # type: ignore unknown

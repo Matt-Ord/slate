@@ -94,6 +94,10 @@ class BlockDiagonalBasis[
             axis,
             out_shape=self.repeat_shape,
             out_axes=tuple(range(axis, axis + 2 * len(self.block_shape), 2)),
+        ).reshape(
+            *vectors.shape[:axis],
+            -1,
+            *vectors.shape[axis + 1 :],
         )
 
     @override
