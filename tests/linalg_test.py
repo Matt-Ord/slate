@@ -14,7 +14,7 @@ from slate.basis import (
 from slate.basis._block_diagonal import BlockDiagonalBasis
 from slate.basis._diagonal import DiagonalBasis
 from slate.basis._tuple import from_metadata
-from slate.linalg import (
+from slate.linalg._eig import (
     get_eigenvalues_hermitian,
     into_diagonal,
     into_diagonal_hermitian,

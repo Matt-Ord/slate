@@ -5,6 +5,11 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
+from slate._einsum._einstein_index import (
+    EinsteinIndex,
+    NestedEinsteinIndex,
+    parse_einsum_specification,
+)
 from slate.array import Array
 from slate.basis import (
     Basis,
@@ -14,11 +19,6 @@ from slate.basis import (
     tuple_basis,
 )
 from slate.basis._fundamental import FundamentalBasis
-from slate.linalg._einstein_index import (
-    EinsteinIndex,
-    NestedEinsteinIndex,
-    parse_einsum_specification,
-)
 from slate.metadata import NestedLength, StackedMetadata
 
 if TYPE_CHECKING:

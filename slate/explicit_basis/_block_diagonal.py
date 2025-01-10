@@ -9,7 +9,7 @@ from slate.explicit_basis._explicit_basis import (
     ExplicitBasis,
     ExplicitUnitaryBasis,
 )
-from slate.metadata import BasisMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 if TYPE_CHECKING:
     import uuid
@@ -27,15 +27,15 @@ class BlockDiagonalExplicitBasis[
     def __init__[DT1: np.generic, B1: Basis[Any, Any]](
         self: BlockDiagonalExplicitBasis[Any, DT1, B1],
         matrix: Array[
-            Metadata2D[BasisMetadata, BasisStateMetadata[B1], Any],
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any],
             DT,
             BlockDiagonalBasis[
                 DT,
-                BasisMetadata,
+                SimpleMetadata,
                 None,
                 TupleBasis2D[
                     DT,
-                    Basis[BasisMetadata, Any],
+                    Basis[SimpleMetadata, Any],
                     Basis[BasisStateMetadata[B1], Any],
                     None,
                 ],
@@ -56,15 +56,15 @@ class BlockDiagonalExplicitUnitaryBasis[
     def __init__[DT1: np.generic, B1: Basis[Any, Any]](
         self: BlockDiagonalExplicitUnitaryBasis[Any, DT1, B1],
         matrix: Array[
-            Metadata2D[BasisMetadata, BasisStateMetadata[B], Any],
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B], Any],
             DT,
             BlockDiagonalBasis[
                 DT,
-                BasisMetadata,
+                SimpleMetadata,
                 None,
                 TupleBasis2D[
                     DT,
-                    Basis[BasisMetadata, Any],
+                    Basis[SimpleMetadata, Any],
                     Basis[BasisStateMetadata[B], Any],
                     None,
                 ],

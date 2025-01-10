@@ -10,6 +10,7 @@ basis that diagonalizes the array
 
 from __future__ import annotations
 
+from slate._einsum import einsum
 from slate.array._transpose import inv, transpose
 from slate.linalg._eig import (
     get_eigenvalues,
@@ -17,16 +18,19 @@ from slate.linalg._eig import (
     into_diagonal,
     into_diagonal_hermitian,
 )
-from slate.linalg._einsum import einsum
 from slate.linalg._misc import extract_diagonal, norm
 
 __all__ = [
     "einsum",
     "extract_diagonal",
     "get_eigenvalues",
+    "get_eigenvalues",
+    "get_eigenvalues_hermitian",
     "get_eigenvalues_hermitian",
     "into_diagonal",
     "into_diagonal",
+    "into_diagonal",
+    "into_diagonal_hermitian",
     "into_diagonal_hermitian",
     "inv",
     "norm",

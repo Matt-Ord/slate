@@ -5,6 +5,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
+from slate._einsum._einstein_index import (
+    EinsteinIndex,
+    NestedEinsteinIndex,
+    parse_einsum_index,
+)
 from slate.array import Array, with_basis
 from slate.basis import (
     CroppedBasis,
@@ -16,12 +21,7 @@ from slate.basis import (
     tuple_basis,
     with_child,
 )
-from slate.linalg import into_diagonal, into_diagonal_hermitian
-from slate.linalg._einstein_index import (
-    EinsteinIndex,
-    NestedEinsteinIndex,
-    parse_einsum_index,
-)
+from slate.linalg._eig import into_diagonal, into_diagonal_hermitian
 
 if TYPE_CHECKING:
     from slate.basis import Basis
