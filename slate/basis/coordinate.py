@@ -9,7 +9,7 @@ from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Sequence
 
 
 class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
@@ -63,23 +63,6 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return vectors.swapaxes(axis, 0)[self.inner_points].swapaxes(axis, 0)
-
-    @override
-    def with_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-    ](self, inner: Basis[M1, DT1]) -> CoordinateBasis[M1, DT1]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-    ](
-        self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
-    ) -> CoordinateBasis[M1, DT1]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return CoordinateBasis(self.inner_points, wrapper(self.inner))
 
     @property
     @override

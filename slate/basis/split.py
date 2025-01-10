@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import TYPE_CHECKING, Any, Never, Self, cast, override
+from typing import TYPE_CHECKING, Any, Self, cast, override
 
 import numpy as np
 
@@ -11,8 +11,6 @@ from slate.basis.wrapped import WrappedBasis
 from slate.util import Padding, pad_along_axis, slice_along_axis
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from slate.metadata import BasisMetadata
 
 
@@ -124,21 +122,6 @@ class SplitBasis[
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         lhs_vector = self.inner.__convert_vector_into__(vectors, self.lhs, axis)
         return pad_along_axis(lhs_vector, Padding(self.size, 1, 0), axis)
-
-    @override
-    def with_inner(self, inner: Any) -> SplitBasis[Never, Never, Never, Never]:
-        return self.with_modified_inner(lambda _: 0)
-
-    @override
-    def with_modified_inner(
-        self,
-        wrapper: Callable[
-            [Never],
-            Any,
-        ],
-    ) -> SplitBasis[Never, Never, Never, Never]:
-        msg = "Cannot modify inner of a split basis."
-        raise TypeError(msg)
 
     @property
     @override

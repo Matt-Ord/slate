@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, override
+from typing import Any, override
 
 import numpy as np
 
@@ -14,9 +14,6 @@ from slate.util._pad import (
     pad_along_axis,
     truncate_along_axis,
 )
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 class TruncatedBasis[M: BasisMetadata, DT: np.generic](
@@ -73,23 +70,6 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return truncate_along_axis(vectors, self.truncation, axis)
-
-    @override
-    def with_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-    ](self, inner: Basis[M1, DT1]) -> TruncatedBasis[M1, DT1]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-    ](
-        self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]
-    ) -> TruncatedBasis[M1, DT1]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return TruncatedBasis(self.truncation, wrapper(self.inner))
 
     @property
     @override

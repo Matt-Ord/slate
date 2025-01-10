@@ -12,11 +12,17 @@ from slate.basis import (
     diagonal_basis,
     tuple_basis,
 )
+from slate.basis._basis_state_metadata import BasisStateMetadata
+from slate.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
 from slate.basis._diagonal import as_diagonal_basis
 from slate.explicit_basis import (
     ExplicitBasis,
     ExplicitUnitaryBasis,
     TrivialExplicitBasis,
+)
+from slate.explicit_basis._block_diagonal import (
+    BlockDiagonalExplicitBasis,
+    BlockDiagonalExplicitUnitaryBasis,
 )
 from slate.metadata import BasisMetadata
 
@@ -84,7 +90,7 @@ def _eig_from_tuple[
     states_basis_0 = tuple_basis(
         (
             FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=False),
-            array.basis[0].dual_basis(),
+            FundamentalBasis(BasisStateMetadata(array.basis[0])),
         )
     )
     basis_0 = ExplicitBasis(
@@ -93,7 +99,7 @@ def _eig_from_tuple[
     states_basis_1 = tuple_basis(
         (
             FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=True),
-            array.basis[1],
+            FundamentalBasis(BasisStateMetadata(array.basis[1])),
         )
     )
     basis_1 = ExplicitBasis(
@@ -104,6 +110,75 @@ def _eig_from_tuple[
     return Array(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues,
+    )
+
+
+def _eig_from_block_diagonal_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.complexfloating[Any, Any],
+](
+    array: Array[
+        Metadata2D[M0, M1, E],
+        DT,
+        BlockDiagonalBasis[
+            DT, Any, E, TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E]
+        ],
+    ],
+) -> Array[
+    Metadata2D[M0, M1, E],
+    np.complexfloating,
+    DiagonalBasis[
+        DT,
+        ExplicitBasis[M0, Any],
+        ExplicitBasis[M1, Any],
+        E,
+    ],
+]:
+    assert array.basis.inner.shape[0] == array.basis.inner.shape[1]
+    n_states = array.basis.inner.shape[0]
+    n_repeats = array.basis.n_repeats
+    n_block = array.basis.block_shape[0]
+
+    eigenvalues = np.empty((n_repeats, n_block), dtype=array.dtype)
+    eigenvectors = np.empty((n_repeats, n_block, n_block), dtype=array.dtype)
+    raw_data = array.raw_data.reshape((n_repeats, n_block, n_block))
+    for i in range(n_repeats):
+        eig = np.linalg.eig(raw_data[i])
+        eigenvalues[i] = eig.eigenvalues
+        eigenvectors[i] = np.transpose(eig.eigenvectors)
+
+    states_basis_0 = BlockDiagonalBasis(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(n_states, is_dual=False),
+                FundamentalBasis(BasisStateMetadata(array.basis.inner[0])),
+            )
+        ),
+        array.basis.block_shape,
+    )
+    basis_0 = BlockDiagonalExplicitBasis(
+        Array(states_basis_0, eigenvectors),
+    )
+    states_basis_1 = BlockDiagonalBasis(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(n_states, is_dual=True),
+                FundamentalBasis(BasisStateMetadata(array.basis.inner[1])),
+            )
+        ),
+        array.basis.block_shape,
+    )
+    basis_1 = BlockDiagonalExplicitBasis(
+        Array(states_basis_1, eigenvectors),
+        data_id=basis_0.data_id,
+        direction="backward",
+    )
+
+    return Array(
+        diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
+        eigenvalues,
     )
 
 
@@ -136,6 +211,10 @@ def into_diagonal[
     diagonal = as_diagonal_basis(array.basis)
     if diagonal is not None:
         return array.with_basis(_diagonal_basis_as_explicit(diagonal))
+
+    block_diagonal = as_block_diagonal_basis(array.basis)
+    if block_diagonal is not None:
+        return _eig_from_block_diagonal_basis(with_basis(array, block_diagonal))
 
     tuple_basis = as_tuple_basis(array.basis)
     return _eig_from_tuple(with_basis(array, tuple_basis))
@@ -172,7 +251,7 @@ def _eigh_from_tuple[
     states_basis_0 = tuple_basis(
         (
             FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=False),
-            array.basis[0].dual_basis(),
+            FundamentalBasis(BasisStateMetadata(array.basis[0])),
         )
     )
     basis_0 = ExplicitUnitaryBasis(
@@ -183,7 +262,7 @@ def _eigh_from_tuple[
     states_basis_1 = tuple_basis(
         (
             FundamentalBasis.from_size(eig.eigenvalues.size, is_dual=True),
-            array.basis[1],
+            FundamentalBasis(BasisStateMetadata(array.basis[1])),
         )
     )
     basis_1 = ExplicitUnitaryBasis(
@@ -196,6 +275,75 @@ def _eigh_from_tuple[
     return Array(
         diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues.astype(np.complex128),
+    )
+
+
+def _eigh_from_block_diagonal_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.complexfloating[Any, Any],
+](
+    array: Array[
+        Metadata2D[M0, M1, E],
+        DT,
+        BlockDiagonalBasis[
+            DT, Any, E, TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E]
+        ],
+    ],
+) -> Array[
+    Metadata2D[M0, M1, E],
+    np.complexfloating,
+    DiagonalBasis[
+        DT,
+        ExplicitUnitaryBasis[M0, Any],
+        ExplicitUnitaryBasis[M1, Any],
+        E,
+    ],
+]:
+    assert array.basis.inner.shape[0] == array.basis.inner.shape[1]
+    n_states = array.basis.inner.shape[0]
+    n_repeats = array.basis.n_repeats
+    n_block = array.basis.block_shape[0]
+
+    eigenvalues = np.empty((n_repeats, n_block), dtype=array.dtype)
+    eigenvectors = np.empty((n_repeats, n_block, n_block), dtype=array.dtype)
+    raw_data = array.raw_data.reshape((n_repeats, n_block, n_block))
+    for i in range(n_repeats):
+        eig = np.linalg.eigh(raw_data[i])
+        eigenvalues[i] = eig.eigenvalues
+        eigenvectors[i] = np.transpose(eig.eigenvectors)
+
+    states_basis_0 = BlockDiagonalBasis(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(n_states, is_dual=False),
+                FundamentalBasis(BasisStateMetadata(array.basis.inner[0])),
+            )
+        ),
+        array.basis.block_shape,
+    )
+    basis_0 = BlockDiagonalExplicitUnitaryBasis(
+        Array(states_basis_0, eigenvectors),
+    )
+    states_basis_1 = BlockDiagonalBasis(
+        tuple_basis(
+            (
+                FundamentalBasis.from_size(n_states, is_dual=True),
+                FundamentalBasis(BasisStateMetadata(array.basis.inner[1])),
+            )
+        ),
+        array.basis.block_shape,
+    )
+    basis_1 = BlockDiagonalExplicitUnitaryBasis(
+        Array(states_basis_1, eigenvectors),
+        data_id=basis_0.data_id,
+        direction="backward",
+    )
+
+    return Array(
+        diagonal_basis((basis_0, basis_1), array.basis.metadata().extra),
+        eigenvalues,
     )
 
 
@@ -219,6 +367,10 @@ def into_diagonal_hermitian[
     diagonal = as_diagonal_basis(array.basis)
     if diagonal is not None:
         return array.with_basis(_diagonal_basis_as_explicit(diagonal))
+
+    block_diagonal = as_block_diagonal_basis(array.basis)
+    if block_diagonal is not None:
+        return _eigh_from_block_diagonal_basis(with_basis(array, block_diagonal))
 
     tuple_basis = as_tuple_basis(array.basis)
     return _eigh_from_tuple(with_basis(array, tuple_basis))

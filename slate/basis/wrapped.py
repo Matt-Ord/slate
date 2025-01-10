@@ -10,7 +10,7 @@ from slate.basis._basis import Basis, NestedBool
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Iterator
 
 
 class WrappedBasis[
@@ -40,24 +40,6 @@ class WrappedBasis[
     def inner(self) -> B:
         """Inner basis."""
         return self._inner
-
-    def with_inner[
-        _M: BasisMetadata,
-        _DT: np.generic,
-        _B: Basis[BasisMetadata, Any] = Basis[_M, _DT],
-    ](self: WrappedBasis[_M, _DT, B], inner: _B) -> WrappedBasis[_M, _DT, _B]:
-        """Get the wrapped basis with the inner set to inner."""
-        return self.with_modified_inner(lambda _: inner)
-
-    @abstractmethod
-    def with_modified_inner[
-        _M: BasisMetadata,
-        _DT: np.generic,
-        _B: Basis[BasisMetadata, Any] = Basis[_M, Any],
-    ](
-        self: WrappedBasis[_M, _DT, B], wrapper: Callable[[B], _B]
-    ) -> WrappedBasis[_M, _DT, _B]:
-        """Get the wrapped basis after wrapper is applied to inner."""
 
     @abstractmethod
     def __into_inner__[DT1: np.generic](  # [DT1: DT]

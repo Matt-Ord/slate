@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, override
+from typing import Any, Never, override
 
 import numpy as np
 
@@ -8,9 +8,6 @@ from slate.basis._basis import Basis, BasisFeature
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util import pad_ft_points
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M, DT]]):
@@ -72,21 +69,6 @@ class CroppedBasis[M: BasisMetadata, DT: np.generic](WrappedBasis[M, DT, Basis[M
             return np.conj(out) if (self.is_dual != basis.is_dual) else out
 
         return super().__convert_vector_into__(vectors, basis, axis)
-
-    @override
-    def with_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-    ](self, inner: Basis[M1, DT1]) -> CroppedBasis[M1, DT1]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[
-        M1: BasisMetadata,
-        DT1: np.generic,
-    ](self, wrapper: Callable[[Basis[M, DT]], Basis[M1, DT1]]) -> CroppedBasis[M1, DT1]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return CroppedBasis(self.size, wrapper(self.inner))
 
     @property
     @override
