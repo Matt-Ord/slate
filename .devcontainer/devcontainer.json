@@ -118,7 +118,9 @@
 					"ylim",
 					"yscale",
 					"pytest",
-					"savez"
+					"savez",
+					"eigvalsh",
+					"eigvals"
 				]
 			},
 			"extensions": [

@@ -117,52 +117,10 @@ def _flatten_nested[T](nested: NestedData[T]) -> tuple[T, ...]:
     return (nested,)
 
 
-def einsum[DT: np.number[Any]](
+def _einsum_simple[DT: np.number[Any]](
     idx: str,
     *arrays: Array[BasisMetadata, DT],
 ) -> Array[Any, DT, Any]:
-    # Eventually we will want to support fast einsum for an arbitrary index-like
-    # matrix. For now though, we just support the simple case that is
-    # required for ExplicitBasis.
-    if idx == "(i j'),(j k)->(i k)":
-        as_index = as_index_basis(arrays[1].basis)
-        as_tuple_0 = as_tuple_basis(arrays[0].basis)
-        as_diagonal = as_diagonal_basis(as_index)
-        if as_diagonal is not None:
-            out_basis = tuple_basis((as_tuple_0[0], as_diagonal.inner[1]))
-            array_0 = arrays[0].with_basis(as_tuple_0)
-            array_1 = arrays[1].with_basis(as_diagonal)
-
-            return Array(
-                out_basis,
-                _einsum_numpy(
-                    "ij,j->ij",
-                    array_0.raw_data.reshape(array_0.basis.shape),
-                    array_1.raw_data,
-                ),
-            )
-
-        as_block_diagonal = as_block_diagonal_basis(as_index)
-        if as_block_diagonal is not None:
-            out_basis = tuple_basis((as_tuple_0[0], as_block_diagonal.inner[1]))
-            array_0 = arrays[0].with_basis(as_tuple_0)
-            array_1 = arrays[1].with_basis(as_block_diagonal)
-
-            array_1_raw = array_1.raw_data.reshape(
-                as_block_diagonal.n_repeats, *as_block_diagonal.block_shape
-            )
-            array_0_raw = array_0.raw_data.reshape(
-                as_tuple_0[0].size,
-                as_block_diagonal.n_repeats,
-                as_block_diagonal.block_shape[0],
-            )
-
-            return Array(
-                out_basis,
-                # Diagonal on index j but not on index (k,l)
-                _einsum_numpy("ijk,jkl->ijl", array_0_raw, array_1_raw),
-            )
-
     specification = parse_einsum_specification(idx)
     # For now, we don't support any optimization
     # we just do the naive einsum in the fundamental basis
@@ -193,3 +151,61 @@ def einsum[DT: np.number[Any]](
 
     final_idx += "".join(i.label for i in out_shape_flat)
     return Array(out_basis, _einsum_numpy(final_idx, *raw_arrays))
+
+
+def _einsum_smart[DT: np.number[Any]](
+    idx: str,
+    *arrays: Array[BasisMetadata, DT],
+) -> Array[Any, DT, Any]:
+    assert idx == "(i j'),(j k)->(i k)"
+    as_index = as_index_basis(arrays[1].basis)
+    as_tuple_0 = as_tuple_basis(arrays[0].basis)
+    as_diagonal = as_diagonal_basis(as_index)
+    if as_diagonal is not None:
+        out_basis = tuple_basis((as_tuple_0[0], as_diagonal.inner[1]))
+        array_0 = arrays[0].with_basis(as_tuple_0)
+        array_1 = arrays[1].with_basis(as_diagonal)
+
+        return Array(
+            out_basis,
+            _einsum_numpy(
+                "ij,j->ij",
+                array_0.raw_data.reshape(array_0.basis.shape),
+                array_1.raw_data,
+            ),
+        )
+
+    as_block_diagonal = as_block_diagonal_basis(as_index)
+    if as_block_diagonal is not None:
+        out_basis = tuple_basis((as_tuple_0[0], as_block_diagonal.inner[1]))
+        array_0 = arrays[0].with_basis(as_tuple_0)
+        array_1 = arrays[1].with_basis(as_block_diagonal)
+
+        array_1_raw = array_1.raw_data.reshape(
+            as_block_diagonal.n_repeats, *as_block_diagonal.block_shape
+        )
+        array_0_raw = array_0.raw_data.reshape(
+            as_tuple_0[0].size,
+            as_block_diagonal.n_repeats,
+            as_block_diagonal.block_shape[0],
+        )
+
+        return Array(
+            out_basis,
+            # Diagonal on index j but not on index (k,l)
+            _einsum_numpy("ijk,jkl->ijl", array_0_raw, array_1_raw),
+        )
+    return _einsum_simple("(i j'),(j k)->(i k)", *arrays)
+
+
+def einsum[DT: np.number[Any]](
+    idx: str,
+    *arrays: Array[BasisMetadata, DT],
+) -> Array[Any, DT, Any]:
+    # Eventually we will want to support fast einsum for an arbitrary index-like
+    # matrix. For now though, we just support the simple case that is
+    # required for ExplicitBasis.
+    if idx == "(i j'),(j k)->(i k)":
+        _einsum_smart(idx, *arrays)
+
+    return _einsum_simple(idx, *arrays)
