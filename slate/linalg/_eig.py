@@ -20,10 +20,6 @@ from slate.explicit_basis import (
     ExplicitUnitaryBasis,
     TrivialExplicitBasis,
 )
-from slate.explicit_basis._block_diagonal import (
-    BlockDiagonalExplicitBasis,
-    BlockDiagonalExplicitUnitaryBasis,
-)
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
@@ -158,9 +154,7 @@ def _eig_from_block_diagonal_basis[
         ),
         array.basis.block_shape,
     )
-    basis_0 = BlockDiagonalExplicitBasis(
-        Array(states_basis_0, eigenvectors),
-    )
+    basis_0 = ExplicitBasis(Array(states_basis_0, eigenvectors))
     states_basis_1 = BlockDiagonalBasis(
         tuple_basis(
             (
@@ -170,7 +164,7 @@ def _eig_from_block_diagonal_basis[
         ),
         array.basis.block_shape,
     )
-    basis_1 = BlockDiagonalExplicitBasis(
+    basis_1 = ExplicitBasis(
         Array(states_basis_1, eigenvectors),
         data_id=basis_0.data_id,
         direction="backward",
@@ -323,7 +317,7 @@ def _eigh_from_block_diagonal_basis[
         ),
         array.basis.block_shape,
     )
-    basis_0 = BlockDiagonalExplicitUnitaryBasis(
+    basis_0 = ExplicitUnitaryBasis(
         Array(states_basis_0, eigenvectors),
     )
     states_basis_1 = BlockDiagonalBasis(
@@ -335,7 +329,7 @@ def _eigh_from_block_diagonal_basis[
         ),
         array.basis.block_shape,
     )
-    basis_1 = BlockDiagonalExplicitUnitaryBasis(
+    basis_1 = ExplicitUnitaryBasis(
         Array(states_basis_1, eigenvectors),
         data_id=basis_0.data_id,
         direction="backward",
