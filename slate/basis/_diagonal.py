@@ -18,8 +18,6 @@ from slate.metadata import Metadata2D
 from slate.metadata._metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from slate.metadata.stacked import StackedMetadata
 
 
@@ -101,30 +99,6 @@ class DiagonalBasis[
     @override
     def __hash__(self) -> int:
         return hash((2, self.inner, self.is_dual))
-
-    @override
-    def with_inner[  # type: ignore there is no way to bound inner in parent
-        DT1: np.generic,
-        B01: Basis[Any, Any],
-        B11: Basis[Any, Any],
-        E1,
-    ](self, inner: TupleBasis2D[DT1, B01, B11, E1]) -> DiagonalBasis[DT1, B01, B11, E1]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[  # type: ignore there is no way to bound the wrapper function in the parent class
-        DT1: np.generic,
-        B01: Basis[Any, Any],
-        B11: Basis[Any, Any],
-        E1,
-    ](
-        self,
-        wrapper: Callable[
-            [TupleBasis2D[DT, Any, Any, E]], TupleBasis2D[DT1, B01, B11, E1]
-        ],
-    ) -> DiagonalBasis[DT1, B01, B11, E1]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return DiagonalBasis[DT1, B01, B11, E1](wrapper(self.inner))
 
     @property
     @override

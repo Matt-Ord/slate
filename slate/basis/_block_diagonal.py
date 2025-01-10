@@ -1,18 +1,15 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, cast, override
+from typing import Any, TypeGuard, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import BasisFeature
-from slate.basis._tuple import TupleBasis
-from slate.basis.wrapped import WrappedBasis
-from slate.metadata._metadata import BasisMetadata
+from slate.basis._basis import Basis, BasisFeature
+from slate.basis._tuple import TupleBasis, TupleBasis2D
+from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
+from slate.metadata import BasisMetadata, Metadata2D, StackedMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 # TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
 # arbitrary nested axes? Can we do this in a way which doesn't make the 'SimpleDiagonal'
@@ -47,6 +44,10 @@ class BlockDiagonalBasis[
 
         self._block_shape = block_shape
 
+    @override
+    def metadata(self) -> StackedMetadata[M, E]:
+        return super().metadata()
+
     @property
     @override
     def inner(self) -> B:
@@ -58,11 +59,11 @@ class BlockDiagonalBasis[
         return self._block_shape
 
     @property
-    def repeat_shape(self) -> tuple[int, int]:
+    def repeat_shape(self) -> tuple[int, ...]:
         """The shape of the repeats of blocks."""
-        return (
-            self.inner.children[0].size // self.block_shape[0],
-            self.inner.children[1].size // self.block_shape[1],
+        return tuple(
+            self.inner.children[i].size // self.block_shape[i]
+            for i in range(len(self.block_shape))
         )
 
     @property
@@ -137,27 +138,6 @@ class BlockDiagonalBasis[
     def __hash__(self) -> int:
         return hash((3, self.inner, self.is_dual))
 
-    @override
-    def with_inner[  # type: ignore there is no way to bound inner in parent
-        _B: TupleBasis[Any, Any, Any],
-    ](self, inner: _B) -> BlockDiagonalBasis[DT, M, E, _B]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[  # type: ignore there is no way to bound the wrapper function in the parent class
-        _DT: np.generic,
-        _M: BasisMetadata,
-        _E,
-        _B: TupleBasis[Any, Any, Any] = TupleBasis[_M, _E, _DT],
-    ](
-        self,
-        wrapper: Callable[[TupleBasis[_M, _E, _DT]], _B],
-    ) -> BlockDiagonalBasis[_DT, _M, _E, _B]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return BlockDiagonalBasis[_DT, _M, _E, _B](
-            wrapper(self.inner), self.block_shape
-        )
-
     @property
     @override
     def features(self) -> set[BasisFeature]:
@@ -213,3 +193,49 @@ class BlockDiagonalBasis[
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
         return self.__from_inner__(self.inner.points)
+
+
+def _is_diagonal_basis(
+    basis: Basis[Any, Any],
+) -> TypeGuard[BlockDiagonalBasis[Any, Any, Any]]:
+    return isinstance(basis, BlockDiagonalBasis)
+
+
+@overload
+def as_block_diagonal_basis[
+    DT: np.generic,
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+](
+    basis: Basis[Metadata2D[M0, M1, E], DT],
+) -> (
+    BlockDiagonalBasis[DT, Any, E, TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E]]
+    | None
+): ...
+
+
+@overload
+def as_block_diagonal_basis[
+    DT: np.generic,
+    M: BasisMetadata,
+    E,
+](
+    basis: Basis[StackedMetadata[M, E], DT],
+) -> BlockDiagonalBasis[DT, M, E] | None: ...
+
+
+@overload
+def as_block_diagonal_basis[DT: np.generic](
+    basis: Basis[Any, DT],
+) -> BlockDiagonalBasis[DT, BasisMetadata, Any] | None: ...
+
+
+def as_block_diagonal_basis(
+    basis: Any,
+) -> Any:
+    """Get the closest basis that is block diagonal."""
+    return next(
+        (b for b in wrapped_basis_iter_inner(basis) if _is_diagonal_basis(b)),
+        None,
+    )

@@ -19,8 +19,6 @@ from slate.metadata import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from slate.basis._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
 
 
@@ -120,24 +118,6 @@ class TransformedBasis[M: BasisMetadata](
             if self.direction == "forward"
             else self._transform_backward(vectors, axis)
         )
-
-    @override
-    def with_inner[M1: BasisMetadata](
-        self, inner: Basis[M1, np.complexfloating]
-    ) -> TransformedBasis[M1]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[
-        M1: BasisMetadata,
-    ](
-        self,
-        wrapper: Callable[
-            [Basis[M, np.complexfloating]], Basis[M1, np.complexfloating]
-        ],
-    ) -> TransformedBasis[M1]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return TransformedBasis(wrapper(self.inner))
 
     @property
     @override

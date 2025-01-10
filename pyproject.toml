@@ -27,6 +27,7 @@ plot = ["matplotlib >=3.9.2,<4.0.0"]
 
 [tool.ruff]
 unsafe-fixes = true
+exclude = [".git", ".git-rewrite", ".vscode"]
 
 [tool.ruff.lint]
 select = ["ALL"]

@@ -5,15 +5,18 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
+from slate import array as _array
 from slate.array import Array, with_basis
 from slate.basis import (
-    TupleBasis2D,
     as_tuple_basis,
     from_shape,
 )
-from slate.linalg import into_diagonal
-from slate.linalg._eig import (
+from slate.basis._block_diagonal import BlockDiagonalBasis
+from slate.basis._diagonal import DiagonalBasis
+from slate.basis._tuple import from_metadata
+from slate.linalg import (
     get_eigenvalues_hermitian,
+    into_diagonal,
     into_diagonal_hermitian,
 )
 
@@ -24,13 +27,11 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def slate_array_stacked() -> (
-    Array[
-        StackedMetadata[SimpleMetadata, None],
-        np.complexfloating,
-        TupleBasis[BasisMetadata, None, np.generic],
-    ]
-):
+def slate_array_stacked() -> Array[
+    StackedMetadata[SimpleMetadata, None],
+    np.complexfloating,
+    TupleBasis[BasisMetadata, None, np.generic],
+]:
     rng = np.random.default_rng()
     shape = (10, 10)
     data = rng.random(shape) + 1j * rng.random(shape)
@@ -75,18 +76,15 @@ def _test_into_diagonal(
         from_shape((10, 10), is_dual=(False, True)),
         from_shape((10, 10), is_dual=(True, False)),
         from_shape((10, 10), is_dual=(True, True)),
+        DiagonalBasis(from_shape((10, 10))),
+        BlockDiagonalBasis(from_shape((10, 10)), (2, 2)),
     ],
 )
 def test_linalg_complex(
-    basis: TupleBasis2D[
-        np.generic,
-        Basis[SimpleMetadata, np.generic],
-        Basis[SimpleMetadata, np.generic],
-        None,
-    ],
+    basis: Basis[Metadata2D[SimpleMetadata, SimpleMetadata, None], np.generic],
 ) -> None:
     rng = np.random.default_rng()
-    data = rng.random(basis.shape) + 1j * rng.random(basis.shape)
+    data = rng.random(basis.size) + 1j * rng.random(basis.size)
 
     array = Array(basis, data)
     _test_into_diagonal(array)
@@ -115,7 +113,9 @@ def _test_into_diagonal_hermitian(
     )
 
     eigenvalues = get_eigenvalues_hermitian(array)
-    np.testing.assert_allclose(eigenvalues.as_array(), diagonal.raw_data)
+    np.testing.assert_allclose(
+        np.sort(eigenvalues.as_array()), np.sort(diagonal.raw_data)
+    )
 
     np.testing.assert_allclose(diagonal.as_array(), array.as_array())
 
@@ -133,22 +133,17 @@ def _test_into_diagonal_hermitian(
         from_shape((10, 10), is_dual=(False, True)),
         from_shape((10, 10), is_dual=(True, False)),
         from_shape((10, 10), is_dual=(True, True)),
+        DiagonalBasis(from_shape((10, 10))),
+        BlockDiagonalBasis(from_shape((10, 10)), (2, 2)),
     ],
 )
 def test_linalg_diagonal(
-    basis: TupleBasis2D[
-        np.generic,
-        Basis[SimpleMetadata, np.generic],
-        Basis[SimpleMetadata, np.generic],
-        None,
-    ],
+    basis: Basis[Metadata2D[SimpleMetadata, SimpleMetadata, None], np.generic],
 ) -> None:
     rng = np.random.default_rng()
-    data = rng.random(10)
-    array = Array(
-        basis,
-        np.diag(data).astype(np.complex128),
-    )
+    fundamental = from_metadata(basis.metadata())
+    data = np.diag(rng.random(fundamental.shape[0])).astype(np.complex128)
+    array = Array(fundamental, data).with_basis(basis)
 
     _test_into_diagonal_hermitian(array)
 
@@ -160,21 +155,19 @@ def test_linalg_diagonal(
         from_shape((10, 10), is_dual=(False, True)),
         from_shape((10, 10), is_dual=(True, False)),
         from_shape((10, 10), is_dual=(True, True)),
+        DiagonalBasis(from_shape((3, 3))),
+        BlockDiagonalBasis(from_shape((10, 10)), (2, 2)),
     ],
 )
 def test_linalg_complex_hermitian(
-    basis: TupleBasis2D[
-        np.generic,
-        Basis[SimpleMetadata, np.generic],
-        Basis[SimpleMetadata, np.generic],
-        None,
-    ],
+    basis: Basis[Metadata2D[SimpleMetadata, SimpleMetadata, None], np.generic],
 ) -> None:
     rng = np.random.default_rng()
-    data = rng.random(basis.shape) + 1j * rng.random(basis.shape)
-    data += np.conj(np.transpose(data))
 
-    array = Array(basis, data)
+    array = Array(basis, rng.random(basis.size) + 1j * rng.random(basis.size))
+    array += _array.conjugate(_array.transpose(array))
+    array = array.with_basis(basis)
+
     _test_into_diagonal_hermitian(array)
 
 
@@ -185,19 +178,16 @@ def test_linalg_complex_hermitian(
         from_shape((10, 10), is_dual=(False, True)),
         from_shape((10, 10), is_dual=(True, False)),
         from_shape((10, 10), is_dual=(True, True)),
+        DiagonalBasis(from_shape((3, 3))),
+        BlockDiagonalBasis(from_shape((10, 10)), (2, 2)),
     ],
 )
 def test_linalg_real_hermitian(
-    basis: TupleBasis2D[
-        np.generic,
-        Basis[SimpleMetadata, np.generic],
-        Basis[SimpleMetadata, np.generic],
-        None,
-    ],
+    basis: Basis[Metadata2D[SimpleMetadata, SimpleMetadata, None], np.generic],
 ) -> None:
     rng = np.random.default_rng()
-    data = rng.random(basis.shape).astype(np.complex128)
-    data += np.conj(np.transpose(data))
-    array = Array(basis, data)
+    array = Array(basis, rng.random(basis.size).astype(np.complex128))
+    array += _array.conjugate(_array.transpose(array))
+    array = array.with_basis(basis)
 
     _test_into_diagonal_hermitian(array)

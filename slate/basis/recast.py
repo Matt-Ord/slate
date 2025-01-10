@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, cast, override
+from typing import Any, cast, override
 
 import numpy as np
 
@@ -9,9 +9,6 @@ from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_bas
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.metadata.stacked import Metadata2D
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
 
 
 class RecastBasis[
@@ -88,25 +85,6 @@ class RecastBasis[
         return self._inner_recast.__convert_vector_into__(
             vectors, self._outer_recast, axis
         )
-
-    @override
-    def with_inner[
-        _M: BasisMetadata,
-        _DT: np.generic,
-        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
-    ](self: RecastBasis[_M, M1, DT, BInner], inner: _B) -> RecastBasis[_M, M1, DT, _B]:
-        return self.with_modified_inner(lambda _: inner)
-
-    @override
-    def with_modified_inner[
-        _M: BasisMetadata,
-        _DT: np.generic,
-        _B: Basis[BasisMetadata, Never] = Basis[_M, _DT],
-    ](
-        self: RecastBasis[_M, M1, DT, BInner], wrapper: Callable[[BInner], _B]
-    ) -> RecastBasis[_M, M1, DT, _B]:
-        """Get the wrapped basis after wrapper is applied to inner."""
-        return RecastBasis(wrapper(self.inner), self.inner_recast, self.outer_recast)
 
     @property
     @override
