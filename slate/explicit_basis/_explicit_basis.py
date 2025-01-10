@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, override
+from typing import TYPE_CHECKING, Any, Literal, Self, cast, override
 
 import numpy as np
 
 from slate import array as _array
 from slate import basis
+from slate._einsum import einsum
 from slate.array import Array
 from slate.array._transpose import inv, transpose
 from slate.basis import (
@@ -17,9 +18,9 @@ from slate.basis import (
     as_tuple_basis,
     tuple_basis,
 )
+from slate.basis._fundamental import FundamentalBasis
 from slate.basis.recast import RecastBasis
-from slate.metadata import BasisMetadata
-from slate.metadata._shape import shallow_shape_from_nested
+from slate.metadata import BasisMetadata, SimpleMetadata, shallow_shape_from_nested
 
 if TYPE_CHECKING:
     from slate.metadata import Metadata2D
@@ -42,13 +43,13 @@ class ExplicitBasis[
         B1: Basis[Any, Any],
     ](
         self: ExplicitBasis[Any, DT1, B1],
-        matrix: Array[Metadata2D[BasisMetadata, BasisStateMetadata[B1], None], DT1],
+        matrix: Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B1], None], DT1],
         *,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
         self._matrix = cast(
-            "Array[Metadata2D[BasisMetadata, BasisStateMetadata[B], None], DT]", matrix
+            "Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT]", matrix
         )
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
@@ -67,7 +68,7 @@ class ExplicitBasis[
     @property
     def transform(
         self,
-    ) -> Array[Metadata2D[BasisMetadata, BasisStateMetadata[B], None], DT]:
+    ) -> Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT]:
         return (
             self._matrix
             if self.direction == "forward"
@@ -77,7 +78,7 @@ class ExplicitBasis[
     @property
     def inverse_transform(
         self,
-    ) -> Array[Metadata2D[BasisMetadata, BasisStateMetadata[B], None], DT]:
+    ) -> Array[Metadata2D[BasisStateMetadata[B], SimpleMetadata, None], DT]:
         return (
             inv(self._matrix)
             if self.direction == "forward"
@@ -124,32 +125,29 @@ class ExplicitBasis[
         """The convention used to select the direction for the forward transform."""
         return self._direction
 
-    @property
-    def _transform_matrix(self) -> np.ndarray[Any, Any]:
-        # TODO: We should be able to use einsum to do this, but it is not implemented yet.  # noqa: FIX002
-        # TODO: inv() on sparse matrices is not implemented yet.  # noqa: FIX002
-        states_tuple = self.transform.with_basis(as_tuple_basis(self.transform.basis))
-        return states_tuple.raw_data.reshape(states_tuple.basis.shape)
-
     @override
     def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
-        axis: int = -1,
+        self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        transformed = np.tensordot(
-            cast("np.ndarray[Any, np.dtype[Never]]", vectors),
-            self._transform_matrix,
-            axes=([axis], [0]),
-        )
-        return np.moveaxis(transformed, -1, axis)
+        swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
+        flat = swapped.reshape(-1, vectors.shape[axis])
 
-    @property
-    def _inverse_transform_matrix(self) -> np.ndarray[Any, Any]:
-        states_tuple = self.inverse_transform.with_basis(
-            as_tuple_basis(self.inverse_transform.basis)
+        transform = self.transform
+        flat_basis = tuple_basis(
+            (
+                FundamentalBasis.from_size(flat.shape[0]),
+                FundamentalBasis(
+                    transform.basis.metadata()[0],
+                    is_dual=not cast("tuple[bool,...]", transform.basis.is_dual)[0],
+                ),
+            )
         )
-        return states_tuple.raw_data.reshape(states_tuple.basis.shape)
+        swapped_array = Array(flat_basis, flat)
+
+        transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
+        return (
+            transformed.as_array().reshape(*swapped.shape[:-1], -1).swapaxes(axis, -1)
+        )
 
     @override
     def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
@@ -157,12 +155,26 @@ class ExplicitBasis[
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        transformed = np.tensordot(
-            cast("np.ndarray[Any, np.dtype[Never]]", vectors),
-            self._inverse_transform_matrix,
-            axes=([axis], [0]),
+        swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
+        flat = swapped.reshape(-1, vectors.shape[axis])
+
+        transform = self.inverse_transform
+        flat_basis = tuple_basis(
+            (
+                FundamentalBasis.from_size(flat.shape[0]),
+                FundamentalBasis(
+                    transform.basis.metadata()[0],
+                    is_dual=not cast("tuple[bool,...]", transform.basis.is_dual)[0],
+                ),
+            )
         )
-        return np.moveaxis(transformed, -1, axis)
+        swapped_array = Array(flat_basis, flat)
+
+        transform = self.inverse_transform
+        transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
+        return (
+            transformed.as_array().reshape(*swapped.shape[:-1], -1).swapaxes(axis, -1)
+        )
 
     @property
     @override
@@ -241,7 +253,7 @@ class ExplicitUnitaryBasis[
         B1: Basis[Any, Any],
     ](
         self: ExplicitUnitaryBasis[Any, DT1, B1],
-        matrix: Array[Metadata2D[BasisMetadata, BasisStateMetadata[B1], Any], DT1],
+        matrix: Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any], DT1],
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
@@ -258,7 +270,7 @@ class ExplicitUnitaryBasis[
     @override
     def transform(
         self,
-    ) -> Array[Metadata2D[BasisMetadata, BasisStateMetadata[B], None], DT]:
+    ) -> Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT]:
         return (
             self._matrix
             if self.direction == "forward"
@@ -269,7 +281,7 @@ class ExplicitUnitaryBasis[
     @override
     def inverse_transform(
         self,
-    ) -> Array[Metadata2D[BasisMetadata, BasisStateMetadata[B], None], DT]:
+    ) -> Array[Metadata2D[BasisStateMetadata[B], SimpleMetadata, None], DT]:
         return (
             _dual_unitary_data(transpose(self.transform))
             if self.direction == "forward"

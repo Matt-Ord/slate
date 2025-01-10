@@ -10,7 +10,7 @@ from slate.basis import Basis, DiagonalBasis, diagonal_basis
 from slate.basis._basis_state_metadata import BasisStateMetadata
 from slate.basis._fundamental import FundamentalBasis
 from slate.explicit_basis._explicit_basis import ExplicitUnitaryBasis
-from slate.metadata import BasisMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 if TYPE_CHECKING:
     from slate.metadata import Metadata2D
@@ -22,10 +22,13 @@ class DiagonalExplicitBasis[M: BasisMetadata, DT: np.generic, B: Basis[Any, Any]
     def __init__[DT1: np.generic, B1: Basis[Any, Any]](
         self: DiagonalExplicitBasis[Any, DT1, B1],
         matrix: Array[
-            Metadata2D[BasisMetadata, BasisStateMetadata[B1], Any],
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any],
             DT1,
             DiagonalBasis[
-                DT1, Basis[BasisMetadata, Any], Basis[BasisStateMetadata[B1], Any], None
+                DT1,
+                Basis[SimpleMetadata, Any],
+                Basis[BasisStateMetadata[B1], Any],
+                None,
             ],
         ],
     ) -> None:
