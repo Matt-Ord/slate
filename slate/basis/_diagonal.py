@@ -108,6 +108,7 @@ class DiagonalBasis[
             out.add("ADD")
             out.add("MUL")
             out.add("SUB")
+            out.add("LINEAR_MAP")
         if "INDEX" in self.inner.features:
             out.add("INDEX")
         return out

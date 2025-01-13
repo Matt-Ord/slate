@@ -184,6 +184,7 @@ class ExplicitBasis[
             out.add("ADD")
             out.add("MUL")
             out.add("SUB")
+            out.add("LINEAR_MAP")
         return out
 
     @override

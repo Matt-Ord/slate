@@ -72,6 +72,7 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
             out.add("ADD")
             out.add("MUL")
             out.add("SUB")
+            out.add("LINEAR_MAP")
         if "INDEX" in self.inner.features:
             out.add("INDEX")
         return out
