@@ -3,41 +3,76 @@ from __future__ import annotations
 from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload, override
 
 import numpy as np
-from matplotlib.animation import ArtistAnimation
-from matplotlib.artist import Artist
 
 try:
     from matplotlib import pyplot as plt
+    from matplotlib.animation import ArtistAnimation as MPLArtistAnimation
+    from matplotlib.axes import Axes as MPLAxesBase
+    from matplotlib.colors import LogNorm, SymLogNorm
+    from matplotlib.colors import Normalize as BaseNorm
+    from matplotlib.figure import Figure as MPLFigureBase
+    from matplotlib.scale import LinearScale, LogScale, SymmetricalLogScale
+
+    from slate.plot._squared_scale import SquaredScale
 except ImportError:
     plt = None
+    LogNorm, BaseNorm, SymLogNorm = (None, None, None)
+    LinearScale, LogScale, SymmetricalLogScale = (None, None, None)
+    SquaredScale = None
 
+    class _MPLAxesBase:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401, ARG002
+            msg = (
+                "Matplotlib is not installed. Please install it with the 'plot' extra."
+            )
+            raise ImportError(msg)
 
-from matplotlib.axes import Axes as MPLAxes
-from matplotlib.colors import Colormap, LogNorm, Normalize, SymLogNorm
-from matplotlib.figure import Figure as MPLFigure
-from matplotlib.scale import LinearScale, LogScale, ScaleBase, SymmetricalLogScale
+    MPLAxesBase: type[MPLAxes] = _MPLAxesBase  # type: ignore assign
 
-from slate.plot._squared_scale import SquaredScale
+    class _MPLFigureBase:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401, ARG002
+            msg = (
+                "Matplotlib is not installed. Please install it with the 'plot' extra."
+            )
+            raise ImportError(msg)
+
+    MPLFigureBase: type[MPLFigure] = _MPLFigureBase  # type: ignore assign
+
+    class ArtistAnimationBase:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401, ARG002
+            msg = (
+                "Matplotlib is not installed. Please install it with the 'plot' extra."
+            )
+            raise ImportError(msg)
+
+    MPLArtistAnimation: type[ArtistAnimation] = ArtistAnimationBase  # type: ignore assign
+
 
 if TYPE_CHECKING:
     import os
     from collections.abc import Iterable, Sequence
 
+    from matplotlib.animation import ArtistAnimation
     from matplotlib.artist import Artist
+    from matplotlib.axes import Axes as MPLAxes
     from matplotlib.cm import ScalarMappable
     from matplotlib.collections import QuadMesh
     from matplotlib.colorbar import Colorbar
+    from matplotlib.colors import Colormap, Normalize
     from matplotlib.container import ErrorbarContainer
+    from matplotlib.figure import Figure as MPLFigure
     from matplotlib.legend import Legend
+    from matplotlib.scale import ScaleBase
     from matplotlib.text import Text
     from matplotlib.transforms import Transform
     from matplotlib.typing import ColorType
     from numpy.typing import ArrayLike
 
+
 Scale = Literal["symlog", "linear", "squared", "log"]
 
 
-class Axes(MPLAxes):
+class Axes(MPLAxesBase):
     @override
     def get_figure(self) -> Figure | None: ...  # type: ignore bad overload
 
@@ -118,7 +153,7 @@ class Axes(MPLAxes):
     def legend(self, *args: Any, **kwargs: Any) -> Legend: ...  # type: ignore overload
 
 
-class Figure(MPLFigure):
+class Figure(MPLFigureBase):
     def colorbar(  # type: ignore bad overload
         self,
         mappable: ScalarMappable,
@@ -210,9 +245,13 @@ def get_norm_with_lim(
     scale: Scale,
     lim: tuple[float, float],
 ) -> Normalize:
+    if BaseNorm is None or LogNorm is None or SymLogNorm is None:
+        msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
+        raise ImportError(msg)
+
     match scale:
         case "linear":
-            return Normalize(vmin=lim[0], vmax=lim[1])
+            return BaseNorm(vmin=lim[0], vmax=lim[1])
         case "log":
             return LogNorm(vmin=lim[0], vmax=lim[1])
         case "symlog":
@@ -223,13 +262,21 @@ def get_norm_with_lim(
                 linthresh=1 if max_abs <= 0 else 1e-3 * max_abs,  # type: ignore No parameter named "linthresh"
             )
         case "squared":
-            return Normalize(vmin=lim[0], vmax=lim[1])
+            return BaseNorm(vmin=lim[0], vmax=lim[1])
 
 
 def get_scale_with_lim(
     scale: Scale,
     lim: tuple[float, float],
 ) -> ScaleBase:
+    if (
+        LinearScale is None
+        or LogScale is None
+        or SymmetricalLogScale is None
+        or SquaredScale is None
+    ):
+        msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
+        raise ImportError(msg)
     match scale:
         case "linear":
             return LinearScale(axis=None)
@@ -258,7 +305,7 @@ def set_ymargin(ax: Axes, bottom: float = 0.0, top: float = 0.3) -> None:
     ax.set_ylim(bottom, top)
 
 
-class TupleAnimation[*TS](ArtistAnimation):
+class TupleAnimation[*TS](MPLArtistAnimation):
     frame_seq: Iterable[tuple[*TS]]  # type: ignore overload
 
     def __init__(
@@ -286,3 +333,13 @@ def combine_animations[*TS0, *TS1](
         for a, b in zip(lhs.frame_seq, rhs.frame_seq, strict=False)
     ]
     return TupleAnimation(fig, artists)
+
+
+def wait_for_close() -> None:
+    """Block until the figure is closed."""  # noqa: DOC501
+    if plt is None:
+        msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
+        raise ImportError(msg)
+    mainloop = plt._get_backend_mod().mainloop  # type: ignore no other way to get the mainloop  # noqa: SLF001
+    if mainloop is not None:
+        mainloop()
