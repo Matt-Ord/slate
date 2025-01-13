@@ -337,9 +337,13 @@ def combine_animations[*TS0, *TS1](
 
 def wait_for_close() -> None:
     """Block until the figure is closed."""  # noqa: DOC501
-    if plt is None:
+    try:
+        from matplotlib import _pylab_helpers  # noqa: PLC0415, PLC2701
+    except ImportError as e:
         msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
-        raise ImportError(msg)
-    mainloop = plt._get_backend_mod().mainloop  # type: ignore no other way to get the mainloop  # noqa: SLF001
-    if mainloop is not None:
-        mainloop()
+        raise ImportError(msg) from e
+
+    backend = _pylab_helpers.Gcf.get_active()
+
+    if backend is not None:
+        backend.start_main_loop()
