@@ -225,7 +225,9 @@ def get_common_basis[M: BasisMetadata, E, DT: np.generic](
         rhs_children = cast("tuple[Basis[Any, Any], ...]", rhs_rev[-1].children)  # type: ignore unknown
 
         basis = tuple_basis(
-            tuple(starmap(get_common_basis, zip(lhs_children, rhs_children, strict=False))),
+            tuple(
+                starmap(get_common_basis, zip(lhs_children, rhs_children, strict=False))
+            ),
             cast("StackedMetadata[Any, Any]", rhs.metadata()).extra,
         )
         return cast("Basis[M, DT]", basis)
@@ -302,6 +304,18 @@ def as_mul_basis[M: BasisMetadata, DT: np.generic](
     return as_feature_basis(basis, {"MUL"})
 
 
+def as_linear_map_basis[M: BasisMetadata, DT: np.generic](
+    basis: Basis[M, DT],
+) -> Basis[M, DT]:
+    """Get the closest basis that supports LINEAR_MAP.
+
+    If the basis is already a LINEAR_MAP basis, return it.
+    If it wraps a LINEAR_MAP basis, return the inner basis.
+    Otherwise, return the fundamental.
+    """
+    return as_feature_basis(basis, {"LINEAR_MAP"})
+
+
 def as_is_dual_basis[M: BasisMetadata, DT: np.generic](
     basis: Basis[M, DT], is_dual: NestedBool
 ) -> Basis[M, DT]:
@@ -324,7 +338,12 @@ def as_is_dual_basis[M: BasisMetadata, DT: np.generic](
     return cast(
         "Basis[M, DT]",
         tuple_basis(
-            tuple(starmap(as_is_dual_basis, zip(basis_as_tuple.children, is_dual, strict=False))),
+            tuple(
+                starmap(
+                    as_is_dual_basis,
+                    zip(basis_as_tuple.children, is_dual, strict=False),
+                )
+            ),
             basis_as_tuple.metadata().extra,
         ),
     )

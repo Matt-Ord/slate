@@ -75,15 +75,10 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
     @override
     def features(self) -> set[BasisFeature]:
         out = set[BasisFeature]()
-        if "SIMPLE_ADD" in self.inner.features:
+        if "LINEAR_MAP" in self.inner.features:
             out.add("ADD")
-            out.add("SIMPLE_ADD")
-        if "SIMPLE_MUL" in self.inner.features:
             out.add("MUL")
-            out.add("SIMPLE_MUL")
-        if "SIMPLE_SUB" in self.inner.features:
             out.add("SUB")
-            out.add("SIMPLE_SUB")
         if "INDEX" in self.inner.features:
             out.add("INDEX")
         return out
@@ -94,7 +89,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        if "SIMPLE_ADD" not in self.features:
+        if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
@@ -103,7 +98,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
     def mul_data[DT1: np.number[Any]](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        if "SIMPLE_MUL" not in self.features:
+        if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
@@ -114,7 +109,7 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
     ) -> np.ndarray[Any, np.dtype[DT1]]:
-        if "SIMPLE_SUB" not in self.features:
+        if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
