@@ -22,12 +22,14 @@ from slate.plot._util import (
     Axes,
     Figure,
     Measure,
+    Scale,
     get_axis_colorbar,
     get_figure,
     get_lim,
     get_measured_data,
     get_norm_with_lim,
     get_scale_with_lim,
+    set_ymargin,
 )
 from slate.util import (
     get_data_in_axes,
@@ -40,7 +42,6 @@ if TYPE_CHECKING:
 
     from slate.metadata import BasisMetadata, SpacedVolumeMetadata, StackedMetadata
     from slate.metadata.length import SpacedLengthMetadata
-from slate.plot._util import Scale, set_ymargin
 
 
 class PlotKwargs(TypedDict, total=False):

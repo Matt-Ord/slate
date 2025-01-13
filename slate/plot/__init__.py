@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from slate.plot._animate import (
     animate_array_over_list,
     animate_data_1d_k,
@@ -20,7 +22,24 @@ from slate.plot._plot import (
     basis_against_array_2d_k,
     basis_against_array_2d_x,
 )
-from slate.plot._squared_scale import SquaredScale
+
+try:
+    from slate.plot._squared_scale import SquaredScale
+except ImportError:
+
+    class SquaredScaleMock:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401, ARG002
+            msg = (
+                "Matplotlib is not installed. Please install it with the 'plot' extra."
+            )
+            raise ImportError(msg)
+
+    SquaredScale: type[SquaredScaleTy] = None  # type: ignore unknown
+
+if TYPE_CHECKING:
+    from slate.plot._squared_scale import SquaredScale as SquaredScaleTy
+
+
 from slate.plot._util import (
     Axes,
     Figure,
