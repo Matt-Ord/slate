@@ -14,13 +14,13 @@ from slate.array import Array
 from slate.basis import (
     Basis,
     as_fundamental,
-    as_index_basis,
     as_tuple_basis,
     tuple_basis,
 )
 from slate.basis._block_diagonal import as_block_diagonal_basis
 from slate.basis._diagonal import as_diagonal_basis
 from slate.basis._fundamental import FundamentalBasis
+from slate.basis._util import as_linear_map_basis
 from slate.metadata import NestedLength, StackedMetadata
 
 if TYPE_CHECKING:
@@ -41,30 +41,30 @@ def _get_einsum_result_basis(
     idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
 ) -> Basis[Any, Any]:
     if isinstance(idx, EinsteinIndex):
-        return basis_map[idx]
+        return basis_map.resolve_single(idx)[0]
     return tuple_basis(tuple(_get_einsum_result_basis(c, basis_map) for c in idx), None)
 
 
 class EinsumBasisMap:
     def __init__(self) -> None:
-        self._map = dict[str, Basis[Any, Any]]()
+        self._single_map = dict[str, Basis[Any, Any]]()
+        self._tuple_map = dict[tuple[str, ...], Basis[Any, Any]]()
 
-    def __getitem__(self, idx: EinsteinIndex) -> Basis[Any, Any]:
-        current = self._map.get(idx.label, None)
+    def resolve_single(self, idx: EinsteinIndex) -> tuple[Basis[Any, Any], int]:
+        current = self._single_map.get(idx.label, None)
         if current is None:
             raise KeyError(idx.label)
-        return current.dual_basis() if idx.is_dual else current
+        return current.dual_basis() if idx.is_dual else current, current.size
 
-    def __setitem__(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
-        self._map[idx.label] = basis.dual_basis() if idx.is_dual else basis
+    def set_single(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
+        self._single_map[idx.label] = basis.dual_basis() if idx.is_dual else basis
 
 
 def _resolve_einsum_basis(
     idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
 ) -> tuple[Basis[Any, Any], NestedLength]:
     if isinstance(idx, EinsteinIndex):
-        resolved = basis_map[idx]
-        return resolved, resolved.size
+        return basis_map.resolve_single(idx)
 
     children = list[Basis[Any, Any]]()
     lengths = list[NestedLength]()
@@ -78,20 +78,40 @@ def _resolve_einsum_basis(
 
 class EinsumBasisHints:
     def __init__(self) -> None:
-        self._map = defaultdict[str, set[Basis[Any, Any]]](set)
+        self._single_map = defaultdict[str, set[Basis[Any, Any]]](set)
+        self._diag_map = defaultdict[tuple[str, ...], set[Basis[Any, Any]]](set)
 
     def add_hint(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
-        self._map[idx.label].add(basis.dual_basis() if idx.is_dual else basis)
+        self._single_map[idx.label].add(basis.dual_basis() if idx.is_dual else basis)
+
+    def add_diag_hint(
+        self, idx: tuple[EinsteinIndex, ...], basis: Basis[Any, Any]
+    ) -> None:
+        diag = basis.dual_basis() if idx[0].is_dual else basis
+        self._diag_map[tuple(i.label for i in idx)].add(diag)
 
     def resolve_basis_map(self) -> EinsumBasisMap:
-        basis_map = EinsumBasisMap()
-        for idx, bases in self._map.items():
+        # The resolved inner basis for the einsum operation
+        inner_basis_map = EinsumBasisMap()
+        for idx, bases in self._single_map.items():
             bases_list = list(bases)
             if len(bases_list) == 1:
-                basis_map[EinsteinIndex(idx)] = as_index_basis(bases_list[0])
+                as_linear = as_linear_map_basis(bases_list[0])
+                inner_basis_map.set_single(EinsteinIndex(idx), as_linear)
             else:
-                basis_map[EinsteinIndex(idx)] = as_fundamental(bases_list[0])
-        return basis_map
+                common_parent = as_fundamental(bases_list[0])
+                inner_basis_map.set_single(EinsteinIndex(idx), common_parent)
+
+        # TODO: The strategy here. Resolve the inner basis as before, then  # noqa: FIX002
+        # wrap them all in a recast basis as we resolve the diagonals such
+        # that we now index according to the outer recast. we also need a new
+        # set of indices that are used to index the outer recast.
+        # The resolution process works to resolve an outer recast basis
+        # which is a simple TupleBasis as the outer index.
+        # I think to do this coherently we need information about
+        # the complete einsum shape, which we don't have here.
+
+        return inner_basis_map
 
 
 def _collect_einsum_basis_hints(
@@ -100,6 +120,13 @@ def _collect_einsum_basis_hints(
     if isinstance(idx, EinsteinIndex):
         hints.add_hint(idx, basis)
         return
+
+    basis = cast("Basis[StackedMetadata[Any, Any], Any]", basis)
+    as_diagonal = as_diagonal_basis(basis)
+    # TODO: Add generalized diagonal so we can also support block diagonal  # noqa: FIX002
+    if as_diagonal is not None and all(isinstance(i, EinsteinIndex) for i in idx):
+        idx = cast("tuple[EinsteinIndex, ...]", idx)
+        hints.add_diag_hint(idx, basis)
 
     basis = as_tuple_basis(cast("Basis[StackedMetadata[Any, Any], Any]", basis))
 
@@ -158,9 +185,9 @@ def _einsum_smart[DT: np.number[Any]](
     *arrays: Array[BasisMetadata, DT],
 ) -> Array[Any, DT, Any]:
     assert idx == "(i j'),(j k)->(i k)"
-    as_index = as_index_basis(arrays[1].basis)
+    as_linear = as_linear_map_basis(arrays[1].basis)
     as_tuple_0 = as_tuple_basis(arrays[0].basis)
-    as_diagonal = as_diagonal_basis(as_index)
+    as_diagonal = as_diagonal_basis(as_linear)
     if as_diagonal is not None:
         out_basis = tuple_basis((as_tuple_0[0], as_diagonal.inner[1]))
         array_0 = arrays[0].with_basis(as_tuple_0)
@@ -175,7 +202,7 @@ def _einsum_smart[DT: np.number[Any]](
             ),
         )
 
-    as_block_diagonal = as_block_diagonal_basis(as_index)
+    as_block_diagonal = as_block_diagonal_basis(as_linear)
     if as_block_diagonal is not None:
         out_basis = tuple_basis((as_tuple_0[0], as_block_diagonal.inner[1]))
         array_0 = arrays[0].with_basis(as_tuple_0)

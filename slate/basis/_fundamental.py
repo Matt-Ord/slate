@@ -78,7 +78,7 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
     @property
     @override
     def features(self) -> set[BasisFeature]:
-        return {"ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB", "INDEX"}
+        return {"ADD", "MUL", "SUB", "LINEAR_MAP", "INDEX"}
 
     @override
     def add_data[DT1: np.number[Any]](

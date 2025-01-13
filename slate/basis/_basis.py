@@ -14,18 +14,15 @@ import numpy as np
 from slate.metadata._metadata import BasisMetadata
 from slate.metadata._shape import NestedLength, size_from_nested_shape
 
-BasisFeature = Literal[
-    "ADD", "MUL", "SUB", "SIMPLE_ADD", "SIMPLE_MUL", "SIMPLE_SUB", "INDEX"
-]
+BasisFeature = Literal["ADD", "MUL", "SUB", "LINEAR_MAP", "INDEX"]
 """
 Features of a basis.
 This specify certain operations that can be performed on the basis.
 - ADD: addition of data
 - MUL: multiplication of data
 - SUB: subtraction of data
-- SIMPLE_ADD: addition of data by adding raw data
-- SIMPLE_MUL: multiplication of data by multiplying raw data
-- SIMPLE_SUB: subtraction of data by subtracting raw data
+- LINEAR_MAP: the basis can be described as the linear map from the full basis
+  ie, data_i = sum_j matrix_ij fundamental_data_j
 - INDEX: The basis is a simple truncation of a fundamental basis which can be represented as a CoordinateBasis basis.
 """
 
