@@ -49,6 +49,7 @@ from slate.plot._util import (
     combine_animations,
     get_figure,
     get_measured_data,
+    wait_for_close,
 )
 
 __all__ = [
@@ -77,4 +78,5 @@ __all__ = [
     "combine_animations",
     "get_figure",
     "get_measured_data",
+    "wait_for_close",
 ]
