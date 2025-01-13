@@ -6,6 +6,7 @@ import numpy as np
 
 from slate import basis
 from slate.basis import Basis, FundamentalBasis, TupleBasis, TupleBasis1D, TupleBasis3D
+from slate.basis._tuple import tuple_basis
 from slate.metadata import (
     BasisMetadata,
     Metadata2D,
@@ -13,7 +14,6 @@ from slate.metadata import (
     shallow_shape_from_nested,
 )
 from slate.metadata._shape import size_from_nested_shape
-from slate.metadata.stacked import StackedMetadata
 from slate.util._index import slice_along_axis
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
     from slate.basis._tuple import TupleBasis2D
     from slate.metadata import SimpleMetadata
-    from slate.metadata.stacked import Metadata1D, Metadata3D
+    from slate.metadata.stacked import Metadata1D, Metadata3D, StackedMetadata
 
 type Index = int | slice
 type NestedIndex = Index | tuple[NestedIndex, ...]
@@ -29,32 +29,32 @@ type NestedIndex = Index | tuple[NestedIndex, ...]
 
 def _index_single_raw_along_axis[DT: np.generic](
     index: Index,
-    metadata: BasisMetadata,
+    basis: Basis[BasisMetadata, Any],
     data: np.ndarray[Any, np.dtype[DT]],
     *,
     axis: int = -1,
-) -> tuple[BasisMetadata | None, np.ndarray[Any, np.dtype[DT]]]:
+) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, np.dtype[DT]]]:
     if index == slice(None):
-        return metadata, data
+        return basis, data
     out = data[slice_along_axis(index, axis=axis)]
-    basis = (
+    out_basis = (
         FundamentalBasis.from_size(out.shape[axis])
         if isinstance(index, slice)
         else None
     )
-    return basis, out
+    return out_basis, out
 
 
 def _index_tuple_raw_along_axis[DT: np.generic](
     index: tuple[NestedIndex, ...],
-    metadata: BasisMetadata,
+    b: Basis[BasisMetadata, Any],
     data: np.ndarray[Any, np.dtype[DT]],
     *,
     axis: int = -1,
-) -> tuple[BasisMetadata | None, np.ndarray[Any, np.dtype[DT]]]:
+) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, np.dtype[DT]]]:
     axis &= data.ndim
-    assert isinstance(metadata, StackedMetadata)
-    children = cast("tuple[BasisMetadata, ...]", metadata.children)  # type: ignore unknown
+    b = basis.as_tuple_basis(b)
+    children = b.children
     stacked_shape = (
         data.shape[:axis]
         + tuple(size_from_nested_shape(c.fundamental_shape) for c in children)
@@ -62,30 +62,30 @@ def _index_tuple_raw_along_axis[DT: np.generic](
     )
     data = data.reshape(stacked_shape)
 
-    final_meta = list[BasisMetadata]()
+    final_basis = list[Basis[Any, Any]]()
     for child_index, child in zip(index, children, strict=False):
-        child_axis = axis + len(final_meta)
+        child_axis = axis + len(final_basis)
         meta, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
         if meta is not None:
-            final_meta.append(meta)
-    if len(final_meta) == 0:
+            final_basis.append(meta)
+    if len(final_basis) == 0:
         return None, data.reshape(data.shape[:axis] + data.shape[axis + 1 :])
 
     data = data.reshape(data.shape[:axis] + (-1,) + data.shape[axis + 1 :])
-    if len(final_meta) == 1:
-        return final_meta[0], data
-    return StackedMetadata(tuple(final_meta), None), data
+    if len(final_basis) == 1:
+        return final_basis[0], data
+    return tuple_basis(tuple(final_basis), None), data
 
 
 def _index_raw_along_axis[DT: np.generic](
     index: NestedIndex,
-    metadata: BasisMetadata,
+    basis: Basis[BasisMetadata, Any],
     data: np.ndarray[Any, np.dtype[DT]],
     axis: int,
-) -> tuple[BasisMetadata | None, np.ndarray[Any, np.dtype[DT]]]:
+) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, np.dtype[DT]]]:
     if isinstance(index, tuple):
-        return _index_tuple_raw_along_axis(index, metadata, data, axis=axis)
-    return _index_single_raw_along_axis(index, metadata, data, axis=axis)
+        return _index_tuple_raw_along_axis(index, basis, data, axis=axis)
+    return _index_single_raw_along_axis(index, basis, data, axis=axis)
 
 
 class Array[
@@ -297,9 +297,9 @@ class Array[
     ) -> Array[Any, _DT] | _DT:
         fundamental_basis = basis.as_fundamental(self.basis)
         data = self.with_basis(fundamental_basis).raw_data
-        indexed_meta, indexed_data = _index_raw_along_axis(
-            index, fundamental_basis.metadata(), data.reshape(-1, 1), axis=0
+        indexed_basis, indexed_data = _index_raw_along_axis(
+            index, fundamental_basis, data.reshape(-1, 1), axis=0
         )
-        if indexed_meta is None:
+        if indexed_basis is None:
             return indexed_data.item()
-        return Array(basis.from_metadata(indexed_meta), indexed_data)
+        return Array(indexed_basis, indexed_data)
