@@ -28,25 +28,11 @@ def slice_along_axis(
 def slice_ignoring_axes[_A: slice | int | None](
     old_slice: Sequence[_A], axes: tuple[int, ...]
 ) -> tuple[slice | _A, ...]:
-    """
-    Given a slice, insert slice(None) everywhere given in axes.
-
-    Parameters
-    ----------
-    slice : list[slice  |  _IntLike_co  |  None]
-        _description_
-    axes : tuple[_IntLike_co]
-        _description_
-
-    Returns
-    -------
-    list[slice | _IntLike_co | None]
-        _description_
-    """
+    """Given a slice, insert slice(None) everywhere given in axes."""
     new_slice = list[slice | _A](old_slice)
     for axis in sorted(int(a) for a in axes):
         new_slice.insert(axis, slice(None))
-    return tuple(old_slice)
+    return tuple(new_slice)
 
 
 def get_position_in_sorted(axes: tuple[int, ...]) -> tuple[int, ...]:
@@ -54,14 +40,6 @@ def get_position_in_sorted(axes: tuple[int, ...]) -> tuple[int, ...]:
     Given a list of axes get the index in the sorted list.
 
     ie 2,4,1,3 -> 1,3,0,2
-
-    Parameters
-    ----------
-    axes : _AX0Inv
-
-    Returns
-    -------
-    _AX0Inv
     """
     return tuple(np.argsort(np.argsort(axes)))
 

@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, Any, cast, overload
 import numpy as np
 
 from slate.array._array import Array
-from slate.array._conversion import as_diagonal_basis, as_index_basis, as_tuple_basis
+from slate.array._conversion import (
+    as_diagonal_basis,
+    as_index_basis,
+    as_tuple_basis,
+    nest,
+)
 from slate.basis import (
     Basis,
     TupleBasis2D,
@@ -210,4 +215,7 @@ def get_data_in_axes[M: BasisMetadata, DT: np.generic](
     list[slice | _IntLike_co | None]
     """
     indexed = array[slice_ignoring_axes(idx, axes)]
+    if len(axes) == 1:
+        # Must be tuple_basis((basis,))
+        indexed = nest(indexed)
     return transpose(indexed, get_position_in_sorted(axes))

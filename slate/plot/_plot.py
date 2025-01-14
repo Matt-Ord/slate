@@ -307,7 +307,8 @@ def array_against_axes_2d[M: StackedMetadata[AnyMetadata, Any], DT: np.number[An
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, QuadMesh]:
-    idx = tuple(0 for _ in range(data.basis.metadata().n_dim)) if idx is None else idx
+    metadata = data.basis.metadata()
+    idx = tuple(0 for _ in range(metadata.n_dim - 2)) if idx is None else idx
 
     data_in_axis = get_data_in_axes(data, axes, idx)
 
