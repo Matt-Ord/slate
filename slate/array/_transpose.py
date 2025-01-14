@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast, overload
 
 import numpy as np
 
@@ -13,9 +13,11 @@ from slate.basis import (
 )
 from slate.basis._diagonal import DiagonalBasis, diagonal_basis
 from slate.metadata import BasisMetadata
+from slate.util._index import get_position_in_sorted, slice_ignoring_axes
 
 if TYPE_CHECKING:
-    from slate.metadata.stacked import Metadata2D
+    from slate.basis._tuple import TupleBasis
+    from slate.metadata.stacked import Metadata1D, Metadata2D, StackedMetadata
 
 
 def conjugate[M: BasisMetadata, DT: np.generic](
@@ -41,7 +43,12 @@ def _transpose_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.gen
     )
 
 
-def _transpose_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def _transpose_from_tuple_simple[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.generic,
+](
     array: Array[
         Metadata2D[M0, M1, E],
         DT,
@@ -54,15 +61,58 @@ def _transpose_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generi
     )
 
 
-def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def _transpose_simple[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M2, M1, E], DT]:
-    """Transpose a slate array."""
     as_diagonal = as_diagonal_basis(array)
     if as_diagonal is not None:
         return _transpose_from_diagonal(as_diagonal)
 
-    return _transpose_from_tuple(as_tuple_basis(array))
+    return _transpose_from_tuple_simple(as_tuple_basis(array))
+
+
+def _transpose_from_tuple[M: BasisMetadata, E, DT: np.generic](
+    array: Array[
+        StackedMetadata[M, E],
+        DT,
+        TupleBasis[M, E, Any],
+    ],
+    axes: tuple[int, ...] | None = None,
+) -> Array[StackedMetadata[M, E], DT, TupleBasis[M, E, Any]]:
+    # TODO: einsum based implementation would be preferred here...  # noqa: FIX002
+    children = array.basis.children
+    axes = tuple(range(len(children)))[::-1] if axes is None else axes
+    out_basis = tuple_basis(
+        tuple(children[i] for i in axes), array.basis.metadata().extra
+    )
+
+    return Array(out_basis, array.raw_data.reshape(array.basis.shape).transpose(axes))
+
+
+@overload
+def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+    array: Array[Metadata2D[M1, M2, E], DT],
+    axes: None = None,
+) -> Array[Metadata2D[M2, M1, E], DT]: ...
+
+
+@overload
+def transpose[M: BasisMetadata, Any, DT: np.generic](
+    array: Array[StackedMetadata[M, Any], DT],
+    axes: tuple[int, ...] | None = None,
+) -> Array[StackedMetadata[M, Any], DT]: ...
+
+
+def transpose[DT: np.generic](
+    array: Array[StackedMetadata[Any, Any], DT],
+    axes: tuple[int, ...] | None = None,
+) -> Array[StackedMetadata[Any, Any], DT]:
+    """Transpose a slate array."""
+    array = as_index_basis(array)
+    if axes is None and array.basis.metadata().n_dim == 2:  # noqa: PLR2004
+        return _transpose_simple(cast("Array[Metadata2D[Any, Any, Any], DT]", array))
+
+    return _transpose_from_tuple(as_tuple_basis(array), axes)
 
 
 def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
@@ -114,3 +164,50 @@ def dagger[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
 ) -> Array[Metadata2D[M2, M1, E], DT]:
     """Conjugate Transpose a slate array."""
     return conjugate(transpose(array))
+
+
+@overload
+def get_data_in_axes[M: BasisMetadata, DT: np.generic](
+    array: Array[StackedMetadata[M, Any], DT],
+    axes: tuple[int],
+    idx: tuple[int, ...],
+) -> Array[Metadata1D[M, Any], DT]: ...
+
+
+@overload
+def get_data_in_axes[M: BasisMetadata, DT: np.generic](
+    array: Array[StackedMetadata[M, Any], DT],
+    axes: tuple[int, int],
+    idx: tuple[int, ...],
+) -> Array[Metadata2D[M, M, Any], DT]: ...
+
+
+@overload
+def get_data_in_axes[M: BasisMetadata, DT: np.generic](
+    array: Array[StackedMetadata[M, Any], DT],
+    axes: tuple[int, ...],
+    idx: tuple[int, ...],
+) -> Array[StackedMetadata[M, Any], DT]: ...
+
+
+def get_data_in_axes[M: BasisMetadata, DT: np.generic](
+    array: Array[StackedMetadata[M, Any], DT],
+    axes: tuple[int, ...],
+    idx: tuple[int, ...],
+) -> Array[StackedMetadata[M, Any], DT]:
+    """
+    Given a slice, insert slice(None) everywhere given in axes.
+
+    Parameters
+    ----------
+    slice : list[slice  |  _IntLike_co  |  None]
+        slice excluding axes
+    axes : tuple[_IntLike_co]
+        axes to insert slice(None)
+
+    Returns
+    -------
+    list[slice | _IntLike_co | None]
+    """
+    indexed = array[slice_ignoring_axes(idx, axes)]
+    return transpose(indexed, get_position_in_sorted(axes))

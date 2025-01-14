@@ -12,11 +12,11 @@ from slate.basis import (
 from slate.metadata._metadata import BasisMetadata
 from slate.metadata._shape import shallow_shape_from_nested
 from slate.plot._plot import (
-    basis_against_array,
-    basis_against_array_1d_k,
-    basis_against_array_1d_x,
-    basis_against_array_2d_k,
-    basis_against_array_2d_x,
+    array_against_axes_1d,
+    array_against_axes_1d_k,
+    array_against_axes_2d_k,
+    array_against_axes_2d_x,
+    array_against_basis,
 )
 from slate.plot._util import (
     Axes,
@@ -70,7 +70,7 @@ def animate_array_over_list[DT: np.number[Any]](
     frames: list[tuple[Line2D]] = []
 
     for idx_x0 in range(shape[0]):
-        _, _, line = basis_against_array(
+        _, _, line = array_against_basis(
             _index_array(data, idx_x0),
             ax=ax,
             scale=scale,
@@ -108,7 +108,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     frames: list[tuple[Line2D]] = []
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
-        _, _, line = basis_against_array_1d_x(
+        _, _, line = array_against_axes_1d(
             Array(basis_x, raw_data),
             axes,
             idx,
@@ -140,7 +140,7 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     frames: list[tuple[Line2D]] = []
 
     for idx_x0 in range(shape[axes[0]]):
-        _, _, line = basis_against_array_1d_x(
+        _, _, line = array_against_axes_1d(
             data,
             axes[1:],
             _get_slice_idx(axes, idx_x0, idx),
@@ -180,7 +180,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     frames: list[tuple[Line2D]] = []
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
-        _, _, line = basis_against_array_1d_k(
+        _, _, line = array_against_axes_1d_k(
             Array(final_basis[1], raw_data),
             axes,
             idx,
@@ -212,7 +212,7 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     frames: list[tuple[Line2D]] = []
 
     for idx_x0 in range(shape[axes[0]]):
-        _, _, line = basis_against_array_1d_k(
+        _, _, line = array_against_axes_1d_k(
             data,
             axes[1:],
             _get_slice_idx(axes, idx_x0, idx),
@@ -266,7 +266,7 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
     frames: list[tuple[QuadMesh]] = []
 
     for idx_x0 in range(shape[axes[0]]):
-        _, _, mesh = basis_against_array_2d_x(
+        _, _, mesh = array_against_axes_2d_x(
             data,
             axes[1:],
             _get_slice_idx(axes, idx_x0, idx),
@@ -317,7 +317,7 @@ def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
 
     frames: list[tuple[QuadMesh]] = []
     for idx_x0 in range(shape[axes[0]]):
-        _, _, mesh = basis_against_array_2d_k(
+        _, _, mesh = array_against_axes_2d_k(
             data,
             axes[1:],
             _get_slice_idx(axes, idx_x0, idx),
