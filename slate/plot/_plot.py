@@ -5,11 +5,9 @@ from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 import numpy as np
 
 from slate import array, basis
-from slate.array import Array
-from slate.metadata import (
-    AxisDirections,
-    LabeledMetadata,
-)
+from slate.array import Array, get_data_in_axes
+from slate.basis import from_metadata
+from slate.metadata import AnyMetadata, AxisDirections, LabeledMetadata
 from slate.metadata.length import (
     fundamental_k_points,
     fundamental_x_points,
@@ -32,7 +30,6 @@ from slate.plot._util import (
     set_ymargin,
 )
 from slate.util import (
-    get_data_in_axes,
     get_max_idx,
 )
 
@@ -40,6 +37,7 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
+    from slate.basis._basis import Basis
     from slate.metadata import BasisMetadata, SpacedVolumeMetadata, StackedMetadata
     from slate.metadata.length import SpacedLengthMetadata
 
@@ -124,7 +122,19 @@ def array_against_array[M: BasisMetadata, DT: np.number[Any]](
     )
 
 
-def basis_against_array[M: BasisMetadata, DT: np.number[Any]](
+def _get_basis_coordinates(
+    basis: Basis[Any, Any],
+) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
+    metadata = basis.metadata()
+    if isinstance(metadata, LabeledMetadata):
+        values = metadata.values.astype(np.float64)  # type: ignore unknown
+        coordinates = values[basis.points]
+    else:
+        coordinates = basis.points.astype(np.float64)
+    return coordinates
+
+
+def array_against_basis[M: BasisMetadata, DT: np.number[Any]](
     data: Array[M, DT],
     *,
     y_error: Array[M, np.floating[Any]] | None = None,
@@ -150,14 +160,7 @@ def basis_against_array[M: BasisMetadata, DT: np.number[Any]](
     tuple[Figure, Axes, Line2D]
     """
     converted = array.as_index_basis(data)
-
-    metadata = converted.basis.metadata()
-    if isinstance(metadata, LabeledMetadata):
-        values = metadata.values.astype(np.float64)  # type: ignore unknown
-        coordinates = values[converted.basis.points]
-    else:
-        coordinates = converted.basis.points.astype(np.float64)
-
+    coordinates = _get_basis_coordinates(converted.basis)
     return array_against_array(
         Array(converted.basis, coordinates),
         converted,
@@ -167,7 +170,44 @@ def basis_against_array[M: BasisMetadata, DT: np.number[Any]](
     )
 
 
-def basis_against_array_1d_k[DT: np.number[Any]](
+def array_against_axes_1d[DT: np.number[Any]](
+    data: Array[StackedMetadata[Any, Any], DT],
+    axes: tuple[int,] = (0,),
+    idx: tuple[int, ...] | None = None,
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, Axes, Line2D]:
+    """
+    Plot data along axes in the x basis.
+
+    Parameters
+    ----------
+    basis : TupleBasisLike
+    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
+    axes : tuple[int, int], optional
+        axes to plot in, by default (0, 1)
+    idx : SingleStackedIndexLike | None, optional
+        index to plot, by default None
+    ax : Axes | None, optional
+        plot axis, by default None
+    scale : Scale, optional
+        scale, by default "linear"
+    measure : Measure, optional
+        measure, by default "abs"
+
+    Returns
+    -------
+    tuple[Figure, Axes, Line2D]
+    """
+    metadata = data.basis.metadata()
+    idx = tuple(0 for _ in range(metadata.n_dim - 1)) if idx is None else idx
+
+    data_in_axis = array.flatten(get_data_in_axes(data, axes, idx))
+    fig, ax, line = array_against_basis(data_in_axis, periodic=True, **kwargs)
+
+    return fig, ax, line
+
+
+def array_against_axes_1d_k[DT: np.number[Any]](
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -195,17 +235,20 @@ def basis_against_array_1d_k[DT: np.number[Any]](
     -------
     tuple[Figure, Axes, Line2D]
     """
+    metadata = data.basis.metadata()
     basis_k = basis.fundamental_transformed_tuple_basis_from_metadata(
-        data.basis.metadata(), is_dual=data.basis.is_dual
+        metadata, is_dual=data.basis.is_dual
     )
-    converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
+    converted_data = Array.from_array(
+        data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
+    )
 
-    idx = get_max_idx(converted_data, axes) if idx is None else idx
+    idx = tuple(0 for _ in range(metadata.n_dim - 1)) if idx is None else idx
 
-    coordinates = get_k_coordinates_in_axes(basis_k.metadata(), axes, idx)
+    coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
     data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
-    shifted_data = np.fft.fftshift(data_in_axis)
+    shifted_data = np.fft.fftshift(data_in_axis.as_array())
     shifted_coordinates = np.fft.fftshift(coordinates[0])
 
     fig, ax, line = _plot_raw_data_1d(
@@ -213,51 +256,6 @@ def basis_against_array_1d_k[DT: np.number[Any]](
     )
 
     ax.set_xlabel(f"k{(axes[0] % 3)} axis")
-    return fig, ax, line
-
-
-def basis_against_array_1d_x[DT: np.number[Any]](
-    data: Array[SpacedVolumeMetadata, DT],
-    axes: tuple[int,] = (0,),
-    idx: tuple[int, ...] | None = None,
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, Axes, Line2D]:
-    """
-    Plot data along axes in the x basis.
-
-    Parameters
-    ----------
-    basis : TupleBasisLike
-    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
-    axes : tuple[int, int], optional
-        axes to plot in, by default (0, 1)
-    idx : SingleStackedIndexLike | None, optional
-        index to plot, by default None
-    ax : Axes | None, optional
-        plot axis, by default None
-    scale : Scale, optional
-        scale, by default "linear"
-    measure : Measure, optional
-        measure, by default "abs"
-
-    Returns
-    -------
-    tuple[Figure, Axes, Line2D]
-    """
-    basis_x = basis.from_metadata(data.basis.metadata(), is_dual=data.basis.is_dual)
-    converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
-
-    idx = get_max_idx(converted_data, axes) if idx is None else idx
-
-    coordinates = get_x_coordinates_in_axes(basis_x.metadata(), axes, idx)
-    data_in_axis = get_data_in_axes(converted_data, axes, idx)
-
-    fig, ax, line = _plot_raw_data_1d(
-        data_in_axis, coordinates[0], periodic=True, **kwargs
-    )
-
-    ax.set_xlabel(f"x{(axes[0] % 3)} axis")
-
     return fig, ax, line
 
 
@@ -294,6 +292,29 @@ def _plot_raw_data_2d[DT: np.number[Any]](
     return fig, ax, mesh
 
 
+def _get_coordinates_grid(
+    metadata: StackedMetadata[AnyMetadata, Any],
+) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
+    """Get the lengths from each axis in a grid."""
+    points = tuple(_get_basis_coordinates(from_metadata(m)) for m in metadata)
+    aa = np.meshgrid(*points, indexing="ij")
+    return np.asarray(aa)
+
+
+def array_against_axes_2d[M: StackedMetadata[AnyMetadata, Any], DT: np.number[Any]](
+    data: Array[M, DT],
+    axes: tuple[int, int] = (0, 1),
+    idx: tuple[int, ...] | None = None,
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, Axes, QuadMesh]:
+    idx = tuple(0 for _ in range(data.basis.metadata().n_dim)) if idx is None else idx
+
+    data_in_axis = get_data_in_axes(data, axes, idx)
+
+    coordinates = _get_coordinates_grid(data_in_axis.basis.metadata())
+    return _plot_raw_data_2d(data_in_axis.as_array(), coordinates, **kwargs)
+
+
 def _get_lengths_in_axes(
     metadata: StackedMetadata[SpacedLengthMetadata, Any],
     axes: tuple[int, ...],
@@ -304,7 +325,7 @@ def _get_lengths_in_axes(
     return np.asarray(aa)
 
 
-def basis_against_array_2d_x[DT: np.number[Any], E](
+def array_against_axes_2d_x[DT: np.number[Any], E](
     data: Array[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -346,11 +367,9 @@ def basis_against_array_2d_x[DT: np.number[Any], E](
     else:
         coordinates = _get_lengths_in_axes(metadata, axes)
 
-    data_in_axis = get_data_in_axes(converted_data, axes, idx)
+    data_in_axis = get_data_in_axes(data, axes, idx)
 
-    fig, ax, mesh = _plot_raw_data_2d(
-        data_in_axis.reshape(coordinates.shape[1:]), coordinates, **kwargs
-    )
+    fig, ax, mesh = _plot_raw_data_2d(data_in_axis.as_array(), coordinates, **kwargs)
 
     ax.set_xlabel(f"x{axes[0]} axis / m")
     ax.set_ylabel(f"x{axes[1]} axis / m")
@@ -376,7 +395,7 @@ def _get_frequencies_in_axes(
     return np.asarray(aa)
 
 
-def basis_against_array_2d_k[DT: np.number[Any], E](
+def array_against_axes_2d_k[DT: np.number[Any], E](
     data: Array[StackedMetadata[SpacedLengthMetadata, E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -417,9 +436,9 @@ def basis_against_array_2d_k[DT: np.number[Any], E](
         coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
     else:
         coordinates = _get_frequencies_in_axes(metadata, axes)
-    data_in_axis = get_data_in_axes(converted_data, axes, idx)
+    data_in_axis = get_data_in_axes(Array.from_array(converted_data), axes, idx)
 
-    shifted_data = np.fft.fftshift(data_in_axis)
+    shifted_data = np.fft.fftshift(data_in_axis.as_array())
     shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))
 
     fig, ax, mesh = _plot_raw_data_2d(shifted_data, shifted_coordinates, **kwargs)

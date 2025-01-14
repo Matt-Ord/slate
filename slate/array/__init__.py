@@ -12,6 +12,7 @@ from slate.array._conversion import (
     as_index_basis,
     as_mul_basis,
     as_outer_array,
+    as_raw_array,
     as_sub_basis,
     as_tuple_basis,
     cast_basis,
@@ -46,7 +47,7 @@ from slate.array._misc import (
     unwrap,
 )
 from slate.array._stats import average, max, min, standard_deviation  # noqa: A004
-from slate.array._transpose import conjugate, dagger, transpose
+from slate.array._transpose import conjugate, dagger, get_data_in_axes, transpose
 
 __all__ = [
     "Array",
@@ -67,6 +68,7 @@ __all__ = [
     "as_index_basis",
     "as_mul_basis",
     "as_outer_array",
+    "as_raw_array",
     "as_sub_basis",
     "as_tuple_basis",
     "average",
@@ -77,6 +79,7 @@ __all__ = [
     "dagger",
     "exp",
     "flatten",
+    "get_data_in_axes",
     "imag",
     "log",
     "log2",

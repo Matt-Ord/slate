@@ -16,11 +16,12 @@ from slate.plot._animate import (
 from slate.plot._distribution import Distribution, array_distribution
 from slate.plot._plot import (
     array_against_array,
-    basis_against_array,
-    basis_against_array_1d_k,
-    basis_against_array_1d_x,
-    basis_against_array_2d_k,
-    basis_against_array_2d_x,
+    array_against_axes_1d,
+    array_against_axes_1d_k,
+    array_against_axes_2d,
+    array_against_axes_2d_k,
+    array_against_axes_2d_x,
+    array_against_basis,
 )
 
 try:
@@ -69,12 +70,13 @@ __all__ = [
     "animate_data_over_list_1d_k",
     "animate_data_over_list_1d_x",
     "array_against_array",
+    "array_against_axes_1d",
+    "array_against_axes_1d_k",
+    "array_against_axes_2d",
+    "array_against_axes_2d_k",
+    "array_against_axes_2d_x",
+    "array_against_basis",
     "array_distribution",
-    "basis_against_array",
-    "basis_against_array_1d_k",
-    "basis_against_array_1d_x",
-    "basis_against_array_2d_k",
-    "basis_against_array_2d_x",
     "combine_animations",
     "get_figure",
     "get_measured_data",

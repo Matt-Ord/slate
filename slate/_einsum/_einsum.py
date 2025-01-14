@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, cast
+from dataclasses import dataclass
+from typing import Any, cast
 
 import numpy as np
 
 from slate._einsum._einstein_index import (
     EinsteinIndex,
+    EinsumSpecification,
     NestedEinsteinIndex,
     parse_einsum_specification,
 )
@@ -20,11 +22,9 @@ from slate.basis import (
 from slate.basis._block_diagonal import as_block_diagonal_basis
 from slate.basis._diagonal import as_diagonal_basis
 from slate.basis._fundamental import FundamentalBasis
-from slate.basis._util import as_linear_map_basis
-from slate.metadata import NestedLength, StackedMetadata
-
-if TYPE_CHECKING:
-    from slate.metadata import BasisMetadata
+from slate.basis._util import as_linear_map_basis, from_shape
+from slate.basis.recast import RecastBasis
+from slate.metadata import BasisMetadata, NestedLength, StackedMetadata
 
 
 def _einsum_numpy[DT: np.number[Any]](
@@ -144,40 +144,95 @@ def _flatten_nested[T](nested: NestedData[T]) -> tuple[T, ...]:
     return (nested,)
 
 
-def _einsum_simple[DT: np.number[Any]](
-    idx: str,
-    *arrays: Array[BasisMetadata, DT],
-) -> Array[Any, DT, Any]:
-    specification = parse_einsum_specification(idx)
+@dataclass(frozen=True)
+class BasisSpecification:
+    result_index: tuple[str, ...]
+    result_basis: Basis[Any, Any] | None
+    part_index: tuple[tuple[str, ...], ...]
+    part_basis: tuple[RecastBasis[BasisMetadata, StackedMetadata[Any, Any], Any], ...]
+
+    def get_part_data(
+        self, *arrays: Array[BasisMetadata, Any]
+    ) -> tuple[np.ndarray[tuple[int, ...], np.dtype[Any]], ...]:
+        return tuple(
+            arr.with_basis(b.inner).raw_data.reshape(b.outer_recast.metadata().shape)
+            for (arr, b) in zip(arrays, self.part_basis, strict=True)
+        )
+
+
+def _reslove_basis(
+    specification: EinsumSpecification, arrays: tuple[Array[Any, Any], ...]
+) -> BasisSpecification:
     # For now, we don't support any optimization
     # we just do the naive einsum in the fundamental basis
     hints = EinsumBasisHints()
     for arr, part in zip(arrays, specification.parts, strict=False):
         _collect_einsum_basis_hints(arr.basis, part, hints)
     basis_map = hints.resolve_basis_map()
-    raw_arrays = list[np.ndarray[Any, Any]]()
-    raw_idx = list[str]()
-    for arr, part in zip(arrays, specification.parts, strict=False):
+    part_basis = list[
+        RecastBasis[
+            BasisMetadata,
+            StackedMetadata[Any, Any],
+            Any,
+            Basis[BasisMetadata, Any],
+            Basis[StackedMetadata[Any, Any], Any],
+        ],
+    ]()
+    part_index = list[tuple[str, ...]]()
+
+    for _arr, part in zip(arrays, specification.parts, strict=False):
         basis, shape = _resolve_einsum_basis(part, basis_map)
-        converted = arr.with_basis(basis)
-        raw_arrays.append(converted.raw_data.reshape(_flatten_nested(shape)))
 
-        flat_idx = _flatten_nested(part)
-        raw_idx.append("".join(i.label for i in flat_idx))
+        part_basis.append(
+            RecastBasis(
+                basis,
+                from_shape(_flatten_nested(shape)),
+                from_shape(_flatten_nested(shape)),
+            )
+        )
 
-    final_idx = ",".join(raw_idx) + "->"
+        part_index.append(tuple(i.label for i in _flatten_nested(part)))
 
-    if specification.result is None:
+    result_basis = (
+        None
+        if specification.result is None
+        else _resolve_einsum_basis(specification.result, basis_map)[0]
+    )
+    out_shape_flat = (
+        tuple[EinsteinIndex]()
+        if specification.result is None
+        else _flatten_nested(specification.result)
+    )
+
+    return BasisSpecification(
+        result_index=tuple(i.label for i in out_shape_flat),
+        result_basis=result_basis,
+        part_index=tuple(part_index),
+        part_basis=tuple(part_basis),
+    )
+
+
+def _einsum_simple[DT: np.number[Any]](
+    idx: str,
+    *arrays: Array[BasisMetadata, DT],
+) -> Array[Any, DT, Any]:
+    specification = parse_einsum_specification(idx)
+    resolved = _reslove_basis(specification, arrays)
+
+    raw_arrays = resolved.get_part_data(*arrays)
+    raw_idx = resolved.part_index
+
+    final_idx = ",".join("".join(i) for i in raw_idx) + "->"
+    result_basis = resolved.result_basis
+    if result_basis is None:
         return Array(
             FundamentalBasis.from_size(1),
             _einsum_numpy(final_idx, *raw_arrays),
         )
 
-    out_basis, _shape = _resolve_einsum_basis(specification.result, basis_map)
-    out_shape_flat = _flatten_nested(specification.result)
+    final_idx += "".join(resolved.result_index)
 
-    final_idx += "".join(i.label for i in out_shape_flat)
-    return Array(out_basis, _einsum_numpy(final_idx, *raw_arrays))
+    return Array(result_basis, _einsum_numpy(final_idx, *raw_arrays))
 
 
 def _einsum_smart[DT: np.number[Any]](
