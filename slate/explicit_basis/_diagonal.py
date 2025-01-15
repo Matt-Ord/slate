@@ -11,9 +11,11 @@ from slate.explicit_basis._explicit_basis import ExplicitUnitaryBasis
 from slate.metadata import BasisMetadata
 
 
-class TrivialExplicitBasis[M: BasisMetadata, DT: np.generic, B: Basis[Any, Any]](
-    ExplicitUnitaryBasis[M, DT, B]
-):
+class TrivialExplicitBasis[
+    M: BasisMetadata,
+    DT: np.generic,
+    B: Basis[Any, Any],
+](ExplicitUnitaryBasis[M, DT, B, Basis[Any, Any]]):
     def __init__[B1: Basis[Any, Any]](
         self: TrivialExplicitBasis[Any, Any, B1], inner: B1
     ) -> None:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Literal, Self, cast, override
+from typing import Any, Literal, Self, cast, override
 
 import numpy as np
 
@@ -14,17 +14,18 @@ from slate.basis import (
     Basis,
     BasisFeature,
     BasisStateMetadata,
+    FundamentalBasis,
+    RecastBasis,
     WrappedBasis,
     as_tuple_basis,
     tuple_basis,
 )
-from slate.basis._fundamental import FundamentalBasis
-from slate.basis.recast import RecastBasis
-from slate.metadata import BasisMetadata, SimpleMetadata, shallow_shape_from_nested
-
-if TYPE_CHECKING:
-    from slate.metadata import Metadata2D
-
+from slate.metadata import (
+    BasisMetadata,
+    Metadata2D,
+    SimpleMetadata,
+    shallow_shape_from_nested,
+)
 
 type Direction = Literal["forward", "backward"]
 
@@ -257,7 +258,7 @@ class ExplicitUnitaryBasis[
     BTransform: Basis[Any, Any] = Basis[
         Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
     ],
-](ExplicitBasis[M, DT, B]):
+](ExplicitBasis[M, DT, B, BTransform]):
     """Represents a truncated basis."""
 
     def __init__[
