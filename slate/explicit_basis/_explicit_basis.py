@@ -33,6 +33,9 @@ class ExplicitBasis[
     M: BasisMetadata,
     DT: np.generic,
     B: Basis[Any, Any] = Basis[M, DT],
+    BTransform: Basis[Any, Any] = Basis[
+        Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
+    ],
 ](
     WrappedBasis[M, DT, B],
 ):
@@ -41,15 +44,19 @@ class ExplicitBasis[
     def __init__[
         DT1: np.generic,
         B1: Basis[Any, Any],
+        _BTransform: Basis[Any, Any],
     ](
-        self: ExplicitBasis[Any, DT1, B1],
-        matrix: Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B1], None], DT1],
+        self: ExplicitBasis[Any, DT1, B1, _BTransform],
+        matrix: Array[
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], None], DT1, _BTransform
+        ],
         *,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
         self._matrix = cast(
-            "Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT]", matrix
+            "Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT, BTransform]",
+            matrix,
         )
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
@@ -84,6 +91,12 @@ class ExplicitBasis[
             if self.direction == "forward"
             else transpose(self._matrix)
         )
+
+    @property
+    def matrix(
+        self,
+    ) -> Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT, BTransform]:
+        return self._matrix
 
     @property
     def eigenvectors(self) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
@@ -241,15 +254,21 @@ class ExplicitUnitaryBasis[
     M: BasisMetadata,
     DT: np.generic,
     B: Basis[Any, Any] = Basis[M, DT],
+    BTransform: Basis[Any, Any] = Basis[
+        Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
+    ],
 ](ExplicitBasis[M, DT, B]):
     """Represents a truncated basis."""
 
     def __init__[
         DT1: np.generic,
         B1: Basis[Any, Any],
+        _BTransform: Basis[Any, Any],
     ](
-        self: ExplicitUnitaryBasis[Any, DT1, B1],
-        matrix: Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any], DT1],
+        self: ExplicitUnitaryBasis[Any, DT1, B1, _BTransform],
+        matrix: Array[
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any], DT1, _BTransform
+        ],
         *,
         assert_unitary: bool = False,
         direction: Direction = "forward",
