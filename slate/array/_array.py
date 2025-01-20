@@ -6,14 +6,12 @@ import numpy as np
 
 from slate import basis
 from slate.basis import Basis, FundamentalBasis, TupleBasis, TupleBasis1D, TupleBasis3D
-from slate.basis._tuple import tuple_basis
 from slate.metadata import (
     BasisMetadata,
     Metadata2D,
     NestedLength,
     shallow_shape_from_nested,
 )
-from slate.metadata._shape import size_from_nested_shape
 from slate.util._index import slice_along_axis
 
 if TYPE_CHECKING:
@@ -29,13 +27,15 @@ type NestedIndex = Index | tuple[NestedIndex, ...]
 
 def _index_single_raw_along_axis[DT: np.generic](
     index: Index,
-    basis: Basis[BasisMetadata, Any],
+    data_basis: Basis[BasisMetadata, Any],
     data: np.ndarray[Any, np.dtype[DT]],
     *,
     axis: int = -1,
 ) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, np.dtype[DT]]]:
     if index == slice(None):
-        return basis, data
+        return data_basis, data
+    fundamental_basis = basis.as_fundamental(data_basis)
+    data = data_basis.__convert_vector_into__(data, fundamental_basis, axis=axis)
     out = data[slice_along_axis(index, axis=axis)]
     out_basis = (
         FundamentalBasis.from_size(out.shape[axis])
@@ -47,19 +47,18 @@ def _index_single_raw_along_axis[DT: np.generic](
 
 def _index_tuple_raw_along_axis[DT: np.generic](
     index: tuple[NestedIndex, ...],
-    b: Basis[BasisMetadata, Any],
+    data_basis: Basis[BasisMetadata, Any],
     data: np.ndarray[Any, np.dtype[DT]],
     *,
     axis: int = -1,
 ) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, np.dtype[DT]]]:
     axis &= data.ndim
-    b = basis.as_tuple_basis(b)
-    children = b.children
+    tuple_basis = basis.as_tuple_basis(basis.as_linear_map_basis(data_basis))
+    children = tuple_basis.children
     stacked_shape = (
-        data.shape[:axis]
-        + tuple(size_from_nested_shape(c.fundamental_shape) for c in children)
-        + data.shape[axis + 1 :]
+        data.shape[:axis] + tuple(c.size for c in children) + data.shape[axis + 1 :]
     )
+    data = data_basis.__convert_vector_into__(data, tuple_basis, axis=axis)
     data = data.reshape(stacked_shape)
 
     final_basis = list[Basis[Any, Any]]()
@@ -74,7 +73,7 @@ def _index_tuple_raw_along_axis[DT: np.generic](
     data = data.reshape(data.shape[:axis] + (-1,) + data.shape[axis + 1 :])
     if len(final_basis) == 1:
         return final_basis[0], data
-    return tuple_basis(tuple(final_basis), None), data
+    return basis.tuple_basis(tuple(final_basis), None), data
 
 
 def _index_raw_along_axis[DT: np.generic](
@@ -295,10 +294,8 @@ class Array[
         self: Array[Any, _DT],
         index: NestedIndex,
     ) -> Array[Any, _DT] | _DT:
-        fundamental_basis = basis.as_fundamental(self.basis)
-        data = self.with_basis(fundamental_basis).raw_data
         indexed_basis, indexed_data = _index_raw_along_axis(
-            index, fundamental_basis, data.reshape(-1, 1), axis=0
+            index, self.basis, self.raw_data.reshape(-1, 1), axis=0
         )
         if indexed_basis is None:
             return indexed_data.item()

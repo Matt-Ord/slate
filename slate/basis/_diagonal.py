@@ -54,6 +54,8 @@ class DiagonalBasis[
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if vectors.size == 0:
+            return vectors
         swapped = vectors.swapaxes(axis, 0)
         stacked = swapped.reshape(self.size, *swapped.shape[1:])
 
@@ -76,6 +78,8 @@ class DiagonalBasis[
         vectors: np.ndarray[Any, np.dtype[DT1]],
         axis: int = -1,
     ) -> np.ndarray[Any, np.dtype[DT1]]:
+        if vectors.size == 0:
+            return vectors
         swapped = vectors.swapaxes(axis, 0)
         stacked = swapped.reshape(*self.inner.shape, *swapped.shape[1:])
 
