@@ -238,23 +238,23 @@ class Array[
         return Array(as_mul_basis, data)
 
     @overload
-    def __iter__[_DT: np.generic](
-        self: Array[Metadata1D[Any, Any], _DT, Basis[Any, Any]], /
+    def __iter__[DT_: np.generic](
+        self: Array[Metadata1D[Any, Any], DT_, Basis[Any, Any]], /
     ) -> Never: ...
     @overload
-    def __iter__[_M1: BasisMetadata, _DT: np.generic](
-        self: Array[Metadata2D[Any, _M1, Any], _DT, Basis[Any, Any]], /
-    ) -> Iterator[Array[Basis[_M1, Any], _DT]]: ...
+    def __iter__[M1: BasisMetadata, DT_: np.generic](
+        self: Array[Metadata2D[Any, M1, Any], DT_, Basis[Any, Any]], /
+    ) -> Iterator[Array[Basis[M1, Any], DT_]]: ...
     @overload
-    def __iter__[_M1: BasisMetadata, _M2: BasisMetadata, _DT: np.generic](
-        self: Array[Metadata3D[Any, _M1, _M2, Any], _DT, Basis[Any, Any]], /
+    def __iter__[M1: BasisMetadata, M2: BasisMetadata, DT_: np.generic](
+        self: Array[Metadata3D[Any, M1, M2, Any], DT_, Basis[Any, Any]], /
     ) -> Iterator[
-        Array[TupleBasis2D[Any, Basis[_M1, Any], Basis[_M2, Any], Any], _DT]
+        Array[TupleBasis2D[Any, Basis[M1, Any], Basis[M2, Any], Any], DT_]
     ]: ...
     @overload
-    def __iter__[_M1: BasisMetadata, _DT: np.generic](
-        self: Array[StackedMetadata[_M1, Any], _DT, Basis[_M1, Any]], /
-    ) -> Iterator[Array[StackedMetadata[_M1, None], _DT]]: ...
+    def __iter__[M1: BasisMetadata, DT_: np.generic](
+        self: Array[StackedMetadata[M1, Any], DT_, Basis[M1, Any]], /
+    ) -> Iterator[Array[StackedMetadata[M1, None], DT_]]: ...
 
     def __iter__(
         self: Array[Any, Any, Basis[BasisMetadata, Any]], /
@@ -279,21 +279,21 @@ class Array[
         )
 
     @overload
-    def __getitem__[_DT: np.generic](
-        self: Array[Any, _DT],
+    def __getitem__[DT_: np.generic](
+        self: Array[Any, DT_],
         index: int,
-    ) -> _DT: ...
+    ) -> DT_: ...
 
     @overload
-    def __getitem__[_DT: np.generic](
-        self: Array[Any, _DT],
+    def __getitem__[DT_: np.generic](
+        self: Array[Any, DT_],
         index: tuple[NestedIndex, ...] | slice,
-    ) -> Array[Any, _DT]: ...
+    ) -> Array[Any, DT_]: ...
 
-    def __getitem__[_DT: np.generic](
-        self: Array[Any, _DT],
+    def __getitem__[DT_: np.generic](
+        self: Array[Any, DT_],
         index: NestedIndex,
-    ) -> Array[Any, _DT] | _DT:
+    ) -> Array[Any, DT_] | DT_:
         indexed_basis, indexed_data = _index_raw_along_axis(
             index, self.basis, self.raw_data.reshape(-1, 1), axis=0
         )

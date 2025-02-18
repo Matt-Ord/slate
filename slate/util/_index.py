@@ -25,11 +25,11 @@ def slice_along_axis(
     return (*slice_padding, slice_at_axis)
 
 
-def slice_ignoring_axes[_A: slice | int | None](
-    old_slice: Sequence[_A], axes: tuple[int, ...]
-) -> tuple[slice | _A, ...]:
+def slice_ignoring_axes[A: slice | int | None](
+    old_slice: Sequence[A], axes: tuple[int, ...]
+) -> tuple[slice | A, ...]:
     """Given a slice, insert slice(None) everywhere given in axes."""
-    new_slice = list[slice | _A](old_slice)
+    new_slice = list[slice | A](old_slice)
     for axis in sorted(int(a) for a in axes):
         new_slice.insert(axis, slice(None))
     return tuple(new_slice)

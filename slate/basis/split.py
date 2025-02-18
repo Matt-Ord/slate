@@ -33,12 +33,12 @@ class SplitBasis[
     """
 
     def __init__[
-        _B0: Basis[Any, Any],
-        _B1: Basis[Any, Any],
+        B0_: Basis[Any, Any],
+        B1_: Basis[Any, Any],
     ](
-        self: SplitBasis[Any, Any, _B0, _B1],
-        lhs: _B0,
-        rhs: _B1,
+        self: SplitBasis[Any, Any, B0_, B1_],
+        lhs: B0_,
+        rhs: B1_,
     ) -> None:
         self._lhs: B0 = lhs
         self._rhs: B1 = rhs

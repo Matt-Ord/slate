@@ -45,11 +45,11 @@ class ExplicitBasis[
     def __init__[
         DT1: np.generic,
         B1: Basis[Any, Any],
-        _BTransform: Basis[Any, Any],
+        BTransform_: Basis[Any, Any],
     ](
-        self: ExplicitBasis[Any, DT1, B1, _BTransform],
+        self: ExplicitBasis[Any, DT1, B1, BTransform_],
         matrix: Array[
-            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], None], DT1, _BTransform
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], None], DT1, BTransform_
         ],
         *,
         direction: Direction = "forward",
@@ -264,11 +264,11 @@ class ExplicitUnitaryBasis[
     def __init__[
         DT1: np.generic,
         B1: Basis[Any, Any],
-        _BTransform: Basis[Any, Any],
+        BTransform_: Basis[Any, Any],
     ](
-        self: ExplicitUnitaryBasis[Any, DT1, B1, _BTransform],
+        self: ExplicitUnitaryBasis[Any, DT1, B1, BTransform_],
         matrix: Array[
-            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any], DT1, _BTransform
+            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], Any], DT1, BTransform_
         ],
         *,
         assert_unitary: bool = False,
