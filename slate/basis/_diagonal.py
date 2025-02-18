@@ -31,9 +31,9 @@ class DiagonalBasis[
 ):
     """Represents a diagonal basis."""
 
-    def __init__[_DT: np.generic, _B0: Basis[Any, Any], _B1: Basis[Any, Any], _E](
-        self: DiagonalBasis[_DT, _B0, _B1, _E],
-        inner: TupleBasis2D[_DT, _B0, _B1, _E],
+    def __init__[DT_: np.generic, B0_: Basis[Any, Any], B1_: Basis[Any, Any], E_](
+        self: DiagonalBasis[DT_, B0_, B1_, E_],
+        inner: TupleBasis2D[DT_, B0_, B1_, E_],
     ) -> None:
         super().__init__(cast("Any", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
@@ -158,20 +158,20 @@ class DiagonalBasis[
 
 
 @overload
-def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
-    children: tuple[_B0, _B1], extra_metadata: None = None
-) -> DiagonalBasis[Any, _B0, _B1, None]: ...
+def diagonal_basis[B0: Basis[Any, Any], B1: Basis[Any, Any]](
+    children: tuple[B0, B1], extra_metadata: None = None
+) -> DiagonalBasis[Any, B0, B1, None]: ...
 
 
 @overload
-def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
-    children: tuple[_B0, _B1], extra_metadata: E
-) -> DiagonalBasis[Any, _B0, _B1, E]: ...
+def diagonal_basis[B0: Basis[Any, Any], B1: Basis[Any, Any], E](
+    children: tuple[B0, B1], extra_metadata: E
+) -> DiagonalBasis[Any, B0, B1, E]: ...
 
 
-def diagonal_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
-    children: tuple[_B0, _B1], extra_metadata: E | None = None
-) -> DiagonalBasis[Any, _B0, _B1, E | None]:
+def diagonal_basis[B0: Basis[Any, Any], B1: Basis[Any, Any], E](
+    children: tuple[B0, B1], extra_metadata: E | None = None
+) -> DiagonalBasis[Any, B0, B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
     return DiagonalBasis(tuple_basis(children, extra_metadata))
 

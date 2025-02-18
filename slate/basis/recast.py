@@ -21,15 +21,15 @@ class RecastBasis[
     """Represents a truncated basis."""
 
     def __init__[
-        _M1: BasisMetadata,
-        _DT: np.generic,
-        _BInner: Basis[BasisMetadata, Any],
-        _BOuter: Basis[BasisMetadata, Any] = Basis[_M1, _DT],
+        M1_: BasisMetadata,
+        DT_: np.generic,
+        BInner_: Basis[BasisMetadata, Any],
+        BOuter_: Basis[BasisMetadata, Any] = Basis[M1_, DT_],
     ](
-        self: RecastBasis[Any, _M1, _DT, _BInner, _BOuter],
-        inner: _BInner,
-        inner_recast: Basis[_M1, _DT],
-        outer_recast: _BOuter,
+        self: RecastBasis[Any, M1_, DT_, BInner_, BOuter_],
+        inner: BInner_,
+        inner_recast: Basis[M1_, DT_],
+        outer_recast: BOuter_,
     ) -> None:
         self._inner_recast: Basis[M1, DT] = inner_recast
         self._outer_recast: BOuter = outer_recast

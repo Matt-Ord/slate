@@ -94,9 +94,9 @@ class TupleBasis[
     M: BasisMetadata,
     E,
     DT: np.generic,
-    _InnerM: StackedMetadata[Any, Any] = StackedMetadata[M, E],
+    InnerM: StackedMetadata[Any, Any] = StackedMetadata[M, E],
 ](
-    Basis[_InnerM, DT],
+    Basis[InnerM, DT],
 ):
     """Represents a Tuple of independent basis."""
 
@@ -109,7 +109,7 @@ class TupleBasis[
 
         super().__init__(
             cast(
-                "_InnerM",
+                "InnerM",
                 StackedMetadata(tuple(i.metadata() for i in children), extra_metadata),
             ),
         )
@@ -267,11 +267,11 @@ class TupleBasis[
 class TupleBasisND[
     DT: np.generic,
     E,
-    _InnerM: MetadataND[*tuple[BasisMetadata, ...], Any] = MetadataND[
+    InnerM: MetadataND[*tuple[BasisMetadata, ...], Any] = MetadataND[
         *tuple[BasisMetadata, ...], E
     ],
 ](
-    TupleBasis[Any, E, DT, _InnerM],
+    TupleBasis[Any, E, DT, InnerM],
 ):
     """A variadic alternative to tuple basis.
 
@@ -289,7 +289,7 @@ class TupleBasisND[
         )
 
     @override
-    def metadata(self) -> _InnerM:
+    def metadata(self) -> InnerM:
         return super().metadata()
 
     @property
@@ -316,25 +316,25 @@ class TupleBasis1D[
     """
 
     def __init__[
-        _DT: np.generic,
-        _B0: Basis[BasisMetadata, Any],
-        _E,
+        DT_: np.generic,
+        B0_: Basis[BasisMetadata, Any],
+        E_,
     ](
-        self: TupleBasis1D[_DT, _B0, _E],
-        children: tuple[_B0],
-        extra_metadata: _E,
+        self: TupleBasis1D[DT_, B0_, E_],
+        children: tuple[B0_],
+        extra_metadata: E_,
     ) -> None:
         msg = "TupleBasis1D is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
         super().__init__(
-            cast("tuple[Basis[BasisMetadata, _DT]]", children), extra_metadata
+            cast("tuple[Basis[BasisMetadata, DT_]]", children), extra_metadata
         )
 
     @override
-    def metadata[_M0: BasisMetadata](
-        self: TupleBasis1D[Any, Basis[_M0, Any], E],
-    ) -> Metadata1D[_M0, E]:
-        return cast("Metadata1D[_M0, E]", super().metadata())
+    def metadata[M0: BasisMetadata](
+        self: TupleBasis1D[Any, Basis[M0, Any], E],
+    ) -> Metadata1D[M0, E]:
+        return cast("Metadata1D[M0, E]", super().metadata())
 
     @property
     def children(self) -> tuple[B0]:  # type: ignore inconsistent type
@@ -366,24 +366,24 @@ class TupleBasis2D[
     """
 
     def __init__[
-        _DT: np.generic,
-        _B0: Basis[BasisMetadata, Any],
-        _B1: Basis[BasisMetadata, Any],
-        _E,
+        DT_: np.generic,
+        B0_: Basis[BasisMetadata, Any],
+        B1_: Basis[BasisMetadata, Any],
+        E_,
     ](
-        self: TupleBasis2D[_DT, _B0, _B1, _E],
-        children: tuple[_B0, _B1],
-        extra_metadata: _E,
+        self: TupleBasis2D[DT_, B0_, B1_, E_],
+        children: tuple[B0_, B1_],
+        extra_metadata: E_,
     ) -> None:
         msg = "TupleBasis2D is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
         super().__init__(children, extra_metadata)
 
     @override
-    def metadata[_M0: BasisMetadata, _M1: BasisMetadata](
-        self: TupleBasis2D[Any, Basis[_M0, Any], Basis[_M1, Any], E],
-    ) -> Metadata2D[_M0, _M1, E]:
-        return cast("Metadata2D[_M0, _M1, E]", super().metadata())
+    def metadata[M0: BasisMetadata, M1: BasisMetadata](
+        self: TupleBasis2D[Any, Basis[M0, Any], Basis[M1, Any], E],
+    ) -> Metadata2D[M0, M1, E]:
+        return cast("Metadata2D[M0, M1, E]", super().metadata())
 
     @property
     def children(self) -> tuple[B0, B1]:  # type: ignore inconsistent type
@@ -419,25 +419,25 @@ class TupleBasis3D[
     """
 
     def __init__[
-        _DT: np.generic,
-        _B0: Basis[BasisMetadata, Any],
-        _B1: Basis[BasisMetadata, Any],
-        _B2: Basis[BasisMetadata, Any],
-        _E,
+        DT_: np.generic,
+        B0_: Basis[BasisMetadata, Any],
+        B1_: Basis[BasisMetadata, Any],
+        B2_: Basis[BasisMetadata, Any],
+        E_,
     ](
-        self: TupleBasis3D[_DT, _B0, _B1, _B2, _E],
-        children: tuple[_B0, _B1, _B2],
-        extra_metadata: _E,
+        self: TupleBasis3D[DT_, B0_, B1_, B2_, E_],
+        children: tuple[B0_, B1_, B2_],
+        extra_metadata: E_,
     ) -> None:
         msg = "TupleBasis3D is only a placeholder type, and should not be directly created."
         raise NotImplementedError(msg)
         super().__init__(children, extra_metadata)
 
     @override
-    def metadata[_M0: BasisMetadata, _M1: BasisMetadata, _M2: BasisMetadata](
-        self: TupleBasis3D[Any, Basis[_M0, Any], Basis[_M1, Any], Basis[_M2, Any], E],
-    ) -> Metadata3D[_M0, _M1, _M2, E]:
-        return cast("Metadata3D[_M0, _M1, _M2, E]", super().metadata())
+    def metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata](
+        self: TupleBasis3D[Any, Basis[M0, Any], Basis[M1, Any], Basis[M2, Any], E],
+    ) -> Metadata3D[M0, M1, M2, E]:
+        return cast("Metadata3D[M0, M1, M2, E]", super().metadata())
 
     @property
     def children(self) -> tuple[B0, B1, B2]:  # type: ignore inconsistent type

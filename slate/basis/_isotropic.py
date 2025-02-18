@@ -21,8 +21,8 @@ class IsotropicBasis[
 ):
     """Represents an isotropic basis."""
 
-    def __init__[_DT: np.generic, _B0: Basis[Any, Any], _B1: Basis[Any, Any], _E](
-        self: IsotropicBasis[_DT, _B0, _B1, _E], inner: TupleBasis2D[_DT, _B0, _B1, _E]
+    def __init__[DT_: np.generic, B0_: Basis[Any, Any], B1_: Basis[Any, Any], E_](
+        self: IsotropicBasis[DT_, B0_, B1_, E_], inner: TupleBasis2D[DT_, B0_, B1_, E_]
     ) -> None:
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
@@ -129,19 +129,19 @@ class IsotropicBasis[
 
 
 @overload
-def isotropic_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any]](
-    children: tuple[_B0, _B1], extra_metadata: None = None
-) -> IsotropicBasis[Any, _B0, _B1, None]: ...
+def isotropic_basis[B0: Basis[Any, Any], B1: Basis[Any, Any]](
+    children: tuple[B0, B1], extra_metadata: None = None
+) -> IsotropicBasis[Any, B0, B1, None]: ...
 
 
 @overload
-def isotropic_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
-    children: tuple[_B0, _B1], extra_metadata: E
-) -> IsotropicBasis[Any, _B0, _B1, E]: ...
+def isotropic_basis[B0: Basis[Any, Any], B1: Basis[Any, Any], E](
+    children: tuple[B0, B1], extra_metadata: E
+) -> IsotropicBasis[Any, B0, B1, E]: ...
 
 
-def isotropic_basis[_B0: Basis[Any, Any], _B1: Basis[Any, Any], E](
-    children: tuple[_B0, _B1], extra_metadata: E | None = None
-) -> IsotropicBasis[Any, _B0, _B1, E | None]:
+def isotropic_basis[B0: Basis[Any, Any], B1: Basis[Any, Any], E](
+    children: tuple[B0, B1], extra_metadata: E | None = None
+) -> IsotropicBasis[Any, B0, B1, E | None]:
     """Build a VariadicTupleBasis from a tuple."""
     return IsotropicBasis(tuple_basis(children, extra_metadata))

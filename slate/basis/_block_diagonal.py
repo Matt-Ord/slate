@@ -32,10 +32,10 @@ class BlockDiagonalBasis[
     """Represents a diagonal basis."""
 
     def __init__[
-        _B: TupleBasis[Any, Any, Any],
+        B_: TupleBasis[Any, Any, Any],
     ](
-        self: BlockDiagonalBasis[Any, Any, Any, _B],
-        inner: _B,
+        self: BlockDiagonalBasis[Any, Any, Any, B_],
+        inner: B_,
         block_shape: tuple[int, ...],
     ) -> None:
         super().__init__(cast("Any", inner))

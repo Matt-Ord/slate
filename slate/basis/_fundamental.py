@@ -12,8 +12,8 @@ from slate.basis._basis_state_metadata import BasisStateMetadata, SimpleMetadata
 class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
     """Represents a full fundamental basis."""
 
-    def __init__[_M: SimpleMetadata](
-        self: FundamentalBasis[_M], metadata: _M, *, is_dual: bool = False
+    def __init__[M_: SimpleMetadata](
+        self: FundamentalBasis[M_], metadata: M_, *, is_dual: bool = False
     ) -> None:
         self._is_dual = is_dual
         super().__init__(metadata)

@@ -142,7 +142,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         fundamental = self.__into_fundamental__(vectors, axis)
         return basis.__from_fundamental__(fundamental, axis)
 
-    def add_data[DT1: np.number[Any]](  # noqa: PLR6301
+    def add_data[DT1: np.number[Any]](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -150,7 +150,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         msg = "add_data not implemented for this basis"
         raise NotImplementedError(msg)
 
-    def sub_data[DT1: np.number[Any]](  # noqa: PLR6301
+    def sub_data[DT1: np.number[Any]](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -158,7 +158,7 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         msg = "sub_data not implemented for this basis"
         raise NotImplementedError(msg)
 
-    def mul_data[DT1: np.number[Any]](  # noqa: PLR6301
+    def mul_data[DT1: np.number[Any]](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: float,
