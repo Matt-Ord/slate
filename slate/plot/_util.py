@@ -1,6 +1,16 @@
 from __future__ import annotations
 
-from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload, override
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    TypedDict,
+    Unpack,
+    cast,
+    overload,
+    override,
+)
 
 import numpy as np
 
@@ -62,6 +72,7 @@ if TYPE_CHECKING:
     from matplotlib.container import ErrorbarContainer
     from matplotlib.figure import Figure as MPLFigure
     from matplotlib.legend import Legend
+    from matplotlib.lines import Line2D
     from matplotlib.scale import ScaleBase
     from matplotlib.text import Text
     from matplotlib.transforms import Transform
@@ -70,6 +81,10 @@ if TYPE_CHECKING:
 
 
 Scale = Literal["symlog", "linear", "squared", "log"]
+
+
+class LegendKwargs(TypedDict, total=False):
+    loc: Literal["upper right", "upper left", "lower left", "lower right"]
 
 
 class Axes(MPLAxesBase):
@@ -139,18 +154,31 @@ class Axes(MPLAxesBase):
     ) -> Text: ...
 
     @overload
-    def legend(self) -> Legend: ...
+    def legend(self, **kwargs: Unpack[LegendKwargs]) -> Legend: ...
     @overload
     def legend(
-        self, handles: Iterable[Artist | tuple[Artist, ...]], labels: Iterable[str]
+        self,
+        handles: Iterable[Artist | tuple[Artist, ...]],
+        labels: Iterable[str],
+        **kwargs: Unpack[LegendKwargs],
     ) -> Legend: ...
     @overload
-    def legend(self, *, handles: Iterable[Artist | tuple[Artist, ...]]) -> Legend: ...
-    @overload
-    def legend(self, labels: Iterable[str]) -> Legend: ...
-
+    def legend(
+        self, labels: Iterable[str], **kwargs: Unpack[LegendKwargs]
+    ) -> Legend: ...
     @override
     def legend(self, *args: Any, **kwargs: Any) -> Legend: ...  # type: ignore overload
+
+    @overload
+    def plot(  # type: ignore overload
+        self,
+        *args: float | ArrayLike | str,
+        scalex: bool = ...,
+        scaley: bool = ...,
+    ) -> list[Line2D]: ...
+    def axvline(self, x: float = 0, ymin: float = 0, ymax: float = 1) -> Line2D: ...  # type: ignore overload
+
+    def axhline(self, y: float = 0, xmin: float = 0, xmax: float = 1) -> Line2D: ...  # type: ignore overload
 
 
 class Figure(MPLFigureBase):
