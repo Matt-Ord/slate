@@ -5,11 +5,11 @@ from typing import Any, Self, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._basis_state_metadata import BasisStateMetadata, SimpleMetadata
 
 
-class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
+class FundamentalBasis[M: SimpleMetadata](Basis[M, ctype[np.generic]]):
     """Represents a full fundamental basis."""
 
     def __init__[M_: SimpleMetadata](
@@ -17,6 +17,14 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
     ) -> None:
         self._is_dual = is_dual
         super().__init__(metadata)
+
+    @override
+    def try_cast_ctype[DT_: np.generic](
+        self,
+        ctype: type[DT_],
+    ) -> FundamentalBasis[M]:
+        """Try to cast a basis into one which supports the given data type."""
+        return self
 
     @property
     @override
@@ -40,20 +48,24 @@ class FundamentalBasis[M: SimpleMetadata](Basis[M, np.generic]):
         return self.fundamental_size
 
     @override
-    def __into_fundamental__[DT1: np.generic](
+    def __into_fundamental__[DT2: np.generic](
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return np.conj(vectors) if self.is_dual else vectors
+    ) -> BasisConversion[np.generic, DT2, np.generic]:
+        return BasisConversion[np.generic, DT2, np.generic](
+            lambda: np.conj(vectors) if self.is_dual else vectors
+        )
 
     @override
-    def __from_fundamental__[DT1: np.generic](
+    def __from_fundamental__[DT2: np.generic](
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return np.conj(vectors) if self.is_dual else vectors
+    ) -> BasisConversion[np.generic, DT2, np.generic]:
+        return BasisConversion[np.generic, DT2, np.generic](
+            lambda: np.conj(vectors) if self.is_dual else vectors
+        )
 
     @override
     def __eq__(self, other: object) -> bool:

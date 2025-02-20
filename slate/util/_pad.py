@@ -13,11 +13,11 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 
-def pad_ft_points[DT: np.generic](
-    array: np.ndarray[Any, np.dtype[DT]],
+def pad_ft_points[DT: np.dtype[np.generic]](
+    array: np.ndarray[Any, DT],
     s: Iterable[int],
     axes: Iterable[int],
-) -> np.ndarray[Any, np.dtype[DT]]:
+) -> np.ndarray[Any, DT]:
     """
     Pad the points in the fourier transform with zeros.
 
@@ -30,7 +30,7 @@ def pad_ft_points[DT: np.generic](
 
     padded_shape = shape_arr.copy()
     padded_shape[axes_arr] = tuple(s)
-    padded: np.ndarray[Any, np.dtype[DT]] = np.zeros(  # type: ignore can't infer dtype
+    padded: np.ndarray[Any, DT] = np.zeros(  # type: ignore can't infer dtype
         shape=padded_shape, dtype=array.dtype
     )
 
@@ -87,11 +87,11 @@ def _get_truncated_indices(
     return (offset + step * np.arange(n)) % size
 
 
-def _truncate_along_axis_continuous[DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[DT]],
+def _truncate_along_axis_continuous[DT: np.dtype[np.generic]](
+    vectors: np.ndarray[Any, DT],
     truncation: Truncation,
     axis: int = -1,
-) -> np.ndarray[tuple[int, ...], np.dtype[DT]]:
+) -> np.ndarray[tuple[int, ...], DT]:
     step = truncation.step
     offset = truncation.offset
     n = truncation.n
@@ -105,11 +105,11 @@ def _is_contiguous_truncate(size: int, truncation: Truncation) -> bool:
     return size >= truncation.step * truncation.n
 
 
-def truncate_along_axis[DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[DT]],
+def truncate_along_axis[DT: np.dtype[np.generic]](
+    vectors: np.ndarray[Any, DT],
     truncation: Truncation,
     axis: int = -1,
-) -> np.ndarray[tuple[int, ...], np.dtype[DT]]:
+) -> np.ndarray[tuple[int, ...], DT]:
     """Truncate Data along an axis."""
     if _is_contiguous_truncate(vectors.shape[axis], truncation):
         return _truncate_along_axis_continuous(vectors, truncation, axis)
@@ -128,11 +128,11 @@ class Padding:
     offset: int
 
 
-def _pad_along_axis_continuous[DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[DT]],
+def _pad_along_axis_continuous[DT: np.dtype[np.generic]](
+    vectors: np.ndarray[Any, DT],
     padding: Padding,
     axis: int = -1,
-) -> np.ndarray[tuple[int, ...], np.dtype[DT]]:
+) -> np.ndarray[tuple[int, ...], DT]:
     final_shape = np.array(vectors.shape)
     final_shape[axis] = padding.n
     out = np.zeros(final_shape, dtype=vectors.dtype)
@@ -151,11 +151,11 @@ def _is_contiguous_pad(size: int, padding: Padding) -> bool:
     return padding.n >= padding.step * size
 
 
-def pad_along_axis[DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[DT]],
+def pad_along_axis[DT: np.dtype[np.generic]](
+    vectors: np.ndarray[Any, DT],
     padding: Padding,
     axis: int = -1,
-) -> np.ndarray[tuple[int, ...], np.dtype[DT]]:
+) -> np.ndarray[tuple[int, ...], DT]:
     """Pad Data along an axis."""
     if _is_contiguous_pad(vectors.shape[axis], padding):
         return _pad_along_axis_continuous(vectors, padding, axis)

@@ -9,6 +9,7 @@ from slate.basis._basis import (
     NestedBoolOrNone,
     are_dual,
     are_dual_shapes,
+    ctype,
 )
 from slate.basis._basis_state_metadata import BasisStateMetadata
 from slate.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
@@ -97,6 +98,7 @@ __all__ = [
     "as_state_list",
     "as_sub_basis",
     "as_tuple_basis",
+    "ctype",
     "diagonal_basis",
     "flatten",
     "from_metadata",

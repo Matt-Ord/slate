@@ -45,7 +45,7 @@ def _get_slice_idx(
     return idx[:insert_pos] + (x_0_idx,) + idx[insert_pos:]
 
 
-def _index_array[M: BasisMetadata, DT: np.generic](
+def _index_array[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[Metadata2D[BasisMetadata, M, Any], DT], idx: int
 ) -> Array[M, DT]:
     as_tuple = basis.as_tuple_basis(array.basis)
@@ -55,7 +55,7 @@ def _index_array[M: BasisMetadata, DT: np.generic](
     return Array(as_tuple[1], converted.raw_data.reshape(converted.basis.shape)[idx])
 
 
-def animate_array_over_list[DT: np.number[Any]](
+def animate_array_over_list[DT: np.dtype[np.number[Any]]](
     data: Array[Metadata2D[SimpleMetadata, BasisMetadata, Any], DT],
     *,
     ax: Axes | None = None,
@@ -85,7 +85,7 @@ def animate_array_over_list[DT: np.number[Any]](
     return fig, ax, ani
 
 
-def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
+def animate_data_over_list_1d_x[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: Array[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -123,7 +123,7 @@ def animate_data_over_list_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
+def animate_data_1d_x[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -155,7 +155,7 @@ def animate_data_1d_x[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
+def animate_data_over_list_1d_k[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: Array[Metadata2D[SimpleMetadata, SpacedVolumeMetadata, Any], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -195,7 +195,7 @@ def animate_data_over_list_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
+def animate_data_1d_k[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -228,7 +228,7 @@ def animate_data_1d_k[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
+def animate_data_2d_x[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
@@ -280,7 +280,7 @@ def animate_data_2d_x[DT: np.number[Any]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_2d_k[DT: np.number[Any]](  # noqa: PLR0913
+def animate_data_2d_k[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: Array[SpacedVolumeMetadata, DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,

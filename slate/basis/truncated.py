@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, override
+from typing import Any, Never, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
+from slate.basis._basis import Basis, BasisFeature, ctype
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util._pad import (
@@ -16,8 +16,11 @@ from slate.util._pad import (
 )
 
 
-class TruncatedBasis[M: BasisMetadata, DT: np.generic](
-    WrappedBasis[M, DT, Basis[M, DT]],
+class TruncatedBasis[
+    B: Basis[BasisMetadata, ctype[Never]],
+    DT: ctype[Never] = ctype[Never],
+](
+    WrappedBasis[B, DT],
 ):
     """Represents a basis sampled evenly along an axis."""
 
@@ -27,6 +30,16 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         assert_unique_indices(
             self._inner.size, self._truncation.n, self._truncation.step
         )
+
+    @override
+    def try_cast_ctype[DT_: np.generic](
+        self,
+        ctype: type[DT_],
+    ) -> CroppedBasis[B, ctype[DT_]] | None:
+        """Try to cast a basis into one which supports the given data type."""
+        if self.inner.try_cast_ctype(ctype) is None:
+            return None
+        return cast("CroppedBasis[B, ctype[DT_]]", self)
 
     @override
     def __hash__(self) -> int:
@@ -56,19 +69,19 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         return Padding(self._inner.size, self._truncation.step, self._truncation.offset)
 
     @override
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
+    def __into_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         return pad_along_axis(vectors, self._inner_padding, axis)
 
     @override
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
+    def __from_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         return truncate_along_axis(vectors, self.truncation, axis)
 
     @property
@@ -121,4 +134,9 @@ class TruncatedBasis[M: BasisMetadata, DT: np.generic](
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
-        return self.__from_inner__(self.inner.points)
+
+        return (
+            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            .__from_inner__(self.inner.points)
+            .ok()
+        )

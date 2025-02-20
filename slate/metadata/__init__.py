@@ -20,11 +20,7 @@ from slate.metadata._shape import (
 from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
 from slate.metadata.stacked import (
     AnyMetadata,
-    Metadata1D,
-    Metadata2D,
-    Metadata3D,
-    MetadataND,
-    StackedMetadata,
+    TupleMetadata,
 )
 from slate.metadata.util import (
     fundamental_nk_points,
@@ -50,16 +46,12 @@ __all__ = [
     "LabeledMetadata",
     "LengthMetadata",
     "LengthMetadata",
-    "Metadata1D",
-    "Metadata2D",
-    "Metadata3D",
-    "MetadataND",
     "NestedLength",
     "SimpleMetadata",
     "SpacedLabeledMetadata",
     "SpacedLengthMetadata",
     "SpacedVolumeMetadata",
-    "StackedMetadata",
+    "TupleMetadata",
     "VolumeMetadata",
     "fundamental_nk_points",
     "fundamental_nx_points",

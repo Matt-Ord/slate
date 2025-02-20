@@ -7,7 +7,7 @@ from slate.array._conversion import as_fundamental_basis, as_index_basis
 from slate.metadata._metadata import BasisMetadata
 
 
-def real[M: BasisMetadata, DT: np.generic](
+def real[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
     """Extract the real part of a slate array."""
@@ -15,7 +15,7 @@ def real[M: BasisMetadata, DT: np.generic](
     return Array(converted.basis, np.real(converted.raw_data)).with_basis(array.basis)
 
 
-def imag[M: BasisMetadata, DT: np.generic](
+def imag[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
     """Extract the imag part of a slate array."""
@@ -31,7 +31,7 @@ def angle[M: BasisMetadata, DT: np.complexfloating](
     return Array(converted.basis, np.angle(converted.raw_data)).with_basis(array.basis)
 
 
-def abs[M: BasisMetadata, DT: np.generic](  # noqa: A001
+def abs[M: BasisMetadata, DT: np.dtype[np.generic]](  # noqa: A001
     array: Array[M, DT],
 ) -> Array[M, np.floating]:
     """Abs value of data in a slate array."""

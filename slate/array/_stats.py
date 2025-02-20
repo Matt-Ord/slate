@@ -11,28 +11,28 @@ from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 
 if TYPE_CHECKING:
     from slate.basis._fundamental import FundamentalBasis
-    from slate.metadata.stacked import Metadata1D, Metadata2D, StackedMetadata
+    from slate.metadata.stacked import Metadata1D, Metadata2D, TupleMetadata
 
 
 @overload
-def standard_deviation[M: SimpleMetadata, DT: np.number[Any]](
+def standard_deviation[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](
     array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
 ) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
-def standard_deviation[M: BasisMetadata, DT: np.number[Any]](
-    array: Array[StackedMetadata[M, Any], DT], *, axis: int
-) -> Array[StackedMetadata[M, None], DT]: ...
+def standard_deviation[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
+    array: Array[TupleMetadata[M, Any], DT], *, axis: int
+) -> Array[TupleMetadata[M, None], DT]: ...
 
 
 @overload
-def standard_deviation[DT: np.number[Any]](
+def standard_deviation[DT: np.dtype[np.number[Any]]](
     array: Array[Any, DT], *, axis: None = ...
 ) -> DT: ...
 
 
-def standard_deviation[DT: np.number[Any]](
+def standard_deviation[DT: np.dtype[np.number[Any]]](
     array: Array[Any, DT], axis: int | None = None
 ) -> Array[Any, DT] | DT:
     if axis is None:
@@ -53,22 +53,24 @@ def standard_deviation[DT: np.number[Any]](
 
 
 @overload
-def average[M: SimpleMetadata, DT: np.number[Any]](
+def average[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](
     array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
 ) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
-def average[M: BasisMetadata, DT: np.number[Any]](
-    array: Array[StackedMetadata[M, Any], DT], *, axis: int
-) -> Array[StackedMetadata[M, None], DT]: ...
+def average[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
+    array: Array[TupleMetadata[M, Any], DT], *, axis: int
+) -> Array[TupleMetadata[M, None], DT]: ...
 
 
 @overload
-def average[DT: np.number[Any]](array: Array[Any, DT], *, axis: None = ...) -> DT: ...
+def average[DT: np.dtype[np.number[Any]]](
+    array: Array[Any, DT], *, axis: None = ...
+) -> DT: ...
 
 
-def average[DT: np.number[Any]](
+def average[DT: np.dtype[np.number[Any]]](
     array: Array[Any, DT], axis: int | None = None
 ) -> Array[Any, DT] | DT:
     if axis is None:
@@ -89,22 +91,24 @@ def average[DT: np.number[Any]](
 
 
 @overload
-def min[M: SimpleMetadata, DT: np.number[Any]](  # noqa: A001
+def min[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
     array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
 ) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
-def min[M: BasisMetadata, DT: np.number[Any]](  # noqa: A001
-    array: Array[StackedMetadata[M, Any], DT], *, axis: int
-) -> Array[StackedMetadata[M, None], DT]: ...
+def min[M: BasisMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
+    array: Array[TupleMetadata[M, Any], DT], *, axis: int
+) -> Array[TupleMetadata[M, None], DT]: ...
 
 
 @overload
-def min[DT: np.number[Any]](array: Array[Any, DT], *, axis: None = ...) -> DT: ...  # noqa: A001
+def min[DT: np.dtype[np.number[Any]]](
+    array: Array[Any, DT], *, axis: None = ...
+) -> DT: ...
 
 
-def min[DT: np.number[Any]](  # noqa: A001
+def min[DT: np.dtype[np.number[Any]]](  # noqa: A001
     array: Array[Any, DT], axis: int | None = None
 ) -> Array[Any, DT] | DT:
     if axis is None:
@@ -125,22 +129,24 @@ def min[DT: np.number[Any]](  # noqa: A001
 
 
 @overload
-def max[M: SimpleMetadata, DT: np.number[Any]](  # noqa: A001
+def max[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
     array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
 ) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
-def max[M: BasisMetadata, DT: np.number[Any]](  # noqa: A001
-    array: Array[StackedMetadata[M, Any], DT], *, axis: int
-) -> Array[StackedMetadata[M, None], DT]: ...
+def max[M: BasisMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
+    array: Array[TupleMetadata[M, Any], DT], *, axis: int
+) -> Array[TupleMetadata[M, None], DT]: ...
 
 
 @overload
-def max[DT: np.number[Any]](array: Array[Any, DT], *, axis: None = ...) -> DT: ...  # noqa: A001
+def max[DT: np.dtype[np.number[Any]]](
+    array: Array[Any, DT], *, axis: None = ...
+) -> DT: ...
 
 
-def max[DT: np.number[Any]](  # noqa: A001
+def max[DT: np.dtype[np.number[Any]]](  # noqa: A001
     array: Array[Any, DT], axis: int | None = None
 ) -> Array[Any, DT] | DT:
     if axis is None:

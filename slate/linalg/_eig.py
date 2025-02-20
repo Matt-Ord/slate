@@ -25,7 +25,7 @@ from slate.metadata import BasisMetadata
 if TYPE_CHECKING:
     from slate.basis._basis import Basis
     from slate.basis._tuple import TupleBasis2D
-    from slate.metadata import StackedMetadata
+    from slate.metadata import TupleMetadata
     from slate.metadata._metadata import SimpleMetadata
     from slate.metadata.stacked import Metadata2D
 
@@ -34,7 +34,7 @@ def _diagonal_basis_as_explicit[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     basis: DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
 ) -> DiagonalBasis[
@@ -52,9 +52,13 @@ def _diagonal_basis_as_explicit[
     )
 
 
-def get_eigenvalues[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
-    array: Array[StackedMetadata[M, E], DT],
-) -> Array[BasisMetadata, np.complexfloating, FundamentalBasis[SimpleMetadata]]:
+def get_eigenvalues[M: BasisMetadata, E, DT: np.dtype[np.complexfloating[Any, Any]]](
+    array: Array[TupleMetadata[M, E], DT],
+) -> Array[
+    BasisMetadata,
+    np.dtype[np.complexfloating[Any, Any]],
+    FundamentalBasis[SimpleMetadata],
+]:
     """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
     return Array(FundamentalBasis.from_size(a.size), a)
@@ -64,7 +68,7 @@ def _eig_from_tuple[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     array: Array[
         Metadata2D[M0, M1, E],
@@ -73,7 +77,7 @@ def _eig_from_tuple[
     ],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complexfloating,
+    np.dtype[np.complexfloating[Any, Any]],
     DiagonalBasis[
         DT,
         ExplicitBasis[M0, DT],
@@ -113,7 +117,7 @@ def _eig_from_block_diagonal_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     array: Array[
         Metadata2D[M0, M1, E],
@@ -124,7 +128,7 @@ def _eig_from_block_diagonal_basis[
     ],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complexfloating,
+    np.dtype[np.complexfloating[Any, Any]],
     DiagonalBasis[
         DT,
         ExplicitBasis[M0, Any],
@@ -180,12 +184,12 @@ def into_diagonal[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     array: Array[Metadata2D[M0, M1, E], DT],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complexfloating,
+    np.dtype[np.complexfloating[Any, Any]],
     DiagonalBasis[
         DT,
         ExplicitBasis[M0, DT],
@@ -214,8 +218,12 @@ def into_diagonal[
     return _eig_from_tuple(with_basis(array, tuple_basis))
 
 
-def get_eigenvalues_hermitian[M: BasisMetadata, E, DT: np.complexfloating[Any, Any]](
-    array: Array[StackedMetadata[M, E], DT],
+def get_eigenvalues_hermitian[
+    M: BasisMetadata,
+    E,
+    DT: np.dtype[np.complexfloating[Any, Any]],
+](
+    array: Array[TupleMetadata[M, E], DT],
 ) -> Array[BasisMetadata, np.floating, FundamentalBasis[SimpleMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
     return Array(FundamentalBasis.from_size(a.size), a)
@@ -225,14 +233,14 @@ def _eigh_from_tuple[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     array: Array[
         Metadata2D[M0, M1, E], DT, TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E]
     ],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complexfloating,
+    np.dtype[np.complexfloating[Any, Any]],
     DiagonalBasis[
         DT,
         ExplicitUnitaryBasis[M0, Any],
@@ -276,7 +284,7 @@ def _eigh_from_block_diagonal_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     array: Array[
         Metadata2D[M0, M1, E],
@@ -287,7 +295,7 @@ def _eigh_from_block_diagonal_basis[
     ],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complexfloating,
+    np.dtype[np.complexfloating[Any, Any]],
     DiagonalBasis[
         DT,
         ExplicitUnitaryBasis[M0, Any],
@@ -345,12 +353,12 @@ def into_diagonal_hermitian[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.complexfloating[Any, Any],
+    DT: np.dtype[np.complexfloating[Any, Any]],
 ](
     array: Array[Metadata2D[M0, M1, E], DT],
 ) -> Array[
     Metadata2D[M0, M1, E],
-    np.complexfloating,
+    np.dtype[np.complexfloating[Any, Any]],
     DiagonalBasis[
         DT,
         ExplicitUnitaryBasis[M0, Any],

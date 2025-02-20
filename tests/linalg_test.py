@@ -22,14 +22,14 @@ from slate.linalg._eig import (
 
 if TYPE_CHECKING:
     from slate.basis import Basis, TupleBasis
-    from slate.metadata import BasisMetadata, SimpleMetadata, StackedMetadata
+    from slate.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
     from slate.metadata.stacked import Metadata2D
 
 
 @pytest.fixture
 def slate_array_stacked() -> Array[
-    StackedMetadata[SimpleMetadata, None],
-    np.complexfloating,
+    TupleMetadata[SimpleMetadata, None],
+    np.dtype[np.complexfloating[Any, Any]],
     TupleBasis[BasisMetadata, None, np.generic],
 ]:
     rng = np.random.default_rng()

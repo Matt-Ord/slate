@@ -14,7 +14,7 @@ from slate.metadata.stacked import Metadata2D
 class RecastBasis[
     M0: BasisMetadata,
     M1: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     BInner: Basis[BasisMetadata, Any] = Basis[M0, DT],
     BOuter: Basis[BasisMetadata, Any] = Basis[M1, DT],
 ](WrappedBasis[M0, DT, BInner]):
@@ -22,7 +22,7 @@ class RecastBasis[
 
     def __init__[
         M1_: BasisMetadata,
-        DT_: np.generic,
+        DT_: np.dtype[np.generic],
         BInner_: Basis[BasisMetadata, Any],
         BOuter_: Basis[BasisMetadata, Any] = Basis[M1_, DT_],
     ](
@@ -67,21 +67,21 @@ class RecastBasis[
         return self._outer_recast
 
     @override
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
+    def __into_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         return self._outer_recast.__convert_vector_into__(
             vectors, self._inner_recast, axis
         )
 
     @override
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
+    def __from_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         return self._inner_recast.__convert_vector_into__(
             vectors, self._outer_recast, axis
         )
@@ -132,7 +132,12 @@ class RecastBasis[
         return (lhs - rhs).astype(lhs.dtype)
 
 
-def recast_basis_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def recast_basis_from_diagonal[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     basis: DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
 ) -> RecastBasis[
     Metadata2D[M0, M1, E], M1, DT, DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E]
@@ -141,7 +146,12 @@ def recast_basis_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.g
     return RecastBasis(basis, basis.inner[1], basis.inner[1])
 
 
-def as_recast_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def as_recast_diagonal_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     basis: Basis[Metadata2D[M0, M1, E], DT],
 ) -> (
     RecastBasis[
@@ -161,7 +171,7 @@ def as_recast_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.gen
 
 type RecastDiagonalBasis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     BInner: Basis[BasisMetadata, Any] = Basis[M, DT],
     BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
 ] = RecastBasis[
@@ -171,7 +181,7 @@ type RecastDiagonalBasis[
 
 def recast_diagonal_basis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     BInner: Basis[BasisMetadata, Any] = Basis[M, DT],
     BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
 ](

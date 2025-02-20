@@ -17,7 +17,7 @@ from slate.basis import (
 )
 
 if TYPE_CHECKING:
-    from slate.metadata import SimpleMetadata, StackedMetadata
+    from slate.metadata import SimpleMetadata, TupleMetadata
 
 
 def test_slate_array_as_array(
@@ -64,7 +64,7 @@ def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) ->
         (fundamental_transformed_tuple_basis_from_shape((2, 3))),
     ],
 )
-def test_transpose_array(basis: Basis[StackedMetadata[Any, Any], Any]) -> None:
+def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
     arr = Array(basis, data)
@@ -85,7 +85,7 @@ def test_transpose_array(basis: Basis[StackedMetadata[Any, Any], Any]) -> None:
     ],
 )
 def test_transpose_with_axes(
-    basis: Basis[StackedMetadata[Any, Any], Any], axes: tuple[int, ...] | None
+    basis: Basis[TupleMetadata[Any, Any], Any], axes: tuple[int, ...] | None
 ) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)

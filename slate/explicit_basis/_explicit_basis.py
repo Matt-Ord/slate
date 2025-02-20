@@ -32,7 +32,7 @@ type Direction = Literal["forward", "backward"]
 
 class ExplicitBasis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.number[Any]],
     B: Basis[Any, Any] = Basis[M, DT],
     BTransform: Basis[Any, Any] = Basis[
         Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
@@ -43,7 +43,7 @@ class ExplicitBasis[
     """Represents an explicit basis."""
 
     def __init__[
-        DT1: np.generic,
+        DT1: np.dtype[np.generic],
         B1: Basis[Any, Any],
         BTransform_: Basis[Any, Any],
     ](
@@ -140,9 +140,11 @@ class ExplicitBasis[
         return self._direction
 
     @override
-    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
-        self, vectors: np.ndarray[Any, np.dtype[DT1]], axis: int = -1
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def __into_inner__(
+        self,
+        vectors: np.ndarray[Any, DT],
+        axis: int = -1,
+    ) -> np.ndarray[Any, DT]:
         swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
         flat = swapped.reshape(-1, vectors.shape[axis])
 
@@ -164,11 +166,11 @@ class ExplicitBasis[
         )
 
     @override
-    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
+    def __from_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
         flat = swapped.reshape(-1, vectors.shape[axis])
 
@@ -233,7 +235,9 @@ class ExplicitBasis[
         return (lhs - rhs).astype(lhs.dtype)
 
 
-def _assert_unitary[DT: np.generic](vectors: np.ndarray[Any, np.dtype[DT]]) -> None:
+def _assert_unitary[DT: np.dtype[np.generic]](
+    vectors: np.ndarray[Any, DT],
+) -> None:
     identity_matrix = np.eye(vectors.shape[0])
     result = np.dot(vectors, np.conj(np.transpose(vectors)))
 
@@ -244,7 +248,12 @@ def _assert_unitary[DT: np.generic](vectors: np.ndarray[Any, np.dtype[DT]]) -> N
     )
 
 
-def _dual_unitary_data[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def _dual_unitary_data[
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M1, M2, E], DT]:
     conj = _array.conjugate(array)
@@ -253,7 +262,7 @@ def _dual_unitary_data[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
 
 class ExplicitUnitaryBasis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B: Basis[Any, Any] = Basis[M, DT],
     BTransform: Basis[Any, Any] = Basis[
         Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
@@ -262,7 +271,7 @@ class ExplicitUnitaryBasis[
     """Represents a truncated basis."""
 
     def __init__[
-        DT1: np.generic,
+        DT1: np.dtype[np.generic],
         B1: Basis[Any, Any],
         BTransform_: Basis[Any, Any],
     ](

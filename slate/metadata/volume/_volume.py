@@ -8,7 +8,7 @@ import numpy as np
 
 from slate.metadata._shape import shallow_shape_from_nested
 from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
-from slate.metadata.stacked import StackedMetadata
+from slate.metadata.stacked import TupleMetadata
 from slate.metadata.util import (
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,
@@ -48,8 +48,10 @@ class AxisDirections:
         return hash(tuple(tuple(x) for x in self.vectors))
 
 
-type VolumeMetadata = StackedMetadata[LengthMetadata, AxisDirections]
-type SpacedVolumeMetadata = StackedMetadata[SpacedLengthMetadata, AxisDirections]
+type VolumeMetadata = TupleMetadata[tuple[LengthMetadata, ...], AxisDirections]
+type SpacedVolumeMetadata = TupleMetadata[
+    tuple[SpacedLengthMetadata, ...], AxisDirections
+]
 
 
 def fundamental_stacked_delta_x(

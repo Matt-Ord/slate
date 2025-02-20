@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class SplitBasis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B0: Basis[Any, Any] = Basis[M, DT],
     B1: Basis[Any, Any] = Basis[M, DT],
 ](
@@ -96,11 +96,11 @@ class SplitBasis[
         return vectors[slice_along_axis(slice(start, None), axis)]
 
     @override
-    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
+    def __into_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[np.complexfloating]]:
+    ) -> np.ndarray[Any, DT]:
         lhs_fundamental = self.lhs.__convert_vector_into__(
             self._get_lhs_vectors(vectors, axis), self.inner, axis
         )
@@ -110,16 +110,16 @@ class SplitBasis[
         )
 
         return cast(
-            "np.ndarray[Any, np.dtype[DT1]]",
+            "np.ndarray[Any, DT]",
             lhs_fundamental + rhs_fundamental,
         )
 
     @override
-    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
+    def __from_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         lhs_vector = self.inner.__convert_vector_into__(vectors, self.lhs, axis)
         return pad_along_axis(lhs_vector, Padding(self.size, 1, 0), axis)
 

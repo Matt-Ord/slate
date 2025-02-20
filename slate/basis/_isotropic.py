@@ -1,36 +1,38 @@
 from __future__ import annotations
 
-from typing import Any, overload, override
+from typing import Any, Never, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
-from slate.basis._tuple import TupleBasis2D, tuple_basis
+from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._tuple import TupleBasis
 from slate.basis.wrapped import WrappedBasis
-from slate.metadata.stacked import Metadata2D
+from slate.metadata._metadata import BasisMetadata
 from slate.metadata.util import nx_points
 
 
 class IsotropicBasis[
-    DT: np.generic,
-    B0: Basis[Any, Any],
-    B1: Basis[Any, Any],
+    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
     E,
+    DT: ctype[Never],
 ](
-    WrappedBasis[Metadata2D[Any, Any, E], DT, TupleBasis2D[DT, B0, B1, E]],
+    WrappedBasis[TupleBasis[C, E, DT], DT],
 ):
     """Represents an isotropic basis."""
 
-    def __init__[DT_: np.generic, B0_: Basis[Any, Any], B1_: Basis[Any, Any], E_](
-        self: IsotropicBasis[DT_, B0_, B1_, E_], inner: TupleBasis2D[DT_, B0_, B1_, E_]
-    ) -> None:
+    def __init__(self, inner: TupleBasis[C, E, DT]) -> None:
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
-    @property
     @override
-    def inner(self) -> TupleBasis2D[DT, B0, B1, E]:
-        return self._inner
+    def try_cast_ctype[DT_: np.generic](
+        self,
+        ctype: type[DT_],
+    ) -> IsotropicBasis[C, E, ctype[DT_]] | None:
+        """Try to cast a basis into one which supports the given data type."""
+        if self.inner.try_cast_ctype(ctype) is None:
+            return None
+        return cast("IsotropicBasis[C, E, ctype[DT_]]", self)
 
     @property
     @override
@@ -38,11 +40,11 @@ class IsotropicBasis[
         return self.inner.children[0].size
 
     @override
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
+    def __into_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         swapped = vectors.swapaxes(axis, 0)
         indices = nx_points(self.size)
         displacement_matrix = np.mod(indices[:, None] - indices[None, :], self.size)
@@ -53,11 +55,11 @@ class IsotropicBasis[
         )
 
     @override
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
+    def __from_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         swapped = vectors.swapaxes(axis, 0)
         stacked = swapped.reshape(self.size, self.size, *swapped.shape[1:])[0]
 
@@ -125,23 +127,9 @@ class IsotropicBasis[
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
-        return self.__from_inner__(self.inner.points)
 
-
-@overload
-def isotropic_basis[B0: Basis[Any, Any], B1: Basis[Any, Any]](
-    children: tuple[B0, B1], extra_metadata: None = None
-) -> IsotropicBasis[Any, B0, B1, None]: ...
-
-
-@overload
-def isotropic_basis[B0: Basis[Any, Any], B1: Basis[Any, Any], E](
-    children: tuple[B0, B1], extra_metadata: E
-) -> IsotropicBasis[Any, B0, B1, E]: ...
-
-
-def isotropic_basis[B0: Basis[Any, Any], B1: Basis[Any, Any], E](
-    children: tuple[B0, B1], extra_metadata: E | None = None
-) -> IsotropicBasis[Any, B0, B1, E | None]:
-    """Build a VariadicTupleBasis from a tuple."""
-    return IsotropicBasis(tuple_basis(children, extra_metadata))
+        return (
+            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            .__from_inner__(self.inner.points)
+            .ok()
+        )
