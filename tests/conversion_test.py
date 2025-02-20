@@ -152,7 +152,7 @@ def test_transform_spaced_basis() -> None:
     )
     np.testing.assert_equal(full_basis.size, array.as_array().size)
     np.testing.assert_array_almost_equal(
-        array.basis.__convert_vector_into__(array.raw_data, full_basis, axis=-1),
+        array.basis.__convert_vector_into__(array.raw_data, full_basis, axis=-1).ok(),
         array.as_array().ravel(),
     )
 

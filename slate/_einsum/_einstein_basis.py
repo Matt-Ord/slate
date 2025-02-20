@@ -19,7 +19,7 @@ from slate.basis import (
     from_shape,
     tuple_basis,
 )
-from slate.metadata import BasisMetadata, NestedLength, StackedMetadata
+from slate.metadata import BasisMetadata, NestedLength, TupleMetadata
 
 if TYPE_CHECKING:
     import numpy as np
@@ -112,14 +112,14 @@ def _collect_einsum_basis_hints(
         hints.add_hint(idx, basis)
         return
 
-    basis = cast("Basis[StackedMetadata[Any, Any], Any]", basis)
+    basis = cast("Basis[TupleMetadata[Any, Any], Any]", basis)
     as_diagonal = as_diagonal_basis(basis)
     # TODO: Add generalized diagonal so we can also support block diagonal  # noqa: FIX002
     if as_diagonal is not None and all(isinstance(i, EinsteinIndex) for i in idx):
         idx = cast("tuple[EinsteinIndex, ...]", idx)
         hints.add_diag_hint(idx, basis)
 
-    basis = as_tuple_basis(cast("Basis[StackedMetadata[Any, Any], Any]", basis))
+    basis = as_tuple_basis(cast("Basis[TupleMetadata[Any, Any], Any]", basis))
 
     for n, i in enumerate(idx):
         child = basis.children[n]
@@ -140,7 +140,7 @@ class BasisSpecification:
     result_index: tuple[str, ...]
     result_basis: Basis[Any, Any] | None
     part_index: tuple[tuple[str, ...], ...]
-    part_basis: tuple[RecastBasis[BasisMetadata, StackedMetadata[Any, Any], Any], ...]
+    part_basis: tuple[RecastBasis[BasisMetadata, TupleMetadata[Any, Any], Any], ...]
 
     def get_part_data(
         self, *arrays: Array[BasisMetadata, Any]
@@ -169,10 +169,10 @@ def reslove_basis(
     part_basis = list[
         RecastBasis[
             BasisMetadata,
-            StackedMetadata[Any, Any],
+            TupleMetadata[Any, Any],
             Any,
             Basis[BasisMetadata, Any],
-            Basis[StackedMetadata[Any, Any], Any],
+            Basis[TupleMetadata[Any, Any], Any],
         ],
     ]()
     part_index = list[tuple[str, ...]]()

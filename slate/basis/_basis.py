@@ -3,16 +3,21 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from itertools import starmap
 from typing import (
+    TYPE_CHECKING,
     Any,
     Literal,
     Never,
     Self,
+    cast,
 )
 
 import numpy as np
 
 from slate.metadata._metadata import BasisMetadata
 from slate.metadata._shape import NestedLength, size_from_nested_shape
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 BasisFeature = Literal["ADD", "MUL", "SUB", "LINEAR_MAP", "INDEX"]
 """
@@ -59,7 +64,42 @@ def are_dual[M: BasisMetadata](lhs: Basis[M, Any], rhs: Basis[M, Any]) -> bool:
     )
 
 
-class Basis[M: BasisMetadata, DT: np.generic](ABC):
+class ctype[D: np.generic]:  # noqa: N801
+    """A type which is contravariant in the data type D."""
+
+    def _variance_fn(self, value: D, _private: Never) -> None: ...
+
+
+class BasisConversion[DT1: np.generic, DT2: np.generic, DT3: np.generic]:
+    def __init__(self, fn: Callable[[], np.ndarray[Any, np.dtype[DT2]]]) -> None:
+        self._fn = fn
+
+    def _variance_fn_1(self, value: DT1, _private: Never) -> Never: ...
+    def _variance_fn_2(self, value: DT2, _private: Never) -> DT2: ...
+    def _variance_fn_3(self, value: DT3, _private: Never) -> Never: ...
+
+    def ok[DT: np.generic](
+        self: BasisConversion[DT, DT, DT],
+    ) -> np.ndarray[Any, np.dtype[DT2]]:
+        return cast("Any", self)._fn()  # noqa: SLF001
+
+
+def _convert_vectors_unsafe[DT2: np.generic](
+    initial: Basis[Any, ctype[np.generic]],
+    vectors: np.ndarray[Any, np.dtype[DT2]],
+    final: Basis[Any, ctype[np.generic]],
+    axis: int = -1,
+) -> np.ndarray[Any, np.dtype[DT2]]:
+    assert initial.metadata() == final.metadata()
+
+    if initial == final:
+        return vectors
+
+    fundamental = initial.__into_fundamental__(vectors, axis).ok()
+    return final.__from_fundamental__(fundamental, axis).ok()
+
+
+class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](ABC):
     """Base class for a basis."""
 
     def __init__(self, metadata: M) -> None:
@@ -69,6 +109,29 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
     @abstractmethod
     def size(self) -> int:
         """Number of elements in the basis."""
+
+    def try_cast_ctype[DT_: np.generic](  # noqa: PLR6301
+        self,
+        ctype: type[DT_],  # noqa: ARG002
+    ) -> Basis[M, ctype[DT_]] | None:
+        """Try to cast a basis into one which supports the given data type."""
+        return None
+
+    def cast_ctype[DT_: np.generic](
+        self,
+        ctype: type[DT_],
+    ) -> Basis[M, ctype[DT_]]:
+        """Cast the basis into the given data type.
+
+        Raises
+        ------
+            TypeError: If the basis does not support the given data type.
+        """  # noqa: DOC501
+        cast = self.try_cast_ctype(ctype)
+        if cast is not None:
+            return cast
+        msg = f"Basis does not support ctype {ctype}"
+        raise TypeError(msg)
 
     @property
     def fundamental_size(self) -> int:
@@ -92,30 +155,20 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         """Features of the basis."""
         return set()
 
-    @staticmethod
-    def _dtype_variance_fn(_a: DT, _b: Never) -> None:
-        """
-        Fix the variance of DT.
-
-        This is a workaround for the limitation in typing __into_fundamental__
-        which should be [DT1: DT]
-        """
-        return
-
     @abstractmethod
-    def __into_fundamental__[DT1: np.generic](  # [DT1: DT]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+    def __into_fundamental__[DT1: np.generic, DT2: np.generic](
+        self: Basis[Any, ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> BasisConversion[DT1, DT2, np.generic]:
         """Convert a vector in the non-conjugate basis into the fundamental basis."""
 
     @abstractmethod
-    def __from_fundamental__[DT1: np.generic](  # [DT1: DT]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+    def __from_fundamental__[DT2: np.generic, DT3: np.generic](
+        self: Basis[Any, ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> BasisConversion[np.generic, DT2, DT3]:
         """Convert a vector into the non-conjugate basis from the fundamental basis."""
 
     @property
@@ -132,48 +185,45 @@ class Basis[M: BasisMetadata, DT: np.generic](ABC):
         ...
 
     def __convert_vector_into__[
+        M_: BasisMetadata,
         DT1: np.generic,
-    ](  # [DT1: DT, B1: Basis[M1, DT]]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
-        basis: Basis[BasisMetadata, Never],
+        DT2: np.generic,
+        DT3: np.generic,
+    ](
+        self: Basis[M_, ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
+        basis: Basis[M_, ctype[DT3]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        assert self.metadata() == basis.metadata()
+    ) -> BasisConversion[DT1, DT2, DT3]:
+        return BasisConversion[DT1, DT2, DT3](
+            lambda: _convert_vectors_unsafe(self, vectors, basis, axis)  # type: ignore BasisConversion makes this safe
+        )
 
-        if self == basis:
-            return vectors
-
-        fundamental = self.__into_fundamental__(vectors, axis)
-        return basis.__from_fundamental__(fundamental, axis)
-
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT_: np.dtype[np.number[Any]]](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, DT_],
+        rhs: np.ndarray[Any, DT_],
+    ) -> np.ndarray[Any, DT_]:
         msg = "add_data not implemented for this basis"
         raise NotImplementedError(msg)
 
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT_: np.dtype[np.number[Any]]](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, DT_],
+        rhs: np.ndarray[Any, DT_],
+    ) -> np.ndarray[Any, DT_]:
         msg = "sub_data not implemented for this basis"
         raise NotImplementedError(msg)
 
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT_: np.dtype[np.number[Any]]](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
+        lhs: np.ndarray[Any, DT_],
         rhs: float,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT_]:
         msg = "mul_data not implemented for this basis"
         raise NotImplementedError(msg)
 
     @property
-    def points(
-        self,
-    ) -> np.ndarray[Any, np.dtype[np.int_]]:
+    def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         msg = "points not implemented for this basis, requires the INDEX feature"
         raise NotImplementedError(msg)

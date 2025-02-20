@@ -9,7 +9,7 @@ import numpy as np
 
 from slate.metadata._metadata import LabelSpacing
 from slate.metadata.length import SpacedLengthMetadata
-from slate.metadata.stacked import StackedMetadata
+from slate.metadata.stacked import TupleMetadata
 from slate.metadata.volume._volume import (
     AxisDirections,
     SpacedVolumeMetadata,
@@ -136,7 +136,7 @@ def spaced_volume_metadata_from_stacked_delta_x(
     """Get the metadata for a spaced volume from the vectors and spacing."""
     delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
     normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v, strict=False))
-    return StackedMetadata(
+    return TupleMetadata(
         tuple(
             SpacedLengthMetadata(s, spacing=LabelSpacing(delta=delta))
             for (s, delta) in zip(shape, delta_v, strict=True)

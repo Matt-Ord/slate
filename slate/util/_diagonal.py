@@ -13,9 +13,9 @@ def _spec_from_indices[DT: int | np.signedinteger](
     return "".join(chr(cast("int", 97 + i)) for i in indices)
 
 
-def extract_diagonal[DT: np.generic](
-    array: np.ndarray[Any, np.dtype[DT]], axes: tuple[int, ...], out_axis: int = -1
-) -> np.ndarray[Any, np.dtype[DT]]:
+def extract_diagonal[DT: np.dtype[np.generic]](
+    array: np.ndarray[Any, DT], axes: tuple[int, ...], out_axis: int = -1
+) -> np.ndarray[Any, DT]:
     input_indices = np.arange(array.ndim)
     input_indices[list(axes)] = input_indices[axes[0]]
 
@@ -30,12 +30,12 @@ def extract_diagonal[DT: np.generic](
     return np.einsum(subscripts, array[tuple(square_slice)])  # type: ignore unknown
 
 
-def build_diagonal[DT: np.generic](
-    array: np.ndarray[Any, np.dtype[DT]],
+def build_diagonal[DT: np.dtype[np.generic]](
+    array: np.ndarray[Any, DT],
     axis: int = -1,
     out_axes: tuple[int, ...] = (-1, -2),
     out_shape: tuple[int, ...] | None = None,
-) -> np.ndarray[Any, np.dtype[DT]]:
+) -> np.ndarray[Any, DT]:
     out_shape = out_shape or (array.shape[axis],) * len(out_axes)
     assert len(out_shape) == len(out_axes)
     n_dim_out = array.ndim - 1 + len(out_axes)

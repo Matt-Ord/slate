@@ -19,11 +19,11 @@ from slate.metadata import (
     Metadata1D,
     Metadata2D,
     SimpleMetadata,
-    StackedMetadata,
+    TupleMetadata,
 )
 
 
-def extract_diagonal[M: BasisMetadata, E, DT: np.generic](
+def extract_diagonal[M: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Metadata2D[M, M, E], DT],
 ) -> Array[M, DT, Basis[M, Any]]:
     b = DiagonalBasis(basis.as_tuple_basis(basis.as_fundamental(array.basis)))
@@ -33,22 +33,24 @@ def extract_diagonal[M: BasisMetadata, E, DT: np.generic](
 
 
 @overload
-def norm[M: SimpleMetadata, DT: np.number[Any]](
+def norm[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](
     array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
 ) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
 
 
 @overload
-def norm[M: BasisMetadata, DT: np.number[Any]](
-    array: Array[StackedMetadata[M, Any], DT], *, axis: int
-) -> Array[StackedMetadata[M, None], DT]: ...
+def norm[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
+    array: Array[TupleMetadata[M, Any], DT], *, axis: int
+) -> Array[TupleMetadata[M, None], DT]: ...
 
 
 @overload
-def norm[DT: np.number[Any]](array: Array[Any, DT], *, axis: None = ...) -> DT: ...
+def norm[DT: np.dtype[np.number[Any]]](
+    array: Array[Any, DT], *, axis: None = ...
+) -> DT: ...
 
 
-def norm[DT: np.number[Any]](
+def norm[DT: np.dtype[np.number[Any]]](
     array: Array[Any, DT], axis: int | None = None
 ) -> Array[Any, DT] | DT:
     if axis is None:

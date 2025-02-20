@@ -22,12 +22,12 @@ from slate.basis import (
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.metadata import Metadata1D, Metadata2D, Metadata3D, StackedMetadata
+    from slate.metadata import Metadata1D, Metadata2D, Metadata3D, TupleMetadata
 
 
 def with_basis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B1: Basis[Any, Any],
 ](
     array: Array[M, DT],
@@ -37,44 +37,49 @@ def with_basis[
     return array.with_basis(basis)
 
 
-def cast_basis[M: BasisMetadata, DT: np.generic, B: Basis[Any, Any]](
+def cast_basis[M: BasisMetadata, DT: np.dtype[np.generic], B: Basis[Any, Any]](
     array: Array[M, DT], basis: B
 ) -> Array[Any, DT, B]:
     assert array.basis.size == basis.size
     return Array(basis, array.raw_data)
 
 
-def as_feature_basis[M: BasisMetadata, DT: np.generic](
+def as_feature_basis[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT], features: set[BasisFeature]
 ) -> Array[M, DT]:
     return array.with_basis(basis.as_feature_basis(array.basis, features))
 
 
-def as_index_basis[M: BasisMetadata, DT: np.generic](
+def as_index_basis[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     return array.with_basis(basis.as_index_basis(array.basis))
 
 
-def as_mul_basis[M: BasisMetadata, DT: np.generic](
+def as_mul_basis[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     return array.with_basis(basis.as_mul_basis(array.basis))
 
 
-def as_sub_basis[M: BasisMetadata, DT: np.generic](
+def as_sub_basis[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     return array.with_basis(basis.as_sub_basis(array.basis))
 
 
-def as_add_basis[M: BasisMetadata, DT: np.generic](
+def as_add_basis[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     return array.with_basis(basis.as_add_basis(array.basis))
 
 
-def as_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def as_diagonal_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     array: Array[Metadata2D[M0, M1, E], DT],
 ) -> (
     Array[
@@ -95,13 +100,13 @@ def as_diagonal_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
 def as_tuple_basis[
     M0: BasisMetadata,
     E,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
 ](
     array: Array[Any, DT, Basis[Metadata1D[M0, E], DT]],
 ) -> Array[
     Metadata1D[M0, E],
     DT,
-    TupleBasis1D[np.generic, Basis[M0, Any], E],
+    TupleBasis1D[np.dtype[np.generic], Basis[M0, Any], E],
 ]: ...
 
 
@@ -110,13 +115,13 @@ def as_tuple_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
 ](
     array: Array[Any, DT, Basis[Metadata2D[M0, M1, E], DT]],
 ) -> Array[
     Metadata2D[M0, M1, E],
     DT,
-    TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E],
+    TupleBasis2D[np.dtype[np.generic], Basis[M0, Any], Basis[M1, Any], E],
 ]: ...
 
 
@@ -126,29 +131,31 @@ def as_tuple_basis[
     M1: BasisMetadata,
     M2: BasisMetadata,
     E,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
 ](
     array: Array[Any, DT, Basis[Metadata3D[M0, M1, M2, E], DT]],
 ) -> Array[
     Metadata3D[M0, M1, M2, E],
     DT,
-    TupleBasis3D[np.generic, Basis[M0, Any], Basis[M1, Any], Basis[M2, Any], E],
+    TupleBasis3D[
+        np.dtype[np.generic], Basis[M0, Any], Basis[M1, Any], Basis[M2, Any], E
+    ],
 ]: ...
 
 
 @overload
-def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
-    array: Array[StackedMetadata[M, E], DT],
-) -> Array[StackedMetadata[M, E], DT, TupleBasis[M, E, Any, StackedMetadata[M, E]]]: ...
+def as_tuple_basis[M: BasisMetadata, E, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, E], DT],
+) -> Array[TupleMetadata[M, E], DT, TupleBasis[M, E, Any, TupleMetadata[M, E]]]: ...
 
 
-def as_tuple_basis[M: BasisMetadata, E, DT: np.generic](
-    array: Array[StackedMetadata[M, E], DT],
-) -> Array[StackedMetadata[M, E], DT, TupleBasis[M, E, Any, StackedMetadata[M, E]]]:
+def as_tuple_basis[M: BasisMetadata, E, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, E], DT],
+) -> Array[TupleMetadata[M, E], DT, TupleBasis[M, E, Any, TupleMetadata[M, E]]]:
     return array.with_basis(basis.as_tuple_basis(array.basis))
 
 
-def as_fundamental_basis[M: BasisMetadata, DT: np.generic](
+def as_fundamental_basis[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     return array.with_basis(basis.as_fundamental(array.basis))
@@ -156,7 +163,7 @@ def as_fundamental_basis[M: BasisMetadata, DT: np.generic](
 
 def nest[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B: Basis[Any, Any] = Basis[M, DT],
 ](
     array: Array[M, DT, B],
@@ -167,7 +174,7 @@ def nest[
 @overload
 def flatten[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B: Basis[Any, Any] = Basis[M, DT],
 ](
     array: Array[Metadata1D[M, Any], DT, TupleBasis1D[DT, B, Any]],
@@ -177,7 +184,7 @@ def flatten[
 @overload
 def flatten[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B: Basis[Any, Any] = Basis[M, DT],
 ](
     array: Array[Metadata1D[M, Any], DT],
@@ -185,17 +192,17 @@ def flatten[
 
 
 @overload
-def flatten[M: BasisMetadata, DT: np.generic](
+def flatten[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[
-        StackedMetadata[StackedMetadata[M, Any], Any],
+        TupleMetadata[TupleMetadata[M, Any], Any],
         DT,
     ],
-) -> Array[StackedMetadata[M, None], DT]: ...
+) -> Array[TupleMetadata[M, None], DT]: ...
 
 
-def flatten[DT: np.generic](
+def flatten[DT: np.dtype[np.generic]](
     array: Array[
-        StackedMetadata[StackedMetadata[BasisMetadata, Any], Any],
+        TupleMetadata[TupleMetadata[BasisMetadata, Any], Any],
         DT,
     ],
 ) -> Array[Any, DT, Any]:
@@ -213,7 +220,7 @@ def flatten[DT: np.generic](
 
 def as_outer_array[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
 ](
     array: Array[Any, DT, RecastBasis[Any, M, DT, Any, BOuter]],
@@ -221,7 +228,7 @@ def as_outer_array[
     return cast_basis(array, array.basis.outer_recast)
 
 
-def as_diagonal_array[M: BasisMetadata, E, DT: np.generic](
+def as_diagonal_array[M: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[
         Metadata2D[M, M, E], DT, DiagonalBasis[DT, Basis[M, DT], Basis[M, DT], E]
     ],
@@ -229,7 +236,7 @@ def as_diagonal_array[M: BasisMetadata, E, DT: np.generic](
     return cast_basis(array, array.basis.inner[1])
 
 
-def as_raw_array[DT: np.generic, B: Basis[Any, Any]](
+def as_raw_array[DT: np.dtype[np.generic], B: Basis[Any, Any]](
     array: Array[Any, DT, B],
 ) -> Array[BasisStateMetadata[B], DT, FundamentalBasis[BasisStateMetadata[B]]]:
     return cast_basis(array, FundamentalBasis(BasisStateMetadata(array.basis)))
