@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, Any, Never, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
@@ -12,8 +12,8 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
-class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
-    WrappedBasis[M, DT, Basis[M, DT]]
+class CoordinateBasis[M: BasisMetadata, DT: ctype[Never]](  # noqa: PLW1641
+    WrappedBasis[Basis[M, DT], DT]
 ):
     """Represents a basis sampled evenly along an axis."""
 
@@ -46,23 +46,29 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         return False
 
     @override
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+    def __into_inner__[DT2: np.generic, DT3: np.generic](
+        self: CoordinateBasis[Any, ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        swapped = vectors.swapaxes(axis, 0)
-        out = np.zeros((self.inner.size, *swapped.shape[1:]), dtype=vectors.dtype)
-        out[self.points] = swapped
-        return out.swapaxes(axis, 0)
+    ) -> BasisConversion[np.generic, DT2, DT3]:
+        def _fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            swapped = vectors.swapaxes(axis, 0)
+            out = np.zeros((self.inner.size, *swapped.shape[1:]), dtype=vectors.dtype)
+            out[self.points] = swapped
+            return out.swapaxes(axis, 0)
+
+        return BasisConversion(_fn)
 
     @override
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+    def __from_inner__[DT1: np.generic, DT2: np.generic](
+        self: CoordinateBasis[Any, ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return vectors.swapaxes(axis, 0)[self.inner_points].swapaxes(axis, 0)
+    ) -> BasisConversion[DT1, DT2, np.generic]:
+        def _fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            return vectors.swapaxes(axis, 0)[self.inner_points].swapaxes(axis, 0)
+
+        return BasisConversion(_fn)
 
     @property
     @override
@@ -114,4 +120,9 @@ class CoordinateBasis[M: BasisMetadata, DT: np.generic](  # noqa: PLW1641
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
-        return self.__from_inner__(self.inner.points)
+
+        return (
+            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            .__from_inner__(self.inner.points)
+            .ok()
+        )

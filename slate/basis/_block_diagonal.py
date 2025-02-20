@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, TypeGuard, cast, overload, override
+from typing import Any, Never, TypeGuard, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
+from slate.basis._basis import Basis, BasisFeature, ctype
 from slate.basis._tuple import TupleBasis, TupleBasis2D
 from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
-from slate.metadata import BasisMetadata, Metadata2D, StackedMetadata
+from slate.metadata import BasisMetadata, Metadata2D, TupleMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
 
 # TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
@@ -22,20 +22,17 @@ from slate.util._diagonal import build_diagonal, extract_diagonal
 
 
 class BlockDiagonalBasis[
-    DT: np.generic,
-    M: BasisMetadata,
+    C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
     E,
-    B: TupleBasis[Any, Any, Any] = TupleBasis[M, E, DT],
+    DT: ctype[Never],
 ](
-    WrappedBasis[Any, DT, B],
+    WrappedBasis[TupleBasis[C, E, DT], DT],
 ):
     """Represents a diagonal basis."""
 
-    def __init__[
-        B_: TupleBasis[Any, Any, Any],
-    ](
-        self: BlockDiagonalBasis[Any, Any, Any, B_],
-        inner: B_,
+    def __init__(
+        self,
+        inner: TupleBasis[C, E, DT],
         block_shape: tuple[int, ...],
     ) -> None:
         super().__init__(cast("Any", inner))
@@ -43,15 +40,6 @@ class BlockDiagonalBasis[
             assert child.size % s == 0
 
         self._block_shape = block_shape
-
-    @override
-    def metadata(self) -> StackedMetadata[M, E]:
-        return super().metadata()
-
-    @property
-    @override
-    def inner(self) -> B:
-        return self._inner
 
     @property
     def block_shape(self) -> tuple[int, ...]:
@@ -77,11 +65,11 @@ class BlockDiagonalBasis[
         return np.prod(self.block_shape).item() * self.n_repeats
 
     @override
-    def __into_inner__[DT1: np.generic](  # [DT1: DT]
+    def __into_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         axis %= vectors.ndim
 
         stacked = vectors.reshape(
@@ -102,11 +90,11 @@ class BlockDiagonalBasis[
         )
 
     @override
-    def __from_inner__[DT1: np.generic](  # [DT1: DT]
+    def __from_inner__(
         self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT]:
         axis %= vectors.ndim
 
         # The vectors in the inner basis are stored in
@@ -188,18 +176,27 @@ class BlockDiagonalBasis[
         if "INDEX" not in self.features:
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
-        return self.__from_inner__(self.inner.points)
+
+        return (
+            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            .__from_inner__(self.inner.points)
+            .ok()
+        )
 
 
-def _is_diagonal_basis(
+def is_block_diagonal_basis(
     basis: Basis[Any, Any],
-) -> TypeGuard[BlockDiagonalBasis[Any, Any, Any]]:
+) -> TypeGuard[
+    BlockDiagonalBasis[
+        tuple[Basis[BasisMetadata, ctype[Never]], ...], Never, ctype[Never]
+    ]
+]:
     return isinstance(basis, BlockDiagonalBasis)
 
 
 @overload
 def as_block_diagonal_basis[
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
@@ -213,16 +210,16 @@ def as_block_diagonal_basis[
 
 @overload
 def as_block_diagonal_basis[
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     M: BasisMetadata,
     E,
 ](
-    basis: Basis[StackedMetadata[M, E], DT],
+    basis: Basis[TupleMetadata[M, E], DT],
 ) -> BlockDiagonalBasis[DT, M, E] | None: ...
 
 
 @overload
-def as_block_diagonal_basis[DT: np.generic](
+def as_block_diagonal_basis[DT: np.dtype[np.generic]](
     basis: Basis[Any, DT],
 ) -> BlockDiagonalBasis[DT, BasisMetadata, Any] | None: ...
 
@@ -232,6 +229,6 @@ def as_block_diagonal_basis(
 ) -> Any:
     """Get the closest basis that is block diagonal."""
     return next(
-        (b for b in wrapped_basis_iter_inner(basis) if _is_diagonal_basis(b)),
+        (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal_basis(b)),
         None,
     )

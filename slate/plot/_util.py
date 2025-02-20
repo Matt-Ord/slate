@@ -234,8 +234,8 @@ def get_axis_colorbar(axis: Axes) -> Colorbar | None:
 Measure = Literal["real", "imag", "abs", "angle"]
 
 
-def _measure_data[DT: np.number[Any]](
-    data: np.ndarray[Any, np.dtype[DT]],
+def _measure_data[DT: np.dtype[np.number[Any]]](
+    data: np.ndarray[Any, DT],
     measure: Measure,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     match measure:
@@ -249,8 +249,8 @@ def _measure_data[DT: np.number[Any]](
             return np.unwrap(np.angle(data))  # type: ignore[no-any-return]
 
 
-def get_measured_data[DT: np.number[Any]](
-    data: np.ndarray[Any, np.dtype[DT]],
+def get_measured_data[DT: np.dtype[np.number[Any]]](
+    data: np.ndarray[Any, DT],
     measure: Measure,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Transform data with the given measure.

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from slate.metadata import BasisMetadata
 
 
-def _einsum_numpy[DT: np.number[Any]](
+def _einsum_numpy[DT: np.dtype[np.number[Any]]](
     idx: str,
     *arrays: np.ndarray[Any, Any],
 ) -> np.ndarray[Any, Any]:
@@ -32,7 +32,7 @@ def _einsum_numpy[DT: np.number[Any]](
     )
 
 
-def _einsum_simple[DT: np.number[Any]](
+def _einsum_simple[DT: np.dtype[np.number[Any]]](
     idx: str,
     *arrays: Array[BasisMetadata, DT],
 ) -> Array[Any, DT, Any]:
@@ -55,7 +55,7 @@ def _einsum_simple[DT: np.number[Any]](
     return Array(result_basis, _einsum_numpy(final_idx, *raw_arrays))
 
 
-def _einsum_smart[DT: np.number[Any]](
+def _einsum_smart[DT: np.dtype[np.number[Any]]](
     idx: str,
     *arrays: Array[BasisMetadata, DT],
 ) -> Array[Any, DT, Any]:
@@ -100,7 +100,7 @@ def _einsum_smart[DT: np.number[Any]](
     return _einsum_simple("(i j'),(j k)->(i k)", *arrays)
 
 
-def einsum[DT: np.number[Any]](
+def einsum[DT: np.dtype[np.number[Any]]](
     idx: str,
     *arrays: Array[BasisMetadata, DT],
 ) -> Array[Any, DT, Any]:

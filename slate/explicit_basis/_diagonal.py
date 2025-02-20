@@ -13,7 +13,7 @@ from slate.metadata import BasisMetadata
 
 class TrivialExplicitBasis[
     M: BasisMetadata,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
     B: Basis[Any, Any],
 ](ExplicitUnitaryBasis[M, DT, B, Basis[Any, Any]]):
     def __init__[B1: Basis[Any, Any]](
@@ -27,7 +27,7 @@ class TrivialExplicitBasis[
                         FundamentalBasis(BasisStateMetadata(inner)),
                     )
                 ),
-                cast("np.ndarray[Any, np.dtype[DT]]", np.ones(inner.size)),
+                cast("np.ndarray[Any, DT]", np.ones(inner.size)),
             ),
             data_id=uuid.UUID(int=0),
         )

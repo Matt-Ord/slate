@@ -22,10 +22,10 @@ from slate.util._index import get_position_in_sorted, slice_ignoring_axes
 
 if TYPE_CHECKING:
     from slate.basis._tuple import TupleBasis
-    from slate.metadata.stacked import Metadata1D, Metadata2D, StackedMetadata
+    from slate.metadata.stacked import Metadata1D, Metadata2D, TupleMetadata
 
 
-def conjugate[M: BasisMetadata, DT: np.generic](
+def conjugate[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: Array[M, DT],
 ) -> Array[M, DT]:
     """Conjugate a slate array."""
@@ -33,7 +33,12 @@ def conjugate[M: BasisMetadata, DT: np.generic](
     return Array(converted.basis, np.conj(converted.raw_data)).with_basis(array.basis)
 
 
-def _transpose_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def _transpose_from_diagonal[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     array: Array[
         Metadata2D[M0, M1, E],
         DT,
@@ -52,12 +57,12 @@ def _transpose_from_tuple_simple[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.generic,
+    DT: np.dtype[np.generic],
 ](
     array: Array[
         Metadata2D[M0, M1, E],
         DT,
-        TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E],
+        TupleBasis2D[np.dtype[np.generic], Basis[M0, Any], Basis[M1, Any], E],
     ],
 ) -> Array[Metadata2D[M1, M0, E], DT]:
     return Array(
@@ -66,7 +71,12 @@ def _transpose_from_tuple_simple[
     )
 
 
-def _transpose_simple[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def _transpose_simple[
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M2, M1, E], DT]:
     as_diagonal = as_diagonal_basis(array)
@@ -76,15 +86,15 @@ def _transpose_simple[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     return _transpose_from_tuple_simple(as_tuple_basis(array))
 
 
-def _transpose_from_tuple[M: BasisMetadata, E, DT: np.generic](
+def _transpose_from_tuple[M: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[
-        StackedMetadata[M, E],
+        TupleMetadata[M, E],
         DT,
         TupleBasis[M, E, Any],
     ],
     *,
     axes: tuple[int, ...] | None = None,
-) -> Array[StackedMetadata[M, E], DT, TupleBasis[M, E, Any]]:
+) -> Array[TupleMetadata[M, E], DT, TupleBasis[M, E, Any]]:
     # TODO: einsum based implementation would be preferred here...  # noqa: FIX002
     children = array.basis.children
     axes = tuple(range(len(children)))[::-1] if axes is None else axes
@@ -96,7 +106,7 @@ def _transpose_from_tuple[M: BasisMetadata, E, DT: np.generic](
 
 
 @overload
-def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Metadata2D[M1, M2, E], DT],
     *,
     axes: None = None,
@@ -104,18 +114,16 @@ def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
 
 
 @overload
-def transpose[M: BasisMetadata, Any, DT: np.generic](
-    array: Array[StackedMetadata[M, Any], DT],
-    *,
+def transpose[M: BasisMetadata, Any, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, Any], DT],
     axes: tuple[int, ...] | None = None,
-) -> Array[StackedMetadata[M, Any], DT]: ...
+) -> Array[TupleMetadata[M, Any], DT]: ...
 
 
-def transpose[DT: np.generic](
-    array: Array[StackedMetadata[Any, Any], DT],
-    *,
+def transpose[DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[Any, Any], DT],
     axes: tuple[int, ...] | None = None,
-) -> Array[StackedMetadata[Any, Any], DT]:
+) -> Array[TupleMetadata[Any, Any], DT]:
     """Transpose a slate array."""
     array = as_index_basis(array)
     if axes is None and array.basis.metadata().n_dim == 2:  # noqa: PLR2004
@@ -124,7 +132,12 @@ def transpose[DT: np.generic](
     return _transpose_from_tuple(as_tuple_basis(array), axes=axes)
 
 
-def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def _inv_from_diagonal[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    DT: np.dtype[np.generic],
+](
     array: Array[
         Metadata2D[M0, M1, E],
         DT,
@@ -140,11 +153,11 @@ def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
     )
 
 
-def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
+def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[
         Metadata2D[M0, M1, E],
         DT,
-        TupleBasis2D[np.generic, Basis[M0, Any], Basis[M1, Any], E],
+        TupleBasis2D[np.dtype[np.generic], Basis[M0, Any], Basis[M1, Any], E],
     ],
 ) -> Array[Metadata2D[M1, M0, E], DT]:
     raw_data = array.raw_data.reshape(array.basis.shape)
@@ -157,7 +170,7 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
     )
 
 
-def inv[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def inv[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M2, M1, E], DT]:
     """Inverse a slate array."""
@@ -168,7 +181,7 @@ def inv[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     return _inv_from_tuple(as_tuple_basis(array))
 
 
-def dagger[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
+def dagger[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M2, M1, E], DT]:
     """Conjugate Transpose a slate array."""
@@ -176,34 +189,34 @@ def dagger[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
 
 
 @overload
-def get_data_in_axes[M: BasisMetadata, DT: np.generic](
-    array: Array[StackedMetadata[M, Any], DT],
+def get_data_in_axes[M: BasisMetadata, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, Any], DT],
     axes: tuple[int],
     idx: tuple[int, ...],
 ) -> Array[Metadata1D[M, Any], DT]: ...
 
 
 @overload
-def get_data_in_axes[M: BasisMetadata, DT: np.generic](
-    array: Array[StackedMetadata[M, Any], DT],
+def get_data_in_axes[M: BasisMetadata, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, Any], DT],
     axes: tuple[int, int],
     idx: tuple[int, ...],
 ) -> Array[Metadata2D[M, M, Any], DT]: ...
 
 
 @overload
-def get_data_in_axes[M: BasisMetadata, DT: np.generic](
-    array: Array[StackedMetadata[M, Any], DT],
+def get_data_in_axes[M: BasisMetadata, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, Any], DT],
     axes: tuple[int, ...],
     idx: tuple[int, ...],
-) -> Array[StackedMetadata[M, Any], DT]: ...
+) -> Array[TupleMetadata[M, Any], DT]: ...
 
 
-def get_data_in_axes[M: BasisMetadata, DT: np.generic](
-    array: Array[StackedMetadata[M, Any], DT],
+def get_data_in_axes[M: BasisMetadata, DT: np.dtype[np.generic]](
+    array: Array[TupleMetadata[M, Any], DT],
     axes: tuple[int, ...],
     idx: tuple[int, ...],
-) -> Array[StackedMetadata[M, Any], DT]:
+) -> Array[TupleMetadata[M, Any], DT]:
     """
     Given a slice, insert slice(None) everywhere given in axes.
 

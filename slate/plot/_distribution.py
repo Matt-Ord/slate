@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 Distribution = Literal["normal", "exponential normal", "skew normal"]
 
 
-def array_distribution[M: BasisMetadata, DT: np.number[Any]](
+def array_distribution[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
     array: Array[M, np.floating[Any]],
     *,
     ax: Axes | None = None,
