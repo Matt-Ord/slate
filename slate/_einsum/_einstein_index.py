@@ -71,5 +71,5 @@ class EinsumSpecification:
 def parse_einsum_specification(specification: str) -> EinsumSpecification:
     parts, result = specification.split("->")
     parts = tuple(parse_einsum_index(p) for p in parts.split(","))
-    result = parse_einsum_index(result) if result.strip("") else None
+    result = parse_einsum_index(result) if result.strip() else None
     return EinsumSpecification(parts, result)
