@@ -18,11 +18,9 @@ from slate.basis import (
     RecastBasis,
     WrappedBasis,
     as_tuple_basis,
-    tuple_basis,
 )
 from slate.metadata import (
     BasisMetadata,
-    Metadata2D,
     SimpleMetadata,
     shallow_shape_from_nested,
 )

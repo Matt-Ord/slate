@@ -6,7 +6,13 @@ from typing import Any, cast
 import numpy as np
 
 from slate.array import Array
-from slate.basis import Basis, BasisStateMetadata, FundamentalBasis, diagonal_basis
+from slate.basis import (
+    Basis,
+    BasisStateMetadata,
+    DiagonalBasis,
+    FundamentalBasis,
+    TupleBasis,
+)
 from slate.explicit_basis._explicit_basis import ExplicitUnitaryBasis
 from slate.metadata import BasisMetadata
 
@@ -21,10 +27,12 @@ class TrivialExplicitBasis[
     ) -> None:
         super().__init__(
             Array(
-                diagonal_basis(
-                    (
-                        FundamentalBasis(BasisStateMetadata(inner)),
-                        FundamentalBasis(BasisStateMetadata(inner)),
+                DiagonalBasis(
+                    TupleBasis(
+                        (
+                            FundamentalBasis(BasisStateMetadata(inner)),
+                            FundamentalBasis(BasisStateMetadata(inner)),
+                        )
                     )
                 ),
                 cast("np.ndarray[Any, DT]", np.ones(inner.size)),

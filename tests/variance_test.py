@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Never, cast
 
 from slate.array import Array
 
@@ -9,21 +9,15 @@ if TYPE_CHECKING:
 
     from slate.basis import (
         Basis,
-        DiagonalBasis,
         FundamentalBasis,
         TupleBasis,
-        TupleBasis2D,
         WrappedBasis,
     )
     from slate.basis._basis import ctype
     from slate.metadata import (
         BasisMetadata,
-        LengthMetadata,
-        Metadata2D,
-        MetadataND,
         SimpleMetadata,
         TupleMetadata,
-        VolumeMetadata,
     )
 
 
@@ -38,6 +32,8 @@ def ctype_variance() -> None:
     # A generic type however should handle a float128
     b = cast("ctype[np.generic]", {})
     _e: ctype[np.float128] = b
+
+    _f: ctype[Never] = b
 
 
 def basis_dtype_variance() -> None:
@@ -65,6 +61,24 @@ def tuple_basis_dtype_variance() -> None:
 
     b = cast("TupleBasis[Any,Any, ctype[np.generic]]", {})
     _e: TupleBasis[Any, Any, ctype[np.float128]] = b
+    # Check that we can actually upcast the basis
+    c = cast(
+        "TupleBasis[tuple[Basis[BasisMetadata, ctype[np.float64]], ...],Any, ctype[Never]]",
+        {},
+    )
+    c_upcast = c.upcast()
+    _c_upcast_res: TupleBasis[
+        tuple[Basis[BasisMetadata, ctype[Never]], ...], Any, ctype[np.float64]
+    ] = c_upcast
+
+    d = cast(
+        "TupleBasis[tuple[Basis[BasisMetadata, ctype[np.float64]]],Any, ctype[Never]]",
+        {},
+    )
+    d_upcast = d.upcast()
+    _d_upcast_res: TupleBasis[
+        tuple[Basis[BasisMetadata, ctype[Never]], ...], Any, ctype[np.float64]
+    ] = d_upcast
 
 
 def tuple_basis_extra_variance() -> None:
@@ -72,7 +86,31 @@ def tuple_basis_extra_variance() -> None:
         "TupleBasis[Any,np.number, Any]",
         {},
     )
+    # Number is a generic
     _b: TupleBasis[Any, np.generic, Any] = a
+    # But it is not a float128
+    _c: TupleBasis[Any, np.float128, Any] = a  # type: ignore should fail
+
+
+def tuple_basis_children_variance() -> None:
+    a = cast(
+        "TupleBasis[tuple[Basis[BasisMetadata, ctype[np.generic]]], Any, Any]",
+        {},
+    )
+    _c: TupleBasis[tuple[Basis[BasisMetadata, ctype[np.float128]]], Any, Any] = a
+    # The basis of a is not compatible with the basis of _d
+    _d: TupleBasis[tuple[Basis[SimpleMetadata, ctype[np.float128]]], Any, Any] = a  # type: ignore should fail
+    # One is valid if we specify any number
+    _e: TupleBasis[tuple[Basis[BasisMetadata, ctype[np.generic]], ...], Any, Any] = a
+    # But not if we have two
+    _f: TupleBasis[
+        tuple[
+            Basis[BasisMetadata, ctype[np.generic]],
+            Basis[BasisMetadata, ctype[np.generic]],
+        ],
+        Any,
+        Any,
+    ] = a  # type: ignore should fail
 
 
 def basis_conversion() -> None:
@@ -116,21 +154,22 @@ def array_basis_variance() -> None:
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     a = Array(basis, data)
     _ = a.as_array()
-    _ = a.with_basis(basis)
+    _ = a.with_basis(basis).ok()
 
     basis = cast("Basis[SimpleMetadata, ctype[np.number[Any]]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     a = Array(basis, data)
     _ = a.as_array()
-    _ = a.with_basis(basis)
+    _ = a.with_basis(basis).ok()
     # It should block an incompatible basis
     incompatible_basis = cast("Basis[SimpleMetadata, ctype[np.float128]]", {})
-    _ = a.with_basis(incompatible_basis).unwrap()  # type: ignore should fail
+    _ = a.with_basis(incompatible_basis).ok()  # type: ignore should fail
+    # Note here that TupleMetadata is not compatible with SimpleMetadata
     incompatible_basis = cast("Basis[TupleMetadata[Any, Any], ctype[np.generic]]", {})
-    _ = a.with_basis(incompatible_basis).unwrap()  # type: ignore should fail
+    _ = a.with_basis(incompatible_basis)
     # but not a compatible one
     compatible_basis = cast("Basis[SimpleMetadata, ctype[np.generic]]", {})
-    _ = a.with_basis(compatible_basis).unwrap()
+    _ = a.with_basis(compatible_basis).ok()
 
     basis = cast("Basis[SimpleMetadata, ctype[np.complexfloating]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
@@ -138,7 +177,7 @@ def array_basis_variance() -> None:
     a = Array(basis, data)
     # But we cannot convert the array if incompatible
     _ = a.as_array()  # type: ignore should fail
-    _ = a.with_basis(basis).unwrap()  # type: ignore should fail
+    _ = a.with_basis(basis).ok()  # type: ignore should fail
 
 
 def array_dtype_variance() -> None:
@@ -172,95 +211,29 @@ def fundamental_basis_variance() -> None:
 
 def wrappeed_basis_variance() -> None:
     a = cast(
-        "WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.float64]]",
+        "WrappedBasis[Basis[SimpleMetadata, ctype[np.float64]], ctype[np.float64] ]",
         {},
     )
-    _b: WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.generic]] = a  # type: ignore should fail
-    _c: WrappedBasis[SimpleMetadata, np.float64, Basis[SimpleMetadata, np.float64]] = a
-    _d: WrappedBasis[SimpleMetadata, np.float64, Basis[BasisMetadata, np.generic]] = a  # type: ignore should fail
-    _e: WrappedBasis[SimpleMetadata, np.float64, Basis[BasisMetadata, np.float64]] = a
-
-
-def stacked_metadata_variance() -> None:
-    a = cast("Metadata2D[SimpleMetadata, SimpleMetadata, SimpleMetadata]", {})
-    _b: Metadata2D[BasisMetadata, BasisMetadata, BasisMetadata] = a
-    _c: Metadata2D[BasisMetadata, BasisMetadata, LengthMetadata] = a  # type: ignore should fail
-    _d: Metadata2D[BasisMetadata, LengthMetadata, BasisMetadata] = a  # type: ignore should fail
-    _e: Metadata2D[LengthMetadata, BasisMetadata, BasisMetadata] = a  # type: ignore should fail
-
-    a1 = cast("MetadataND[SimpleMetadata, SimpleMetadata, SimpleMetadata]", {})
-    _b1: MetadataND[BasisMetadata, BasisMetadata, BasisMetadata] = a1  # type: ignore i disagree with type checker
-
-
-def tuple_basis_2d_variance() -> None:
-    a1 = cast(
-        "TupleBasis2D[np.floating[Any], Basis[LengthMetadata, np.float64], Basis[SimpleMetadata, np.float64], None]",
-        {},
-    )
-    _c1: TupleBasis2D[
-        np.float64,
-        Basis[SimpleMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a1
-    _e1: TupleBasis2D[
-        np.float64,
-        Basis[BasisMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a1
-    _e2: TupleBasis2D[
-        np.float64,
-        Basis[BasisMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a1
-    _e5: TupleBasis[
-        BasisMetadata,
-        None,
-        np.float64,
-    ] = a1
-    _e4: Metadata2D[LengthMetadata, SimpleMetadata, None] = a1.metadata()
-    _e3: TupleBasis2D[
-        np.float64,
-        Basis[BasisMetadata, np.float64],
-        Basis[LengthMetadata, np.float64],
-        None,
-    ] = a1  # type: ignore should fail
-
-    a2 = cast(
-        "TupleBasis2D[np.dtype[np.generic], Basis[VolumeMetadata, Any], Basis[VolumeMetadata, Any], None]",
-        {},
-    )
-    _b2: TupleBasis[Any, None, np.complex128, TupleMetadata[Any, None]] = a2
-
-
-def diagonal_basis_variance() -> None:
-    a = cast(
-        "DiagonalBasis[np.floating[Any], Basis[SimpleMetadata, np.float64], Basis[SimpleMetadata, np.float64], None]",
-        {},
-    )
-    _b: DiagonalBasis[
-        np.generic,
-        Basis[SimpleMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
+    # Fails due to not supporting generic
+    _b: WrappedBasis[Basis[SimpleMetadata, ctype[np.float64]], ctype[np.generic]] = a  # type: ignore should fail
+    _c: WrappedBasis[Basis[SimpleMetadata, ctype[np.float64]], ctype[np.float64]] = a
+    # Fails due to not supporting generic
+    _d: WrappedBasis[Basis[BasisMetadata, ctype[np.float64]], ctype[np.generic]] = a  # type: ignore should fail
+    _e: WrappedBasis[Basis[BasisMetadata, ctype[np.float64]], ctype[np.float64]] = a
+    # Fails due to bad basis type
+    _f: WrappedBasis[
+        Basis[TupleMetadata[Any, Any], ctype[np.float64]], ctype[np.generic]
     ] = a  # type: ignore should fail
-    _c: DiagonalBasis[
-        np.float64,
-        Basis[SimpleMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a
-    _d: DiagonalBasis[
-        np.float64,
-        Basis[TupleMetadata[Any, Any], np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
+    _g: WrappedBasis[
+        Basis[TupleMetadata[Any, Any], ctype[np.float64]], ctype[np.float64]
     ] = a  # type: ignore should fail
-    _e: DiagonalBasis[
-        np.float64,
-        Basis[BasisMetadata, np.float64],
-        Basis[SimpleMetadata, np.float64],
-        None,
-    ] = a
+
+    b = cast(
+        "WrappedBasis[Basis[SimpleMetadata, ctype[np.float64]], ctype[Never] ]",
+        {},
+    )
+    # Upcasting the basis should infer the correct type
+    b_upcast = b.upcast()
+    _h: WrappedBasis[Basis[SimpleMetadata, ctype[np.float64]], ctype[np.float64]] = (
+        b_upcast
+    )

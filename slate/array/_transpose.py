@@ -11,26 +11,28 @@ from slate.array._conversion import (
     as_tuple_basis,
     nest,
 )
-from slate.basis import (
-    Basis,
-    TupleBasis2D,
-    tuple_basis,
-)
-from slate.basis._diagonal import DiagonalBasis, diagonal_basis
 from slate.metadata import BasisMetadata
 from slate.util._index import get_position_in_sorted, slice_ignoring_axes
 
 if TYPE_CHECKING:
+    from slate.basis import (
+        Basis,
+    )
+    from slate.basis._diagonal import DiagonalBasis
     from slate.basis._tuple import TupleBasis
-    from slate.metadata.stacked import Metadata1D, Metadata2D, TupleMetadata
+    from slate.metadata.stacked import TupleMetadata
 
 
-def conjugate[M: BasisMetadata, DT: np.dtype[np.generic]](
-    array: Array[M, DT],
-) -> Array[M, DT]:
+def conjugate[B: Basis, DT: np.dtype[np.generic]](
+    array: Array[B, DT],
+) -> Array[B, DT]:
     """Conjugate a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.conj(converted.raw_data)).with_basis(array.basis)
+    raw_data = converted.raw_data
+    converted_data = cast(
+        "np.ndarray[Any, DT]", np.conj(raw_data).astype(raw_data.dtype)
+    )
+    (Array(converted.basis, converted_data).with_basis(array.basis))
 
 
 def _transpose_from_diagonal[
