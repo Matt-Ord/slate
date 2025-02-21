@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from copy import copy
-from typing import TYPE_CHECKING, Any, Never, Self, TypeGuard, override
+from typing import TYPE_CHECKING, Any, Never, Self, TypeGuard, cast, override
 
 import numpy as np
 
@@ -25,19 +25,30 @@ def _convert_vectors_unsafe[DT2: np.generic](
         return vectors
 
     as_inner = initial.__into_inner__(vectors, axis).ok()
-    if isinstance(final, WrappedBasis) and initial.inner == final.inner:  # type: ignore unknown
+    if is_wrapped_basis(final) and initial.inner == final.inner:
         return final.__from_inner__(as_inner, axis).ok()
     return initial.inner.__convert_vector_into__(as_inner, final, axis=axis)  # type: ignore unknown
 
 
 class WrappedBasis[
     B: Basis[BasisMetadata, ctype[Never]] = Basis[BasisMetadata, ctype[Never]],
+    # Invariant: DT must also be supported by all basis in B.
+    # It is not possible to specify this constraint in the type system, so instead
+    # we enforce it at __init__ time.
     DT: ctype[Never] = ctype[Never],
 ](Basis[Any, DT]):
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
-    def __init__(self, inner: B) -> None:
-        self._inner = inner
+    def __init__[B_: Basis[BasisMetadata, ctype[Never]]](
+        self: WrappedBasis[B_, ctype[Never]], inner: B_
+    ) -> None:
+        self._inner = cast("B", inner)
+
+    def upcast[DT_: ctype[Never]](
+        self: WrappedBasis[Basis[Any, DT_], Any],
+    ) -> WrappedBasis[B, DT_]:
+        """Upcast the wrapped basis to a more specific type."""
+        return cast("WrappedBasis[B, DT_]", self)
 
     @override
     def metadata[M: BasisMetadata](self: WrappedBasis[Basis[M, Any], Any]) -> M:
@@ -119,7 +130,7 @@ class WrappedBasis[
 def is_wrapped_basis[
     M: BasisMetadata,
     DT: ctype[Never],
-](basis: Basis[M, DT]) -> TypeGuard[WrappedBasis[Basis[M, ctype[Never]], DT]]:
+](basis: Basis[M, DT]) -> TypeGuard[WrappedBasis[Basis[M, DT], DT]]:
     """Check if a basis is a wrapped basis."""
     return isinstance(basis, WrappedBasis)
 
@@ -127,7 +138,7 @@ def is_wrapped_basis[
 def wrapped_basis_iter_inner[
     M: BasisMetadata,
     DT: ctype[Never],
-](basis: Basis[M, DT]) -> Iterator[Basis[M, ctype[Never]]]:
+](basis: Basis[M, DT]) -> Iterator[Basis[M, DT]]:
     """Return successive calls to basis.inner until the basis is not a WrappedBasis."""
     yield basis
     if is_wrapped_basis(basis):
@@ -137,10 +148,10 @@ def wrapped_basis_iter_inner[
 def get_wrapped_basis_super_inner[
     M: BasisMetadata,
     DT: ctype[Never],
-](basis: Basis[M, DT]) -> Basis[M, ctype[Never]]:
+](basis: Basis[M, DT]) -> Basis[M, DT]:
     """Get the `super inner` of a wrapped basis.
 
-    If the inner is itself a wrapped basis, return the super inner of that basis
+    If the inner is itself a wrapped basis, return the super inner of that basis.
     """
     *_, last = wrapped_basis_iter_inner(basis)
     return last

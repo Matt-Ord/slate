@@ -33,33 +33,35 @@ from slate.metadata import (
 )
 from slate.metadata._metadata import SimpleMetadata
 
-type StackedBasis[M: BasisMetadata, E, DT: ctype[Never] = ctype[Never]] = Basis[
-    TupleMetadata[M, E], DT
-]
 
-
-def _convert_tuple_basis_axes[M: TupleMetadata[Any, Any], DT: np.generic](
-    vectors: np.ndarray[Any, np.dtype[DT]],
-    initial_basis: TupleBasis[M, ctype[DT]],
-    final_basis: TupleBasis[M, ctype[DT]],
-    axis: int = -1,
-) -> np.ndarray[Any, np.dtype[DT]]:
-    swapped = vectors.swapaxes(axis, 0)
-    stacked = swapped.reshape(*initial_basis.shape, *swapped.shape[1:])
-    for ax, (initial, final) in enumerate(zip(initial_basis, final_basis, strict=True)):
-        stacked = initial.__convert_vector_into__(stacked, final, axis=ax).ok()
-
-    return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
-
-
-def _convert_tuple_basis_vector[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
+def _convert_tuple_basis_axes[
+    C: tuple[Basis[BasisMetadata, ctype[np.generic]], ...],
     E,
     DT: np.generic,
 ](
     vectors: np.ndarray[Any, np.dtype[DT]],
     initial_basis: TupleBasis[C, E, ctype[np.generic]],
-    final_basis: Basis[TupleBasisMetadata[C, E], ctype[np.generic]],
+    final_basis: TupleBasis[C, E, ctype[np.generic]],
+    axis: int = -1,
+) -> np.ndarray[Any, np.dtype[DT]]:
+    swapped = vectors.swapaxes(axis, 0)
+    stacked = swapped.reshape(*initial_basis.shape, *swapped.shape[1:])
+    for ax, (initial, final) in enumerate(
+        zip(initial_basis.children, final_basis.children, strict=True)
+    ):
+        stacked = initial.__convert_vector_into__(stacked, final, axis=ax).ok()
+
+    return stacked.reshape(-1, *swapped.shape[1:]).swapaxes(axis, 0)
+
+
+def _convert_tuple_basis_vector_unsafe[
+    C: tuple[Basis[BasisMetadata, ctype[np.generic]], ...],
+    E,
+    DT: np.generic,
+](
+    vectors: np.ndarray[Any, np.dtype[DT]],
+    initial_basis: TupleBasis[C, E, ctype[np.generic]],
+    final_basis: TupleBasis[C, E, ctype[np.generic]],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
     """Convert a vector, expressed in terms of the given basis from_config in the basis to_config."""
@@ -67,6 +69,9 @@ def _convert_tuple_basis_vector[
         # The conversion of a dual to a non-dual vector must happen in an index basis
         initial_fundamental = as_tuple_basis(as_index_basis(initial_basis))
         final_fundamental = as_tuple_basis(as_index_basis(final_basis))
+        if initial_fundamental is None or final_fundamental is None:
+            msg = "Cannot convert between a basis which is not a TupleBasis"
+            raise ValueError(msg)
         converted_0 = _convert_tuple_basis_axes(
             vectors, initial_basis, initial_fundamental, axis
         )
@@ -97,10 +102,12 @@ def _convert_vectors_unsafe[DT2: np.generic](
     else:
         return initial.__convert_vector_into__(vectors, final, axis).ok()
 
-    converted = _convert_tuple_basis_vector(vectors, initial, basis_as_tuple, axis)
+    converted = _convert_tuple_basis_vector_unsafe(
+        vectors, initial, basis_as_tuple, axis
+    )
     for wrapped_basis in reversed(inner):
         assert is_wrapped_basis(wrapped_basis)
-        converted = wrapped_basis.__from_inner__(converted, axis)
+        converted = wrapped_basis.__from_inner__(converted, axis).ok()
     return converted
 
 
@@ -122,12 +129,18 @@ class TupleBasis[
     """Represents a Tuple of independent basis."""
 
     def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...], E_](
-        self: TupleBasis[C_, E_, ctype[np.generic]],
+        self: TupleBasis[C_, E_, ctype[Never]],
         children: C_,
-        extra_metadata: E_,
+        extra: E_ | None = None,
     ) -> None:
         self._children = cast("C", children)
-        self._extra = cast("E", extra_metadata)
+        self._extra = cast("E", extra)
+
+    def upcast[DT_: ctype[Never]](
+        self: TupleBasis[tuple[Basis[BasisMetadata, DT_], ...], Any, Any],
+    ) -> TupleBasis[C, E, DT_]:
+        """Upcast the wrapped basis to a more specific type."""
+        return cast("TupleBasis[C,E, DT_]", self)
 
     @override
     def dual_basis(
@@ -173,7 +186,7 @@ class TupleBasis[
     ) -> BasisConversion[DT1, DT2, np.generic]:
         fundamental = from_metadata(self.metadata())
         return BasisConversion[DT1, DT2, np.generic](
-            lambda: _convert_tuple_basis_vector(vectors, self, fundamental, axis)
+            lambda: _convert_tuple_basis_vector_unsafe(vectors, self, fundamental, axis)  # type: ignore BasisConversion makes this safe
         )
 
     @override
@@ -184,7 +197,7 @@ class TupleBasis[
     ) -> BasisConversion[np.generic, DT2, DT3]:
         fundamental = from_metadata(self.metadata())
         return BasisConversion[np.generic, DT2, DT3](
-            lambda: _convert_tuple_basis_vector(vectors, fundamental, self, axis)
+            lambda: _convert_tuple_basis_vector_unsafe(vectors, fundamental, self, axis)  # type: ignore BasisConversion makes this safe
         )
 
     @override
@@ -264,8 +277,11 @@ class TupleBasis[
             msg = "points not implemented for this basis"
             raise NotImplementedError(msg)
 
-        # TODO: test __from_fundamental__ types...
-        return self.__from_fundamental__(np.arange(self.size))
+        return (
+            cast("TupleBasis[Any, Any, ctype[np.int_]]", self)
+            .__from_fundamental__(np.arange(self.size))
+            .ok()
+        )
 
 
 @overload
@@ -321,12 +337,6 @@ def from_metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
 
 
 @overload
-def from_metadata[C: tuple[Basis[BasisMetadata, Any], ...], E](
-    metadata: TupleBasisMetadata[C, E], *, is_dual: NestedBoolOrNone = None
-) -> TupleBasis[C, E, ctype[np.generic]]: ...
-
-
-@overload
 def from_metadata[M: BasisMetadata, E](
     metadata: TupleMetadata[tuple[M, ...], E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis[tuple[Basis[M, ctype[np.generic]], ...], E, ctype[np.generic]]: ...
@@ -364,7 +374,7 @@ def from_metadata(
         from_metadata(c, is_dual=dual)
         for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
-    return TupleBasis(children, metadata.extra)
+    return TupleBasis(children, metadata.extra).upcast()
 
 
 def is_tuple_basis[M: BasisMetadata, DT: ctype[Never]](
@@ -373,9 +383,13 @@ def is_tuple_basis[M: BasisMetadata, DT: ctype[Never]](
     return isinstance(basis, TupleBasis)
 
 
-def as_tuple_basis[C: tuple[Basis[BasisMetadata, ctype[Never]], ...], E](
-    basis: Basis[TupleBasisMetadata[C, E], Any],
-) -> TupleBasis[C, E, ctype[Never]]:
+def as_tuple_basis[
+    C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
+    E,
+    DT: ctype[Never],
+](
+    basis: Basis[TupleBasisMetadata[C, E], DT],
+) -> TupleBasis[C, E, DT] | None:
     """Get the closest basis to basis that is a TupleBasis.
 
     - For a wrapped TupleBasis, this will return the unwrapped basis
@@ -383,17 +397,21 @@ def as_tuple_basis[C: tuple[Basis[BasisMetadata, ctype[Never]], ...], E](
 
     This is useful for functions which require a TupleBasis, and ensures that
     only the minimal basis conversion is required.
+
+    Raises
+    ------
+        ValueError: if the basis is not a TupleBasis
     """
     super_inner = get_wrapped_basis_super_inner(basis)
     if is_tuple_basis(super_inner):
         return cast("Any", super_inner)
 
-    return from_metadata(basis.metadata())
+    return None
 
 
 def as_feature_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT], features: set[BasisFeature]
-) -> Basis[M, ctype[Never]]:
+) -> Basis[M, DT]:
     """Get the closest basis that supports the feature set."""
     inner_basis = from_metadata(basis.metadata(), is_dual=basis.is_dual)
     for inner_basis in wrapped_basis_iter_inner(basis):
@@ -408,12 +426,12 @@ def as_feature_basis[M: BasisMetadata, DT: ctype[Never]](
                 inner_basis.metadata().extra,
             ),
         )
-    return from_metadata(basis.metadata(), is_dual=basis.is_dual)
+    return from_metadata(basis.metadata(), is_dual=basis.is_dual)  # type: ignore does not understand everything is generic
 
 
 def as_index_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> Basis[M, ctype[Never]]:
+) -> Basis[M, DT]:
     """Get the closest basis that supports INDEX.
 
     If the basis is already an INDEX basis, return it.

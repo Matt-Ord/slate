@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, Never, cast, overload
 import numpy as np
 
 from slate import basis
-from slate.basis import Basis, FundamentalBasis, TupleBasis, TupleBasis1D, TupleBasis3D
+from slate.basis import Basis, FundamentalBasis, TupleBasis
+from slate.basis._tuple import TupleBasis
 from slate.metadata import (
     BasisMetadata,
-    Metadata2D,
     NestedLength,
     shallow_shape_from_nested,
 )
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from slate.basis._basis import ctype
-    from slate.basis._tuple import TupleBasis, TupleBasisMetadata
+    from slate.basis._tuple import TupleBasisMetadata
     from slate.metadata import SimpleMetadata
     from slate.metadata.stacked import TupleMetadata
 
@@ -77,7 +77,7 @@ def _index_tuple_raw_along_axis[DT: np.generic](
     data = data.reshape(data.shape[:axis] + (-1,) + data.shape[axis + 1 :])
     if len(final_basis) == 1:
         return final_basis[0], data
-    return basis.tuple_basis(tuple(final_basis), None), data
+    return TupleBasis(tuple(final_basis), None), data
 
 
 def _index_raw_along_axis[DT: np.dtype[np.generic]](
@@ -91,22 +91,30 @@ def _index_raw_along_axis[DT: np.dtype[np.generic]](
     return _index_single_raw_along_axis(index, basis, data, axis=axis)
 
 
-class ArrayConversion[M: BasisMetadata, B: Basis, DT: np.dtype[np.generic]]:
+class ArrayConversion[
+    M0: BasisMetadata,
+    DT0: ctype[np.generic],
+    B1: Basis,
+    DT: np.dtype[np.generic],
+]:
     def __init__(
-        self, data: np.ndarray[tuple[int], DT], old_basis: Basis[Any, Any], new_basis: B
+        self,
+        data: np.ndarray[tuple[int], DT],
+        old_basis: Basis[Any, Any],
+        new_basis: B1,
     ) -> None:
         self._data = data
         self._old_basis = old_basis
         self._new_basis = new_basis
 
-    def _metadata_variance_fn(self, value: M, _private: Never) -> None: ...
+    def _metadata_variance_fn(self, value: M0, _private: Never) -> None: ...
 
-    def unwrap[M_: BasisMetadata, DT_: np.generic](
-        self: ArrayConversion[M_, Basis[M_, ctype[DT_]], np.dtype[DT_]],
-    ) -> Array[B, DT]:
+    def ok[M_: BasisMetadata, DT_: np.generic](
+        self: ArrayConversion[M_, ctype[DT_], Basis[M_, ctype[DT_]], np.dtype[DT_]],
+    ) -> Array[B1, DT]:
         return Array[Any, Any](
             self._new_basis,
-            self._old_basis.__convert_vector_into__(self._data, self._new_basis),
+            self._old_basis.__convert_vector_into__(self._data, self._new_basis).ok(),
         )
 
 
@@ -150,7 +158,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         """Get the data as a (full) np.array."""
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
-        return self.with_basis(fundamental).unwrap().raw_data.reshape(shape)
+        return self.with_basis(fundamental).ok().raw_data.reshape(shape)
 
     @overload
     @staticmethod
@@ -213,10 +221,15 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         """Get a Array from an array."""
         return Array(basis.from_shape(array.shape), array)
 
-    def with_basis[DT_: np.generic, B_: Basis, M_: BasisMetadata](
-        self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-        basis: B_,
-    ) -> ArrayConversion[M_, B_, np.dtype[DT_]]:
+    def with_basis[
+        DT_: np.generic,
+        M0_: BasisMetadata,
+        DT0_: ctype[Never],
+        B1_: Basis,
+    ](
+        self: Array[Basis[M0_, DT0_], np.dtype[DT_]],
+        basis: B1_,
+    ) -> ArrayConversion[M0_, DT0_, B1_, np.dtype[DT_]]:
         """Get the Array with the basis set to basis."""
         return ArrayConversion(self.raw_data, self.basis, basis)
 

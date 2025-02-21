@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, Never, TypeGuard, cast, overload, override
+from typing import Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, ctype
-from slate.basis._tuple import TupleBasis, TupleBasis2D
+from slate.basis._tuple import TupleBasis, TupleBasisMetadata
 from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
-from slate.metadata import BasisMetadata, Metadata2D, TupleMetadata
+from slate.metadata import BasisMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
 
 # TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
@@ -184,49 +184,23 @@ class BlockDiagonalBasis[
         )
 
 
-def is_block_diagonal_basis(
-    basis: Basis[Any, Any],
-) -> TypeGuard[
-    BlockDiagonalBasis[
-        tuple[Basis[BasisMetadata, ctype[Never]], ...], Never, ctype[Never]
-    ]
-]:
+def is_block_diagonal_basis[
+    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
+    E,
+    DT: ctype[Never],
+](
+    basis: Basis[TupleBasisMetadata[C, E], DT],
+) -> TypeGuard[BlockDiagonalBasis[C, E, DT]]:
     return isinstance(basis, BlockDiagonalBasis)
 
 
-@overload
 def as_block_diagonal_basis[
-    DT: np.dtype[np.generic],
-    M0: BasisMetadata,
-    M1: BasisMetadata,
+    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
     E,
+    DT: ctype[Never],
 ](
-    basis: Basis[Metadata2D[M0, M1, E], DT],
-) -> (
-    BlockDiagonalBasis[DT, Any, E, TupleBasis2D[DT, Basis[M0, DT], Basis[M1, DT], E]]
-    | None
-): ...
-
-
-@overload
-def as_block_diagonal_basis[
-    DT: np.dtype[np.generic],
-    M: BasisMetadata,
-    E,
-](
-    basis: Basis[TupleMetadata[M, E], DT],
-) -> BlockDiagonalBasis[DT, M, E] | None: ...
-
-
-@overload
-def as_block_diagonal_basis[DT: np.dtype[np.generic]](
-    basis: Basis[Any, DT],
-) -> BlockDiagonalBasis[DT, BasisMetadata, Any] | None: ...
-
-
-def as_block_diagonal_basis(
-    basis: Any,
-) -> Any:
+    basis: Basis[TupleBasisMetadata[C, E], DT],
+) -> BlockDiagonalBasis[C, E, DT] | None:
     """Get the closest basis that is block diagonal."""
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal_basis(b)),
