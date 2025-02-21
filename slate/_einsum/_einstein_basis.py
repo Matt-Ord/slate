@@ -68,23 +68,24 @@ def _resolve_einsum_basis(
 
 class EinsumBasisHints:
     def __init__(self) -> None:
-        self._single_map = defaultdict[str, set[Basis[Any, Any]]](set)
-        self._diag_map = defaultdict[tuple[str, ...], set[Basis[Any, Any]]](set)
+        self._single_map = defaultdict[str, list[Basis[Any, Any]]](list)
+        self._diag_map = defaultdict[tuple[str, ...], list[Basis[Any, Any]]](list)
 
     def add_hint(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
-        self._single_map[idx.label].add(basis.dual_basis() if idx.is_dual else basis)
+        self._single_map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
 
     def add_diag_hint(
         self, idx: tuple[EinsteinIndex, ...], basis: Basis[Any, Any]
     ) -> None:
         diag = basis.dual_basis() if idx[0].is_dual else basis
-        self._diag_map[tuple(i.label for i in idx)].add(diag)
+        self._diag_map[tuple(i.label for i in idx)].append(diag)
 
     def resolve_basis_map(self) -> EinsumBasisMap:
         # The resolved inner basis for the einsum operation
         inner_basis_map = EinsumBasisMap()
         for idx, bases in self._single_map.items():
-            bases_list = list(bases)
+            # Get unique bases, but preserve insertion order
+            bases_list = list(dict.fromkeys(bases))
             if len(bases_list) == 1:
                 as_linear = as_linear_map_basis(bases_list[0])
                 inner_basis_map.set_single(EinsteinIndex(idx), as_linear)
@@ -156,7 +157,13 @@ def reslove_basis(
     # For now, we don't support any optimization
     # we just do the naive einsum in the fundamental basis
     hints = EinsumBasisHints()
-    for arr, part in zip(arrays, specification.parts, strict=False):
+    # Sort by the size of the array to minimize the transformation cost
+    parts_iter = sorted(
+        zip(arrays, specification.parts, strict=False),
+        key=lambda x: x[0].basis.fundamental_size,
+        reverse=True,
+    )
+    for arr, part in parts_iter:
         _collect_einsum_basis_hints(arr.basis, part, hints)
     basis_map = hints.resolve_basis_map()
     part_basis = list[
