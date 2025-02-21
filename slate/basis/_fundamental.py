@@ -9,7 +9,7 @@ from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._basis_state_metadata import BasisStateMetadata, SimpleMetadata
 
 
-class FundamentalBasis[M: SimpleMetadata](Basis[M, ctype[np.generic]]):
+class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.generic]]):
     """Represents a full fundamental basis."""
 
     def __init__[M_: SimpleMetadata](

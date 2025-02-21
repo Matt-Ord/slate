@@ -9,8 +9,6 @@ from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
     as_tuple_basis,
-    diagonal_basis,
-    tuple_basis,
 )
 from slate.basis._basis_state_metadata import BasisStateMetadata
 from slate.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
@@ -23,27 +21,24 @@ from slate.explicit_basis import (
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.basis._basis import Basis
-    from slate.basis._tuple import TupleBasis2D
+    from slate.basis._basis import Basis, ctype
     from slate.metadata import TupleMetadata
     from slate.metadata._metadata import SimpleMetadata
-    from slate.metadata.stacked import Metadata2D
 
 
 def _diagonal_basis_as_explicit[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.dtype[np.complexfloating[Any, Any]],
+    DT: ctype[np.complexfloating[Any, Any]],
 ](
-    basis: DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
+    basis: DiagonalBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT],
 ) -> DiagonalBasis[
-    DT,
-    ExplicitUnitaryBasis[M0, Any],
-    ExplicitUnitaryBasis[M1, Any],
+    tuple[ExplicitUnitaryBasis[M0, DT], ExplicitUnitaryBasis[M1, DT]],
     E,
+    DT,
 ]:
-    return diagonal_basis(
+    return DiagonalBasis(
         (
             TrivialExplicitBasis(basis.inner[0]),
             TrivialExplicitBasis(basis.inner[1]),
