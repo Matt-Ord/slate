@@ -24,9 +24,11 @@ class TruncatedBasis[
 ):
     """Represents a basis sampled evenly along an axis."""
 
-    def __init__(self, truncation: Truncation, inner: Basis[M, DT]) -> None:
+    def __init__[B_: Basis[BasisMetadata, ctype[Never]]](
+        self: TruncatedBasis[B_, ctype[Never]], truncation: Truncation, inner: B_
+    ) -> None:
         self._truncation = truncation
-        super().__init__(inner)
+        super().__init__(cast("B", inner))
         assert_unique_indices(
             self._inner.size, self._truncation.n, self._truncation.step
         )

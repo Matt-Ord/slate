@@ -239,13 +239,13 @@ def flatten(
             children = (*children, *b_as_tuple.children)
         else:
             children = (*children, b)
-
+    b = as_tuple.metadata().extra
     return TupleBasis(children, as_tuple.metadata().extra)
 
 
 def as_add_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> Basis[M, ctype[Never]]:
+) -> Basis[M, DT]:
     """Get the closest basis that supports addition.
 
     If the basis is already an ADD basis, return it.
@@ -257,7 +257,7 @@ def as_add_basis[M: BasisMetadata, DT: ctype[Never]](
 
 def as_sub_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> Basis[M, ctype[Never]]:
+) -> Basis[M, DT]:
     """Get the closest basis that supports subtraction.
 
     If the basis is already a SUB basis, return it.
@@ -269,7 +269,7 @@ def as_sub_basis[M: BasisMetadata, DT: ctype[Never]](
 
 def as_mul_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> Basis[M, ctype[Never]]:
+) -> Basis[M, DT]:
     """Get the closest basis that supports MUL.
 
     If the basis is already a MUL basis, return it.
@@ -281,7 +281,7 @@ def as_mul_basis[M: BasisMetadata, DT: ctype[Never]](
 
 def as_linear_map_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> Basis[M, ctype[Never]]:
+) -> Basis[M, DT]:
     """Get the closest basis that supports LINEAR_MAP.
 
     If the basis is already a LINEAR_MAP basis, return it.
