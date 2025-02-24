@@ -360,7 +360,7 @@ def array_against_axes_2d_x[DT: np.number[Any], E](
     basis_x = basis.from_metadata(metadata, is_dual=data.basis.is_dual)
     converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
 
-    idx = get_max_idx(converted_data, axes) if idx is None else idx
+    idx = get_max_idx(converted_data, axes=axes) if idx is None else idx
 
     if isinstance(metadata.extra, AxisDirections):
         metadata = cast("SpacedVolumeMetadata", metadata)
@@ -430,7 +430,7 @@ def array_against_axes_2d_k[DT: np.number[Any], E](
     )
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
-    idx = get_max_idx(converted_data, axes) if idx is None else idx
+    idx = get_max_idx(converted_data, axes=axes) if idx is None else idx
 
     if isinstance(metadata.extra, AxisDirections):
         metadata = cast("SpacedVolumeMetadata", metadata)

@@ -234,11 +234,10 @@ def get_axis_colorbar(axis: Axes) -> Colorbar | None:
 Measure = Literal["real", "imag", "abs", "angle"]
 
 
-def get_measured_data[DT: np.number[Any]](
+def _measure_data[DT: np.number[Any]](
     data: np.ndarray[Any, np.dtype[DT]],
     measure: Measure,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
-    """Transform data with the given measure."""
     match measure:
         case "real":
             return np.real(data)  # type: ignore[no-any-return]
@@ -248,6 +247,23 @@ def get_measured_data[DT: np.number[Any]](
             return np.abs(data)  # type: ignore[no-any-return]
         case "angle":
             return np.unwrap(np.angle(data))  # type: ignore[no-any-return]
+
+
+def get_measured_data[DT: np.number[Any]](
+    data: np.ndarray[Any, np.dtype[DT]],
+    measure: Measure,
+) -> np.ndarray[Any, np.dtype[np.floating]]:
+    """Transform data with the given measure.
+
+    Raises
+    ------
+        ValueError: If the data contains NaN values.
+    """  # noqa: DOC501
+    measured = _measure_data(data, measure)
+    if np.any(np.isnan(measured)):
+        msg = "The data contains NaN values."
+        raise ValueError(msg)
+    return measured
 
 
 def _get_default_lim(

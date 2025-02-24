@@ -42,6 +42,7 @@ def _project_points_along_directions(
 def _project_k_points_along_axes(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     metadata: SpacedVolumeMetadata,
+    *,
     axes: tuple[int, ...],
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the list of k points projected onto the plane including both axes."""
@@ -53,11 +54,12 @@ def _project_k_points_along_axes(
 
 def get_fundamental_stacked_k_points_projected_along_axes(
     metadata: SpacedVolumeMetadata,
+    *,
     axes: tuple[int, ...],
 ) -> np.ndarray[tuple[int, int], np.dtype[np.floating]]:
     """Get the fundamental_k_points projected onto the plane including both axes."""
     points = fundamental_stacked_k_points(metadata)
-    return _project_k_points_along_axes(points, metadata, axes)
+    return _project_k_points_along_axes(points, metadata, axes=axes)
 
 
 def get_k_coordinates_in_axes(
@@ -71,7 +73,7 @@ def get_k_coordinates_in_axes(
         if idx is None
         else idx
     )
-    points = get_fundamental_stacked_k_points_projected_along_axes(metadata, axes)
+    points = get_fundamental_stacked_k_points_projected_along_axes(metadata, axes=axes)
     slice_ = slice_ignoring_axes(idx, axes)
     return cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
@@ -85,6 +87,7 @@ def get_k_coordinates_in_axes(
 def _project_x_points_along_axes(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     metadata: SpacedVolumeMetadata,
+    *,
     axes: tuple[int, ...],
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the list of k points projected onto the plane including both axes."""
@@ -96,11 +99,12 @@ def _project_x_points_along_axes(
 
 def get_fundamental_stacked_x_points_projected_along_axes(
     metadata: SpacedVolumeMetadata,
+    *,
     axes: tuple[int, ...],
 ) -> np.ndarray[tuple[int, int], np.dtype[np.floating]]:
     """Get the fundamental_x_points projected onto the plane including both axes."""
     points = fundamental_stacked_x_points(metadata)
-    return _project_x_points_along_axes(points, metadata, axes)
+    return _project_x_points_along_axes(points, metadata, axes=axes)
 
 
 def get_x_coordinates_in_axes(
@@ -114,7 +118,7 @@ def get_x_coordinates_in_axes(
         if idx is None
         else idx
     )
-    points = get_fundamental_stacked_x_points_projected_along_axes(metadata, axes)
+    points = get_fundamental_stacked_x_points_projected_along_axes(metadata, axes=axes)
     slice_ = slice_ignoring_axes(idx, axes)
     return cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
