@@ -4,37 +4,31 @@ from typing import TYPE_CHECKING, Any, Literal, Self, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, NestedBoolOrNone
+from slate.basis._basis import Basis, BasisFeature, NestedBoolOrNone, ctype
 from slate.basis._fundamental import FundamentalBasis
-from slate.basis._tuple import TupleBasis, tuple_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import (
     AnyMetadata,
     BasisMetadata,
-    Metadata1D,
-    Metadata2D,
-    Metadata3D,
     SimpleMetadata,
     TupleMetadata,
 )
 
 if TYPE_CHECKING:
-    from slate.basis._tuple import TupleBasis1D, TupleBasis2D, TupleBasis3D
+    from slate.basis._tuple import TupleBasis
 
 
 type TransformDirection = Literal["forward", "backward"]
 
 
-class TransformedBasis[M: BasisMetadata](
-    WrappedBasis[
-        M, DT : np.dtype[np.complexfloating[Any, Any]], Basis[M, np.complexfloating]
-    ],
+class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
+    WrappedBasis[B, ctype[np.complexfloating]],
 ):
     """Represents a fourier transformed basis."""
 
     def __init__(
         self,
-        inner: Basis[M, np.complexfloating],
+        inner: B,
         direction: TransformDirection | None = None,
     ) -> None:
         self._direction: TransformDirection = (
