@@ -35,6 +35,11 @@ def are_dual_shapes(lhs: NestedBool, rhs: NestedBool) -> bool:
     """Check if two bases are dual to each other.
 
     The two basis must have the same shape, otherwise a `ValueError` will be raised.
+
+    Raises
+    ------
+    ValueError
+        If the two shapes are not dual to each other.
     """
     if isinstance(lhs, tuple) and isinstance(rhs, tuple):
         return all(starmap(are_dual_shapes, zip(lhs, rhs, strict=False)))
