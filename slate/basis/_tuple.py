@@ -128,6 +128,20 @@ class TupleBasis[
 ](Basis[TupleBasisMetadata[C, E], DT]):
     """Represents a Tuple of independent basis."""
 
+    @overload
+    def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...], E_](
+        self: TupleBasis[C_, E_, ctype[Never]],
+        children: C_,
+        extra: E_,
+    ) -> None: ...
+
+    @overload
+    def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...]](
+        self: TupleBasis[C_, None, ctype[Never]],
+        children: C_,
+        extra: None = None,
+    ) -> None: ...
+
     def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...], E_](
         self: TupleBasis[C_, E_, ctype[Never]],
         children: C_,

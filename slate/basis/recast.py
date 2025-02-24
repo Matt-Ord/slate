@@ -1,32 +1,27 @@
 from __future__ import annotations
 
-from typing import Any, cast, override
+from typing import Any, Never, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
-from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
+from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
-from slate.metadata.stacked import Metadata2D
 
 
 class RecastBasis[
-    M0: BasisMetadata,
-    M1: BasisMetadata,
-    DT: np.dtype[np.generic],
-    BInner: Basis[BasisMetadata, Any] = Basis[M0, DT],
-    BOuter: Basis[BasisMetadata, Any] = Basis[M1, DT],
-](WrappedBasis[M0, DT, BInner]):
+    BInner: Basis,
+    BOuter: Basis,
+    DT: ctype[Never],
+](WrappedBasis[BInner, DT]):
     """Represents a truncated basis."""
 
     def __init__[
-        M1_: BasisMetadata,
-        DT_: np.dtype[np.generic],
-        BInner_: Basis[BasisMetadata, Any],
-        BOuter_: Basis[BasisMetadata, Any] = Basis[M1_, DT_],
+        BInner_: Basis,
+        BOuter_: Basis,
     ](
-        self: RecastBasis[Any, M1_, DT_, BInner_, BOuter_],
+        self: RecastBasis[BInner_, BOuter_, ctype[Never]],
         inner: BInner_,
         inner_recast: Basis[M1_, DT_],
         outer_recast: BOuter_,
