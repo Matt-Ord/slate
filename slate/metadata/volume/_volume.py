@@ -112,19 +112,43 @@ def fundamental_reciprocal_volume(
     return np.linalg.det(fundamental_stacked_delta_k(metadata))
 
 
+def _wrap_and_offset(
+    metadata: SpacedVolumeMetadata,
+    points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
+    *,
+    offset: tuple[float, ...] | None = None,
+    wrapped: bool = False,
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    if offset is not None:
+        points = tuple(p + o for p, o in zip(points, offset, strict=False))
+
+    if wrapped:
+        delta_x = fundamental_stacked_delta_x(metadata)
+        points = tuple(
+            (p + (d / 2)) % d - (d / 2) for p, d in zip(points, delta_x, strict=False)
+        )
+    return points
+
+
 def fundamental_stacked_x_points(
     metadata: SpacedVolumeMetadata,
+    *,
+    offset: tuple[float, ...] | None = None,
+    wrapped: bool = False,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the stacked coordinates, using the x convention (0...N)."""
-    scaled = cast(
-        "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-        np.einsum(  # type: ignore unknown
-            "ij,ik->jk",
-            fundamental_stacked_dx(metadata),
-            fundamental_stacked_nx_points(metadata),
-        ),
+    points = tuple(
+        cast(
+            "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
+            np.einsum(  # type: ignore unknown
+                "ij,ik->jk",
+                fundamental_stacked_dx(metadata),
+                fundamental_stacked_nx_points(metadata),
+            ),
+        )
     )
-    return tuple(scaled)
+
+    return _wrap_and_offset(metadata, points, offset=offset, wrapped=wrapped)
 
 
 def fundamental_stacked_k_points(
