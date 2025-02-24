@@ -28,8 +28,6 @@ plot = ["matplotlib >=3.9.2,<4.0.0"]
 [tool.ruff]
 unsafe-fixes = true
 exclude = [".git", ".git-rewrite", ".vscode"]
-fixable = ["ALL"]
-unfixable = ["T201"]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -48,6 +46,8 @@ ignore = [
     "DOC402",
     "PD",
 ]
+fixable = ["ALL"]
+unfixable = ["T201"]
 
 
 [tool.ruff.lint.extend-per-file-ignores]
