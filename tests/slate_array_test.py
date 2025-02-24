@@ -91,7 +91,7 @@ def test_transpose_with_axes(
     data = rng.random(basis.size).astype(np.complex128)
     arr = Array(basis, data)
 
-    transposed = array.transpose(arr, axes)
+    transposed = array.transpose(arr, axes=axes)
     np.testing.assert_allclose(
         transposed.as_array(), arr.as_array().transpose(axes), rtol=1e-15
     )

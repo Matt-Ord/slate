@@ -82,6 +82,7 @@ def _transpose_from_tuple[M: BasisMetadata, E, DT: np.generic](
         DT,
         TupleBasis[M, E, Any],
     ],
+    *,
     axes: tuple[int, ...] | None = None,
 ) -> Array[StackedMetadata[M, E], DT, TupleBasis[M, E, Any]]:
     # TODO: einsum based implementation would be preferred here...  # noqa: FIX002
@@ -97,6 +98,7 @@ def _transpose_from_tuple[M: BasisMetadata, E, DT: np.generic](
 @overload
 def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
     array: Array[Metadata2D[M1, M2, E], DT],
+    *,
     axes: None = None,
 ) -> Array[Metadata2D[M2, M1, E], DT]: ...
 
@@ -104,12 +106,14 @@ def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.generic](
 @overload
 def transpose[M: BasisMetadata, Any, DT: np.generic](
     array: Array[StackedMetadata[M, Any], DT],
+    *,
     axes: tuple[int, ...] | None = None,
 ) -> Array[StackedMetadata[M, Any], DT]: ...
 
 
 def transpose[DT: np.generic](
     array: Array[StackedMetadata[Any, Any], DT],
+    *,
     axes: tuple[int, ...] | None = None,
 ) -> Array[StackedMetadata[Any, Any], DT]:
     """Transpose a slate array."""
@@ -117,7 +121,7 @@ def transpose[DT: np.generic](
     if axes is None and array.basis.metadata().n_dim == 2:  # noqa: PLR2004
         return _transpose_simple(cast("Array[Metadata2D[Any, Any, Any], DT]", array))
 
-    return _transpose_from_tuple(as_tuple_basis(array), axes)
+    return _transpose_from_tuple(as_tuple_basis(array), axes=axes)
 
 
 def _inv_from_diagonal[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.generic](
@@ -218,4 +222,4 @@ def get_data_in_axes[M: BasisMetadata, DT: np.generic](
     if len(axes) == 1:
         # Must be tuple_basis((basis,))
         indexed = nest(indexed)
-    return transpose(indexed, get_position_in_sorted(axes))
+    return transpose(indexed, axes=get_position_in_sorted(axes))

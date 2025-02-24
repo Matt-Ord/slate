@@ -113,8 +113,8 @@ def fundamental_reciprocal_volume(
 
 
 def _wrap_and_offset(
-    metadata: SpacedVolumeMetadata,
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
+    delta: tuple[float, ...],
     *,
     offset: tuple[float, ...] | None = None,
     wrapped: bool = False,
@@ -123,9 +123,8 @@ def _wrap_and_offset(
         points = tuple(p + o for p, o in zip(points, offset, strict=False))
 
     if wrapped:
-        delta_x = fundamental_stacked_delta_x(metadata)
         points = tuple(
-            (p + (d / 2)) % d - (d / 2) for p, d in zip(points, delta_x, strict=False)
+            (p + (d / 2)) % d - (d / 2) for p, d in zip(points, delta, strict=False)
         )
     return points
 
@@ -147,20 +146,26 @@ def fundamental_stacked_x_points(
             ),
         )
     )
-
-    return _wrap_and_offset(metadata, points, offset=offset, wrapped=wrapped)
+    delta = tuple(np.linalg.norm(fundamental_stacked_delta_x(metadata), axis=1))
+    return _wrap_and_offset(points, delta, offset=offset, wrapped=wrapped)
 
 
 def fundamental_stacked_k_points(
     metadata: SpacedVolumeMetadata,
+    *,
+    offset: tuple[float, ...] | None = None,
+    wrapped: bool = False,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the stacked coordinates, using the kx convention (0...N/2-N/2...)."""
-    scaled = cast(
-        "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-        np.einsum(  # type: ignore unknown
-            "ij,ik->jk",
-            fundamental_stacked_dk(metadata),
-            fundamental_stacked_nk_points(metadata),
-        ),
+    points = tuple(
+        cast(
+            "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
+            np.einsum(  # type: ignore unknown
+                "ij,ik->jk",
+                fundamental_stacked_dk(metadata),
+                fundamental_stacked_nk_points(metadata),
+            ),
+        )
     )
-    return tuple(scaled)
+    delta = tuple(np.linalg.norm(fundamental_stacked_delta_k(metadata), axis=1))
+    return _wrap_and_offset(points, delta, offset=offset, wrapped=wrapped)
