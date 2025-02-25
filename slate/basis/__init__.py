@@ -13,21 +13,18 @@ from slate.basis._basis import (
 )
 from slate.basis._basis_state_metadata import BasisStateMetadata
 from slate.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
-from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, diagonal_basis
+from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, is_diagonal_basis
 from slate.basis._fundamental import FundamentalBasis, as_state_list
-from slate.basis._isotropic import IsotropicBasis, isotropic_basis
+from slate.basis._isotropic import IsotropicBasis
 from slate.basis._tuple import (
-    StackedBasis,
     TupleBasis,
-    TupleBasis1D,
-    TupleBasis2D,
-    TupleBasis3D,
-    TupleBasisND,
+    TupleBasisLike,
     as_feature_basis,
     as_index_basis,
     as_tuple_basis,
     from_metadata,
-    tuple_basis,
+    is_tuple_basis,
+    is_tuple_basis_like,
 )
 from slate.basis._util import (
     as_add_basis,
@@ -39,7 +36,6 @@ from slate.basis._util import (
     flatten,
     from_shape,
     get_common_basis,
-    tuple_basis_is_variadic,
     with_child,
     with_modified_child,
     with_modified_children,
@@ -82,6 +78,7 @@ __all__ = [
     "TupleBasis1D",
     "TupleBasis2D",
     "TupleBasis3D",
+    "TupleBasisLike",
     "TupleBasisND",
     "WrappedBasis",
     "are_dual",
@@ -107,6 +104,9 @@ __all__ = [
     "fundamental_transformed_tuple_basis_from_shape",
     "get_common_basis",
     "get_wrapped_basis_super_inner",
+    "is_diagonal_basis",
+    "is_tuple_basis",
+    "is_tuple_basis_like",
     "isotropic_basis",
     "tuple_basis",
     "tuple_basis_is_variadic",

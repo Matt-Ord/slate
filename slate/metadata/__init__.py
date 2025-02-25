@@ -11,17 +11,15 @@ from slate.metadata._metadata import (
     LabelSpacing,
     SimpleMetadata,
     SpacedLabeledMetadata,
+    is_simple_metadata,
 )
 from slate.metadata._shape import (
     NestedLength,
     shallow_shape_from_nested,
     size_from_nested_shape,
 )
+from slate.metadata._stacked import AnyMetadata, TupleMetadata, is_tuple_metadata
 from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
-from slate.metadata.stacked import (
-    AnyMetadata,
-    TupleMetadata,
-)
 from slate.metadata.util import (
     fundamental_nk_points,
     fundamental_nx_points,
@@ -58,6 +56,8 @@ __all__ = [
     "fundamental_size",
     "fundamental_stacked_nk_points",
     "fundamental_stacked_nx_points",
+    "is_simple_metadata",
+    "is_tuple_metadata",
     "length",
     "shallow_shape_from_nested",
     "size_from_nested_shape",

@@ -7,7 +7,7 @@ import numpy as np
 from slate import array, basis
 from slate.array import Array, get_data_in_axes
 from slate.basis import from_metadata
-from slate.metadata import AnyMetadata, AxisDirections, LabeledMetadata
+from slate.metadata import AxisDirections, LabeledMetadata
 from slate.metadata.length import (
     fundamental_k_points,
     fundamental_x_points,
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
 
     from slate.basis._basis import Basis
+    from slate.basis._tuple import TupleBasisLike
     from slate.metadata import BasisMetadata, SpacedVolumeMetadata, TupleMetadata
     from slate.metadata.length import SpacedLengthMetadata
 
@@ -208,7 +209,7 @@ def array_against_axes_1d[DT: np.dtype[np.number[Any]]](
 
 
 def array_against_axes_1d_k[DT: np.dtype[np.number[Any]]](
-    data: Array[SpacedVolumeMetadata, DT],
+    data: Array[Basis[SpacedVolumeMetadata], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -293,7 +294,7 @@ def _plot_raw_data_2d[DT: np.dtype[np.number[Any]]](
 
 
 def _get_coordinates_grid(
-    metadata: TupleMetadata[AnyMetadata, Any],
+    metadata: TupleMetadata,
 ) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
     """Get the lengths from each axis in a grid."""
     points = tuple(_get_basis_coordinates(from_metadata(m)) for m in metadata)
@@ -302,10 +303,10 @@ def _get_coordinates_grid(
 
 
 def array_against_axes_2d[
-    M: TupleMetadata[AnyMetadata, Any],
+    M: TupleMetadata,
     DT: np.dtype[np.number[Any]],
 ](
-    data: Array[M, DT],
+    data: Array[Basis[M], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -320,7 +321,7 @@ def array_against_axes_2d[
 
 
 def _get_lengths_in_axes(
-    metadata: TupleMetadata[SpacedLengthMetadata, Any],
+    metadata: TupleMetadata[Basis[SpacedLengthMetadata], Any],
     axes: tuple[int, ...],
 ) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
     """Get the lengths from each axis in a grid."""
@@ -330,7 +331,7 @@ def _get_lengths_in_axes(
 
 
 def array_against_axes_2d_x[DT: np.dtype[np.number[Any]], E](
-    data: Array[TupleMetadata[SpacedLengthMetadata, E], DT],
+    data: Array[Basis[TupleMetadata[tuple[SpacedLengthMetadata, ...], E]], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -390,7 +391,7 @@ def array_against_axes_2d_x[DT: np.dtype[np.number[Any]], E](
 
 
 def _get_frequencies_in_axes(
-    metadata: TupleMetadata[SpacedLengthMetadata, Any],
+    metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...]],
     axes: tuple[int, ...],
 ) -> np.ndarray[tuple[int, ...], np.dtype[np.floating[Any]]]:
     """Get the lengths from each axis in a grid."""
@@ -400,7 +401,7 @@ def _get_frequencies_in_axes(
 
 
 def array_against_axes_2d_k[DT: np.dtype[np.number[Any]], E](
-    data: Array[TupleMetadata[SpacedLengthMetadata, E], DT],
+    data: Array[TupleBasisLike[tuple[SpacedLengthMetadata, ...], E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],

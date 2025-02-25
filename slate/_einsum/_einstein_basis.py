@@ -17,8 +17,8 @@ from slate.basis import (
     as_linear_map_basis,
     as_tuple_basis,
     from_shape,
-    tuple_basis,
 )
+from slate.basis._tuple import TupleBasis
 from slate.metadata import BasisMetadata, NestedLength, TupleMetadata
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ def _get_einsum_result_basis(
 ) -> Basis[Any, Any]:
     if isinstance(idx, EinsteinIndex):
         return basis_map.resolve_single(idx)[0]
-    return tuple_basis(tuple(_get_einsum_result_basis(c, basis_map) for c in idx), None)
+    return TupleBasis(tuple(_get_einsum_result_basis(c, basis_map) for c in idx), None)
 
 
 class EinsumBasisMap:
@@ -63,7 +63,7 @@ def _resolve_einsum_basis(
         children.append(resolved[0])
         lengths.append(resolved[1])
 
-    return tuple_basis(tuple(children), None), tuple(lengths)
+    return TupleBasis(tuple(children), None), tuple(lengths)
 
 
 class EinsumBasisHints:

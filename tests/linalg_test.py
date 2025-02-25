@@ -22,8 +22,7 @@ from slate.linalg._eig import (
 
 if TYPE_CHECKING:
     from slate.basis import Basis, TupleBasis
-    from slate.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
-    from slate.metadata.stacked import Metadata2D
+    from slate.metadata import BasisMetadata, Metadata2D, SimpleMetadata, TupleMetadata
 
 
 @pytest.fixture
