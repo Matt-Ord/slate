@@ -35,13 +35,16 @@ from slate.metadata._metadata import SimpleMetadata
 
 
 def _convert_tuple_basis_axes[
-    C: tuple[Basis[BasisMetadata, ctype[np.generic]], ...],
     E,
     DT: np.generic,
 ](
     vectors: np.ndarray[Any, np.dtype[DT]],
-    initial_basis: TupleBasis[C, E, ctype[np.generic]],
-    final_basis: TupleBasis[C, E, ctype[np.generic]],
+    initial_basis: TupleBasis[
+        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+    ],
+    final_basis: TupleBasis[
+        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+    ],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
     swapped = vectors.swapaxes(axis, 0)
@@ -55,13 +58,16 @@ def _convert_tuple_basis_axes[
 
 
 def _convert_tuple_basis_vector_unsafe[
-    C: tuple[Basis[BasisMetadata, ctype[np.generic]], ...],
     E,
     DT: np.generic,
 ](
     vectors: np.ndarray[Any, np.dtype[DT]],
-    initial_basis: TupleBasis[C, E, ctype[np.generic]],
-    final_basis: TupleBasis[C, E, ctype[np.generic]],
+    initial_basis: TupleBasis[
+        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+    ],
+    final_basis: TupleBasis[
+        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+    ],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
     """Convert a vector, expressed in terms of the given basis from_config in the basis to_config."""
@@ -111,21 +117,11 @@ def _convert_vectors_unsafe[DT2: np.generic](
     return converted
 
 
-class TupleBasisMetadata[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], ...] = tuple[
-        Basis[BasisMetadata, ctype[Never]], ...
-    ],
-    E = Never,
-](TupleMetadata[tuple[BasisMetadata, ...], E]):
-    def __init__(self, children: C, extra: E) -> None:
-        super().__init__(tuple(i.metadata() for i in children), extra)
-
-
 class TupleBasis[
     C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
     E,
     DT: ctype[Never],
-](Basis[TupleBasisMetadata[C, E], DT]):
+](Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]):
     """Represents a Tuple of independent basis."""
 
     @overload
@@ -175,12 +171,12 @@ class TupleBasis[
         return self._children
 
     @override
-    def metadata(self) -> TupleBasisMetadata[C, E]:
+    def metadata(self) -> TupleMetadata[tuple[BasisMetadata, ...], E]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
         """
-        return TupleBasisMetadata(self.children, self._extra)
+        return TupleMetadata(self.children, self._extra)
 
     @property
     @override
@@ -300,7 +296,7 @@ class TupleBasis[
 
 @overload
 def from_metadata[M0: BasisMetadata, E](
-    metadata: TupleBasisMetadata[tuple[Basis[M0, ctype[Never]]], E],
+    metadata: TupleMetadata[tuple[M0], E],
     *,
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[tuple[Basis[M0, ctype[np.generic]]], E, ctype[np.generic]]: ...
@@ -308,13 +304,7 @@ def from_metadata[M0: BasisMetadata, E](
 
 @overload
 def from_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
-    metadata: TupleBasisMetadata[
-        tuple[
-            Basis[M0, ctype[Never]],
-            Basis[M1, ctype[Never]],
-        ],
-        E,
-    ],
+    metadata: TupleMetadata[tuple[M0, M1], E],
     *,
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
@@ -329,14 +319,7 @@ def from_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
 
 @overload
 def from_metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
-    metadata: TupleBasisMetadata[
-        tuple[
-            Basis[M0, ctype[Never]],
-            Basis[M1, ctype[Never]],
-            Basis[M2, ctype[Never]],
-        ],
-        E,
-    ],
+    metadata: TupleMetadata[tuple[M0, M1, M2], E],
     *,
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
@@ -393,17 +376,26 @@ def from_metadata(
 
 def is_tuple_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, ctype[Never]], ...], Never, DT]]:
+) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Never, DT]]:
     return isinstance(basis, TupleBasis)
 
 
-def as_tuple_basis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
-    E,
-    DT: ctype[Never],
-](
-    basis: Basis[TupleBasisMetadata[C, E], DT],
-) -> TupleBasis[C, E, DT] | None:
+type TupleBasisLike[
+    M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
+    E = Never,
+    DT: ctype[Never] = ctype[Never],
+] = Basis[TupleMetadata[M, E], DT]
+
+
+def is_tuple_basis_like[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT],
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]:
+    return isinstance(basis.metadata(), TupleMetadata)
+
+
+def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M, ...], E, DT],
+) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
     """Get the closest basis to basis that is a TupleBasis.
 
     - For a wrapped TupleBasis, this will return the unwrapped basis
@@ -420,7 +412,7 @@ def as_tuple_basis[
     if is_tuple_basis(super_inner):
         return cast("Any", super_inner)
 
-    return None
+    return from_metadata(basis.metadata())  # type: ignore This is ok, since np.generic is a subtype of DT
 
 
 def as_feature_basis[M: BasisMetadata, DT: ctype[Never]](

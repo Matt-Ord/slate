@@ -7,8 +7,8 @@ from typing import Any, cast, override
 import numpy as np
 
 from slate.metadata._shape import shallow_shape_from_nested
+from slate.metadata._stacked import TupleMetadata
 from slate.metadata.length import LengthMetadata, SpacedLengthMetadata
-from slate.metadata.stacked import TupleMetadata
 from slate.metadata.util import (
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,

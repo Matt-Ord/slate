@@ -9,16 +9,15 @@ from typing import (
     overload,
 )
 
-import numpy as np
-
 from slate.basis._basis import Basis, NestedBool, ctype
 from slate.basis._tuple import (
     TupleBasis,
-    TupleBasisMetadata,
+    TupleBasisLike,
     as_feature_basis,
     as_tuple_basis,
     from_metadata,
     is_tuple_basis,
+    is_tuple_basis_like,
 )
 from slate.basis.wrapped import (
     wrapped_basis_iter_inner,
@@ -33,31 +32,43 @@ from slate.metadata import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    import numpy as np
+
     from slate.basis._fundamental import FundamentalBasis
 
 
-def with_modified_children[M: BasisMetadata, E, DT: ctype[Never]](
-    basis: TupleBasis[tuple[Basis[M, DT], ...], E, DT],
-    wrapper: Callable[[int, Basis[M, DT]], Basis[M, DT]],
-) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
+def with_modified_children[
+    M: BasisMetadata,
+    E,
+    DT0: ctype[Never],
+    DT1: ctype[Never],
+](
+    basis: TupleBasis[tuple[Basis[M, DT0], ...], E, DT1],
+    wrapper: Callable[[int, Basis[M, DT0]], Basis[M, DT0]],
+) -> TupleBasis[tuple[Basis[M, DT0], ...], E, DT0]:
     """Get the basis with modified children."""
-    return TupleBasis[tuple[Basis[M, DT], ...], E, DT](
+    return TupleBasis[tuple[Basis[M, DT0], ...], E, DT0](
         tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata().extra
     ).upcast()
 
 
-def with_modified_child[M: BasisMetadata, E, DT: ctype[np.generic]](
-    basis: TupleBasis[tuple[Basis[M, DT], ...], E, DT],
-    wrapper: Callable[[Basis[M, DT]], Basis[M, DT]],
+def with_modified_child[
+    M: BasisMetadata,
+    E,
+    DT0: ctype[Never],
+    DT1: ctype[Never],
+](
+    basis: TupleBasis[tuple[Basis[M, DT0], ...], E, DT1],
+    wrapper: Callable[[Basis[M, DT0]], Basis[M, DT0]],
     idx: int,
-) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
+) -> TupleBasis[tuple[Basis[M, DT0], ...], E, DT0]:
     """Get the basis with modified child."""
     return with_modified_children(
         basis, lambda i, b: cast("Basis[Any, Any]", b if i != idx else wrapper(b))
     )
 
 
-def with_child[M: BasisMetadata, E, DT: ctype[np.generic]](
+def with_child[M: BasisMetadata, E, DT: ctype[Never]](
     basis: TupleBasis[tuple[Basis[M, DT], ...], E, DT], inner: Basis[M, DT], idx: int
 ) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
     """Get a basis with the basis at idx set to inner."""
@@ -212,18 +223,19 @@ def flatten[B: Basis[Any, Any]](basis: TupleBasis[tuple[B], Any, Any]) -> B: ...
 
 
 @overload
-def flatten[M: BasisMetadata, DT: ctype[np.generic]](
-    basis: Basis[
-        TupleBasisMetadata[
-            tuple[Basis[TupleMetadata[tuple[M, ...], Any], DT], ...], Any
-        ],
-        DT,
-    ],
+def flatten[M: BasisMetadata, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], Never, DT],
 ) -> TupleBasis[tuple[Basis[M, DT], ...], None, DT]: ...
 
 
+@overload
+def flatten[DT: ctype[Never]](
+    basis: Basis[TupleMetadata, DT],
+) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], None, DT]: ...
+
+
 def flatten(
-    basis: Basis[TupleBasisMetadata, Any],
+    basis: Basis[TupleMetadata, Any],
 ) -> Basis[Any, Any]:
     as_tuple = as_tuple_basis(basis)
     if as_tuple is None:
@@ -234,8 +246,8 @@ def flatten(
 
     children = tuple[Basis[Any, Any]]()
     for b in as_tuple.children:
-        b_as_tuple = as_tuple_basis(cast("Basis[TupleBasisMetadata, Any]", b))
-        if b_as_tuple is not None:
+        if is_tuple_basis_like(b):
+            b_as_tuple = as_tuple_basis(b)
             children = (*children, *b_as_tuple.children)
         else:
             children = (*children, b)
@@ -307,7 +319,7 @@ def as_is_dual_basis[M: BasisMetadata, DT: ctype[Never]](
         return basis.dual_basis()
     assert isinstance(basis.is_dual, tuple)
 
-    basis_as_tuple = as_tuple_basis(cast("Basis[TupleBasisMetadata, Any]", basis))
+    basis_as_tuple = as_tuple_basis(cast("Basis[TupleMetadata[Any,Any], Any]", basis))
     if basis_as_tuple is None:
         return from_metadata(basis.metadata(), is_dual=is_dual)
 

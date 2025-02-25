@@ -18,7 +18,6 @@ from slate.array._conversion import (
     cast_basis,
     flatten,
     nest,
-    with_basis,
 )
 from slate.array._misc import (
     abs,  # noqa: A004
@@ -98,5 +97,4 @@ __all__ = [
     "tanh",
     "transpose",
     "unwrap",
-    "with_basis",
 ]

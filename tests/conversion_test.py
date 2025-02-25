@@ -5,23 +5,20 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array import Array, with_basis
+from slate.array import Array
 from slate.basis import (
+    BlockDiagonalBasis,
     FundamentalBasis,
     RecastBasis,
     TransformedBasis,
     TruncatedBasis,
     Truncation,
-    diagonal_basis,
     from_shape,
-    tuple_basis,
+    fundamental_transformed_tuple_basis_from_shape,
 )
-from slate.basis._block_diagonal import BlockDiagonalBasis
-from slate.basis.transformed import fundamental_transformed_tuple_basis_from_shape
 
 if TYPE_CHECKING:
     from slate.basis._basis import Basis
-    from slate.basis._tuple import TupleBasis2D
     from slate.metadata import SimpleMetadata
 
 

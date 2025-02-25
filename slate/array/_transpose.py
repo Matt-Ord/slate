@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     )
     from slate.basis._diagonal import DiagonalBasis
     from slate.basis._tuple import TupleBasis
-    from slate.metadata.stacked import TupleMetadata
+    from slate.metadata import TupleMetadata
 
 
 def conjugate[B: Basis, DT: np.dtype[np.generic]](
@@ -28,11 +28,12 @@ def conjugate[B: Basis, DT: np.dtype[np.generic]](
 ) -> Array[B, DT]:
     """Conjugate a slate array."""
     converted = as_index_basis(array)
-    raw_data = converted.raw_data
-    converted_data = cast(
-        "np.ndarray[Any, DT]", np.conj(raw_data).astype(raw_data.dtype)
-    )
-    (Array(converted.basis, converted_data).with_basis(array.basis))
+    converted_data = np.conj(converted.raw_data).astype(converted.dtype)
+    converted.raw_data = converted_data
+    # Since b has the same dtype and metadata as the original basis
+    # it is safe to use it in a conversion.
+    # Unfortunately is not possible to express this invariant in the type system.
+    return converted.with_basis(array.basis).ok()  # type: ignore see above
 
 
 def _transpose_from_diagonal[

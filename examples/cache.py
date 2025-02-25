@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from slate import Array, BasisMetadata
+from slate import Array, Basis
 from slate.util import cached, timed
 
 if __name__ == "__main__":
@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
         @cached(Path(dir_name) / "out")
         @timed
-        def _my_expensive_function() -> Array[BasisMetadata, np.float64]:
+        def _my_expensive_function() -> Array[Basis, np.dtype[np.float64]]:
             global count  # noqa: PLW0603
             count += 1
             return Array.from_array(np.zeros((300000, 1000)))

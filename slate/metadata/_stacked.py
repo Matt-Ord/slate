@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, overload, override
+from typing import TYPE_CHECKING, Any, Never, TypeGuard, overload, override
 
 from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 from slate.metadata._shape import size_from_nested_shape
@@ -9,7 +9,10 @@ if TYPE_CHECKING:
     from slate.metadata._shape import NestedLength
 
 
-class TupleMetadata[C: tuple[BasisMetadata, ...], E](BasisMetadata):
+class TupleMetadata[
+    C: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
+    E = Never,
+](BasisMetadata):
     """Metadata built from a tuple of individual metadata entries."""
 
     def __init__(self, children: C, extra: E) -> None:
@@ -134,3 +137,9 @@ class TupleMetadata[C: tuple[BasisMetadata, ...], E](BasisMetadata):
 
 
 type AnyMetadata = BasisMetadata | TupleMetadata[AnyMetadata, Any]
+
+
+def is_tuple_metadata(
+    metadata: BasisMetadata,
+) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, ...], Never]]:
+    return isinstance(metadata, TupleMetadata)

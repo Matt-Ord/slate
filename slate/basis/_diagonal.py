@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import (
+    TYPE_CHECKING,
     Any,
     Never,
     TypeGuard,
@@ -11,9 +12,12 @@ from typing import (
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, ctype
-from slate.basis._tuple import TupleBasis, TupleBasisMetadata
+from slate.basis._tuple import TupleBasis
 from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata._metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from slate.metadata import TupleMetadata
 
 
 class DiagonalBasis[
@@ -148,26 +152,17 @@ class DiagonalBasis[
         )
 
 
-def is_diagonal_basis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
-    E,
-    DT: ctype[Never],
-](
-    basis: Basis[TupleBasisMetadata[C, E], DT],
-) -> TypeGuard[DiagonalBasis[C, E, DT]]:
+def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](
+    basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
+) -> TypeGuard[DiagonalBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E, DT]]:
     return isinstance(basis, DiagonalBasis)
 
 
-def as_diagonal_basis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
-    E,
-    DT: ctype[Never],
-](
-    basis: Basis[TupleBasisMetadata[C, E], DT],
-) -> DiagonalBasis[C, E, DT] | None:
+def as_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](
+    basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
+) -> DiagonalBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E, DT] | None:
     """Get the closest basis that supports the feature set."""
     assert len(basis.metadata().fundamental_shape) == 2  # noqa: PLR2004
     return next(
-        (b for b in wrapped_basis_iter_inner(basis) if is_diagonal_basis(b)),
-        None,
+        (b for b in wrapped_basis_iter_inner(basis) if is_diagonal_basis(b)), None
     )
