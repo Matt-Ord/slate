@@ -5,162 +5,170 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from slate import basis
-from slate.array._array import Array
-from slate.basis._tuple import TupleBasis, TupleBasis1D, tuple_basis
-from slate.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate.array._array import Array, ArrayBuilder
+from slate.basis import TupleBasis
+from slate.metadata import BasisMetadata, SimpleMetadata, is_tuple_metadata
 
 if TYPE_CHECKING:
-    from slate.basis._fundamental import FundamentalBasis
-    from slate.metadata.stacked import Metadata1D, Metadata2D, TupleMetadata
+    from slate.basis import Basis
+    from slate.metadata import TupleMetadata
 
 
 @overload
-def standard_deviation[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](
-    array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
-) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
+def standard_deviation[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](
+    array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
+    *,
+    axis: Literal[0],
+) -> Array[Basis[TupleMetadata[tuple[*M], None]], DT]: ...
 
 
 @overload
 def standard_deviation[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    array: Array[TupleMetadata[M, Any], DT], *, axis: int
-) -> Array[TupleMetadata[M, None], DT]: ...
+    array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
+) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def standard_deviation[DT: np.dtype[np.number[Any]]](
-    array: Array[Any, DT], *, axis: None = ...
+def standard_deviation[DT: np.number[Any]](
+    array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def standard_deviation[DT: np.dtype[np.number[Any]]](
-    array: Array[Any, DT], axis: int | None = None
-) -> Array[Any, DT] | DT:
+def standard_deviation[DT: np.number[Any]](
+    array: Array[Basis, np.dtype[DT]], axis: int | None = None
+) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
         return np.std(array.as_array(), axis=axis)  # type: ignore unknown
-    data = np.asarray(
-        cast("Any", np.std(array.as_array(), axis=axis)),  # type: ignore unknown
+    meta = array.basis.metadata()
+    assert is_tuple_metadata(meta)
+    data = np.array(
+        np.std(cast("Any", array.as_array()), axis=axis),
         dtype=array.raw_data.dtype,
     )
-    full_basis = cast(
-        "TupleBasis[Any, Any, np.generic]", basis.from_metadata(array.basis.metadata())
-    )
+    full_basis = basis.from_metadata(meta)
 
     axis %= len(full_basis.children)
-    out_basis = tuple_basis(
+    out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return Array(out_basis, data)
+    return ArrayBuilder(out_basis.upcast(), data).ok()
 
 
 @overload
-def average[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](
-    array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
-) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
+def average[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](
+    array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
+    *,
+    axis: Literal[0],
+) -> Array[Basis[TupleMetadata[tuple[*M], None]], DT]: ...
 
 
 @overload
 def average[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    array: Array[TupleMetadata[M, Any], DT], *, axis: int
-) -> Array[TupleMetadata[M, None], DT]: ...
+    array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
+) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def average[DT: np.dtype[np.number[Any]]](
-    array: Array[Any, DT], *, axis: None = ...
+def average[DT: np.number[Any]](
+    array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def average[DT: np.dtype[np.number[Any]]](
-    array: Array[Any, DT], axis: int | None = None
-) -> Array[Any, DT] | DT:
+def average[DT: np.number[Any]](
+    array: Array[Basis, np.dtype[DT]], axis: int | None = None
+) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
         return np.average(array.as_array(), axis=axis)  # type: ignore unknown
+    meta = array.basis.metadata()
+    assert is_tuple_metadata(meta)
     data = np.asarray(
         cast("Any", np.average(array.as_array(), axis=axis)),  # type: ignore unknown
         dtype=array.raw_data.dtype,
     )
-    full_basis = cast(
-        "TupleBasis[Any, Any, np.generic]", basis.from_metadata(array.basis.metadata())
-    )
+    full_basis = basis.from_metadata(meta)
 
     axis %= len(full_basis.children)
-    out_basis = tuple_basis(
+    out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    )
-    return Array(out_basis, data)
+    ).upcast()
+    return ArrayBuilder(out_basis, data).ok()
 
 
 @overload
-def min[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
-    array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
-) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
+def min[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](  # noqa: A001
+    array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
+    *,
+    axis: Literal[0],
+) -> Array[Basis[TupleMetadata[tuple[*M], None]], DT]: ...
 
 
 @overload
 def min[M: BasisMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
-    array: Array[TupleMetadata[M, Any], DT], *, axis: int
-) -> Array[TupleMetadata[M, None], DT]: ...
+    array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
+) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def min[DT: np.dtype[np.number[Any]]](
-    array: Array[Any, DT], *, axis: None = ...
+def min[DT: np.number[Any]](  # noqa: A001
+    array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def min[DT: np.dtype[np.number[Any]]](  # noqa: A001
-    array: Array[Any, DT], axis: int | None = None
-) -> Array[Any, DT] | DT:
+def min[DT: np.number[Any]](  # noqa: A001
+    array: Array[Basis, np.dtype[DT]], axis: int | None = None
+) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
         return np.min(array.as_array(), axis=axis)  # type: ignore unknown
+    meta = array.basis.metadata()
+    assert is_tuple_metadata(meta)
     data = np.asarray(
         cast("Any", np.min(array.as_array(), axis=axis)),  # type: ignore unknown
         dtype=array.raw_data.dtype,
     )
-    full_basis = cast(
-        "TupleBasis[Any, Any, np.generic]", basis.from_metadata(array.basis.metadata())
-    )
+    full_basis = basis.from_metadata(meta)
 
     axis %= len(full_basis.children)
-    out_basis = tuple_basis(
+    out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    )
-    return Array(out_basis, data)
+    ).upcast()
+    return ArrayBuilder(out_basis, data).ok()
 
 
 @overload
-def max[M: SimpleMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
-    array: Array[Metadata2D[Any, M, Any], DT], *, axis: Literal[0]
-) -> Array[Metadata1D[M, None], DT, TupleBasis1D[DT, FundamentalBasis[M], None]]: ...
+def max[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](  # noqa: A001
+    array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
+    *,
+    axis: Literal[0],
+) -> Array[Basis[TupleMetadata[tuple[*M], None]], DT]: ...
 
 
 @overload
 def max[M: BasisMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
-    array: Array[TupleMetadata[M, Any], DT], *, axis: int
-) -> Array[TupleMetadata[M, None], DT]: ...
+    array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
+) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def max[DT: np.dtype[np.number[Any]]](
-    array: Array[Any, DT], *, axis: None = ...
+def max[DT: np.number[Any]](  # noqa: A001
+    array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def max[DT: np.dtype[np.number[Any]]](  # noqa: A001
-    array: Array[Any, DT], axis: int | None = None
-) -> Array[Any, DT] | DT:
+def max[DT: np.number[Any]](  # noqa: A001
+    array: Array[Basis, np.dtype[DT]], axis: int | None = None
+) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
         return np.max(array.as_array(), axis=axis)  # type: ignore unknown
+    meta = array.basis.metadata()
+    assert is_tuple_metadata(meta)
     data = np.asarray(
         cast("Any", np.max(array.as_array(), axis=axis)),  # type: ignore unknown
         dtype=array.raw_data.dtype,
     )
-    full_basis = cast(
-        "TupleBasis[Any, Any, np.generic]", basis.from_metadata(array.basis.metadata())
-    )
+    full_basis = basis.from_metadata(meta)
 
     axis %= len(full_basis.children)
-    out_basis = tuple_basis(
+    out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    )
-    return Array(out_basis, data)
+    ).upcast()
+    return ArrayBuilder(out_basis, data).ok()

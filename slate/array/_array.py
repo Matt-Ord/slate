@@ -17,8 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from slate.basis._basis import ctype
-    from slate.metadata import SimpleMetadata
-    from slate.metadata.stacked import TupleMetadata
+    from slate.metadata import SimpleMetadata, TupleMetadata
 
 type Index = int | slice
 type NestedIndex = Index | tuple[NestedIndex, ...]
@@ -171,31 +170,27 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         assert self.basis.size == data.size
         self._data = cast("np.ndarray[tuple[int], Any]", data.ravel())
 
-    def as_array[DT_: np.generic](
-        self: Array[Basis[BasisMetadata, ctype[DT_]], np.dtype[DT_]],
-    ) -> np.ndarray[Any, np.dtype[DT_]]:
+    def as_array(self) -> np.ndarray[Any, DT]:
         """Get the data as a (full) np.array."""
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
-        return self.with_basis(fundamental).ok().raw_data.reshape(shape)
+        return self.with_basis(fundamental).ok().raw_data.reshape(shape)  # type: ignore bad inference
 
     @overload
     @staticmethod
-    def from_array(
-        array: np.ndarray[tuple[int,], Any],
+    def from_array[DT_: np.dtype[np.generic]](
+        array: np.ndarray[tuple[int,], DT_],
     ) -> Array[
         TupleBasis[
-            tuple[FundamentalBasis[SimpleMetadata]],
-            None,
-            ctype[np.generic[Any]],
+            tuple[FundamentalBasis[SimpleMetadata]], None, ctype[np.generic[Any]]
         ],
-        DT,
+        DT_,
     ]: ...
 
     @overload
     @staticmethod
-    def from_array(
-        array: np.ndarray[tuple[int, int], Any],
+    def from_array[DT_: np.dtype[np.generic]](
+        array: np.ndarray[tuple[int, int], DT_],
     ) -> Array[
         TupleBasis[
             tuple[
@@ -205,13 +200,13 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
             None,
             ctype[np.generic[Any]],
         ],
-        DT,
+        DT_,
     ]: ...
 
     @overload
     @staticmethod
-    def from_array(
-        array: np.ndarray[tuple[int, int, int], Any],
+    def from_array[DT_: np.dtype[np.generic]](
+        array: np.ndarray[tuple[int, int, int], DT_],
     ) -> Array[
         TupleBasis[
             tuple[
@@ -222,28 +217,28 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
             None,
             ctype[np.generic[Any]],
         ],
-        DT,
+        DT_,
     ]: ...
 
     @overload
     @staticmethod
-    def from_array(
-        array: np.ndarray[tuple[int, ...], Any],
+    def from_array[DT_: np.dtype[np.generic]](
+        array: np.ndarray[tuple[int, ...], DT_],
     ) -> Array[
         TupleBasis[
             tuple[FundamentalBasis[SimpleMetadata], ...], None, ctype[np.generic[Any]]
         ],
-        DT,
+        DT_,
     ]: ...
 
     @staticmethod
-    def from_array(
-        array: np.ndarray[tuple[int, ...], Any],
+    def from_array[DT_: np.dtype[np.generic]](
+        array: np.ndarray[tuple[int, ...], DT_],
     ) -> Array[
         TupleBasis[
             tuple[FundamentalBasis[SimpleMetadata], ...], None, ctype[np.generic[Any]]
         ],
-        DT,
+        DT_,
     ]:
         """Get a Array from an array."""
         return ArrayBuilder(basis.from_shape(array.shape), array).ok()
@@ -293,25 +288,28 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
     @overload
     def __iter__[DT_: np.dtype[np.generic]](
-        self: Array[Metadata1D[Any, Any], DT_, Basis[Any, Any]], /
+        self: Array[Basis[TupleMetadata[tuple[BasisMetadata], Any], Any], DT_],
+        /,
     ) -> Never: ...
     @overload
     def __iter__[M1: BasisMetadata, DT_: np.dtype[np.generic]](
-        self: Array[Metadata2D[Any, M1, Any], DT_, Basis[Any, Any]], /
+        self: Array[Basis[TupleMetadata[tuple[BasisMetadata, M1], Any], Any], DT_],
+        /,
     ) -> Iterator[Array[Basis[M1, Any], DT_]]: ...
     @overload
     def __iter__[M1: BasisMetadata, M2: BasisMetadata, DT_: np.dtype[np.generic]](
-        self: Array[Metadata3D[Any, M1, M2, Any], DT_, Basis[Any, Any]], /
+        self: Array[Basis[TupleMetadata[tuple[BasisMetadata, M1, M2], Any], Any], DT_],
+        /,
     ) -> Iterator[
-        Array[TupleBasis2D[Any, Basis[M1, Any], Basis[M2, Any], Any], DT_]
+        Array[TupleBasis[tuple[Basis[M1, Any], Basis[M2, Any]], Any, Any], DT_]
     ]: ...
     @overload
     def __iter__[M1: BasisMetadata, DT_: np.dtype[np.generic]](
-        self: Array[TupleMetadata[M1, Any], DT_, Basis[M1, Any]], /
-    ) -> Iterator[Array[TupleMetadata[M1, None], DT_]]: ...
+        self: Array[Basis[TupleMetadata[tuple[M1, ...], Any]], DT_], /
+    ) -> Iterator[Array[Basis[TupleMetadata[tuple[M1, ...], None]], DT_]]: ...
 
     def __iter__(
-        self: Array[Any, Any, Basis[BasisMetadata, Any]], /
+        self: Array[Basis[TupleMetadata[tuple[BasisMetadata, ...], Any]], Any], /
     ) -> Iterator[Array[Any, Any]]:
         basis_as_tuple = basis.with_modified_child(
             basis.as_tuple_basis(self.basis), basis.as_fundamental, 0

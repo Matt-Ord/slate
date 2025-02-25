@@ -7,9 +7,9 @@ from typing import (
 
 import numpy as np
 
+from slate.metadata import TupleMetadata
 from slate.metadata._metadata import LabelSpacing
 from slate.metadata.length import SpacedLengthMetadata
-from slate.metadata.stacked import TupleMetadata
 from slate.metadata.volume._volume import (
     AxisDirections,
     SpacedVolumeMetadata,

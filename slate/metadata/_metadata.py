@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, override
+from typing import TYPE_CHECKING, Any, Protocol, TypeGuard, override
 
 import numpy as np
 
@@ -30,6 +30,12 @@ class SimpleMetadata(BasisMetadata):
     def fundamental_shape(self) -> int:
         """Shape of the full data."""
         return self.fundamental_size
+
+
+def is_simple_metadata(
+    metadata: BasisMetadata,
+) -> TypeGuard[SimpleMetadata]:
+    return isinstance(metadata, SimpleMetadata)
 
 
 class LabeledMetadata[DT: np.dtype[np.generic]](SimpleMetadata, ABC):
