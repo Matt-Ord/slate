@@ -53,8 +53,8 @@ class PlotKwargs(TypedDict, total=False):
 
 def _plot_raw_data_1d[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     data: np.ndarray[Any, DT],
-    coordinates: np.ndarray[Any, np.dtype[np.floating[Any]]],
-    y_errors: np.ndarray[Any, np.dtype[np.floating[Any]]] | None = None,
+    coordinates: np.ndarray[Any, np.dtype[np.floating]],
+    y_errors: np.ndarray[Any, np.dtype[np.floating]] | None = None,
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -67,7 +67,7 @@ def _plot_raw_data_1d[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     Parameters
     ----------
     data : np.ndarray[tuple[int], np.dtype[np.complex128]]
-    coordinates : np.ndarray[tuple[int], np.dtype[np.floating[Any]]]
+    coordinates : np.ndarray[tuple[int], np.dtype[np.floating]]
     ax : Axes | None, optional
         ax, by default None
     scale : Scale, optional
@@ -101,10 +101,10 @@ def _plot_raw_data_1d[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
 
 
 def array_against_array[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    x_data: Array[M, np.floating[Any]],
+    x_data: Array[M, np.floating],
     y_data: Array[M, DT],
     *,
-    y_error: Array[M, np.floating[Any]] | None = None,
+    y_error: Array[M, np.floating] | None = None,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
@@ -124,8 +124,8 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
 
 
 def _get_basis_coordinates(
-    basis: Basis[Any, Any],
-) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
+    basis: Basis,
+) -> np.ndarray[Any, np.dtype[np.floating]]:
     metadata = basis.metadata()
     if isinstance(metadata, LabeledMetadata):
         values = metadata.values.astype(np.float64)  # type: ignore unknown
@@ -138,7 +138,7 @@ def _get_basis_coordinates(
 def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
     data: Array[M, DT],
     *,
-    y_error: Array[M, np.floating[Any]] | None = None,
+    y_error: Array[M, np.floating] | None = None,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
@@ -148,7 +148,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
     Parameters
     ----------
     data : np.ndarray[tuple[int], np.dtype[np.complex128]]
-    coordinates : np.ndarray[tuple[int], np.dtype[np.floating[Any]]]
+    coordinates : np.ndarray[tuple[int], np.dtype[np.floating]]
     ax : Axes | None, optional
         ax, by default None
     scale : Scale, optional
@@ -163,7 +163,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
     converted = array.as_index_basis(data)
     coordinates = _get_basis_coordinates(converted.basis)
     return array_against_array(
-        Array(converted.basis, coordinates),
+        ArrayBuilder(converted.basis, coordinates),
         converted,
         y_error=y_error,
         periodic=periodic,
@@ -267,7 +267,7 @@ def _has_colorbar(axis: Axes) -> bool:
 
 def _plot_raw_data_2d[DT: np.dtype[np.number[Any]]](
     data: np.ndarray[Any, DT],
-    coordinates: np.ndarray[tuple[int, ...], np.dtype[np.floating[Any]]] | None = None,
+    coordinates: np.ndarray[tuple[int, ...], np.dtype[np.floating]] | None = None,
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -295,7 +295,7 @@ def _plot_raw_data_2d[DT: np.dtype[np.number[Any]]](
 
 def _get_coordinates_grid(
     metadata: TupleMetadata,
-) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
+) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
     points = tuple(_get_basis_coordinates(from_metadata(m)) for m in metadata)
     aa = np.meshgrid(*points, indexing="ij")
@@ -323,7 +323,7 @@ def array_against_axes_2d[
 def _get_lengths_in_axes(
     metadata: TupleMetadata[Basis[SpacedLengthMetadata], Any],
     axes: tuple[int, ...],
-) -> np.ndarray[Any, np.dtype[np.floating[Any]]]:
+) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
     points = tuple(fundamental_x_points(metadata.children[ax]) for ax in axes)
     aa = np.meshgrid(*points, indexing="ij")
@@ -393,7 +393,7 @@ def array_against_axes_2d_x[DT: np.dtype[np.number[Any]], E](
 def _get_frequencies_in_axes(
     metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...]],
     axes: tuple[int, ...],
-) -> np.ndarray[tuple[int, ...], np.dtype[np.floating[Any]]]:
+) -> np.ndarray[tuple[int, ...], np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
     points = tuple(fundamental_k_points(metadata.children[ax]) for ax in axes)
     aa = np.meshgrid(*points, indexing="ij")

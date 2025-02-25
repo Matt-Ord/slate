@@ -23,13 +23,13 @@ if TYPE_CHECKING:
 
 
 def ctype_variance() -> None:
-    a = cast("ctype[np.floating[Any]]", {})
+    a = cast("ctype[np.floating]", {})
     # If it can handle a float, it might not be able to handle all generic types
     _b: ctype[np.generic] = a  # type: ignore should fail
     # If a basis can handle a float, it can also handle a float128
     _c: ctype[np.float128] = a
     # But it cannot handle a complex128
-    _d: ctype[np.complexfloating[Any, Any]] = a  # type: ignore should fail
+    _d: ctype[np.complexfloating] = a  # type: ignore should fail
     # A generic type however should handle a float128
     b = cast("ctype[np.generic]", {})
     _e: ctype[np.float128] = b
@@ -38,13 +38,13 @@ def ctype_variance() -> None:
 
 
 def basis_dtype_variance() -> None:
-    a = cast("Basis[SimpleMetadata, ctype[np.floating[Any]]]", {})
+    a = cast("Basis[SimpleMetadata, ctype[np.floating]]", {})
     # If it can handle a float, it might not be able to handle all generic types
     _b: Basis[BasisMetadata, ctype[np.generic]] = a  # type: ignore should fail
     # If a basis can handle a float, it can also handle a float128
     _c: Basis[BasisMetadata, ctype[np.float128]] = a
     # But it cannot handle a complex128
-    _d: Basis[BasisMetadata, ctype[np.complexfloating[Any, Any]]] = a  # type: ignore should fail
+    _d: Basis[BasisMetadata, ctype[np.complexfloating]] = a  # type: ignore should fail
     # A generic type however should handle a float128
     b = cast("Basis[SimpleMetadata, ctype[np.generic]]", {})
     _e: Basis[BasisMetadata, ctype[np.float128]] = b
@@ -115,7 +115,7 @@ def tuple_basis_children_variance() -> None:
 
 
 def basis_conversion() -> None:
-    basis = cast("Basis[SimpleMetadata, ctype[np.floating[Any]]]", {})
+    basis = cast("Basis[SimpleMetadata, ctype[np.floating]]", {})
 
     compatible_data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     incompatible_data = cast("np.ndarray[Any, np.dtype[np.complexfloating]]", {})

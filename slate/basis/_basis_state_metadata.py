@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, override
+from typing import override
 
 from slate.basis._basis import Basis
 from slate.metadata._metadata import SimpleMetadata
 
 
-class BasisStateMetadata[B: Basis[Any, Any]](SimpleMetadata):
+class BasisStateMetadata[B: Basis](SimpleMetadata):
     """Metadata for a list which is derived from some data in another basis."""
 
     def __init__(self, basis: B) -> None:
