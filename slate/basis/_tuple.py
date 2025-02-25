@@ -120,7 +120,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
 class TupleBasis[
     C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
     E,
-    DT: ctype[Never],
+    DT: ctype[Never] = ctype[Never],
 ](Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]):
     """Represents a Tuple of independent basis."""
 

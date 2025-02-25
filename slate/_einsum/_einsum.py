@@ -8,17 +8,15 @@ from slate._einsum._einstein_basis import reslove_basis
 from slate._einsum._einstein_index import (
     parse_einsum_specification,
 )
-from slate.array import Array
 from slate.basis import (
     FundamentalBasis,
     as_block_diagonal_basis,
     as_diagonal_basis,
     as_linear_map_basis,
-    as_tuple_basis,
-    tuple_basis,
 )
 
 if TYPE_CHECKING:
+    from slate.array import Array
     from slate.metadata import BasisMetadata
 
 
@@ -45,14 +43,14 @@ def _einsum_simple[DT: np.dtype[np.number[Any]]](
     final_idx = ",".join("".join(i) for i in raw_idx) + "->"
     result_basis = resolved.result_basis
     if result_basis is None:
-        return Array(
+        return ArrayBuilder(
             FundamentalBasis.from_size(1),
             _einsum_numpy(final_idx, *raw_arrays),
         )
 
     final_idx += "".join(resolved.result_index)
 
-    return Array(result_basis, _einsum_numpy(final_idx, *raw_arrays))
+    return ArrayBuilder(result_basis, _einsum_numpy(final_idx, *raw_arrays))
 
 
 def _einsum_smart[DT: np.dtype[np.number[Any]]](
@@ -64,11 +62,11 @@ def _einsum_smart[DT: np.dtype[np.number[Any]]](
     as_tuple_0 = as_tuple_basis(arrays[0].basis)
     as_diagonal = as_diagonal_basis(as_linear)
     if as_diagonal is not None:
-        out_basis = tuple_basis((as_tuple_0[0], as_diagonal.inner[1]))
+        out_basis = TupleBasis((as_tuple_0[0], as_diagonal.inner[1]))
         array_0 = arrays[0].with_basis(as_tuple_0)
         array_1 = arrays[1].with_basis(as_diagonal)
 
-        return Array(
+        return ArrayBuilder(
             out_basis,
             _einsum_numpy(
                 "ij,j->ij",
@@ -79,7 +77,7 @@ def _einsum_smart[DT: np.dtype[np.number[Any]]](
 
     as_block_diagonal = as_block_diagonal_basis(as_linear)
     if as_block_diagonal is not None:
-        out_basis = tuple_basis((as_tuple_0[0], as_block_diagonal.inner[1]))
+        out_basis = TupleBasis((as_tuple_0[0], as_block_diagonal.inner[1]))
         array_0 = arrays[0].with_basis(as_tuple_0)
         array_1 = arrays[1].with_basis(as_block_diagonal)
 
@@ -92,7 +90,7 @@ def _einsum_smart[DT: np.dtype[np.number[Any]]](
             as_block_diagonal.block_shape[0],
         )
 
-        return Array(
+        return ArrayBuilder(
             out_basis,
             # Diagonal on index j but not on index (k,l)
             _einsum_numpy("ijk,jkl->ijl", array_0_raw, array_1_raw),

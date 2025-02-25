@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
@@ -8,7 +8,6 @@ import pytest
 from slate import array as _array
 from slate.array import Array, with_basis
 from slate.basis import (
-    as_tuple_basis,
     from_shape,
 )
 from slate.basis._block_diagonal import BlockDiagonalBasis
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
 @pytest.fixture
 def slate_array_stacked() -> Array[
     TupleMetadata[SimpleMetadata, None],
-    np.dtype[np.complexfloating[Any, Any]],
+    np.dtype[np.complexfloating],
     TupleBasis[BasisMetadata, None, np.generic],
 ]:
     rng = np.random.default_rng()
@@ -40,7 +39,7 @@ def slate_array_stacked() -> Array[
 def _test_into_diagonal(
     array: Array[
         Metadata2D[BasisMetadata, BasisMetadata, None],
-        np.complexfloating[Any, Any],
+        np.complexfloating,
     ],
 ) -> None:
     diagonal = into_diagonal(array)
@@ -85,14 +84,14 @@ def test_linalg_complex(
     rng = np.random.default_rng()
     data = rng.random(basis.size) + 1j * rng.random(basis.size)
 
-    array = Array(basis, data)
+    array = ArrayBuilder(basis, data)
     _test_into_diagonal(array)
 
 
 def _test_into_diagonal_hermitian(
     array: Array[
         Metadata2D[BasisMetadata, BasisMetadata, None],
-        np.complexfloating[Any, Any],
+        np.complexfloating,
     ],
 ) -> None:
     diagonal = into_diagonal_hermitian(array)
@@ -142,7 +141,7 @@ def test_linalg_diagonal(
     rng = np.random.default_rng()
     fundamental = from_metadata(basis.metadata())
     data = np.diag(rng.random(fundamental.shape[0])).astype(np.complex128)
-    array = Array(fundamental, data).with_basis(basis)
+    array = ArrayBuilder(fundamental, data).with_basis(basis)
 
     _test_into_diagonal_hermitian(array)
 
@@ -163,7 +162,7 @@ def test_linalg_complex_hermitian(
 ) -> None:
     rng = np.random.default_rng()
 
-    array = Array(basis, rng.random(basis.size) + 1j * rng.random(basis.size))
+    array = ArrayBuilder(basis, rng.random(basis.size) + 1j * rng.random(basis.size))
     array += _array.conjugate(_array.transpose(array))
     array = array.with_basis(basis)
 
@@ -185,7 +184,7 @@ def test_linalg_real_hermitian(
     basis: Basis[Metadata2D[SimpleMetadata, SimpleMetadata, None], np.generic],
 ) -> None:
     rng = np.random.default_rng()
-    array = Array(basis, rng.random(basis.size).astype(np.complex128))
+    array = ArrayBuilder(basis, rng.random(basis.size).astype(np.complex128))
     array += _array.conjugate(_array.transpose(array))
     array = array.with_basis(basis)
 

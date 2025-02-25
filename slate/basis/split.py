@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 class SplitBasis[
     M: BasisMetadata,
     DT: np.dtype[np.generic],
-    B0: Basis[Any, Any] = Basis[M, DT],
-    B1: Basis[Any, Any] = Basis[M, DT],
+    B0: Basis = Basis[M, DT],
+    B1: Basis = Basis[M, DT],
 ](
     WrappedBasis[M, DT, Basis[M, DT]],
 ):
@@ -33,8 +33,8 @@ class SplitBasis[
     """
 
     def __init__[
-        B0_: Basis[Any, Any],
-        B1_: Basis[Any, Any],
+        B0_: Basis,
+        B1_: Basis,
     ](
         self: SplitBasis[Any, Any, B0_, B1_],
         lhs: B0_,

@@ -13,7 +13,7 @@ from slate.metadata import BasisMetadata
 class RecastBasis[
     BInner: Basis,
     BOuter: Basis,
-    DT: ctype[Never],
+    DT: ctype[Never] = ctype[Never],
 ](WrappedBasis[BInner, DT]):
     """Represents a truncated basis."""
 
@@ -21,7 +21,7 @@ class RecastBasis[
         BInner_: Basis,
         BOuter_: Basis,
     ](
-        self: RecastBasis[BInner_, BOuter_, ctype[Never]],
+        self: RecastBasis[BInner_, BOuter_],
         inner: BInner_,
         inner_recast: Basis[M1_, DT_],
         outer_recast: BOuter_,
@@ -186,7 +186,7 @@ def recast_diagonal_basis[
     return cast(
         "RecastDiagonalBasis[M, DT, BInner, BOuter]",
         RecastBasis(
-            diagonal_basis((inner_basis.dual_basis(), inner_basis)),
+            DiagonalBasis(inner_basis.dual_basis(), inner_basis)),
             inner_basis,
             outer_basis,
         ),

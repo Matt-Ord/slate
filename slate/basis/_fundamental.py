@@ -121,7 +121,7 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.gen
 
 
 # TODO: better name ie cast_fundamental_basis  # noqa: FIX002
-def as_state_list[B: Basis[Any, Any]](
+def as_state_list[B: Basis](
     basis: B,
 ) -> FundamentalBasis[BasisStateMetadata[B]]:
     """Get the fundamental basis for a given basis."""

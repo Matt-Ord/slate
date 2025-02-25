@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 class DiagonalBasis[
     C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
     E,
-    DT: ctype[Never],
+    DT: ctype[Never] = ctype[Never],
 ](
     WrappedBasis[TupleBasis[C, E, DT], DT],
 ):

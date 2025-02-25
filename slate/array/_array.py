@@ -45,7 +45,7 @@ def _index_single_raw_along_axis(
 
 def _index_tuple_raw_along_axis(
     index: tuple[NestedIndex, ...],
-    data_basis: Basis[Any, Any],
+    data_basis: Basis,
     data: np.ndarray[Any, Any],
     *,
     axis: int = -1,
@@ -63,7 +63,7 @@ def _index_tuple_raw_along_axis(
     data = data_basis.__convert_vector_into__(data, tuple_basis, axis=axis).ok()
     data = data.reshape(stacked_shape)
 
-    final_basis = list[Basis[Any, Any]]()
+    final_basis = list[Basis]()
     for child_index, child in zip(index, children, strict=False):
         child_axis = axis + len(final_basis)
         meta, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
@@ -80,7 +80,7 @@ def _index_tuple_raw_along_axis(
 
 def _index_raw_along_axis[DT: np.dtype[np.generic]](
     index: NestedIndex,
-    basis: Basis[Any, Any],
+    basis: Basis,
     data: np.ndarray[Any, DT],
     axis: int,
 ) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, DT]]:
@@ -97,7 +97,7 @@ class ArrayConversion[
     def __init__(
         self,
         data: np.ndarray[tuple[int], DT],
-        old_basis: Basis[Any, Any],
+        old_basis: Basis,
         new_basis: B1,
     ) -> None:
         self._data = data

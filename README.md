@@ -57,7 +57,7 @@ from slate.metadata import BasisMetadata
 truncated_basis = CroppedBasis(10, FundamentalBasis(SimpleMetadata((20,))))
 
 # Create a Array with the truncated basis
-truncated_slate_array = Array(truncated_basis, data)
+truncated_slate_array = ArrayBuilder(truncated_basis, data)
 ```
 
 ### Converting Back to a Full NumPy Array

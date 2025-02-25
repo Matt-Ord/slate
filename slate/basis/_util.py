@@ -14,9 +14,7 @@ from slate.basis._tuple import (
     TupleBasis,
     TupleBasisLike,
     as_feature_basis,
-    as_tuple_basis,
     from_metadata,
-    is_tuple_basis,
     is_tuple_basis_like,
 )
 from slate.basis.wrapped import (
@@ -64,7 +62,7 @@ def with_modified_child[
 ) -> TupleBasis[tuple[Basis[M, DT0], ...], E, DT0]:
     """Get the basis with modified child."""
     return with_modified_children(
-        basis, lambda i, b: cast("Basis[Any, Any]", b if i != idx else wrapper(b))
+        basis, lambda i, b: cast("Basis", b if i != idx else wrapper(b))
     )
 
 
@@ -219,7 +217,7 @@ def get_common_basis[M: BasisMetadata, DT: ctype[Never]](
 
 
 @overload
-def flatten[B: Basis[Any, Any]](basis: TupleBasis[tuple[B], Any, Any]) -> B: ...
+def flatten[B: Basis](basis: TupleBasis[tuple[B], Any, Any]) -> B: ...
 
 
 @overload
@@ -236,7 +234,7 @@ def flatten[DT: ctype[Never]](
 
 def flatten(
     basis: Basis[TupleMetadata, Any],
-) -> Basis[Any, Any]:
+) -> Basis:
     as_tuple = as_tuple_basis(basis)
     if as_tuple is None:
         msg = "Cannot flatten a non-tuple basis."
@@ -244,7 +242,7 @@ def flatten(
     if len(as_tuple.shape) == 1:
         return as_tuple.children[0]
 
-    children = tuple[Basis[Any, Any]]()
+    children = tuple[Basis]()
     for b in as_tuple.children:
         if is_tuple_basis_like(b):
             b_as_tuple = as_tuple_basis(b)

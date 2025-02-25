@@ -22,7 +22,7 @@ Distribution = Literal["normal", "exponential normal", "skew normal"]
 
 
 def array_distribution[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    array: Array[M, np.floating[Any]],
+    array: Array[M, np.floating],
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
