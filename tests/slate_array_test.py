@@ -7,13 +7,13 @@ import pytest
 
 from slate import array
 from slate.array import Array, conjugate, transpose
+from slate.array._array import ArrayBuilder
 from slate.basis import (
     Basis,
     BlockDiagonalBasis,
     DiagonalBasis,
-    TupleBasis2D,
     from_shape,
-    fundamental_transformed_tuple_basis_from_shape,
+    transformed_from_shape,
 )
 
 if TYPE_CHECKING:
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def test_slate_array_as_array(
-    slate_array_integer: Array[SimpleMetadata, np.int64],
+    slate_array_integer: Array[Basis, np.dtype[np.int64]],
 ) -> None:
     np.testing.assert_array_equal(
         slate_array_integer.raw_data, slate_array_integer.as_array().ravel()
@@ -29,13 +29,13 @@ def test_slate_array_as_array(
 
 
 def test_slate_array_dtype(
-    slate_array_integer: Array[SimpleMetadata, np.int64],
+    slate_array_integer: Array[Basis, np.dtype[np.int64]],
 ) -> None:
     assert slate_array_integer.dtype == np.int64
 
 
 def test_slate_array_basis(
-    slate_array_integer: Array[SimpleMetadata, np.int64],
+    slate_array_integer: Array[Basis, np.dtype[np.int64]],
 ) -> None:
     assert slate_array_integer.basis == from_shape(
         slate_array_integer.fundamental_shape
@@ -44,7 +44,7 @@ def test_slate_array_basis(
 
 def test_create_array_with_wrong_size() -> None:
     with pytest.raises(AssertionError):
-        Array(from_shape((2, 3)), np.array([1, 2, 3, 4]))
+        ArrayBuilder(from_shape((2, 3)), np.array([1, 2, 3, 4]))
 
 
 def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) -> None:
@@ -61,13 +61,13 @@ def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) ->
         (from_shape((8, 10), is_dual=(True, True))),
         (DiagonalBasis(from_shape((3, 3)))),
         (BlockDiagonalBasis(from_shape((10, 10)), (2, 2))),
-        (fundamental_transformed_tuple_basis_from_shape((2, 3))),
+        (transformed_from_shape((2, 3))),
     ],
 )
 def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = Array(basis, data)
+    arr = ArrayBuilder(basis, data).ok()
 
     transposed = array.transpose(arr)
     np.testing.assert_allclose(transposed.as_array(), arr.as_array().transpose())
@@ -89,7 +89,7 @@ def test_transpose_with_axes(
 ) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = Array(basis, data)
+    arr = ArrayBuilder(basis, data)
 
     transposed = array.transpose(arr, axes=axes)
     np.testing.assert_allclose(
@@ -102,7 +102,7 @@ def test_transpose_with_axes(
     [
         from_shape((2, 3)),
         from_shape((2, 3), is_dual=(False, True)),
-        fundamental_transformed_tuple_basis_from_shape((2, 3)),
+        transformed_from_shape((2, 3)),
     ],
 )
 def test_conjugate_array(
@@ -114,7 +114,7 @@ def test_conjugate_array(
     ],
 ) -> None:
     data = np.array([1, 2, 3, 4, 4, 6])
-    array = Array(basis, data)
+    array = ArrayBuilder(basis, data)
 
     np.testing.assert_allclose(
         array.as_array().conjugate(), conjugate(array).as_array()

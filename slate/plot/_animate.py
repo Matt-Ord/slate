@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from slate import basis
-from slate.array import Array
 from slate.basis._tuple import TupleBasis
 from slate.metadata import shallow_shape_from_nested
 from slate.plot._plot import (
@@ -28,6 +27,7 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
+    from slate.array import Array
     from slate.basis import TupleBasisLike
     from slate.basis._basis import Basis
     from slate.metadata import (
@@ -104,7 +104,7 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = array_against_axes_1d(
-            Array(basis_x, raw_data),
+            ArrayBuilder(basis_x, raw_data),
             axes,
             idx,
             ax=ax,
@@ -178,7 +178,7 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
 
     for raw_data in data.raw_data.reshape(data.basis.shape):
         _, _, line = array_against_axes_1d_k(
-            Array(final_basis[1], raw_data),
+            ArrayBuilder(final_basis[1], raw_data),
             axes,
             idx,
             ax=ax,

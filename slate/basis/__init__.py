@@ -47,7 +47,7 @@ from slate.basis.split import SplitBasis
 from slate.basis.transformed import (
     TransformedBasis,
     fundamental_transformed_tuple_basis_from_metadata,
-    fundamental_transformed_tuple_basis_from_shape,
+    transformed_from_shape,
 )
 from slate.basis.truncated import Padding, TruncatedBasis, Truncation
 from slate.basis.wrapped import (
@@ -101,13 +101,13 @@ __all__ = [
     "from_metadata",
     "from_shape",
     "fundamental_transformed_tuple_basis_from_metadata",
-    "fundamental_transformed_tuple_basis_from_shape",
     "get_common_basis",
     "get_wrapped_basis_super_inner",
     "is_diagonal_basis",
     "is_tuple_basis",
     "is_tuple_basis_like",
     "isotropic_basis",
+    "transformed_from_shape",
     "tuple_basis",
     "tuple_basis_is_variadic",
     "with_child",

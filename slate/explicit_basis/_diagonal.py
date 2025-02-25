@@ -5,7 +5,6 @@ from typing import Any, cast
 
 import numpy as np
 
-from slate.array import Array
 from slate.basis import (
     Basis,
     BasisStateMetadata,
@@ -20,13 +19,13 @@ from slate.metadata import BasisMetadata
 class TrivialExplicitBasis[
     M: BasisMetadata,
     DT: np.dtype[np.generic],
-    B: Basis[Any, Any],
-](ExplicitUnitaryBasis[M, DT, B, Basis[Any, Any]]):
-    def __init__[B1: Basis[Any, Any]](
+    B: Basis,
+](ExplicitUnitaryBasis[M, DT, B, Basis]):
+    def __init__[B1: Basis](
         self: TrivialExplicitBasis[Any, Any, B1], inner: B1
     ) -> None:
         super().__init__(
-            Array(
+            ArrayBuilder(
                 DiagonalBasis(
                     TupleBasis(
                         (

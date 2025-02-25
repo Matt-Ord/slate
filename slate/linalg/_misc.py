@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
 from slate import basis
-from slate.array import Array
 from slate.basis import (
     Basis,
     DiagonalBasis,
     FundamentalBasis,
     TupleBasis,
     TupleBasis1D,
-    tuple_basis,
 )
 from slate.metadata import (
     BasisMetadata,
@@ -22,6 +20,9 @@ from slate.metadata import (
     TupleMetadata,
 )
 
+if TYPE_CHECKING:
+    from slate.array import Array
+
 
 def extract_diagonal[M: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Metadata2D[M, M, E], DT],
@@ -29,7 +30,7 @@ def extract_diagonal[M: BasisMetadata, E, DT: np.dtype[np.generic]](
     b = DiagonalBasis(basis.as_tuple_basis(basis.as_fundamental(array.basis)))
     converted = array.with_basis(b)
 
-    return Array(converted.basis.inner[1], converted.raw_data)
+    return ArrayBuilder(converted.basis.inner[1], converted.raw_data)
 
 
 @overload
@@ -64,7 +65,7 @@ def norm[DT: np.dtype[np.number[Any]]](
     )
 
     axis %= len(full_basis.children)
-    out_basis = tuple_basis(
+    out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return Array(out_basis, data)
+    return ArrayBuilder(out_basis, data)

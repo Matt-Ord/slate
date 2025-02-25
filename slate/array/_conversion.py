@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from slate.metadata import TupleMetadata
 
 
-def cast_basis[B: Basis[Any, Any], DT: np.dtype[np.generic]](
+def cast_basis[B: Basis, DT: np.dtype[np.generic]](
     array: Array[Any, DT], basis: B
 ) -> ArrayBuilder[B, DT]:
     assert array.basis.size == basis.size
@@ -168,7 +168,7 @@ def flatten[DT: np.dtype[np.generic]](
     return cast_basis(converted, basis.flatten(basis_as_tuple)).ok()  # type: ignore see above
 
 
-def as_raw_array[DT: np.dtype[np.generic], B: Basis[Any, Any]](
+def as_raw_array[DT: np.dtype[np.generic], B: Basis](
     array: Array[B, DT],
 ) -> Array[FundamentalBasis[BasisStateMetadata[B]], DT]:
     return cast_basis(array, FundamentalBasis(BasisStateMetadata(array.basis))).ok()

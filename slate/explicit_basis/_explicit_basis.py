@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Literal, Self, cast, override
+from typing import TYPE_CHECKING, Any, Literal, Self, cast, override
 
 import numpy as np
 
 from slate import array as _array
 from slate import basis
 from slate._einsum import einsum
-from slate.array import Array
 from slate.array._transpose import inv, transpose
 from slate.basis import (
     Basis,
@@ -17,7 +16,6 @@ from slate.basis import (
     FundamentalBasis,
     RecastBasis,
     WrappedBasis,
-    as_tuple_basis,
 )
 from slate.metadata import (
     BasisMetadata,
@@ -25,14 +23,17 @@ from slate.metadata import (
     shallow_shape_from_nested,
 )
 
+if TYPE_CHECKING:
+    from slate.array import Array
+
 type Direction = Literal["forward", "backward"]
 
 
 class ExplicitBasis[
     M: BasisMetadata,
     DT: np.dtype[np.number[Any]],
-    B: Basis[Any, Any] = Basis[M, DT],
-    BTransform: Basis[Any, Any] = Basis[
+    B: Basis = Basis[M, DT],
+    BTransform: Basis = Basis[
         Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
     ],
 ](
@@ -42,8 +43,8 @@ class ExplicitBasis[
 
     def __init__[
         DT1: np.dtype[np.generic],
-        B1: Basis[Any, Any],
-        BTransform_: Basis[Any, Any],
+        B1: Basis,
+        BTransform_: Basis,
     ](
         self: ExplicitBasis[Any, DT1, B1, BTransform_],
         matrix: Array[
@@ -106,7 +107,7 @@ class ExplicitBasis[
         if inner_recast[1].is_dual:
             state_basis = state_basis.dual_basis()
 
-        inner = tuple_basis((inner_recast[0], state_basis))
+        inner = TupleBasis((inner_recast[0], state_basis))
         eigenvectors_basis = RecastBasis(inner, inner_recast, transposed.basis)
         return _array.cast_basis(transposed, eigenvectors_basis)
 
@@ -147,7 +148,7 @@ class ExplicitBasis[
         flat = swapped.reshape(-1, vectors.shape[axis])
 
         transform = self.transform
-        flat_basis = tuple_basis(
+        flat_basis = TupleBasis(
             (
                 FundamentalBasis.from_size(flat.shape[0]),
                 FundamentalBasis(
@@ -156,7 +157,7 @@ class ExplicitBasis[
                 ),
             )
         )
-        swapped_array = Array(flat_basis, flat)
+        swapped_array = ArrayBuilder(flat_basis, flat)
 
         transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
         return (
@@ -173,7 +174,7 @@ class ExplicitBasis[
         flat = swapped.reshape(-1, vectors.shape[axis])
 
         transform = self.inverse_transform
-        flat_basis = tuple_basis(
+        flat_basis = TupleBasis(
             (
                 FundamentalBasis.from_size(flat.shape[0]),
                 FundamentalBasis(
@@ -182,7 +183,7 @@ class ExplicitBasis[
                 ),
             )
         )
-        swapped_array = Array(flat_basis, flat)
+        swapped_array = ArrayBuilder(flat_basis, flat)
 
         transform = self.inverse_transform
         transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
@@ -255,14 +256,14 @@ def _dual_unitary_data[
     array: Array[Metadata2D[M1, M2, E], DT],
 ) -> Array[Metadata2D[M1, M2, E], DT]:
     conj = _array.conjugate(array)
-    return Array(conj.basis.dual_basis(), conj.raw_data)
+    return ArrayBuilder(conj.basis.dual_basis(), conj.raw_data)
 
 
 class ExplicitUnitaryBasis[
     M: BasisMetadata,
     DT: np.dtype[np.generic],
-    B: Basis[Any, Any] = Basis[M, DT],
-    BTransform: Basis[Any, Any] = Basis[
+    B: Basis = Basis[M, DT],
+    BTransform: Basis = Basis[
         Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
     ],
 ](ExplicitBasis[M, DT, B, BTransform]):
@@ -270,8 +271,8 @@ class ExplicitUnitaryBasis[
 
     def __init__[
         DT1: np.dtype[np.generic],
-        B1: Basis[Any, Any],
-        BTransform_: Basis[Any, Any],
+        B1: Basis,
+        BTransform_: Basis,
     ](
         self: ExplicitUnitaryBasis[Any, DT1, B1, BTransform_],
         matrix: Array[

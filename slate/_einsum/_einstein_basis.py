@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Never, cast
 
 from slate._einsum._einstein_index import (
     EinsteinIndex,
@@ -18,8 +18,8 @@ from slate.basis import (
     as_tuple_basis,
     from_shape,
 )
-from slate.basis._tuple import TupleBasis
-from slate.metadata import BasisMetadata, NestedLength, TupleMetadata
+from slate.basis._tuple import TupleBasis, TupleBasisLike, is_tuple_basis_like
+from slate.metadata import NestedLength
 
 if TYPE_CHECKING:
     import numpy as np
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 def _get_einsum_result_basis(
     idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
-) -> Basis[Any, Any]:
+) -> Basis:
     if isinstance(idx, EinsteinIndex):
         return basis_map.resolve_single(idx)[0]
     return TupleBasis(tuple(_get_einsum_result_basis(c, basis_map) for c in idx), None)
@@ -37,26 +37,26 @@ def _get_einsum_result_basis(
 
 class EinsumBasisMap:
     def __init__(self) -> None:
-        self._single_map = dict[str, Basis[Any, Any]]()
-        self._tuple_map = dict[tuple[str, ...], Basis[Any, Any]]()
+        self._single_map = dict[str, Basis]()
+        self._tuple_map = dict[tuple[str, ...], Basis]()
 
-    def resolve_single(self, idx: EinsteinIndex) -> tuple[Basis[Any, Any], int]:
+    def resolve_single(self, idx: EinsteinIndex) -> tuple[Basis, int]:
         current = self._single_map.get(idx.label, None)
         if current is None:
             raise KeyError(idx.label)
         return current.dual_basis() if idx.is_dual else current, current.size
 
-    def set_single(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
+    def set_single(self, idx: EinsteinIndex, basis: Basis) -> None:
         self._single_map[idx.label] = basis.dual_basis() if idx.is_dual else basis
 
 
 def _resolve_einsum_basis(
     idx: NestedEinsteinIndex, basis_map: EinsumBasisMap
-) -> tuple[Basis[Any, Any], NestedLength]:
+) -> tuple[Basis, NestedLength]:
     if isinstance(idx, EinsteinIndex):
         return basis_map.resolve_single(idx)
 
-    children = list[Basis[Any, Any]]()
+    children = list[Basis]()
     lengths = list[NestedLength]()
     for i in idx:
         resolved = _resolve_einsum_basis(i, basis_map)
@@ -71,12 +71,10 @@ class EinsumBasisHints:
         self._single_map = defaultdict[str, list[Basis[Any, Any]]](list)
         self._diag_map = defaultdict[tuple[str, ...], list[Basis[Any, Any]]](list)
 
-    def add_hint(self, idx: EinsteinIndex, basis: Basis[Any, Any]) -> None:
+    def add_hint(self, idx: EinsteinIndex, basis: Basis) -> None:
         self._single_map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
 
-    def add_diag_hint(
-        self, idx: tuple[EinsteinIndex, ...], basis: Basis[Any, Any]
-    ) -> None:
+    def add_diag_hint(self, idx: tuple[EinsteinIndex, ...], basis: Basis) -> None:
         diag = basis.dual_basis() if idx[0].is_dual else basis
         self._diag_map[tuple(i.label for i in idx)].append(diag)
 
@@ -106,23 +104,22 @@ class EinsumBasisHints:
 
 
 def _collect_einsum_basis_hints(
-    basis: Basis[Any, Any], idx: NestedEinsteinIndex, hints: EinsumBasisHints
+    basis: Basis, idx: NestedEinsteinIndex, hints: EinsumBasisHints
 ) -> None:
     if isinstance(idx, EinsteinIndex):
         hints.add_hint(idx, basis)
         return
 
-    basis = cast("Basis[TupleMetadata[Any, Any], Any]", basis)
+    assert is_tuple_basis_like(basis)
     as_diagonal = as_diagonal_basis(basis)
     # TODO: Add generalized diagonal so we can also support block diagonal  # noqa: FIX002
     if as_diagonal is not None and all(isinstance(i, EinsteinIndex) for i in idx):
         idx = cast("tuple[EinsteinIndex, ...]", idx)
         hints.add_diag_hint(idx, basis)
 
-    basis = as_tuple_basis(cast("Basis[TupleMetadata[Any, Any], Any]", basis))
-
+    basis_as_tuple = as_tuple_basis(basis)
     for n, i in enumerate(idx):
-        child = basis.children[n]
+        child = basis_as_tuple.children[n]
         _collect_einsum_basis_hints(child, i, hints)
 
 
@@ -138,15 +135,17 @@ def _flatten_nested[T](nested: NestedData[T]) -> tuple[T, ...]:
 @dataclass(frozen=True)
 class BasisSpecification:
     result_index: tuple[str, ...]
-    result_basis: Basis[Any, Any] | None
+    result_basis: Basis | None
     part_index: tuple[tuple[str, ...], ...]
-    part_basis: tuple[RecastBasis[BasisMetadata, TupleMetadata[Any, Any], Any], ...]
+    part_basis: tuple[RecastBasis[Basis, TupleBasisLike], ...]
 
     def get_part_data(
-        self, *arrays: Array[BasisMetadata, Any]
+        self, *arrays: Array[Basis, np.dtype[Never]]
     ) -> tuple[np.ndarray[tuple[int, ...], np.dtype[Any]], ...]:
         return tuple(
-            arr.with_basis(b.inner).raw_data.reshape(b.outer_recast.metadata().shape)
+            arr.with_basis(b.inner)
+            .ok()
+            .raw_data.reshape(b.outer_recast.metadata().shape)
             for (arr, b) in zip(arrays, self.part_basis, strict=True)
         )
 
@@ -166,15 +165,7 @@ def reslove_basis(
     for arr, part in parts_iter:
         _collect_einsum_basis_hints(arr.basis, part, hints)
     basis_map = hints.resolve_basis_map()
-    part_basis = list[
-        RecastBasis[
-            BasisMetadata,
-            TupleMetadata[Any, Any],
-            Any,
-            Basis[BasisMetadata, Any],
-            Basis[TupleMetadata[Any, Any], Any],
-        ],
-    ]()
+    part_basis = list[RecastBasis[Basis, TupleBasisLike],]()
     part_index = list[tuple[str, ...]]()
 
     for _arr, part in zip(arrays, specification.parts, strict=False):
