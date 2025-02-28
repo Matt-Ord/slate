@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import itertools
-from typing import Any, Never, TypeGuard, cast, override
+from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, ctype
-from slate.basis._tuple import TupleBasis, TupleBasisMetadata
+from slate.basis._tuple import TupleBasis
 from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata import BasisMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
+
+if TYPE_CHECKING:
+    from slate.metadata._stacked import TupleMetadata
 
 # TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
 # arbitrary nested axes? Can we do this in a way which doesn't make the 'SimpleDiagonal'
@@ -24,7 +27,7 @@ from slate.util._diagonal import build_diagonal, extract_diagonal
 class BlockDiagonalBasis[
     C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
     E,
-    DT: ctype[Never],
+    DT: ctype[Never] = ctype[Never],
 ](
     WrappedBasis[TupleBasis[C, E, DT], DT],
 ):
@@ -140,7 +143,7 @@ class BlockDiagonalBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -151,7 +154,7 @@ class BlockDiagonalBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -160,7 +163,7 @@ class BlockDiagonalBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -185,22 +188,24 @@ class BlockDiagonalBasis[
 
 
 def is_block_diagonal_basis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
+    M0: BasisMetadata,
+    M1: BasisMetadata,
     E,
     DT: ctype[Never],
 ](
-    basis: Basis[TupleBasisMetadata[C, E], DT],
-) -> TypeGuard[BlockDiagonalBasis[C, E, DT]]:
+    basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
+) -> TypeGuard[BlockDiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT]]:
     return isinstance(basis, BlockDiagonalBasis)
 
 
 def as_block_diagonal_basis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
+    M0: BasisMetadata,
+    M1: BasisMetadata,
     E,
     DT: ctype[Never],
 ](
-    basis: Basis[TupleBasisMetadata[C, E], DT],
-) -> BlockDiagonalBasis[C, E, DT] | None:
+    basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
+) -> BlockDiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT] | None:
     """Get the closest basis that is block diagonal."""
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal_basis(b)),

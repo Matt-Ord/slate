@@ -1,10 +1,49 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Literal, Never, TypeGuard, overload
+
 import numpy as np
 
 from slate.array._array import Array, ArrayBuilder
 from slate.array._conversion import as_fundamental_basis, as_index_basis
 from slate.basis import Basis
+from slate.basis import is_tuple_basis_like as is_tuple_basis_like_basis
+from slate.basis._basis import ctype
+
+if TYPE_CHECKING:
+    from slate.basis._tuple import TupleBasisLike
+    from slate.metadata._metadata import BasisMetadata
+
+
+@overload
+def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[1]
+) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata], Never, DT], DT1]]: ...
+@overload
+def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[2]
+) -> TypeGuard[
+    Array[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, DT], DT1]
+]: ...
+@overload
+def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[3]
+) -> TypeGuard[
+    Array[
+        TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, DT],
+        DT1,
+    ]
+]: ...
+@overload
+def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: int | None = None
+) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT], DT1]]: ...
+
+
+def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: int | None = None
+) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT], DT1]]:
+    return is_tuple_basis_like_basis(array.basis, n_dim=n_dim)
 
 
 def real[B: Basis, DT: np.dtype[np.number]](

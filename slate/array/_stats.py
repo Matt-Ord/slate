@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 @overload
-def standard_deviation[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](
+def standard_deviation[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](
     array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
     *,
     axis: Literal[0],
@@ -23,18 +23,18 @@ def standard_deviation[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](
 
 
 @overload
-def standard_deviation[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
+def standard_deviation[M: BasisMetadata, DT: np.dtype[np.number]](
     array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
 ) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def standard_deviation[DT: np.number[Any]](
+def standard_deviation[DT: np.number](
     array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def standard_deviation[DT: np.number[Any]](
+def standard_deviation[DT: np.number](
     array: Array[Basis, np.dtype[DT]], axis: int | None = None
 ) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
@@ -55,7 +55,7 @@ def standard_deviation[DT: np.number[Any]](
 
 
 @overload
-def average[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](
+def average[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](
     array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
     *,
     axis: Literal[0],
@@ -63,18 +63,18 @@ def average[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](
 
 
 @overload
-def average[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
+def average[M: BasisMetadata, DT: np.dtype[np.number]](
     array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
 ) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def average[DT: np.number[Any]](
+def average[DT: np.number](
     array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def average[DT: np.number[Any]](
+def average[DT: np.number](
     array: Array[Basis, np.dtype[DT]], axis: int | None = None
 ) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
@@ -95,7 +95,7 @@ def average[DT: np.number[Any]](
 
 
 @overload
-def min[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](  # noqa: A001
+def min[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](  # noqa: A001
     array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
     *,
     axis: Literal[0],
@@ -103,18 +103,18 @@ def min[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](  # noqa: A001
 
 
 @overload
-def min[M: BasisMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
+def min[M: BasisMetadata, DT: np.dtype[np.number]](  # noqa: A001
     array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
 ) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def min[DT: np.number[Any]](  # noqa: A001
+def min[DT: np.number](  # noqa: A001
     array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def min[DT: np.number[Any]](  # noqa: A001
+def min[DT: np.number](  # noqa: A001
     array: Array[Basis, np.dtype[DT]], axis: int | None = None
 ) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
@@ -135,7 +135,7 @@ def min[DT: np.number[Any]](  # noqa: A001
 
 
 @overload
-def max[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](  # noqa: A001
+def max[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](  # noqa: A001
     array: Array[Basis[TupleMetadata[tuple[BasisMetadata, *M], Any]], DT],
     *,
     axis: Literal[0],
@@ -143,18 +143,18 @@ def max[M: tuple[SimpleMetadata], DT: np.dtype[np.number[Any]]](  # noqa: A001
 
 
 @overload
-def max[M: BasisMetadata, DT: np.dtype[np.number[Any]]](  # noqa: A001
+def max[M: BasisMetadata, DT: np.dtype[np.number]](  # noqa: A001
     array: Array[Basis[TupleMetadata[tuple[M, ...], Any]], DT], *, axis: int
 ) -> Array[Basis[TupleMetadata[tuple[M, ...], None]], DT]: ...
 
 
 @overload
-def max[DT: np.number[Any]](  # noqa: A001
+def max[DT: np.number](  # noqa: A001
     array: Array[Any, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def max[DT: np.number[Any]](  # noqa: A001
+def max[DT: np.number](  # noqa: A001
     array: Array[Basis, np.dtype[DT]], axis: int | None = None
 ) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:

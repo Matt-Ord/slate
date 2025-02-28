@@ -6,6 +6,7 @@ import numpy as np
 
 from slate import basis
 from slate.basis import Basis, FundamentalBasis, TupleBasis
+from slate.basis._tuple import is_tuple_basis_like
 from slate.metadata import (
     BasisMetadata,
     NestedLength,
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from slate.basis._basis import ctype
+    from slate.basis._tuple import TupleBasisLike
     from slate.metadata import SimpleMetadata, TupleMetadata
 
 type Index = int | slice
@@ -45,7 +47,7 @@ def _index_single_raw_along_axis(
 
 def _index_tuple_raw_along_axis(
     index: tuple[NestedIndex, ...],
-    data_basis: Basis,
+    data_basis: TupleBasisLike,
     data: np.ndarray[Any, Any],
     *,
     axis: int = -1,
@@ -85,6 +87,7 @@ def _index_raw_along_axis[DT: np.dtype[np.generic]](
     axis: int,
 ) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, DT]]:
     if isinstance(index, tuple):
+        assert is_tuple_basis_like(basis)
         return _index_tuple_raw_along_axis(index, basis, data, axis=axis)
     return _index_single_raw_along_axis(index, basis, data, axis=axis)
 
@@ -101,7 +104,9 @@ class ArrayConversion[
         new_basis: B1,
     ) -> None:
         self._data = data
-        self._old_basis = old_basis
+        # This is not the true type - but this is safe as it must at least be able to support
+        # the data into the new basis.
+        self._old_basis = cast("Basis[BasisMetadata, ctype[np.generic]]", old_basis)
         self._new_basis = new_basis
 
     def _metadata_variance_fn(self, value: M0, _private: Never) -> None: ...
@@ -244,17 +249,17 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return ArrayBuilder(basis.from_shape(array.shape), array).ok()
 
     def with_basis[
-        DT_: np.generic,
+        DT_: np.dtype[np.generic],
         M0_: BasisMetadata,
         B1_: Basis,
     ](
-        self: Array[Basis[M0_, Any], np.dtype[DT_]],
+        self: Array[Basis[M0_, Any], DT_],
         basis: B1_,
-    ) -> ArrayConversion[M0_, B1_, np.dtype[DT_]]:
+    ) -> ArrayConversion[M0_, B1_, DT_]:
         """Get the Array with the basis set to basis."""
         return ArrayConversion(self.raw_data, self.basis, basis)
 
-    def __add__[M_: BasisMetadata, DT_: np.number[Any]](
+    def __add__[M_: BasisMetadata, DT_: np.number](
         self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
         other: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
     ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
@@ -266,7 +271,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
         return ArrayBuilder(as_add_basis, data).ok()
 
-    def __sub__[M_: BasisMetadata, DT_: np.number[Any]](
+    def __sub__[M_: BasisMetadata, DT_: np.number](
         self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
         other: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
     ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
@@ -278,7 +283,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
         return ArrayBuilder(as_sub_basis, data).ok()
 
-    def __mul__[M_: BasisMetadata, DT_: np.number[Any]](
+    def __mul__[M_: BasisMetadata, DT_: np.number](
         self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
         other: float,
     ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
@@ -331,20 +336,21 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         )
 
     @overload
-    def __getitem__(self, index: int) -> DT: ...
-
+    def __getitem__[DT1: ctype[Never], DT_: np.dtype[np.generic]](
+        self: Array[Any, DT_], index: int
+    ) -> DT_: ...
     @overload
-    def __getitem__(
-        self, index: tuple[NestedIndex, ...] | slice
-    ) -> Array[Basis[BasisMetadata, ctype[Never]], DT]: ...
+    def __getitem__[DT1: ctype[Never], DT_: np.dtype[np.generic]](
+        self: Array[Basis[Any, DT1], DT_], index: tuple[NestedIndex, ...] | slice
+    ) -> Array[Basis[BasisMetadata, DT1], DT_]: ...
 
-    def __getitem__(
-        self,
+    def __getitem__[DT1: ctype[Never], DT_: np.dtype[np.generic]](
+        self: Array[Basis[Any, DT1], DT_],
         index: NestedIndex,
-    ) -> Array[Basis[BasisMetadata, ctype[Never]], DT] | DT:
+    ) -> Array[Basis[BasisMetadata, Any], DT_] | DT_:
         indexed_basis, indexed_data = _index_raw_along_axis(
             index, self.basis, self.raw_data.reshape(-1, 1), axis=0
         )
         if indexed_basis is None:
-            return indexed_data.item()
+            return cast("DT_", indexed_data.item())
         return ArrayBuilder(indexed_basis, indexed_data).ok()

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from slate.metadata import BasisMetadata
+from slate.basis import Basis
 from slate.plot._util import (
     Axes,
     Figure,
@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 Distribution = Literal["normal", "exponential normal", "skew normal"]
 
 
-def array_distribution[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    array: Array[M, np.floating],
+def array_distribution[B: Basis, DT: np.dtype[np.floating]](
+    array: Array[B, DT],
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",

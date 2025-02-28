@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 
@@ -45,7 +45,7 @@ def get_position_in_sorted(axes: tuple[int, ...]) -> tuple[int, ...]:
 
 
 def get_max_idx(
-    data: np.ndarray[tuple[int, ...], np.dtype[np.number[Any]]],
+    data: np.ndarray[tuple[int, ...], np.dtype[np.number]],
     *,
     axes: tuple[int, ...],
 ) -> tuple[int, ...]:

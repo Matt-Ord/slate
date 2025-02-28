@@ -6,6 +6,8 @@ import numpy as np
 
 from slate import array, basis
 from slate.array import Array, get_data_in_axes
+from slate.array._array import ArrayBuilder
+from slate.array._conversion import as_fundamental_basis
 from slate.basis import from_metadata
 from slate.metadata import AxisDirections, LabeledMetadata
 from slate.metadata.length import (
@@ -37,7 +39,7 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
-    from slate.basis._basis import Basis
+    from slate.basis._basis import Basis, ctype
     from slate.basis._tuple import TupleBasisLike
     from slate.metadata import BasisMetadata, SpacedVolumeMetadata, TupleMetadata
     from slate.metadata.length import SpacedLengthMetadata
@@ -51,7 +53,7 @@ class PlotKwargs(TypedDict, total=False):
     measure: Measure
 
 
-def _plot_raw_data_1d[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
+def _plot_raw_data_1d[DT: np.dtype[np.number]](  # noqa: PLR0913
     data: np.ndarray[Any, DT],
     coordinates: np.ndarray[Any, np.dtype[np.floating]],
     y_errors: np.ndarray[Any, np.dtype[np.floating]] | None = None,
@@ -100,23 +102,28 @@ def _plot_raw_data_1d[DT: np.dtype[np.number[Any]]](  # noqa: PLR0913
     return fig, ax, line
 
 
-def array_against_array[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    x_data: Array[M, np.floating],
-    y_data: Array[M, DT],
+def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
+    x_data: Array[Basis[M], np.dtype[np.floating]],
+    y_data: Array[Basis[M], DT],
     *,
-    y_error: Array[M, np.floating] | None = None,
+    y_error: Array[Basis[M], np.dtype[np.floating]] | None = None,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
     """Plot two arrays against each other."""
-    common_basis = basis.get_common_basis(
-        basis.as_index_basis(x_data.basis), basis.as_index_basis(y_data.basis)
+    common_basis = cast(
+        "Basis[Any, ctype[np.generic]]",
+        basis.get_common_basis(
+            basis.as_index_basis(x_data.basis), basis.as_index_basis(y_data.basis)
+        ),
     )
 
-    y_errors = None if y_error is None else y_error.with_basis(common_basis).raw_data
+    y_errors = (
+        None if y_error is None else y_error.with_basis(common_basis).ok().raw_data
+    )
     return _plot_raw_data_1d(
-        y_data.with_basis(common_basis).raw_data,
-        x_data.with_basis(common_basis).raw_data,
+        y_data.with_basis(common_basis).ok().raw_data,
+        x_data.with_basis(common_basis).ok().raw_data,
         y_errors,
         periodic=periodic,
         **kwargs,
@@ -135,10 +142,10 @@ def _get_basis_coordinates(
     return coordinates
 
 
-def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
-    data: Array[M, DT],
+def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
+    data: Array[Basis[M, ctype[np.floating]], DT],
     *,
-    y_error: Array[M, np.floating] | None = None,
+    y_error: Array[Basis[M], np.dtype[np.floating]] | None = None,
     periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
@@ -163,7 +170,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
     converted = array.as_index_basis(data)
     coordinates = _get_basis_coordinates(converted.basis)
     return array_against_array(
-        ArrayBuilder(converted.basis, coordinates),
+        ArrayBuilder(converted.basis, coordinates).ok(),
         converted,
         y_error=y_error,
         periodic=periodic,
@@ -171,8 +178,8 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number[Any]]](
     )
 
 
-def array_against_axes_1d[DT: np.dtype[np.number[Any]]](
-    data: Array[TupleMetadata[Any, Any], DT],
+def array_against_axes_1d[DT: np.dtype[np.number]](
+    data: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any, ctype[np.floating]], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -208,7 +215,7 @@ def array_against_axes_1d[DT: np.dtype[np.number[Any]]](
     return fig, ax, line
 
 
-def array_against_axes_1d_k[DT: np.dtype[np.number[Any]]](
+def array_against_axes_1d_k[DT: np.dtype[np.number]](
     data: Array[Basis[SpacedVolumeMetadata], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -237,11 +244,9 @@ def array_against_axes_1d_k[DT: np.dtype[np.number[Any]]](
     tuple[Figure, Axes, Line2D]
     """
     metadata = data.basis.metadata()
-    basis_k = basis.fundamental_transformed_tuple_basis_from_metadata(
-        metadata, is_dual=data.basis.is_dual
-    )
+    basis_k = basis.transformed_from_metadata(metadata, is_dual=data.basis.is_dual)
     converted_data = Array.from_array(
-        data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
+        data.with_basis(basis_k).ok().raw_data.reshape(basis_k.shape)
     )
 
     idx = tuple(0 for _ in range(metadata.n_dim - 1)) if idx is None else idx
@@ -265,7 +270,7 @@ def _has_colorbar(axis: Axes) -> bool:
     return colourbar is not None
 
 
-def _plot_raw_data_2d[DT: np.dtype[np.number[Any]]](
+def _plot_raw_data_2d[DT: np.dtype[np.number]](
     data: np.ndarray[Any, DT],
     coordinates: np.ndarray[tuple[int, ...], np.dtype[np.floating]] | None = None,
     *,
@@ -297,14 +302,14 @@ def _get_coordinates_grid(
     metadata: TupleMetadata,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
-    points = tuple(_get_basis_coordinates(from_metadata(m)) for m in metadata)
+    points = tuple(_get_basis_coordinates(from_metadata(m)) for m in metadata.children)
     aa = np.meshgrid(*points, indexing="ij")
     return np.asarray(aa)
 
 
 def array_against_axes_2d[
     M: TupleMetadata,
-    DT: np.dtype[np.number[Any]],
+    DT: np.dtype[np.number],
 ](
     data: Array[Basis[M], DT],
     axes: tuple[int, int] = (0, 1),
@@ -321,7 +326,7 @@ def array_against_axes_2d[
 
 
 def _get_lengths_in_axes(
-    metadata: TupleMetadata[Basis[SpacedLengthMetadata], Any],
+    metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...], Any],
     axes: tuple[int, ...],
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
@@ -330,7 +335,7 @@ def _get_lengths_in_axes(
     return np.asarray(aa)
 
 
-def array_against_axes_2d_x[DT: np.dtype[np.number[Any]], E](
+def array_against_axes_2d_x[DT: np.dtype[np.number], E](
     data: Array[Basis[TupleMetadata[tuple[SpacedLengthMetadata, ...], E]], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -362,7 +367,7 @@ def array_against_axes_2d_x[DT: np.dtype[np.number[Any]], E](
     """
     metadata = data.basis.metadata()
     basis_x = basis.from_metadata(metadata, is_dual=data.basis.is_dual)
-    converted_data = data.with_basis(basis_x).raw_data.reshape(basis_x.shape)
+    converted_data = as_fundamental_basis(data).raw_data.reshape(basis_x.shape)
 
     idx = get_max_idx(converted_data, axes=axes) if idx is None else idx
 
@@ -400,7 +405,7 @@ def _get_frequencies_in_axes(
     return np.asarray(aa)
 
 
-def array_against_axes_2d_k[DT: np.dtype[np.number[Any]], E](
+def array_against_axes_2d_k[DT: np.dtype[np.number], E](
     data: Array[TupleBasisLike[tuple[SpacedLengthMetadata, ...], E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -429,9 +434,7 @@ def array_against_axes_2d_k[DT: np.dtype[np.number[Any]], E](
     tuple[Figure, Axes, QuadMesh]
     """
     metadata = data.basis.metadata()
-    basis_k = basis.fundamental_transformed_tuple_basis_from_metadata(
-        metadata, is_dual=data.basis.is_dual
-    )
+    basis_k = basis.transformed_from_metadata(metadata, is_dual=data.basis.is_dual)
     converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
 
     idx = get_max_idx(converted_data, axes=axes) if idx is None else idx

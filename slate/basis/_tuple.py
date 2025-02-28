@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import copy
 from typing import (
     Any,
+    Literal,
     Never,
     TypeGuard,
     cast,
@@ -29,9 +30,10 @@ from slate.basis.wrapped import (
 from slate.metadata import (
     AnyMetadata,
     BasisMetadata,
+    SimpleMetadata,
     TupleMetadata,
+    is_tuple_metadata,
 )
-from slate.metadata._metadata import SimpleMetadata
 
 
 def _convert_tuple_basis_axes[
@@ -75,9 +77,6 @@ def _convert_tuple_basis_vector_unsafe[
         # The conversion of a dual to a non-dual vector must happen in an index basis
         initial_fundamental = as_tuple_basis(as_index_basis(initial_basis))
         final_fundamental = as_tuple_basis(as_index_basis(final_basis))
-        if initial_fundamental is None or final_fundamental is None:
-            msg = "Cannot convert between a basis which is not a TupleBasis"
-            raise ValueError(msg)
         converted_0 = _convert_tuple_basis_axes(
             vectors, initial_basis, initial_fundamental, axis
         )
@@ -250,7 +249,7 @@ class TupleBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: np.ndarray[Any, np.dtype[DT1]]
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -259,7 +258,7 @@ class TupleBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: float,
@@ -270,7 +269,7 @@ class TupleBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -387,10 +386,60 @@ type TupleBasisLike[
 ] = Basis[TupleMetadata[M, E], DT]
 
 
+@overload
 def is_tuple_basis_like[DT: ctype[Never]](
-    basis: Basis[BasisMetadata, DT],
+    basis: Basis[BasisMetadata, DT], *, n_dim: Literal[1]
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata], Never, DT]]: ...
+@overload
+def is_tuple_basis_like[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT], *, n_dim: Literal[2]
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, DT]]: ...
+@overload
+def is_tuple_basis_like[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT], *, n_dim: Literal[3]
+) -> TypeGuard[
+    TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, DT]
+]: ...
+@overload
+def is_tuple_basis_like[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT], *, n_dim: int | None = None
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]: ...
+
+
+def is_tuple_basis_like[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT], *, n_dim: int | None = None
 ) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]:
-    return isinstance(basis.metadata(), TupleMetadata)
+    return is_tuple_metadata(basis.metadata(), n_dim=n_dim)
+
+
+@overload
+def as_tuple_basis[M0: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M0], E, DT],
+) -> TupleBasis[tuple[Basis[M0, DT]], E, DT]: ...
+
+
+@overload
+def as_tuple_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M0, M1], E, DT],
+) -> TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT]: ...
+
+
+@overload
+def as_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: ctype[Never],
+](
+    basis: TupleBasisLike[tuple[M0, M1, M2], E, DT],
+) -> TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT], Basis[M2, DT]], E, DT]: ...
+
+
+@overload
+def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M, ...], E, DT],
+) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]: ...
 
 
 def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](

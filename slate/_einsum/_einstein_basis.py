@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Never, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from slate._einsum._einstein_index import (
     EinsteinIndex,
@@ -110,13 +110,14 @@ def _collect_einsum_basis_hints(
         hints.add_hint(idx, basis)
         return
 
-    assert is_tuple_basis_like(basis)
-    as_diagonal = as_diagonal_basis(basis)
+    as_diagonal = (
+        as_diagonal_basis(basis) if is_tuple_basis_like(basis, n_dim=2) else None
+    )
     # TODO: Add generalized diagonal so we can also support block diagonal  # noqa: FIX002
     if as_diagonal is not None and all(isinstance(i, EinsteinIndex) for i in idx):
         idx = cast("tuple[EinsteinIndex, ...]", idx)
         hints.add_diag_hint(idx, basis)
-
+    assert is_tuple_basis_like(basis)
     basis_as_tuple = as_tuple_basis(basis)
     for n, i in enumerate(idx):
         child = basis_as_tuple.children[n]
@@ -140,8 +141,8 @@ class BasisSpecification:
     part_basis: tuple[RecastBasis[Basis, TupleBasisLike], ...]
 
     def get_part_data(
-        self, *arrays: Array[Basis, np.dtype[Never]]
-    ) -> tuple[np.ndarray[tuple[int, ...], np.dtype[Any]], ...]:
+        self, *arrays: Array[Basis, Any]
+    ) -> tuple[np.ndarray[tuple[int, ...], np.dtype[np.generic]], ...]:
         return tuple(
             arr.with_basis(b.inner)
             .ok()

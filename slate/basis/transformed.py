@@ -125,7 +125,7 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -136,7 +136,7 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -145,7 +145,7 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -157,7 +157,7 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
 
 
 @overload
-def fundamental_transformed_tuple_basis_from_metadata[M0: BasisMetadata, E](
+def transformed_from_metadata[M0: BasisMetadata, E](
     metadata: TupleMetadata[tuple[M0], E],
     *,
     is_dual: NestedBoolOrNone = None,
@@ -167,7 +167,7 @@ def fundamental_transformed_tuple_basis_from_metadata[M0: BasisMetadata, E](
 
 
 @overload
-def fundamental_transformed_tuple_basis_from_metadata[
+def transformed_from_metadata[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
@@ -186,7 +186,7 @@ def fundamental_transformed_tuple_basis_from_metadata[
 
 
 @overload
-def fundamental_transformed_tuple_basis_from_metadata[
+def transformed_from_metadata[
     M0: BasisMetadata,
     M1: BasisMetadata,
     M2: BasisMetadata,
@@ -207,7 +207,7 @@ def fundamental_transformed_tuple_basis_from_metadata[
 
 
 @overload
-def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](
+def transformed_from_metadata[M: BasisMetadata, E](
     metadata: TupleMetadata[tuple[M, ...], E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis[
     tuple[Basis[M, ctype[np.complexfloating]], ...], E, ctype[np.complexfloating]
@@ -215,18 +215,18 @@ def fundamental_transformed_tuple_basis_from_metadata[M: BasisMetadata, E](
 
 
 @overload
-def fundamental_transformed_tuple_basis_from_metadata[M: SimpleMetadata](
+def transformed_from_metadata[M: SimpleMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
 ) -> FundamentalBasis[M]: ...
 
 
 @overload
-def fundamental_transformed_tuple_basis_from_metadata[M: AnyMetadata](
+def transformed_from_metadata[M: AnyMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
 ) -> Basis[M, ctype[np.complexfloating]]: ...
 
 
-def fundamental_transformed_tuple_basis_from_metadata(
+def transformed_from_metadata(
     metadata: AnyMetadata, *, is_dual: NestedBoolOrNone = None
 ) -> Basis[AnyMetadata, ctype[np.complexfloating]]:
     """Get a transformed fundamental basis with the given metadata."""
@@ -243,7 +243,7 @@ def fundamental_transformed_tuple_basis_from_metadata(
     )
 
     children = tuple(
-        fundamental_transformed_tuple_basis_from_metadata(c, is_dual=dual)
+        transformed_from_metadata(c, is_dual=dual)
         for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
     return TupleBasis(children, metadata.extra).upcast()
@@ -326,6 +326,6 @@ def transformed_from_shape[E](
     is_dual: tuple[bool, ...] | None = None,
 ) -> Basis[Any, ctype[np.complexfloating]]:
     """Get a basis with the basis at idx set to inner."""
-    return fundamental_transformed_tuple_basis_from_metadata(
+    return transformed_from_metadata(
         TupleMetadata.from_shape(shape, extra=extra), is_dual=is_dual
     )

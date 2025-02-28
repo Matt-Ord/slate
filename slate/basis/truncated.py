@@ -4,7 +4,7 @@ from typing import Any, Never, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util._pad import (
@@ -34,16 +34,6 @@ class TruncatedBasis[
         )
 
     @override
-    def try_cast_ctype[DT_: np.generic](
-        self,
-        ctype: type[DT_],
-    ) -> CroppedBasis[B, ctype[DT_]] | None:
-        """Try to cast a basis into one which supports the given data type."""
-        if self.inner.try_cast_ctype(ctype) is None:
-            return None
-        return cast("CroppedBasis[B, ctype[DT_]]", self)
-
-    @override
     def __hash__(self) -> int:
         return hash((self._inner, self._truncation))
 
@@ -71,19 +61,19 @@ class TruncatedBasis[
         return Padding(self._inner.size, self._truncation.step, self._truncation.offset)
 
     @override
-    def __into_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: TruncatedBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         return pad_along_axis(vectors, self._inner_padding, axis)
 
     @override
-    def __from_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: TruncatedBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         return truncate_along_axis(vectors, self.truncation, axis)
 
     @property
@@ -100,7 +90,7 @@ class TruncatedBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -111,7 +101,7 @@ class TruncatedBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -120,7 +110,7 @@ class TruncatedBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],

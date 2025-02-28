@@ -110,29 +110,6 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
     def size(self) -> int:
         """Number of elements in the basis."""
 
-    def try_cast_ctype[DT_: np.generic](  # noqa: PLR6301
-        self,
-        ctype: type[DT_],  # noqa: ARG002
-    ) -> Basis[M, ctype[DT_]] | None:
-        """Try to cast a basis into one which supports the given data type."""
-        return None
-
-    def cast_ctype[DT_: np.generic](
-        self,
-        ctype: type[DT_],
-    ) -> Basis[M, ctype[DT_]]:
-        """Cast the basis into the given data type.
-
-        Raises
-        ------
-            TypeError: If the basis does not support the given data type.
-        """  # noqa: DOC501
-        cast = self.try_cast_ctype(ctype)
-        if cast is not None:
-            return cast
-        msg = f"Basis does not support ctype {ctype}"
-        raise TypeError(msg)
-
     @property
     def fundamental_size(self) -> int:
         """Size of the full data."""
@@ -199,7 +176,7 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
             lambda: _convert_vectors_unsafe(self, vectors, basis, axis)  # type: ignore BasisConversion makes this safe
         )
 
-    def add_data[DT_: np.dtype[np.number[Any]]](
+    def add_data[DT_: np.dtype[np.number]](
         self,
         lhs: np.ndarray[Any, DT_],
         rhs: np.ndarray[Any, DT_],
@@ -207,7 +184,7 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
         msg = "add_data not implemented for this basis"
         raise NotImplementedError(msg)
 
-    def sub_data[DT_: np.dtype[np.number[Any]]](
+    def sub_data[DT_: np.dtype[np.number]](
         self,
         lhs: np.ndarray[Any, DT_],
         rhs: np.ndarray[Any, DT_],
@@ -215,7 +192,7 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
         msg = "sub_data not implemented for this basis"
         raise NotImplementedError(msg)
 
-    def mul_data[DT_: np.dtype[np.number[Any]]](
+    def mul_data[DT_: np.dtype[np.number]](
         self,
         lhs: np.ndarray[Any, DT_],
         rhs: float,
