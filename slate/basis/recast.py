@@ -96,7 +96,7 @@ class RecastBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -107,7 +107,7 @@ class RecastBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -116,7 +116,7 @@ class RecastBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],

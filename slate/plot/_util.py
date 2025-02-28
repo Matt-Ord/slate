@@ -234,7 +234,7 @@ def get_axis_colorbar(axis: Axes) -> Colorbar | None:
 Measure = Literal["real", "imag", "abs", "angle"]
 
 
-def _measure_data[DT: np.dtype[np.number[Any]]](
+def _measure_data[DT: np.dtype[np.number]](
     data: np.ndarray[Any, DT],
     measure: Measure,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:

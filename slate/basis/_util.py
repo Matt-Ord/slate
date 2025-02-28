@@ -14,7 +14,9 @@ from slate.basis._tuple import (
     TupleBasis,
     TupleBasisLike,
     as_feature_basis,
+    as_tuple_basis,
     from_metadata,
+    is_tuple_basis,
     is_tuple_basis_like,
 )
 from slate.basis.wrapped import (
@@ -61,9 +63,7 @@ def with_modified_child[
     idx: int,
 ) -> TupleBasis[tuple[Basis[M, DT0], ...], E, DT0]:
     """Get the basis with modified child."""
-    return with_modified_children(
-        basis, lambda i, b: cast("Basis", b if i != idx else wrapper(b))
-    )
+    return with_modified_children(basis, lambda i, b: b if i != idx else wrapper(b))
 
 
 def with_child[M: BasisMetadata, E, DT: ctype[Never]](

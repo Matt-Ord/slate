@@ -116,7 +116,7 @@ def truncate_along_axis[DT: np.dtype[np.generic]](
 
     data_length = vectors.shape[axis]
     indices = _get_truncated_indices(data_length, truncation)
-    return np.take(vectors, indices.astype(int), axis=axis)
+    return np.take(vectors, indices.astype(int), axis=axis)  # type: ignore dtype is DT
 
 
 @dataclass(frozen=True)

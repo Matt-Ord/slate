@@ -4,7 +4,7 @@ from typing import Any, Never, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._tuple import TupleBasis
 from slate.basis.wrapped import WrappedBasis
 from slate.metadata._metadata import BasisMetadata
@@ -24,27 +24,17 @@ class IsotropicBasis[
         super().__init__(inner)
         assert self.inner.children[0].size == self.inner.children[1].size
 
-    @override
-    def try_cast_ctype[DT_: np.generic](
-        self,
-        ctype: type[DT_],
-    ) -> IsotropicBasis[C, E, ctype[DT_]] | None:
-        """Try to cast a basis into one which supports the given data type."""
-        if self.inner.try_cast_ctype(ctype) is None:
-            return None
-        return cast("IsotropicBasis[C, E, ctype[DT_]]", self)
-
     @property
     @override
     def size(self) -> int:
         return self.inner.children[0].size
 
     @override
-    def __into_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: WrappedBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         swapped = vectors.swapaxes(axis, 0)
         indices = nx_points(self.size)
         displacement_matrix = np.mod(indices[:, None] - indices[None, :], self.size)
@@ -55,11 +45,11 @@ class IsotropicBasis[
         )
 
     @override
-    def __from_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: WrappedBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         swapped = vectors.swapaxes(axis, 0)
         stacked = swapped.reshape(self.size, self.size, *swapped.shape[1:])[0]
 
@@ -91,7 +81,7 @@ class IsotropicBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -102,7 +92,7 @@ class IsotropicBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -111,7 +101,7 @@ class IsotropicBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],

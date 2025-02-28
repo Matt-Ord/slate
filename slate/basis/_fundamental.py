@@ -18,14 +18,6 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.gen
         self._is_dual = is_dual
         super().__init__(metadata)
 
-    @override
-    def try_cast_ctype[DT_: np.generic](
-        self,
-        ctype: type[DT_],
-    ) -> FundamentalBasis[M]:
-        """Try to cast a basis into one which supports the given data type."""
-        return self
-
     @property
     @override
     def is_dual(self) -> bool:
@@ -93,7 +85,7 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.gen
         return {"ADD", "MUL", "SUB", "LINEAR_MAP", "INDEX"}
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -101,13 +93,13 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.gen
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],

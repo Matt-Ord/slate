@@ -6,7 +6,7 @@ from slate.basis._basis import Basis
 from slate.metadata._metadata import SimpleMetadata
 
 
-class BasisStateMetadata[B: Basis](SimpleMetadata):
+class BasisStateMetadata[B: Basis = Basis](SimpleMetadata):
     """Metadata for a list which is derived from some data in another basis."""
 
     def __init__(self, basis: B) -> None:

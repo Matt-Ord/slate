@@ -157,7 +157,7 @@ def array_basis_variance() -> None:
     _ = a.as_array()
     _ = a.with_basis(basis).ok()
 
-    basis = cast("Basis[SimpleMetadata, ctype[np.number[Any]]]", {})
+    basis = cast("Basis[SimpleMetadata, ctype[np.number]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     a = ArrayBuilder(basis, data).ok()
     _ = a.as_array()

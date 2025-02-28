@@ -11,7 +11,7 @@ from typing import (
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._tuple import TupleBasis
 from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata._metadata import BasisMetadata
@@ -39,11 +39,11 @@ class DiagonalBasis[
         return self.inner.children[0].size
 
     @override
-    def __into_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: DiagonalBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         if vectors.size == 0:
             return vectors
         swapped = vectors.swapaxes(axis, 0)
@@ -63,11 +63,11 @@ class DiagonalBasis[
         )
 
     @override
-    def __from_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: DiagonalBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         if vectors.size == 0:
             return vectors
         swapped = vectors.swapaxes(axis, 0)
@@ -108,7 +108,7 @@ class DiagonalBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -119,7 +119,7 @@ class DiagonalBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -128,7 +128,7 @@ class DiagonalBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],

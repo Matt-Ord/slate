@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Literal, Self, cast, override
+from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, override
 
 import numpy as np
 
 from slate import array as _array
 from slate import basis
 from slate._einsum import einsum
+from slate.array._array import ArrayBuilder
 from slate.array._transpose import inv, transpose
 from slate.basis import (
     Basis,
@@ -17,11 +18,14 @@ from slate.basis import (
     RecastBasis,
     WrappedBasis,
 )
+from slate.basis._basis import ctype
+from slate.basis._tuple import TupleBasis, TupleBasisLike, as_tuple_basis, from_metadata
 from slate.metadata import (
     BasisMetadata,
     SimpleMetadata,
     shallow_shape_from_nested,
 )
+from slate.metadata._stacked import TupleMetadata
 
 if TYPE_CHECKING:
     from slate.array import Array
@@ -30,37 +34,35 @@ type Direction = Literal["forward", "backward"]
 
 
 class ExplicitBasis[
-    M: BasisMetadata,
-    DT: np.dtype[np.number[Any]],
-    B: Basis = Basis[M, DT],
-    BTransform: Basis = Basis[
-        Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
+    Transform: Array[
+        Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]],
+        Any,
     ],
+    DT: ctype[Never] = ctype[Never],
 ](
-    WrappedBasis[M, DT, B],
+    WrappedBasis[Basis, DT],
 ):
     """Represents an explicit basis."""
 
     def __init__[
-        DT1: np.dtype[np.generic],
-        B1: Basis,
-        BTransform_: Basis,
-    ](
-        self: ExplicitBasis[Any, DT1, B1, BTransform_],
-        matrix: Array[
-            Metadata2D[SimpleMetadata, BasisStateMetadata[B1], None], DT1, BTransform_
+        Transform_: Array[
+            Basis[
+                TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]
+            ],
+            np.dtype[Never],
         ],
+    ](
+        self: ExplicitBasis[Transform_, ctype[Never]],
+        matrix: Transform_,
         *,
         direction: Direction = "forward",
         data_id: uuid.UUID | None = None,
     ) -> None:
-        self._matrix = cast(
-            "Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT, BTransform]",
-            matrix,
-        )
+        self._matrix = cast("Transform", matrix)
         self._direction: Direction = direction
         self._data_id = data_id or uuid.uuid4()
-        super().__init__(as_tuple_basis(self.eigenvectors.basis)[1])
+        inner_basis = as_tuple_basis(self.eigenvectors().basis).children[1]
+        super().__init__(inner_basis)
 
     @property
     def data_id(self) -> uuid.UUID:
@@ -72,20 +74,26 @@ class ExplicitBasis[
         dual._direction = "backward" if self.direction == "forward" else "forward"  # noqa: SLF001
         return dual
 
-    @property
-    def transform(
-        self,
-    ) -> Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT]:
+    def transform[
+        M1_: SimpleMetadata,
+        M2_: BasisStateMetadata[Basis],
+        DT_: np.dtype[np.generic],
+    ](
+        self: ExplicitBasis[Array[Basis[TupleMetadata[tuple[M1_, M2_], None]], DT_]],
+    ) -> Array[TupleBasisLike[tuple[M1_, M2_], None], DT_]:
         return (
             self._matrix
             if self.direction == "forward"
             else transpose(inv(self._matrix))
         )
 
-    @property
-    def inverse_transform(
-        self,
-    ) -> Array[Metadata2D[BasisStateMetadata[B], SimpleMetadata, None], DT]:
+    def inverse_transform[
+        M1_: SimpleMetadata,
+        M2_: BasisStateMetadata[Basis],
+        DT_: np.dtype[np.generic],
+    ](
+        self: ExplicitBasis[Array[Basis[TupleMetadata[tuple[M1_, M2_], None]], DT_]],
+    ) -> Array[TupleBasisLike[tuple[M2_, M1_], None], DT_]:
         return (
             inv(self._matrix)
             if self.direction == "forward"
@@ -93,23 +101,26 @@ class ExplicitBasis[
         )
 
     @property
-    def matrix(
-        self,
-    ) -> Array[Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], DT, BTransform]:
+    def matrix(self) -> Transform:
         return self._matrix
 
-    @property
-    def eigenvectors(self) -> Array[Metadata2D[BasisMetadata, M, None], DT]:
-        transposed = transpose(self.inverse_transform)
+    def eigenvectors[
+        M1_: SimpleMetadata,
+        M2_: BasisStateMetadata[Basis],
+        DT_: np.dtype[np.generic],
+    ](
+        self: ExplicitBasis[Array[Basis[TupleMetadata[tuple[M1_, M2_], None]], DT_]],
+    ) -> Array[TupleBasisLike[tuple[M1_, BasisMetadata], None], DT_]:
+        transposed = transpose(self.inverse_transform())
         inner_recast = basis.from_metadata(transposed.basis.metadata())
 
-        state_basis = inner_recast[1].metadata().basis
-        if inner_recast[1].is_dual:
+        state_basis = inner_recast.children[1].metadata().basis
+        if inner_recast.children[1].is_dual:
             state_basis = state_basis.dual_basis()
 
-        inner = TupleBasis((inner_recast[0], state_basis))
+        inner = TupleBasis((inner_recast.children[0], state_basis))
         eigenvectors_basis = RecastBasis(inner, inner_recast, transposed.basis)
-        return _array.cast_basis(transposed, eigenvectors_basis)
+        return _array.cast_basis(transposed, eigenvectors_basis).ok()
 
     @override
     def __eq__(self, other: object) -> bool:
@@ -130,7 +141,7 @@ class ExplicitBasis[
     @override
     def size(self) -> int:
         return shallow_shape_from_nested(
-            self.eigenvectors.basis.metadata().fundamental_shape
+            self.eigenvectors().basis.metadata().fundamental_shape
         )[0]
 
     @property
@@ -177,13 +188,13 @@ class ExplicitBasis[
         flat_basis = TupleBasis(
             (
                 FundamentalBasis.from_size(flat.shape[0]),
-                FundamentalBasis(
+                from_metadata(
                     transform.basis.metadata()[0],
                     is_dual=not cast("tuple[bool,...]", transform.basis.is_dual)[0],
                 ),
             )
         )
-        swapped_array = ArrayBuilder(flat_basis, flat)
+        swapped_array = ArrayBuilder(flat_basis, flat).ok()
 
         transform = self.inverse_transform
         transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
@@ -203,7 +214,7 @@ class ExplicitBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -214,7 +225,7 @@ class ExplicitBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -223,7 +234,7 @@ class ExplicitBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -260,13 +271,12 @@ def _dual_unitary_data[
 
 
 class ExplicitUnitaryBasis[
-    M: BasisMetadata,
-    DT: np.dtype[np.generic],
-    B: Basis = Basis[M, DT],
-    BTransform: Basis = Basis[
-        Metadata2D[SimpleMetadata, BasisStateMetadata[B], None], Any
+    Transform: Array[
+        Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]],
+        Any,
     ],
-](ExplicitBasis[M, DT, B, BTransform]):
+    DT: ctype[Never] = ctype[Never],
+](ExplicitBasis[Transform, DT]):
     """Represents a truncated basis."""
 
     def __init__[

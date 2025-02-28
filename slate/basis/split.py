@@ -1,26 +1,22 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import TYPE_CHECKING, Any, Self, cast, override
+from typing import Any, Never, Self, cast, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature
+from slate.basis._basis import Basis, BasisFeature, ctype
 from slate.basis._util import get_common_basis
 from slate.basis.wrapped import WrappedBasis
 from slate.util import Padding, pad_along_axis, slice_along_axis
 
-if TYPE_CHECKING:
-    from slate.metadata import BasisMetadata
-
 
 class SplitBasis[
-    M: BasisMetadata,
-    DT: np.dtype[np.generic],
-    B0: Basis = Basis[M, DT],
-    B1: Basis = Basis[M, DT],
+    B0: Basis,
+    B1: Basis,
+    DT: ctype[Never] = ctype[Never],
 ](
-    WrappedBasis[M, DT, Basis[M, DT]],
+    WrappedBasis[Basis, DT],
 ):
     r"""Represents data in the split basis.
 
@@ -35,11 +31,7 @@ class SplitBasis[
     def __init__[
         B0_: Basis,
         B1_: Basis,
-    ](
-        self: SplitBasis[Any, Any, B0_, B1_],
-        lhs: B0_,
-        rhs: B1_,
-    ) -> None:
+    ](self: SplitBasis[B0_, B1_, ctype[Never]], lhs: B0_, rhs: B1_) -> None:
         self._lhs: B0 = lhs
         self._rhs: B1 = rhs
         super().__init__(get_common_basis(lhs, rhs))
@@ -135,7 +127,7 @@ class SplitBasis[
         return out
 
     @override
-    def add_data[DT1: np.number[Any]](
+    def add_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],
@@ -146,7 +138,7 @@ class SplitBasis[
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number[Any]](
+    def mul_data[DT1: np.number](
         self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         if "LINEAR_MAP" not in self.features:
@@ -155,7 +147,7 @@ class SplitBasis[
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number[Any]](
+    def sub_data[DT1: np.number](
         self,
         lhs: np.ndarray[Any, np.dtype[DT1]],
         rhs: np.ndarray[Any, np.dtype[DT1]],

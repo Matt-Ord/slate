@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, TypeGuard, overload, override
+from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, overload, override
 
 from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 from slate.metadata._shape import size_from_nested_shape
@@ -139,7 +139,29 @@ class TupleMetadata[
 type AnyMetadata = BasisMetadata | TupleMetadata[AnyMetadata, Any]
 
 
+@overload
 def is_tuple_metadata(
-    metadata: BasisMetadata,
+    metadata: BasisMetadata, *, n_dim: Literal[1]
+) -> TypeGuard[TupleMetadata[tuple[BasisMetadata], Never]]: ...
+@overload
+def is_tuple_metadata(
+    metadata: BasisMetadata, *, n_dim: Literal[2]
+) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, BasisMetadata], Never]]: ...
+@overload
+def is_tuple_metadata(
+    metadata: BasisMetadata, *, n_dim: Literal[3]
+) -> TypeGuard[
+    TupleMetadata[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never]
+]: ...
+@overload
+def is_tuple_metadata(
+    metadata: BasisMetadata, *, n_dim: int | None = None
+) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, ...], Never]]: ...
+
+
+def is_tuple_metadata(
+    metadata: BasisMetadata, *, n_dim: int | None = None
 ) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, ...], Never]]:
-    return isinstance(metadata, TupleMetadata)
+    return isinstance(metadata, TupleMetadata) and (
+        n_dim is None or metadata.n_dim == n_dim
+    )
