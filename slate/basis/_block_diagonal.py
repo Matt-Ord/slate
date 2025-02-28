@@ -7,7 +7,7 @@ import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, ctype
 from slate.basis._tuple import TupleBasis
-from slate.basis.wrapped import WrappedBasis, wrapped_basis_iter_inner
+from slate.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata import BasisMetadata
 from slate.util._diagonal import build_diagonal, extract_diagonal
 

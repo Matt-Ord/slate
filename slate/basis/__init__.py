@@ -13,10 +13,19 @@ from slate.basis._basis import (
 )
 from slate.basis._basis_state_metadata import BasisStateMetadata
 from slate.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
+from slate.basis._coordinate import CoordinateBasis
 from slate.basis._cropped import CroppedBasis, is_cropped_basis
 from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis, is_diagonal_basis
 from slate.basis._fundamental import FundamentalBasis, as_state_list
 from slate.basis._isotropic import IsotropicBasis
+from slate.basis._recast import RecastBasis, is_recast_basis
+from slate.basis._split import SplitBasis
+from slate.basis._transformed import (
+    TransformedBasis,
+    transformed_from_metadata,
+    transformed_from_shape,
+)
+from slate.basis._truncated import Padding, TruncatedBasis, Truncation
 from slate.basis._tuple import (
     TupleBasis,
     TupleBasisLike,
@@ -41,16 +50,7 @@ from slate.basis._util import (
     with_modified_child,
     with_modified_children,
 )
-from slate.basis.coordinate import CoordinateBasis
-from slate.basis.recast import RecastBasis
-from slate.basis.split import SplitBasis
-from slate.basis.transformed import (
-    TransformedBasis,
-    transformed_from_metadata,
-    transformed_from_shape,
-)
-from slate.basis.truncated import Padding, TruncatedBasis, Truncation
-from slate.basis.wrapped import (
+from slate.basis._wrapped import (
     WrappedBasis,
     get_wrapped_basis_super_inner,
 )
@@ -98,6 +98,7 @@ __all__ = [
     "get_wrapped_basis_super_inner",
     "is_cropped_basis",
     "is_diagonal_basis",
+    "is_recast_basis",
     "is_tuple_basis",
     "is_tuple_basis_like",
     "transformed_from_metadata",

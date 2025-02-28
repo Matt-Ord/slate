@@ -9,8 +9,8 @@ from slate.basis import (
     TransformedBasis,
     diagonal_basis,
 )
+from slate.basis._split import SplitBasis
 from slate.basis._tuple import from_metadata
-from slate.basis.split import SplitBasis
 
 
 def test_split_array_equals_diagonal() -> None:

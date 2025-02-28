@@ -7,7 +7,7 @@ import numpy as np
 from slate.basis._basis import Basis, BasisFeature, NestedBoolOrNone, ctype
 from slate.basis._fundamental import FundamentalBasis
 from slate.basis._tuple import TupleBasis
-from slate.basis.wrapped import WrappedBasis
+from slate.basis._wrapped import WrappedBasis
 from slate.metadata import (
     AnyMetadata,
     BasisMetadata,

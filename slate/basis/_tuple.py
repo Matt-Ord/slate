@@ -22,7 +22,7 @@ from slate.basis._basis import (
     ctype,
 )
 from slate.basis._fundamental import FundamentalBasis
-from slate.basis.wrapped import (
+from slate.basis._wrapped import (
     get_wrapped_basis_super_inner,
     is_wrapped_basis,
     wrapped_basis_iter_inner,

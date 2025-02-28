@@ -1,44 +1,53 @@
 from __future__ import annotations
 
-from typing import Any, Never, cast, override
+from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, ctype
 from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis
-from slate.basis.wrapped import WrappedBasis
+from slate.basis._wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
+
+if TYPE_CHECKING:
+    from slate.basis._tuple import TupleBasisLike
 
 
 class RecastBasis[
-    BInner: Basis,
-    BOuter: Basis,
+    BInner: Basis = Basis,
+    BInnerRecast: Basis = Basis,
+    BOuterRecast: Basis = Basis,
     DT: ctype[Never] = ctype[Never],
 ](WrappedBasis[BInner, DT]):
     """Represents a truncated basis."""
 
-    def __init__[
-        BInner_: Basis,
-        BOuter_: Basis,
-    ](
-        self: RecastBasis[BInner_, BOuter_],
+    def __init__[BInner_: Basis, BInnerRecast_: Basis, BOuterRecast_: Basis](
+        self: RecastBasis[BInner_, BInnerRecast_, BOuterRecast_, ctype[Never]],
         inner: BInner_,
-        inner_recast: Basis[M1_, DT_],
-        outer_recast: BOuter_,
+        inner_recast: BInnerRecast_,
+        outer_recast: BOuterRecast_,
     ) -> None:
-        self._inner_recast: Basis[M1, DT] = inner_recast
-        self._outer_recast: BOuter = outer_recast
-        super().__init__(inner)
+        self._inner_recast = cast("BInnerRecast", inner_recast)
+        self._outer_recast = cast("BOuterRecast", outer_recast)
+        super().__init__(cast("BInner", inner))
 
         assert self._inner_recast.size == self.inner.size
+        assert self._outer_recast.metadata() == self.inner_recast.metadata()
+
+    @override
+    def upcast[DT_: ctype[Never]](
+        self: RecastBasis[Basis[Any, DT_], Basis[Any, DT_], Basis[Any, DT_], Any],
+    ) -> RecastBasis[BInner, BInnerRecast, BOuterRecast, DT_]:
+        """Upcast the wrapped basis to a more specific type."""
+        return cast("RecastBasis[BInner, BInnerRecast, BOuterRecast, DT_]", self)
 
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, RecastBasis)
-            and self.inner == other.inner  # type: ignore unknown
-            and self.inner_recast == other.inner_recast  # type: ignore unknown
-            and self.outer_recast == other.outer_recast  # type: ignore unknown
+            is_recast_basis(other)
+            and self.inner == other.inner
+            and self.inner_recast == other.inner_recast
+            and self.outer_recast == other.outer_recast
         )
 
     @override
@@ -52,12 +61,12 @@ class RecastBasis[
         return self.outer_recast.size
 
     @property
-    def inner_recast(self) -> Basis[M1, DT]:
+    def inner_recast(self) -> BInnerRecast:
         """The basis the inner was recast to."""
         return self._inner_recast
 
     @property
-    def outer_recast(self) -> BOuter:
+    def outer_recast(self) -> BOuterRecast:
         """The basis the inner recast was transformed to."""
         return self._outer_recast
 
@@ -128,32 +137,30 @@ class RecastBasis[
 
 
 def recast_basis_from_diagonal[
-    M0: BasisMetadata,
-    M1: BasisMetadata,
+    B0: Basis,
+    B1: Basis,
     E,
-    DT: np.dtype[np.generic],
+    DT: ctype[np.generic],
 ](
-    basis: DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
-) -> RecastBasis[
-    Metadata2D[M0, M1, E], M1, DT, DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E]
-]:
+    basis: DiagonalBasis[tuple[B0, B1], E, DT],
+) -> RecastBasis[DiagonalBasis[tuple[B0, B1], E, DT], B1, B1, DT]:
     """Recast a diagonal basis to the lhs basis."""
-    return RecastBasis(basis, basis.inner[1], basis.inner[1])
+    return RecastBasis(basis, basis.inner.children[1], basis.inner.children[1])  # type: ignore it does support DT actually
 
 
 def as_recast_diagonal_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: np.dtype[np.generic],
+    DT: ctype[np.generic],
 ](
-    basis: Basis[Metadata2D[M0, M1, E], DT],
+    basis: TupleBasisLike[tuple[M0, M1], E, DT],
 ) -> (
     RecastBasis[
-        Metadata2D[M0, M1, E],
-        M1,
+        DiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT],
+        Basis[M1, DT],
+        Basis[M1, DT],
         DT,
-        DiagonalBasis[DT, Basis[M0, DT], Basis[M1, DT], E],
     ]
     | None
 ):
@@ -164,30 +171,20 @@ def as_recast_diagonal_basis[
     return recast_basis_from_diagonal(basis_as_diagonal)
 
 
-type RecastDiagonalBasis[
-    M: BasisMetadata,
-    DT: np.dtype[np.generic],
-    BInner: Basis[BasisMetadata, Any] = Basis[M, DT],
-    BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
-] = RecastBasis[
-    Metadata2D[M, M, None], M, DT, DiagonalBasis[Any, BInner, BInner, None], BOuter
-]
+@overload
+def is_recast_basis[DT: ctype[np.generic]](  # type: ignore is compatible
+    basis: Basis[BasisMetadata, DT],
+) -> TypeGuard[RecastBasis[Basis, Basis, Basis, DT]]: ...
 
 
-def recast_diagonal_basis[
-    M: BasisMetadata,
-    DT: np.dtype[np.generic],
-    BInner: Basis[BasisMetadata, Any] = Basis[M, DT],
-    BOuter: Basis[BasisMetadata, Any] = Basis[M, DT],
-](
-    inner_basis: BInner, outer_basis: BOuter
-) -> RecastDiagonalBasis[Any, Any, BInner, BOuter]:
-    """Recast a basis which is diagonal in the inner basis."""
-    return cast(
-        "RecastDiagonalBasis[M, DT, BInner, BOuter]",
-        RecastBasis(
-            DiagonalBasis(inner_basis.dual_basis(), inner_basis)),
-            inner_basis,
-            outer_basis,
-        ),
-    )
+@overload
+def is_recast_basis(
+    basis: object,
+) -> TypeGuard[RecastBasis]: ...
+
+
+def is_recast_basis[DT: ctype[np.generic]](
+    basis: object,
+) -> TypeGuard[RecastBasis[Basis, Basis, Basis, Any]]:
+    """Check if the basis is a recast basis."""
+    return isinstance(basis, RecastBasis)
