@@ -7,7 +7,7 @@ import numpy as np
 
 from slate.basis._basis import Basis, BasisFeature, ctype
 from slate.basis._util import get_common_basis
-from slate.basis.wrapped import WrappedBasis
+from slate.basis._wrapped import WrappedBasis
 from slate.util import Padding, pad_along_axis, slice_along_axis
 
 

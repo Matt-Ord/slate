@@ -5,7 +5,7 @@ from typing import Any, Never, cast, override
 import numpy as np
 
 from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
-from slate.basis.wrapped import WrappedBasis
+from slate.basis._wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util._pad import (
     Padding,
@@ -66,7 +66,9 @@ class TruncatedBasis[
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
-        return pad_along_axis(vectors, self._inner_padding, axis)
+        return BasisConversion(
+            lambda: pad_along_axis(vectors, self._inner_padding, axis)
+        )
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
@@ -74,7 +76,9 @@ class TruncatedBasis[
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
-        return truncate_along_axis(vectors, self.truncation, axis)
+        return BasisConversion(
+            lambda: truncate_along_axis(vectors, self.truncation, axis)
+        )
 
     @property
     @override

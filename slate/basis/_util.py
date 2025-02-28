@@ -19,7 +19,7 @@ from slate.basis._tuple import (
     is_tuple_basis,
     is_tuple_basis_like,
 )
-from slate.basis.wrapped import (
+from slate.basis._wrapped import (
     wrapped_basis_iter_inner,
 )
 from slate.metadata import (

@@ -5,7 +5,7 @@ from typing import Any, Never, TypeGuard, cast, override
 import numpy as np
 
 from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
-from slate.basis.wrapped import WrappedBasis
+from slate.basis._wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 from slate.util import pad_ft_points
 
