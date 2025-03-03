@@ -6,8 +6,7 @@ import numpy as np
 import pytest
 
 from slate import array
-from slate.array import Array, conjugate, transpose
-from slate.array._array import ArrayBuilder
+from slate.array import Array, build, conjugate, transpose
 from slate.basis import (
     Basis,
     BlockDiagonalBasis,
@@ -47,7 +46,7 @@ def test_slate_array_basis(
 
 def test_create_array_with_wrong_size() -> None:
     with pytest.raises(AssertionError):
-        ArrayBuilder(from_shape((2, 3)), np.array([1, 2, 3, 4]))
+        build(from_shape((2, 3)), np.array([1, 2, 3, 4])).ok()
 
 
 def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) -> None:
@@ -70,7 +69,7 @@ def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) ->
 def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = ArrayBuilder(basis, data).ok()
+    arr = build(basis, data).ok()
 
     transposed = array.transpose(arr)
     np.testing.assert_allclose(transposed.as_array(), arr.as_array().transpose())
@@ -95,7 +94,7 @@ def test_transpose_with_axes(
 ) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = ArrayBuilder(basis, data).ok()
+    arr = build(basis, data).ok()
 
     transposed = array.transpose(arr, axes=axes)
     np.testing.assert_allclose(
@@ -122,7 +121,7 @@ def test_conjugate_array(
     ],
 ) -> None:
     data = np.array([1, 2, 3, 4, 4, 6])
-    array = ArrayBuilder(basis, data).ok()
+    array = build(basis, data).ok()
 
     np.testing.assert_allclose(
         array.as_array().conjugate(), conjugate(array).as_array()

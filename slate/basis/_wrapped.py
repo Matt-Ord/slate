@@ -27,7 +27,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
     as_inner = initial.__into_inner__(vectors, axis).ok()
     if is_wrapped_basis(final) and initial.inner == final.inner:
         return final.__from_inner__(as_inner, axis).ok()
-    return initial.inner.__convert_vector_into__(as_inner, final, axis=axis)  # type: ignore unknown
+    return initial.inner.__convert_vector_into__(as_inner, final, axis=axis).ok()
 
 
 class WrappedBasis[

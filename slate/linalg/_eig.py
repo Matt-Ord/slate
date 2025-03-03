@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array._array import ArrayBuilder
+from slate.array import build
 from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
@@ -58,7 +58,7 @@ def get_eigenvalues[M: BasisMetadata, E, DT: np.dtype[np.complexfloating]](
 ]:
     """Get the eigenvalues of a matrix."""
     a = np.linalg.eigvals(array.as_array())
-    return ArrayBuilder(FundamentalBasis.from_size(a.size), a)
+    return build(FundamentalBasis.from_size(a.size), a)
 
 
 def _eig_from_tuple[
@@ -84,7 +84,7 @@ def _eig_from_tuple[
         )
     )
     basis_0 = ExplicitBasis(
-        ArrayBuilder(states_basis_0, np.transpose(eig.eigenvectors)),
+        build(states_basis_0, np.transpose(eig.eigenvectors)),
     )
     states_basis_1 = TupleBasis(
         (
@@ -93,11 +93,11 @@ def _eig_from_tuple[
         )
     )
     basis_1 = ExplicitBasis(
-        ArrayBuilder(states_basis_1, np.transpose(eig.eigenvectors)).ok(),
+        build(states_basis_1, np.transpose(eig.eigenvectors)).ok(),
         data_id=basis_0.data_id,
         direction="backward",
     )
-    return ArrayBuilder(
+    return build(
         DiagonalBasis(TupleBasis((basis_0, basis_1), array.basis.metadata().extra)),
         eig.eigenvalues,
     ).ok()
@@ -139,7 +139,7 @@ def _eig_from_block_diagonal_basis[
         ).upcast(),
         array.basis.block_shape,
     )
-    basis_0 = ExplicitBasis(ArrayBuilder(states_basis_0, eigenvectors))
+    basis_0 = ExplicitBasis(build(states_basis_0, eigenvectors))
     states_basis_1 = BlockDiagonalBasis(
         TupleBasis(
             (
@@ -150,12 +150,12 @@ def _eig_from_block_diagonal_basis[
         array.basis.block_shape,
     )
     basis_1 = ExplicitBasis(
-        ArrayBuilder(states_basis_1, eigenvectors),
+        build(states_basis_1, eigenvectors),
         data_id=basis_0.data_id,
         direction="backward",
     )
 
-    return ArrayBuilder(
+    return build(
         DiagonalBasis(TupleBasis((basis_0, basis_1), array.basis.metadata().extra)),
         eigenvalues,
     ).ok()
@@ -201,7 +201,7 @@ def get_eigenvalues_hermitian[
     array: Array[TupleMetadata[M, E], DT],
 ) -> Array[BasisMetadata, np.floating, FundamentalBasis[SimpleMetadata]]:
     a = np.linalg.eigvalsh(array.as_array())
-    return ArrayBuilder(FundamentalBasis.from_size(a.size), a)
+    return build(FundamentalBasis.from_size(a.size), a)
 
 
 def _eigh_from_tuple[
@@ -232,7 +232,7 @@ def _eigh_from_tuple[
         )
     )
     basis_0 = ExplicitUnitaryBasis(
-        ArrayBuilder(states_basis_0, np.transpose(eig.eigenvectors)),
+        build(states_basis_0, np.transpose(eig.eigenvectors)),
         direction="forward",
         assert_unitary=False,
     )
@@ -243,13 +243,13 @@ def _eigh_from_tuple[
         )
     )
     basis_1 = ExplicitUnitaryBasis(
-        ArrayBuilder(states_basis_1, (np.transpose(eig.eigenvectors))),
+        build(states_basis_1, (np.transpose(eig.eigenvectors))),
         data_id=basis_0.data_id,
         direction="backward",
         assert_unitary=False,
     )
 
-    return ArrayBuilder(
+    return build(
         DiagonalBasis((basis_0, basis_1), array.basis.metadata().extra),
         eig.eigenvalues.astype(np.complex128),
     )
@@ -301,7 +301,7 @@ def _eigh_from_block_diagonal_basis[
         array.basis.block_shape,
     )
     basis_0 = ExplicitUnitaryBasis(
-        ArrayBuilder(states_basis_0, eigenvectors),
+        build(states_basis_0, eigenvectors),
     )
     states_basis_1 = BlockDiagonalBasis(
         TupleBasis(
@@ -313,12 +313,12 @@ def _eigh_from_block_diagonal_basis[
         array.basis.block_shape,
     )
     basis_1 = ExplicitUnitaryBasis(
-        ArrayBuilder(states_basis_1, eigenvectors).ok(),
+        build(states_basis_1, eigenvectors).ok(),
         data_id=basis_0.data_id,
         direction="backward",
     )
 
-    return ArrayBuilder(
+    return build(
         DiagonalBasis((basis_0, basis_1), array.basis.metadata().extra),
         eigenvalues,
     ).ok()

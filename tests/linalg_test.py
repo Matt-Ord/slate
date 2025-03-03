@@ -6,8 +6,7 @@ import numpy as np
 import pytest
 
 from slate import array as _array
-from slate.array import Array
-from slate.array._array import ArrayBuilder
+from slate.array import Array, build
 from slate.basis import (
     from_shape,
 )
@@ -88,7 +87,7 @@ def test_linalg_complex(
     rng = np.random.default_rng()
     data = rng.random(basis.size) + 1j * rng.random(basis.size)
 
-    array = ArrayBuilder(basis, data).ok()
+    array = build(basis, data).ok()
     _test_into_diagonal(array)
 
 
@@ -145,7 +144,7 @@ def test_linalg_diagonal(
     rng = np.random.default_rng()
     fundamental = from_metadata(basis.metadata())
     data = np.diag(rng.random(fundamental.shape[0])).astype(np.complex128)
-    array = ArrayBuilder(fundamental, data).with_basis(basis)
+    array = build(fundamental, data).with_basis(basis)
 
     _test_into_diagonal_hermitian(array)
 
@@ -169,9 +168,7 @@ def test_linalg_complex_hermitian(
 ) -> None:
     rng = np.random.default_rng()
 
-    array = ArrayBuilder(
-        basis, rng.random(basis.size) + 1j * rng.random(basis.size)
-    ).ok()
+    array = build(basis, rng.random(basis.size) + 1j * rng.random(basis.size)).ok()
     array += _array.conjugate(_array.transpose(array))
     array = array.with_basis(basis).ok()
 
@@ -195,7 +192,7 @@ def test_linalg_real_hermitian(
     ],
 ) -> None:
     rng = np.random.default_rng()
-    array = ArrayBuilder(basis, rng.random(basis.size).astype(np.complex128)).ok()
+    array = build(basis, rng.random(basis.size).astype(np.complex128)).ok()
     array += _array.conjugate(_array.transpose(array))
     array = array.with_basis(basis).ok()
 

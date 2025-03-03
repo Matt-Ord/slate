@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Never, overload
 
 import numpy as np
 
-from slate.array._array import ArrayBuilder
+from slate.array._array import build
 from slate.array._conversion import (
     as_diagonal_basis,
     as_index_basis,
@@ -49,7 +49,7 @@ def _transpose_from_diagonal[
         DT,
     ],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
-    return ArrayBuilder(
+    return build(
         DiagonalBasis(
             TupleBasis(
                 (array.basis.inner.children[1], array.basis.inner.children[0]),
@@ -68,7 +68,7 @@ def _transpose_from_tuple_simple[
 ](
     array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
-    return ArrayBuilder(
+    return build(
         TupleBasis(
             (array.basis.children[1], array.basis.children[0]),
             array.basis.metadata().extra,
@@ -102,7 +102,7 @@ def _transpose_from_tuple[M: BasisMetadata, E, DT: np.dtype[np.generic]](
         tuple(children[i] for i in axes), array.basis.metadata().extra
     )
     # SAFE, since if the original basis supports the data, the new basis will too.
-    return ArrayBuilder(
+    return build(
         out_basis, array.raw_data.reshape(array.basis.shape).transpose(axes)
     ).ok()  # type: ignore see above
 
@@ -141,7 +141,7 @@ def _inv_from_diagonal[
 ](
     array: Array[DiagonalBasis[tuple[Basis[M0], Basis[M1]], E], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
-    return ArrayBuilder(
+    return build(
         DiagonalBasis(
             TupleBasis(
                 (
@@ -159,7 +159,7 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.dtype[np.gen
     array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
     raw_data = array.raw_data.reshape(array.basis.shape)
-    return ArrayBuilder(
+    return build(
         TupleBasis(
             (
                 array.basis.children[1].dual_basis(),

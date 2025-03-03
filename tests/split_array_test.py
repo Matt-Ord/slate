@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.array import Array
-from slate.array._array import ArrayBuilder
+from slate.array import Array, build
 from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
@@ -32,11 +31,11 @@ def test_split_array_equals_diagonal() -> None:
 def test_split_array_equals_transformed() -> None:
     data = np.diag(np.arange(1, 4)).astype(np.complex128)
     basis_k = TransformedBasis(FundamentalBasis.from_size(3))
-    array = ArrayBuilder(TupleBasis((basis_k, basis_k)).upcast(), data).ok()
+    array = build(TupleBasis((basis_k, basis_k)).upcast(), data).ok()
 
     diagonal = array.with_basis(DiagonalBasis(array.basis)).ok()
     fundamental = DiagonalBasis(from_metadata(array.basis.metadata()))
-    split = ArrayBuilder(
+    split = build(
         SplitBasis(fundamental, diagonal.basis),
         np.array([0, 0, 0, 1.0, 2.0, 3.0]),
     ).ok()

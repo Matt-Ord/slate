@@ -8,7 +8,7 @@ import numpy as np
 from slate import array as _array
 from slate import basis
 from slate._einsum import einsum
-from slate.array._array import ArrayBuilder
+from slate.array import build
 from slate.array._misc import cast_as_dual
 from slate.array._transpose import inv, transpose
 from slate.basis import (
@@ -172,7 +172,7 @@ class ExplicitBasis[
                     ),
                 )
             )
-            swapped_array = ArrayBuilder(flat_basis, flat).ok()
+            swapped_array = build(flat_basis, flat).ok()
 
             transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
             return (
@@ -204,7 +204,7 @@ class ExplicitBasis[
                     ),
                 )
             )
-            swapped_array = ArrayBuilder(flat_basis, flat).ok()
+            swapped_array = build(flat_basis, flat).ok()
 
             transform = self.inverse_transform()
             transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)

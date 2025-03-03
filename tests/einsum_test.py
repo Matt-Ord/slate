@@ -10,7 +10,7 @@ from slate._einsum._einstein_index import (
     NestedEinsteinIndex,
     parse_einsum_index,
 )
-from slate.array._array import ArrayBuilder
+from slate.array import build
 from slate.basis import (
     CroppedBasis,
     FundamentalBasis,
@@ -55,7 +55,7 @@ def _test_einsum_in_basis(
 def test_einsum() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = ArrayBuilder(
+    array = build(
         TupleBasis(
             (
                 FundamentalBasis.from_size(10),
@@ -66,7 +66,7 @@ def test_einsum() -> None:
     ).ok()
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = ArrayBuilder(array.basis.children[0], data).ok()
+    vector = build(array.basis.children[0], data).ok()
 
     _test_einsum_in_basis(array, vector, TransformedBasis(vector.basis))
     _test_einsum_in_basis(array, vector, CroppedBasis(vector.basis.size, vector.basis))
@@ -85,7 +85,7 @@ def test_einsum() -> None:
 def test_einsum_diagonal() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = ArrayBuilder(
+    array = build(
         TupleBasis(
             (
                 FundamentalBasis.from_size(10),
@@ -96,14 +96,14 @@ def test_einsum_diagonal() -> None:
     ).ok()
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = ArrayBuilder(array.basis.children[0], data).ok()
+    vector = build(array.basis.children[0], data).ok()
     diagonal_array = into_diagonal(array)
 
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
 
     data = array.raw_data.reshape(array.basis.shape)
     data += np.conj(data.T)
-    array = ArrayBuilder(
+    array = build(
         TupleBasis(
             (
                 FundamentalBasis.from_size(10),
