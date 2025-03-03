@@ -82,7 +82,10 @@ def as_diagonal_basis[
     DT1: ctype[Never],
 ](
     array: Array[Basis[TupleMetadata[tuple[M0, M1], E], DT1], DT],
-) -> Array[DiagonalBasis[tuple[Basis[M0, DT1], Basis[M1, DT1]], E, DT1], DT] | None:
+) -> (
+    Array[DiagonalBasis[TupleBasis[tuple[Basis[M0, DT1], Basis[M1, DT1]], E], DT1], DT]
+    | None
+):
     b = basis.as_diagonal_basis(array.basis)
     if b is None:
         return None
@@ -163,7 +166,7 @@ def as_outer_array[B: Basis, DT: np.dtype[np.generic]](
 
 
 def as_diagonal_array[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[DiagonalBasis[tuple[Basis, B], Never, ctype[Never]], DT],
+    array: Array[DiagonalBasis[TupleBasis[tuple[Basis, B], Never], ctype[Never]], DT],
 ) -> Array[B, DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.

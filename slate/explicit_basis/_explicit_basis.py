@@ -51,7 +51,7 @@ class ExplicitBasis[
             Basis[
                 TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]
             ],
-            np.dtype[Never],
+            np.dtype[np.complexfloating],
         ],
     ](
         self: ExplicitBasis[Transform_, ctype[Never]],
@@ -295,10 +295,8 @@ class ExplicitUnitaryBasis[
 
     def __init__[
         Transform_: Array[
-            Basis[
-                TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]
-            ],
-            np.dtype[np.generic],
+            Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Any]], None]],
+            np.dtype[Any],
         ],
     ](
         self: ExplicitUnitaryBasis[Transform_, ctype[Never]],

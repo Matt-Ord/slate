@@ -45,7 +45,7 @@ def _transpose_from_diagonal[
     DT: np.dtype[np.generic],
 ](
     array: Array[
-        DiagonalBasis[tuple[Basis[M0], Basis[M1]], E],
+        DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E]],
         DT,
     ],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
@@ -139,7 +139,7 @@ def _inv_from_diagonal[
     E,
     DT: np.dtype[np.generic],
 ](
-    array: Array[DiagonalBasis[tuple[Basis[M0], Basis[M1]], E], DT],
+    array: Array[DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E]], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
     return build(
         DiagonalBasis(

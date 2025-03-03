@@ -151,6 +151,32 @@ class TupleBasis[
         """Upcast the wrapped basis to a more specific type."""
         return cast("TupleBasis[C,E, DT_]", self)
 
+    @overload
+    def downcast_metadata[M0: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M0]], E_, Any],
+    ) -> Basis[TupleMetadata[tuple[M0], E], DT]: ...
+    @overload
+    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M0], Basis[M1]], E_, Any],
+    ) -> Basis[TupleMetadata[tuple[M0, M1], E], DT]: ...
+    @overload
+    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E_, Any],
+    ) -> Basis[TupleMetadata[tuple[M0, M1, M2], E], DT]: ...
+    @overload
+    def downcast_metadata(
+        self,
+    ) -> Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]: ...
+
+    def downcast_metadata(
+        self,
+    ) -> Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]:
+        """Metadata associated with the basis.
+
+        Note: this should be a property, but this would ruin variance.
+        """
+        return cast("Any", self)
+
     @override
     def dual_basis(
         self,
