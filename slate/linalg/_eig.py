@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate.array import Array, with_basis
 from slate.array._array import ArrayBuilder
 from slate.basis import (
     DiagonalBasis,
@@ -22,6 +21,7 @@ from slate.explicit_basis import (
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
+    from slate.array import Array
     from slate.basis._basis import Basis, ctype
     from slate.basis._tuple import TupleBasisLike
     from slate.metadata import TupleMetadata
@@ -313,7 +313,7 @@ def _eigh_from_block_diagonal_basis[
         array.basis.block_shape,
     )
     basis_1 = ExplicitUnitaryBasis(
-        ArrayBuilder(states_basis_1, eigenvectors),
+        ArrayBuilder(states_basis_1, eigenvectors).ok(),
         data_id=basis_0.data_id,
         direction="backward",
     )
@@ -321,7 +321,7 @@ def _eigh_from_block_diagonal_basis[
     return ArrayBuilder(
         DiagonalBasis((basis_0, basis_1), array.basis.metadata().extra),
         eigenvalues,
-    )
+    ).ok()
 
 
 def into_diagonal_hermitian[
@@ -337,11 +337,11 @@ def into_diagonal_hermitian[
 ]:
     diagonal = as_diagonal_basis(array.basis)
     if diagonal is not None:
-        return array.with_basis(_diagonal_basis_as_explicit(diagonal))
+        return array.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
 
     block_diagonal = as_block_diagonal_basis(array.basis)
     if block_diagonal is not None:
-        return _eigh_from_block_diagonal_basis(array.with_basis(block_diagonal))
+        return _eigh_from_block_diagonal_basis(array.with_basis(block_diagonal).ok())
 
     tuple_basis = as_tuple_basis(array.basis)
     return _eigh_from_tuple(array.with_basis(tuple_basis).ok())

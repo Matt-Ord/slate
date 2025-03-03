@@ -357,3 +357,13 @@ def unwrap[B: Basis, DT: np.dtype[np.floating]](
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
     return converted.with_basis(array.basis).ok()  # type: ignore safe, since outer_recast must support DT
+
+
+def cast_as_dual[B: Basis, DT: np.dtype[np.generic]](
+    array: Array[B, DT],
+) -> Array[B, DT]:
+    """Cast a slate array as an array in dual space."""
+    # Since b has the same dtype and metadata as the original basis
+    # it is safe to use it in a conversion.
+    # Unfortunately, it is not possible to express this invariant in the type system.
+    return ArrayBuilder(array.basis.dual_basis(), array.raw_data).ok()  # type: ignore safe, since outer_recast must support DT
