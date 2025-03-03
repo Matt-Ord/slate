@@ -6,6 +6,7 @@ from typing import (
     Never,
     TypeGuard,
     cast,
+    overload,
     override,
 )
 
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class DiagonalBasis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
+    C: tuple[Basis, Basis],
     E,
     DT: ctype[Never] = ctype[Never],
 ](
@@ -39,54 +40,62 @@ class DiagonalBasis[
         return self.inner.children[0].size
 
     @override
-    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: DiagonalBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+    def __into_inner__[DT1: np.generic, DT2: np.generic](
+        self: DiagonalBasis[Any, ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
-        if vectors.size == 0:
-            return vectors
-        swapped = vectors.swapaxes(axis, 0)
-        stacked = swapped.reshape(self.size, *swapped.shape[1:])
+    ) -> BasisConversion[DT1, DT2, DT1]:
+        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            if vectors.size == 0:
+                return vectors
+            swapped = vectors.swapaxes(axis, 0)
+            stacked = swapped.reshape(self.size, *swapped.shape[1:])
 
-        return (
-            cast(
-                "np.ndarray[Any, DT]",
-                np.einsum(  # type: ignore lib
-                    "i...,ij->ij...",
-                    stacked,  # type: ignore lib
-                    np.eye(self.inner.children[0].size, self.inner.children[1].size),
-                ),
+            return (
+                cast(
+                    "np.ndarray[Any, np.dtype[DT2]]",
+                    np.einsum(  # type: ignore lib
+                        "i...,ij->ij...",
+                        stacked,  # type: ignore lib
+                        np.eye(
+                            self.inner.children[0].size, self.inner.children[1].size
+                        ),
+                    ),
+                )
+                .reshape(-1, *swapped.shape[1:])
+                .swapaxes(axis, 0)
             )
-            .reshape(-1, *swapped.shape[1:])
-            .swapaxes(axis, 0)
-        )
+
+        return BasisConversion(fn)
 
     @override
-    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: DiagonalBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+    def __from_inner__[DT2: np.generic, DT3: np.generic](
+        self: DiagonalBasis[Any, ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
-        if vectors.size == 0:
-            return vectors
-        swapped = vectors.swapaxes(axis, 0)
-        stacked = swapped.reshape(*self.inner.shape, *swapped.shape[1:])
+    ) -> BasisConversion[DT3, DT2, DT3]:
+        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            if vectors.size == 0:
+                return vectors
+            swapped = vectors.swapaxes(axis, 0)
+            stacked = swapped.reshape(*self.inner.shape, *swapped.shape[1:])
 
-        return (
-            cast(
-                "np.ndarray[Any, DT]",
-                np.einsum("ii...->i...", stacked),  # type: ignore lib
+            return (
+                cast(
+                    "np.ndarray[Any, np.dtype[DT2]]",
+                    np.einsum("ii...->i...", stacked),  # type: ignore lib
+                )
+                .reshape(self.size, *swapped.shape[1:])
+                .swapaxes(axis, 0)
             )
-            .reshape(self.size, *swapped.shape[1:])
-            .swapaxes(axis, 0)
-        )
+
+        return BasisConversion(fn)
 
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, DiagonalBasis)
-            and (other.inner == self.inner)  # type: ignore unknown
+            is_diagonal_basis(other)
+            and (other.inner == self.inner)
             and self.is_dual == other.is_dual
         )
 
@@ -152,9 +161,19 @@ class DiagonalBasis[
         )
 
 
+@overload
 def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](
     basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
-) -> TypeGuard[DiagonalBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E, DT]]:
+) -> TypeGuard[DiagonalBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E, DT]]: ...
+@overload
+def is_diagonal_basis(
+    basis: object,
+) -> TypeGuard[DiagonalBasis[tuple[Basis, Basis], Any]]: ...
+
+
+def is_diagonal_basis(
+    basis: object,
+) -> TypeGuard[DiagonalBasis[tuple[Basis, Basis], Any]]:
     return isinstance(basis, DiagonalBasis)
 
 

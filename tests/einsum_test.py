@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 
 
 def _test_einsum_in_basis(
-    array: Array[Any, Any, TupleBasis[Any, None, Any]],
-    vector: Array[Any, Any, Any],
+    array: Array[TupleBasis[tuple[Basis, ...], Any], Any],
+    vector: Array[Any, Any],
     basis: Basis,
 ) -> None:
     transformed_array = array.with_basis(

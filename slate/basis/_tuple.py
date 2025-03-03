@@ -117,27 +117,27 @@ def _convert_vectors_unsafe[DT2: np.generic](
 
 
 class TupleBasis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
+    C: tuple[Basis, ...],
     E,
     DT: ctype[Never] = ctype[Never],
 ](Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]):
     """Represents a Tuple of independent basis."""
 
     @overload
-    def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...], E_](
+    def __init__[C_: tuple[Basis, ...], E_](
         self: TupleBasis[C_, E_, ctype[Never]],
         children: C_,
         extra: E_,
     ) -> None: ...
 
     @overload
-    def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...]](
+    def __init__[C_: tuple[Basis, ...]](
         self: TupleBasis[C_, None, ctype[Never]],
         children: C_,
         extra: None = None,
     ) -> None: ...
 
-    def __init__[C_: tuple[Basis[BasisMetadata, ctype[Never]], ...], E_](
+    def __init__[C_: tuple[Basis, ...], E_](
         self: TupleBasis[C_, E_, ctype[Never]],
         children: C_,
         extra: E_ | None = None,
@@ -168,6 +168,21 @@ class TupleBasis[
     def children(self) -> C:
         """Children basis."""
         return self._children
+
+    @overload
+    def metadata[M0: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M0]], E_, Any],
+    ) -> TupleMetadata[tuple[M0], E]: ...
+    @overload
+    def metadata[M0: BasisMetadata, M1: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M0], Basis[M1]], E_, Any],
+    ) -> TupleMetadata[tuple[M0, M1], E]: ...
+    @overload
+    def metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E_, Any],
+    ) -> TupleMetadata[tuple[M0, M1, M2], E]: ...
+    @overload
+    def metadata(self) -> TupleMetadata[tuple[BasisMetadata, ...], E]: ...
 
     @override
     def metadata(self) -> TupleMetadata[tuple[BasisMetadata, ...], E]:
@@ -227,8 +242,8 @@ class TupleBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, TupleBasis):
-            return other.children == self.children  # type: ignore unknown
+        if is_tuple_basis(other):
+            return other.children == self.children
         return False
 
     @override
@@ -373,15 +388,27 @@ def from_metadata(
     return TupleBasis(children, metadata.extra).upcast()
 
 
+@overload
 def is_tuple_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Never, DT]]:
+) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Never, DT]]: ...
+
+
+@overload
+def is_tuple_basis(
+    basis: object,
+) -> TypeGuard[TupleBasis[tuple[Basis, ...], Any]]: ...
+
+
+def is_tuple_basis(
+    basis: object,
+) -> TypeGuard[TupleBasis[tuple[Basis, ...], Any]]:
     return isinstance(basis, TupleBasis)
 
 
 type TupleBasisLike[
     M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
-    E = Never,
+    E = Any,
     DT: ctype[Never] = ctype[Never],
 ] = Basis[TupleMetadata[M, E], DT]
 

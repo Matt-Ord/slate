@@ -31,7 +31,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
 
 
 class WrappedBasis[
-    B: Basis[BasisMetadata, ctype[Never]] = Basis[BasisMetadata, ctype[Never]],
+    B: Basis = Basis,
     # Invariant: DT must also be supported by all basis in B.
     # It is not possible to specify this constraint in the type system, so instead
     # we enforce it at __init__ time.
@@ -39,9 +39,7 @@ class WrappedBasis[
 ](Basis[Any, DT]):
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
-    def __init__[B_: Basis[BasisMetadata, ctype[Never]]](
-        self: WrappedBasis[B_, ctype[Never]], inner: B_
-    ) -> None:
+    def __init__[B_: Basis](self: WrappedBasis[B_, ctype[Never]], inner: B_) -> None:
         self._inner = cast("B", inner)
 
     def upcast[DT_: ctype[Never]](

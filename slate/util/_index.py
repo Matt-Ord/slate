@@ -44,8 +44,8 @@ def get_position_in_sorted(axes: tuple[int, ...]) -> tuple[int, ...]:
     return tuple(np.argsort(np.argsort(axes)))
 
 
-def get_max_idx(
-    data: np.ndarray[tuple[int, ...], np.dtype[np.number]],
+def get_max_idx[DT: np.number](
+    data: np.ndarray[tuple[int, ...], np.dtype[DT]],
     *,
     axes: tuple[int, ...],
 ) -> tuple[int, ...]:

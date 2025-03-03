@@ -11,7 +11,10 @@ from slate.basis._basis import (
     are_dual_shapes,
     ctype,
 )
-from slate.basis._basis_state_metadata import BasisStateMetadata
+from slate.basis._basis_state_metadata import (
+    BasisStateMetadata,
+    is_basis_state_metadata,
+)
 from slate.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
 from slate.basis._coordinate import CoordinateBasis
 from slate.basis._cropped import CroppedBasis, is_cropped_basis
@@ -22,6 +25,7 @@ from slate.basis._recast import RecastBasis, is_recast_basis
 from slate.basis._split import SplitBasis
 from slate.basis._transformed import (
     TransformedBasis,
+    as_transformed,
     transformed_from_metadata,
     transformed_from_shape,
 )
@@ -89,6 +93,7 @@ __all__ = [
     "as_mul_basis",
     "as_state_list",
     "as_sub_basis",
+    "as_transformed",
     "as_tuple_basis",
     "ctype",
     "flatten",
@@ -96,6 +101,7 @@ __all__ = [
     "from_shape",
     "get_common_basis",
     "get_wrapped_basis_super_inner",
+    "is_basis_state_metadata",
     "is_cropped_basis",
     "is_diagonal_basis",
     "is_recast_basis",

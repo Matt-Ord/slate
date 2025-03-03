@@ -17,7 +17,10 @@ from slate.basis import (
 )
 
 if TYPE_CHECKING:
+    from slate.basis._basis import ctype
+    from slate.basis._tuple import TupleBasis
     from slate.metadata import SimpleMetadata, TupleMetadata
+    from slate.metadata._metadata import BasisMetadata
 
 
 def test_slate_array_as_array(
@@ -85,11 +88,14 @@ def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
     ],
 )
 def test_transpose_with_axes(
-    basis: Basis[TupleMetadata[Any, Any], Any], axes: tuple[int, ...] | None
+    basis: Basis[
+        TupleMetadata[tuple[BasisMetadata, BasisMetadata], Any], ctype[np.generic]
+    ],
+    axes: tuple[int, ...] | None,
 ) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = ArrayBuilder(basis, data)
+    arr = ArrayBuilder(basis, data).ok()
 
     transposed = array.transpose(arr, axes=axes)
     np.testing.assert_allclose(
@@ -106,15 +112,17 @@ def test_transpose_with_axes(
     ],
 )
 def test_conjugate_array(
-    basis: TupleBasis2D[
-        np.generic,
-        Basis[SimpleMetadata, np.generic],
-        Basis[SimpleMetadata, np.generic],
+    basis: TupleBasis[
+        tuple[
+            Basis[SimpleMetadata, ctype[np.generic]],
+            Basis[SimpleMetadata, ctype[np.generic]],
+        ],
         None,
+        ctype[np.generic],
     ],
 ) -> None:
     data = np.array([1, 2, 3, 4, 4, 6])
-    array = ArrayBuilder(basis, data)
+    array = ArrayBuilder(basis, data).ok()
 
     np.testing.assert_allclose(
         array.as_array().conjugate(), conjugate(array).as_array()

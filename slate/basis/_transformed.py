@@ -1,10 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Self, cast, overload, override
+from typing import Any, Literal, Self, TypeGuard, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, NestedBoolOrNone, ctype
+from slate.basis._basis import (
+    Basis,
+    BasisConversion,
+    BasisFeature,
+    NestedBoolOrNone,
+    ctype,
+)
 from slate.basis._fundamental import FundamentalBasis
 from slate.basis._tuple import TupleBasis
 from slate.basis._wrapped import WrappedBasis
@@ -19,12 +25,15 @@ from slate.metadata._stacked import is_tuple_metadata
 type TransformDirection = Literal["forward", "backward"]
 
 
-class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
-    WrappedBasis[B, ctype[np.complexfloating]],
+class TransformedBasis[
+    B: Basis = Basis,
+    DT: ctype[np.complexfloating] = ctype[np.complexfloating],
+](
+    WrappedBasis[B, DT],
 ):
     """Represents a fourier transformed basis."""
 
-    def __init__(
+    def __init__(  # TODO: defualt to never and upcast like wrapped...
         self,
         inner: B,
         direction: TransformDirection | None = None,
@@ -43,10 +52,10 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, TransformedBasis):
+        if is_transformed_basis(other):
             return (
                 self.size == other.size
-                and other.inner == self.inner  # type: ignore unknown
+                and other.inner == self.inner
                 and other.direction == self.direction
             )
         return False
@@ -68,49 +77,53 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
         return self.inner.size
 
     @classmethod
-    def _transform_backward[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
+    def _transform_backward[DT1: np.dtype[np.complexfloating]](
         cls,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT1],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT1]:
         return cast(
-            "np.ndarray[Any, np.dtype[DT1]]",
+            "np.ndarray[Any, DT1]",
             np.fft.ifft(vectors, axis=axis, norm="ortho"),
         )
 
     @classmethod
-    def _transform_forward[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
+    def _transform_forward[DT1: np.dtype[np.complexfloating]](
         cls,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+        vectors: np.ndarray[Any, DT1],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    ) -> np.ndarray[Any, DT1]:
         return cast(
-            "np.ndarray[Any, np.dtype[DT1]]",
+            "np.ndarray[Any, DT1]",
             np.fft.fft(vectors, axis=axis, norm="ortho"),
         )
 
     @override
-    def __into_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+    def __into_inner__[DT2: np.complexfloating, DT3: np.generic](
+        self: TransformedBasis[Basis[Any, ctype[DT3]]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return (
-            self._transform_backward(vectors, axis)
-            if self.direction == "forward"
-            else self._transform_forward(vectors, axis)
+    ) -> BasisConversion[np.complexfloating, DT2, DT3]:
+        return BasisConversion(
+            lambda: (
+                self._transform_backward(vectors, axis)
+                if self.direction == "forward"
+                else self._transform_forward(vectors, axis)
+            )
         )
 
     @override
-    def __from_inner__[DT1: np.complexfloating](  # type: ignore we should have stricter bound on parent
-        self,
-        vectors: np.ndarray[Any, np.dtype[DT1]],
+    def __from_inner__[DT1: np.generic, DT2: np.complexfloating](
+        self: TransformedBasis[Basis[Any, ctype[DT1]]],  # TODO: fix...
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
-        return (
-            self._transform_forward(vectors, axis)
-            if self.direction == "forward"
-            else self._transform_backward(vectors, axis)
+    ) -> BasisConversion[DT1, DT2, np.complexfloating]:
+        return BasisConversion[DT1, DT2, np.complexfloating](
+            lambda: (
+                self._transform_forward(vectors, axis)
+                if self.direction == "forward"
+                else self._transform_backward(vectors, axis)
+            )
         )
 
     @property
@@ -154,6 +167,13 @@ class TransformedBasis[B: Basis[BasisMetadata, ctype[np.complexfloating]]](
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
+
+
+def is_transformed_basis(
+    basis: object,
+) -> TypeGuard[TransformedBasis]:
+    """Check if the given basis is a transformed basis."""
+    return isinstance(basis, TransformedBasis)
 
 
 @overload
@@ -217,7 +237,7 @@ def transformed_from_metadata[M: BasisMetadata, E](
 @overload
 def transformed_from_metadata[M: SimpleMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
-) -> FundamentalBasis[M]: ...
+) -> TransformedBasis[FundamentalBasis[M]]: ...
 
 
 @overload
@@ -247,6 +267,76 @@ def transformed_from_metadata(
         for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
     return TupleBasis(children, metadata.extra).upcast()
+
+
+@overload
+def as_transformed[M0: BasisMetadata, E](
+    basis: Basis[TupleMetadata[tuple[M0], E]],
+) -> TupleBasis[
+    tuple[Basis[M0, ctype[np.complexfloating]]], E, ctype[np.complexfloating]
+]: ...
+
+
+@overload
+def as_transformed[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+](
+    basis: Basis[TupleMetadata[tuple[M0, M1], E]],
+) -> TupleBasis[
+    tuple[
+        Basis[M0, ctype[np.complexfloating]],
+        Basis[M1, ctype[np.complexfloating]],
+    ],
+    E,
+    ctype[np.complexfloating],
+]: ...
+
+
+@overload
+def as_transformed[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+](
+    basis: Basis[TupleMetadata[tuple[M0, M1, M2], E]],
+) -> TupleBasis[
+    tuple[
+        Basis[M0, ctype[np.complexfloating]],
+        Basis[M1, ctype[np.complexfloating]],
+        Basis[M2, ctype[np.complexfloating]],
+    ],
+    E,
+    ctype[np.complexfloating],
+]: ...
+
+
+@overload
+def as_transformed[M: BasisMetadata, E](
+    basis: Basis[TupleMetadata[tuple[M, ...], E]],
+) -> TupleBasis[
+    tuple[Basis[M, ctype[np.complexfloating]], ...], E, ctype[np.complexfloating]
+]: ...
+
+
+@overload
+def as_transformed[M: SimpleMetadata](
+    basis: Basis[M],
+) -> TransformedBasis[FundamentalBasis[M]]: ...
+
+
+@overload
+def as_transformed[M: AnyMetadata](
+    basis: Basis[M],
+) -> Basis[M, ctype[np.complexfloating]]: ...
+
+
+def as_transformed(
+    basis: Basis,
+) -> Basis[AnyMetadata, ctype[np.complexfloating]]:
+    return transformed_from_metadata(basis.metadata(), is_dual=basis.is_dual)
 
 
 @overload
@@ -319,7 +409,7 @@ def transformed_from_shape[E](
 ) -> TupleBasis[tuple[FundamentalBasis, ...], E, ctype[np.complexfloating]]: ...
 
 
-def transformed_from_shape[E](
+def transformed_from_shape(
     shape: tuple[int, ...],
     *,
     extra: Any | None = None,

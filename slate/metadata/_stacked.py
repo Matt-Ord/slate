@@ -52,8 +52,8 @@ class TupleMetadata[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, TupleMetadata):
-            return (self.extra == other.extra) and self.children == other.children  # type: ignore unknown
+        if is_tuple_metadata(other):
+            return (self.extra == other.extra) and self.children == other.children
         return False
 
     @override
@@ -141,26 +141,26 @@ type AnyMetadata = BasisMetadata | TupleMetadata[AnyMetadata, Any]
 
 @overload
 def is_tuple_metadata(
-    metadata: BasisMetadata, *, n_dim: Literal[1]
+    metadata: object, *, n_dim: Literal[1]
 ) -> TypeGuard[TupleMetadata[tuple[BasisMetadata], Never]]: ...
 @overload
 def is_tuple_metadata(
-    metadata: BasisMetadata, *, n_dim: Literal[2]
+    metadata: object, *, n_dim: Literal[2]
 ) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, BasisMetadata], Never]]: ...
 @overload
 def is_tuple_metadata(
-    metadata: BasisMetadata, *, n_dim: Literal[3]
+    metadata: object, *, n_dim: Literal[3]
 ) -> TypeGuard[
     TupleMetadata[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never]
 ]: ...
 @overload
 def is_tuple_metadata(
-    metadata: BasisMetadata, *, n_dim: int | None = None
+    metadata: object, *, n_dim: int | None = None
 ) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, ...], Never]]: ...
 
 
 def is_tuple_metadata(
-    metadata: BasisMetadata, *, n_dim: int | None = None
+    metadata: object, *, n_dim: int | None = None
 ) -> TypeGuard[TupleMetadata[tuple[BasisMetadata, ...], Never]]:
     return isinstance(metadata, TupleMetadata) and (
         n_dim is None or metadata.n_dim == n_dim

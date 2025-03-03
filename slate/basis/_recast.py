@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, overrid
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._diagonal import DiagonalBasis, as_diagonal_basis
 from slate.basis._wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
@@ -71,23 +71,27 @@ class RecastBasis[
         return self._outer_recast
 
     @override
-    def __into_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: RecastBasis[Basis, Basis[BasisMetadata, ctype[DT3]], Basis, ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
-        return self._outer_recast.__convert_vector_into__(
-            vectors, self._inner_recast, axis
+    ) -> BasisConversion[DT1, DT2, DT3]:
+        return BasisConversion[DT1, DT2, DT3](
+            lambda: self._outer_recast.__convert_vector_into__(  # type: ignore safe
+                vectors, self._inner_recast, axis
+            )
         )
 
     @override
-    def __from_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: RecastBasis[Basis, Basis, Basis[BasisMetadata, ctype[DT1]], ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
-        return self._inner_recast.__convert_vector_into__(
-            vectors, self._outer_recast, axis
+    ) -> BasisConversion[DT1, DT2, DT3]:
+        return BasisConversion[DT1, DT2, DT3](
+            lambda: self._inner_recast.__convert_vector_into__(  # type: ignore safe
+                vectors, self._outer_recast, axis
+            )
         )
 
     @property
