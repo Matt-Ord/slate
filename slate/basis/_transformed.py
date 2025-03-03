@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Self, TypeGuard, cast, overload, override
+from typing import Any, Literal, Never, Self, TypeGuard, cast, overload, override
 
 import numpy as np
 
@@ -24,17 +24,19 @@ from slate.metadata._stacked import is_tuple_metadata
 
 type TransformDirection = Literal["forward", "backward"]
 
+type ComplexCtype[DT: np.complexfloating] = ctype[DT]
+
 
 class TransformedBasis[
     B: Basis = Basis,
-    DT: ctype[np.complexfloating] = ctype[np.complexfloating],
+    DT: ComplexCtype[Never] = ComplexCtype[Never],
 ](
     WrappedBasis[B, DT],
 ):
     """Represents a fourier transformed basis."""
 
-    def __init__(  # TODO: defualt to never and upcast like wrapped...
-        self,
+    def __init__[B_: Basis](
+        self: TransformedBasis[B_, ctype[Never]],
         inner: B,
         direction: TransformDirection | None = None,
     ) -> None:
@@ -44,6 +46,16 @@ class TransformedBasis[
             else direction
         )
         super().__init__(inner)
+
+    @override
+    def upcast[DT_: np.complexfloating](
+        self: TransformedBasis[Basis[Any, ComplexCtype[DT_]], Any],
+    ) -> TransformedBasis[B, ComplexCtype[DT_]]:
+        """Upcast the wrapped basis to a more specific type."""
+        # Note that np.complexfloating is the most general set of data
+        # that can be used with this basis. real numbers (ie np.floating)
+        # are not supported.
+        return cast("TransformedBasis[B, ctype[DT_]]", self)
 
     @property
     def direction(self) -> TransformDirection:
@@ -114,7 +126,7 @@ class TransformedBasis[
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.complexfloating](
-        self: TransformedBasis[Basis[Any, ctype[DT1]]],  # TODO: fix...
+        self: TransformedBasis[Basis[Any, ctype[DT1]]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.complexfloating]:
@@ -237,7 +249,7 @@ def transformed_from_metadata[M: BasisMetadata, E](
 @overload
 def transformed_from_metadata[M: SimpleMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
-) -> TransformedBasis[FundamentalBasis[M]]: ...
+) -> TransformedBasis[FundamentalBasis[M], ctype[np.complexfloating]]: ...
 
 
 @overload
@@ -253,7 +265,7 @@ def transformed_from_metadata(
     if isinstance(metadata, SimpleMetadata):
         is_dual = False if is_dual is None else is_dual
         assert isinstance(is_dual, bool)
-        return TransformedBasis(FundamentalBasis(metadata, is_dual=is_dual))
+        return TransformedBasis(FundamentalBasis(metadata, is_dual=is_dual)).upcast()
 
     assert is_tuple_metadata(metadata)
     is_dual = (
@@ -324,7 +336,7 @@ def as_transformed[M: BasisMetadata, E](
 @overload
 def as_transformed[M: SimpleMetadata](
     basis: Basis[M],
-) -> TransformedBasis[FundamentalBasis[M]]: ...
+) -> TransformedBasis[FundamentalBasis[M], ctype[np.complexfloating]]: ...
 
 
 @overload

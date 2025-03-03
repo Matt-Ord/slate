@@ -33,7 +33,7 @@ def test_transformed_basis_round_trip(
     basis = TransformedBasis(slate_array_complex.basis)
 
     converted_array = slate_array_complex.with_basis(
-        TransformedBasis(slate_array_complex.basis)
+        TransformedBasis(slate_array_complex.basis).upcast()
     ).ok()
     assert converted_array.basis == basis
     np.testing.assert_array_almost_equal(
@@ -51,7 +51,7 @@ def test_transformed_basis_round_trip(
 
 def test_transformed_basis() -> None:
     fundamental_basis = FundamentalBasis.from_size(5)
-    transformed_basis = TransformedBasis(fundamental_basis)
+    transformed_basis = TransformedBasis(fundamental_basis).upcast()
 
     rng = np.random.default_rng()
     data = rng.random(fundamental_basis.size) + 1j * rng.random(fundamental_basis.size)
@@ -95,7 +95,7 @@ def test_transformed_basis() -> None:
 
 def test_diagonal_basis_round_trip() -> None:
     full_basis = from_shape((10, 10))
-    basis_diagonal = DiagonalBasis(full_basis)
+    basis_diagonal = DiagonalBasis(full_basis).upcast()
 
     array = build(full_basis, np.diag(np.ones(10))).ok()
 
@@ -134,12 +134,12 @@ def test_transform_spaced_basis() -> None:
     half_basis = from_shape((105,))
     full_basis = TupleBasis((half_basis, half_basis)).upcast()
     spaced_basis = TruncatedBasis(
-        Truncation(3, 5, 0), TransformedBasis(half_basis)
+        Truncation(3, 5, 0), TransformedBasis(half_basis).upcast()
     ).upcast()
 
     array = build(
         RecastBasis(
-            DiagonalBasis(full_basis),
+            DiagonalBasis(full_basis).upcast(),
             half_basis,
             spaced_basis,
         ).upcast(),
@@ -209,7 +209,7 @@ def test_block_basis() -> None:
     data = np.arange(4 * 6).reshape(4, 6)
     array = Array.from_array(data)
 
-    block_basis = BlockDiagonalBasis(array.basis, (2, 2))
+    block_basis = BlockDiagonalBasis(array.basis, (2, 2)).upcast()
 
     in_block_basis = array.with_basis(block_basis).ok()
 

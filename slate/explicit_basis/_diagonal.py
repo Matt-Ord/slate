@@ -30,11 +30,13 @@ class TrivialExplicitBasis[
         self: TrivialExplicitBasis[
             Array[
                 DiagonalBasis[
-                    tuple[
-                        FundamentalBasis[BasisStateMetadata[B1]],
-                        FundamentalBasis[BasisStateMetadata[B1]],
-                    ],
-                    None,
+                    TupleBasis[
+                        tuple[
+                            FundamentalBasis[BasisStateMetadata[B1]],
+                            FundamentalBasis[BasisStateMetadata[B1]],
+                        ],
+                        None,
+                    ]
                 ],
                 np.dtype[np.number],
             ],
@@ -50,7 +52,7 @@ class TrivialExplicitBasis[
                         FundamentalBasis(BasisStateMetadata(inner)),
                     )
                 ).upcast()
-            ),
+            ).upcast(),
             np.ones(inner.size),
         ).ok()
         super().__init__(

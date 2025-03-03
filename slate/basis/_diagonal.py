@@ -22,16 +22,17 @@ if TYPE_CHECKING:
 
 
 class DiagonalBasis[
-    C: tuple[Basis, Basis],
-    E,
+    B: TupleBasis[tuple[Basis, Basis], Any] = TupleBasis[tuple[Basis, Basis], Any],
     DT: ctype[Never] = ctype[Never],
 ](
-    WrappedBasis[TupleBasis[C, E, DT], DT],
+    WrappedBasis[B, DT],
 ):
     """Represents a diagonal basis."""
 
-    def __init__(self, inner: TupleBasis[C, E, DT]) -> None:
-        super().__init__(inner)
+    def __init__[B_: TupleBasis[tuple[Basis, Basis], Any]](
+        self: DiagonalBasis[B_, ctype[Never]], inner: B_
+    ) -> None:
+        super().__init__(cast("B", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 
     @property
@@ -164,22 +165,20 @@ class DiagonalBasis[
 @overload
 def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](
     basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
-) -> TypeGuard[DiagonalBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E, DT]]: ...
+) -> TypeGuard[
+    DiagonalBasis[TupleBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E], DT]
+]: ...
 @overload
-def is_diagonal_basis(
-    basis: object,
-) -> TypeGuard[DiagonalBasis[tuple[Basis, Basis], Any]]: ...
+def is_diagonal_basis(basis: object) -> TypeGuard[DiagonalBasis]: ...
 
 
-def is_diagonal_basis(
-    basis: object,
-) -> TypeGuard[DiagonalBasis[tuple[Basis, Basis], Any]]:
+def is_diagonal_basis(basis: object) -> TypeGuard[DiagonalBasis]:
     return isinstance(basis, DiagonalBasis)
 
 
 def as_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](
     basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
-) -> DiagonalBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E, DT] | None:
+) -> DiagonalBasis[TupleBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E], DT] | None:
     """Get the closest basis that supports the feature set."""
     assert len(basis.metadata().fundamental_shape) == 2  # noqa: PLR2004
     return next(

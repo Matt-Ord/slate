@@ -25,20 +25,19 @@ if TYPE_CHECKING:
 
 
 class BlockDiagonalBasis[
-    C: tuple[Basis, ...],
-    E,
+    B: TupleBasis[tuple[Basis, ...], Any] = TupleBasis[tuple[Basis, ...], Any],
     DT: ctype[Never] = ctype[Never],
 ](
-    WrappedBasis[TupleBasis[C, E, DT], DT],
+    WrappedBasis[B, DT],
 ):
     """Represents a diagonal basis."""
 
-    def __init__(
-        self,
-        inner: TupleBasis[C, E, DT],
+    def __init__[B_: TupleBasis[tuple[Basis, ...], Any]](
+        self: BlockDiagonalBasis[B_, ctype[Never]],
+        inner: B_,
         block_shape: tuple[int, ...],
     ) -> None:
-        super().__init__(cast("Any", inner))
+        super().__init__(cast("B", inner))
         for child, s in zip(inner.children, block_shape, strict=True):
             assert child.size % s == 0
 
@@ -69,7 +68,7 @@ class BlockDiagonalBasis[
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic](
-        self: BlockDiagonalBasis[Any, Any, ctype[DT1]],
+        self: BlockDiagonalBasis[Any, ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT1]:
@@ -97,7 +96,7 @@ class BlockDiagonalBasis[
 
     @override
     def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: BlockDiagonalBasis[Any, Any, ctype[DT3]],
+        self: BlockDiagonalBasis[Any, ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT3, DT2, DT3]:
@@ -202,16 +201,18 @@ def is_block_diagonal_basis[  # type: ignore not incompatible
     DT: ctype[Never],
 ](
     basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
-) -> TypeGuard[BlockDiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT]]: ...
+) -> TypeGuard[BlockDiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT]]: ...
 @overload
 def is_block_diagonal_basis(
     basis: object,
-) -> TypeGuard[BlockDiagonalBasis[tuple[Basis, Basis], Never, ctype[Never]]]: ...
+) -> TypeGuard[
+    BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Never], ctype[Never]]
+]: ...
 
 
 def is_block_diagonal_basis(
     basis: object,
-) -> TypeGuard[BlockDiagonalBasis[tuple[Basis, Basis], Any, ctype[Never]]]:
+) -> TypeGuard[BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Any], ctype[Never]]]:
     return isinstance(basis, BlockDiagonalBasis)
 
 
@@ -222,7 +223,7 @@ def as_block_diagonal_basis[
     DT: ctype[Never],
 ](
     basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
-) -> BlockDiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT] | None:
+) -> BlockDiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT] | None:
     """Get the closest basis that is block diagonal."""
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal_basis(b)),

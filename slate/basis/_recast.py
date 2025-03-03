@@ -10,7 +10,7 @@ from slate.basis._wrapped import WrappedBasis
 from slate.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate.basis._tuple import TupleBasisLike
+    from slate.basis._tuple import TupleBasis, TupleBasisLike
 
 
 class RecastBasis[
@@ -146,8 +146,8 @@ def recast_basis_from_diagonal[
     E,
     DT: ctype[np.generic],
 ](
-    basis: DiagonalBasis[tuple[B0, B1], E, DT],
-) -> RecastBasis[DiagonalBasis[tuple[B0, B1], E, DT], B1, B1, DT]:
+    basis: DiagonalBasis[TupleBasis[tuple[B0, B1], E], DT],
+) -> RecastBasis[DiagonalBasis[TupleBasis[tuple[B0, B1], E], DT], B1, B1, DT]:
     """Recast a diagonal basis to the lhs basis."""
     return RecastBasis(basis, basis.inner.children[1], basis.inner.children[1])  # type: ignore it does support DT actually
 
@@ -161,7 +161,7 @@ def as_recast_diagonal_basis[
     basis: TupleBasisLike[tuple[M0, M1], E, DT],
 ) -> (
     RecastBasis[
-        DiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT],
+        DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT],
         Basis[M1, DT],
         Basis[M1, DT],
         DT,
