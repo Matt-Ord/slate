@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from slate import basis
-from slate.array._array import Array, ArrayBuilder
+from slate.array._array import build
 from slate.basis import TupleBasis
 from slate.metadata import BasisMetadata, SimpleMetadata, is_tuple_metadata
 
 if TYPE_CHECKING:
+    from slate.array._array import Array
     from slate.basis import Basis
     from slate.metadata import TupleMetadata
 
@@ -51,7 +52,7 @@ def standard_deviation[DT: np.number](
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return ArrayBuilder(out_basis.upcast(), data).ok()
+    return build(out_basis.upcast(), data).ok()
 
 
 @overload
@@ -91,7 +92,7 @@ def average[DT: np.number](
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).upcast()
-    return ArrayBuilder(out_basis, data).ok()
+    return build(out_basis, data).ok()
 
 
 @overload
@@ -131,7 +132,7 @@ def min[DT: np.number](  # noqa: A001
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).upcast()
-    return ArrayBuilder(out_basis, data).ok()
+    return build(out_basis, data).ok()
 
 
 @overload
@@ -171,4 +172,4 @@ def max[DT: np.number](  # noqa: A001
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).upcast()
-    return ArrayBuilder(out_basis, data).ok()
+    return build(out_basis, data).ok()

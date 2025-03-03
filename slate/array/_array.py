@@ -114,9 +114,10 @@ class ArrayConversion[
     def ok[M_: BasisMetadata, DT_: np.generic](
         self: ArrayConversion[M_, Basis[M_, ctype[DT_]], np.dtype[DT_]],
     ) -> Array[B1, DT]:
+        _a = self._old_basis.__convert_vector_into__(self._data, self._new_basis).ok()
         return cast(
             "Array[B1, DT]",
-            ArrayBuilder(
+            build(
                 self._new_basis,
                 self._old_basis.__convert_vector_into__(
                     self._data, self._new_basis
@@ -133,7 +134,13 @@ class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
     def ok[DT_: np.generic](
         self: ArrayBuilder[Basis[Any, ctype[DT_]], np.dtype[DT_]],
     ) -> Array[B, DT]:
-        return cast("Any", Array.__new__(self._basis, self._data, 0))  # type: ignore safe to construct
+        return cast("Any", Array(self._basis, self._data, 0))  # type: ignore safe to construct
+
+
+def build[B: Basis, DT: np.dtype[np.generic]](
+    basis: B, data: np.ndarray[Any, DT]
+) -> ArrayBuilder[B, DT]:
+    return ArrayBuilder(basis, data)
 
 
 class Array[B: Basis, DT: np.dtype[np.generic]]:
@@ -246,7 +253,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         DT_,
     ]:
         """Get a Array from an array."""
-        return ArrayBuilder(basis.from_shape(array.shape), array).ok()
+        return build(basis.from_shape(array.shape), array).ok()
 
     def with_basis[
         DT_: np.dtype[np.generic],
@@ -270,7 +277,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
             other.with_basis(as_add_basis).ok().raw_data,
         )
 
-        return ArrayBuilder(as_add_basis, data).ok()
+        return build(as_add_basis, data).ok()
 
     def __sub__[M_: BasisMetadata, DT_: np.number](
         self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
@@ -282,7 +289,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
             other.with_basis(as_sub_basis).ok().raw_data,
         )
 
-        return ArrayBuilder(as_sub_basis, data).ok()
+        return build(as_sub_basis, data).ok()
 
     def __mul__[M_: BasisMetadata, DT_: np.number](
         self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
@@ -290,7 +297,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
         as_mul_basis = basis.as_mul_basis(self.basis)
         data = as_mul_basis.mul_data(self.with_basis(as_mul_basis).ok().raw_data, other)
-        return ArrayBuilder(as_mul_basis, data).ok()
+        return build(as_mul_basis, data).ok()
 
     @overload
     def __iter__[DT_: np.dtype[np.generic]](
@@ -332,7 +339,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
                 out_basis = TupleBasis(children)
 
         return (
-            ArrayBuilder(out_basis, row).ok()
+            build(out_basis, row).ok()
             for row in as_tuple.raw_data.reshape(as_tuple.basis.shape)
         )
 
@@ -354,4 +361,4 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         )
         if indexed_basis is None:
             return cast("DT_", indexed_data.item())
-        return ArrayBuilder(indexed_basis, indexed_data).ok()
+        return build(indexed_basis, indexed_data).ok()

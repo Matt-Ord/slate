@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Never
 import numpy as np
 import pytest
 
-from slate.array import Array
-from slate.array._array import ArrayBuilder
+from slate.array import Array, build
 from slate.basis import (
     BlockDiagonalBasis,
     FundamentalBasis,
@@ -56,7 +55,7 @@ def test_transformed_basis() -> None:
 
     rng = np.random.default_rng()
     data = rng.random(fundamental_basis.size) + 1j * rng.random(fundamental_basis.size)
-    array = ArrayBuilder(fundamental_basis, data).ok()
+    array = build(fundamental_basis, data).ok()
     np.testing.assert_array_almost_equal(array.raw_data, data)
     np.testing.assert_array_almost_equal(
         array.with_basis(transformed_basis).ok().raw_data,
@@ -66,13 +65,13 @@ def test_transformed_basis() -> None:
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis.dual_basis()).ok().raw_data, np.conj(data)
     )
-    array = ArrayBuilder(fundamental_basis.dual_basis(), data).ok()
+    array = build(fundamental_basis.dual_basis(), data).ok()
     np.testing.assert_array_almost_equal(
         array.with_basis(transformed_basis.dual_basis()).ok().raw_data,
         np.conj(np.fft.fft(np.conj(data), norm="ortho")),
     )
 
-    array = ArrayBuilder(transformed_basis, data).ok()
+    array = build(transformed_basis, data).ok()
     np.testing.assert_array_almost_equal(array.raw_data, data)
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis).ok().raw_data,
@@ -83,7 +82,7 @@ def test_transformed_basis() -> None:
         np.conj(np.fft.ifft(data, norm="ortho")),
     )
 
-    array = ArrayBuilder(transformed_basis.dual_basis(), data).ok()
+    array = build(transformed_basis.dual_basis(), data).ok()
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis).ok().raw_data,
         np.fft.ifft(np.conj(data), norm="ortho"),
@@ -98,7 +97,7 @@ def test_diagonal_basis_round_trip() -> None:
     full_basis = from_shape((10, 10))
     basis_diagonal = DiagonalBasis(full_basis)
 
-    array = ArrayBuilder(full_basis, np.diag(np.ones(10))).ok()
+    array = build(full_basis, np.diag(np.ones(10))).ok()
 
     converted_array = array.with_basis(basis_diagonal).ok()
     assert converted_array.basis == basis_diagonal
@@ -114,7 +113,7 @@ def test_diagonal_basis_round_trip() -> None:
         array.raw_data,
     )
 
-    array = ArrayBuilder(full_basis, np.ones(full_basis.shape)).ok()
+    array = build(full_basis, np.ones(full_basis.shape)).ok()
 
     converted_array = array.with_basis(basis_diagonal).ok()
     assert converted_array.basis == basis_diagonal
@@ -138,7 +137,7 @@ def test_transform_spaced_basis() -> None:
         Truncation(3, 5, 0), TransformedBasis(half_basis)
     ).upcast()
 
-    array = ArrayBuilder(
+    array = build(
         RecastBasis(
             DiagonalBasis(full_basis),
             half_basis,
@@ -190,7 +189,7 @@ def test_dual_basis_transform(
         tuple(child.dual_basis() for child in basis.children),
         extra=dual_basis.metadata().extra,
     ).upcast()
-    array = ArrayBuilder(basis, np.ones((10, 10), dtype=np.complex128)).ok()
+    array = build(basis, np.ones((10, 10), dtype=np.complex128)).ok()
 
     np.testing.assert_array_almost_equal(
         array.with_basis(dual_basis).ok().raw_data,

@@ -5,7 +5,7 @@ from typing import Any, Never, cast
 
 import numpy as np
 
-from slate.array._array import Array, ArrayBuilder
+from slate.array._array import Array, build
 from slate.basis import (
     Basis,
     BasisStateMetadata,
@@ -42,7 +42,7 @@ class TrivialExplicitBasis[
         ],
         inner: B1,
     ) -> None:
-        matrix = ArrayBuilder(
+        matrix = build(
             DiagonalBasis(
                 TupleBasis(
                     (

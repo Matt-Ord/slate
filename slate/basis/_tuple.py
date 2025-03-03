@@ -190,7 +190,7 @@ class TupleBasis[
 
         Note: this should be a property, but this would ruin variance.
         """
-        return TupleMetadata(self.children, self._extra)
+        return TupleMetadata(tuple(c.metadata() for c in self.children), self._extra)
 
     @property
     @override

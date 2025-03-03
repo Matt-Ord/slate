@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from slate.array._array import Array, NestedIndex
+from slate.array._array import Array, ArrayBuilder, NestedIndex, build
 from slate.array._conversion import (
     as_add_basis,
     as_diagonal_array,
@@ -54,6 +54,7 @@ from slate.array._transpose import conjugate, dagger, get_data_in_axes, transpos
 
 __all__ = [
     "Array",
+    "ArrayBuilder",
     "NestedIndex",
     "abs",
     "angle",
@@ -77,6 +78,7 @@ __all__ = [
     "as_transformed_basis",
     "as_tuple_basis",
     "average",
+    "build",
     "cast_as_dual",
     "cast_basis",
     "conjugate",

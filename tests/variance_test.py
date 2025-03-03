@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Never, cast
 
-from slate.array._array import ArrayBuilder
+from slate.array import build
 
 if TYPE_CHECKING:
     import numpy as np
@@ -153,13 +153,13 @@ def basis_conversion() -> None:
 def array_basis_variance() -> None:
     basis = cast("Basis[SimpleMetadata, ctype[np.float64]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
-    a = ArrayBuilder(basis, data).ok()
+    a = build(basis, data).ok()
     _ = a.as_array()
     _ = a.with_basis(basis).ok()
 
     basis = cast("Basis[SimpleMetadata, ctype[np.number]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
-    a = ArrayBuilder(basis, data).ok()
+    a = build(basis, data).ok()
     _ = a.as_array()
     _ = a.with_basis(basis).ok()
     # It should block an incompatible basis
@@ -175,7 +175,7 @@ def array_basis_variance() -> None:
     basis = cast("Basis[SimpleMetadata, ctype[np.complexfloating]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     # We can't create an array with any old basis
-    a = ArrayBuilder(basis, data).ok()  # type: ignore should fail
+    a = build(basis, data).ok()  # type: ignore should fail
     # But we cannot convert the array if incompatible
     _ = a.as_array()  # type: ignore should fail
     _ = a.with_basis(basis).ok()  # type: ignore should fail

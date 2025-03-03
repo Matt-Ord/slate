@@ -6,7 +6,6 @@ import numpy as np
 
 from slate import array, basis
 from slate.array import Array, get_data_in_axes
-from slate.array._array import ArrayBuilder
 from slate.array._conversion import as_fundamental_basis
 from slate.basis import from_metadata
 from slate.metadata import AxisDirections, LabeledMetadata
@@ -170,7 +169,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     converted = array.as_index_basis(data)
     coordinates = _get_basis_coordinates(converted.basis)
     return array_against_array(
-        ArrayBuilder(converted.basis, coordinates).ok(),
+        array.build(converted.basis, coordinates).ok(),
         converted,
         y_error=y_error,
         periodic=periodic,

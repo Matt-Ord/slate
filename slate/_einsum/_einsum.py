@@ -8,7 +8,7 @@ from slate._einsum._einstein_basis import reslove_basis
 from slate._einsum._einstein_index import (
     parse_einsum_specification,
 )
-from slate.array._array import ArrayBuilder
+from slate.array._array import build
 from slate.basis import (
     FundamentalBasis,
     as_block_diagonal_basis,
@@ -42,14 +42,14 @@ def _einsum_simple[DT: np.dtype[np.number]](
     final_idx = ",".join("".join(i) for i in raw_idx) + "->"
     result_basis = resolved.result_basis
     if result_basis is None:
-        return ArrayBuilder(
+        return build(
             FundamentalBasis.from_size(1),
             _einsum_numpy(final_idx, *raw_arrays),
         ).ok()
 
     final_idx += "".join(resolved.result_index)
 
-    return ArrayBuilder(result_basis, _einsum_numpy(final_idx, *raw_arrays)).ok()
+    return build(result_basis, _einsum_numpy(final_idx, *raw_arrays)).ok()
 
 
 def _einsum_smart[DT: np.dtype[np.number]](
@@ -78,7 +78,7 @@ def _einsum_smart[DT: np.dtype[np.number]](
             .ok()
         )
 
-        return ArrayBuilder(
+        return build(
             out_basis,
             _einsum_numpy(
                 "ij,j->ij",
@@ -114,7 +114,7 @@ def _einsum_smart[DT: np.dtype[np.number]](
             as_block_diagonal.block_shape[0],
         )
 
-        return ArrayBuilder(
+        return build(
             out_basis,
             # Diagonal on index j but not on index (k,l)
             _einsum_numpy("ijk,jkl->ijl", array_0_raw, array_1_raw),

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Never, overload
 import numpy as np
 
 from slate import basis
-from slate.array._array import Array, ArrayBuilder
+from slate.array._array import build
 from slate.basis import (
     Basis,
     BasisFeature,
@@ -20,6 +20,7 @@ from slate.basis._tuple import TupleBasisLike, is_tuple_basis_like
 from slate.metadata import AnyMetadata, BasisMetadata
 
 if TYPE_CHECKING:
+    from slate.array._array import Array, ArrayBuilder
     from slate.metadata import TupleMetadata
 
 
@@ -27,7 +28,7 @@ def cast_basis[B: Basis, DT: np.dtype[np.generic]](
     array: Array[Any, DT], basis: B
 ) -> ArrayBuilder[B, DT]:
     assert array.basis.size == basis.size
-    return ArrayBuilder(basis, array.raw_data)
+    return build(basis, array.raw_data)
 
 
 def as_feature_basis[
