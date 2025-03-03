@@ -42,17 +42,18 @@ class TrivialExplicitBasis[
         ],
         inner: B1,
     ) -> None:
+        matrix = ArrayBuilder(
+            DiagonalBasis(
+                TupleBasis(
+                    (
+                        FundamentalBasis(BasisStateMetadata(inner)),
+                        FundamentalBasis(BasisStateMetadata(inner)),
+                    )
+                ).upcast()
+            ),
+            np.ones(inner.size),
+        ).ok()
         super().__init__(
-            ArrayBuilder(
-                DiagonalBasis(
-                    TupleBasis(
-                        (
-                            FundamentalBasis(BasisStateMetadata(inner)),
-                            FundamentalBasis(BasisStateMetadata(inner)),
-                        )
-                    ).upcast()
-                ),
-                cast("np.ndarray[Any, np.dtype[np.number]]", np.ones(inner.size)),
-            ).ok(),
+            cast("Any", matrix),
             data_id=uuid.UUID(int=0),
         )
