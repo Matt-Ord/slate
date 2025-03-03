@@ -215,7 +215,7 @@ def array_against_axes_1d[DT: np.dtype[np.number]](
     return fig, ax, line
 
 
-def array_against_axes_1d_k[DT: np.dtype[np.number]](
+def array_against_axes_1d_k[DT: np.dtype[np.complexfloating]](
     data: Array[Basis[SpacedVolumeMetadata], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -244,10 +244,7 @@ def array_against_axes_1d_k[DT: np.dtype[np.number]](
     tuple[Figure, Axes, Line2D]
     """
     metadata = data.basis.metadata()
-    basis_k = basis.transformed_from_metadata(metadata, is_dual=data.basis.is_dual)
-    converted_data = Array.from_array(
-        data.with_basis(basis_k).ok().raw_data.reshape(basis_k.shape)
-    )
+    converted_data = array.as_transformed_basis(data)
 
     idx = tuple(0 for _ in range(metadata.n_dim - 1)) if idx is None else idx
 
@@ -395,8 +392,8 @@ def array_against_axes_2d_x[DT: np.dtype[np.number], E](
     return fig, ax, mesh
 
 
-def _get_frequencies_in_axes(
-    metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...]],
+def _get_frequencies_in_axes[E](
+    metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...], E],
     axes: tuple[int, ...],
 ) -> np.ndarray[tuple[int, ...], np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
@@ -405,7 +402,7 @@ def _get_frequencies_in_axes(
     return np.asarray(aa)
 
 
-def array_against_axes_2d_k[DT: np.dtype[np.number], E](
+def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
     data: Array[TupleBasisLike[tuple[SpacedLengthMetadata, ...], E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -434,17 +431,21 @@ def array_against_axes_2d_k[DT: np.dtype[np.number], E](
     tuple[Figure, Axes, QuadMesh]
     """
     metadata = data.basis.metadata()
-    basis_k = basis.transformed_from_metadata(metadata, is_dual=data.basis.is_dual)
-    converted_data = data.with_basis(basis_k).raw_data.reshape(basis_k.shape)
+    converted_data = array.as_transformed_basis(data)
+    converted_basis = basis.as_transformed(converted_data.basis)
 
-    idx = get_max_idx(converted_data, axes=axes) if idx is None else idx
+    idx = (
+        get_max_idx(converted_data.raw_data.reshape(converted_basis.shape), axes=axes)
+        if idx is None
+        else idx
+    )
 
     if isinstance(metadata.extra, AxisDirections):
         metadata = cast("SpacedVolumeMetadata", metadata)
         coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
     else:
         coordinates = _get_frequencies_in_axes(metadata, axes)
-    data_in_axis = get_data_in_axes(Array.from_array(converted_data), axes, idx)
+    data_in_axis = get_data_in_axes(converted_data, axes, idx)
 
     shifted_data = np.fft.fftshift(data_in_axis.as_array())
     shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, override
+from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, override
 
 import numpy as np
 
-from slate.basis._basis import Basis, BasisFeature, ctype
+from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._tuple import TupleBasis
 from slate.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate.metadata import BasisMetadata
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 class BlockDiagonalBasis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], ...],
+    C: tuple[Basis, ...],
     E,
     DT: ctype[Never] = ctype[Never],
 ](
@@ -68,60 +68,67 @@ class BlockDiagonalBasis[
         return np.prod(self.block_shape).item() * self.n_repeats
 
     @override
-    def __into_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __into_inner__[DT1: np.generic, DT2: np.generic](
+        self: BlockDiagonalBasis[Any, Any, ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT1]:
         axis %= vectors.ndim
 
-        stacked = vectors.reshape(
-            *vectors.shape[:axis],
-            self.n_repeats,
-            *self.block_shape,
-            *vectors.shape[axis + 1 :],
-        )
-        return build_diagonal(
-            stacked,
-            axis,
-            out_shape=self.repeat_shape,
-            out_axes=tuple(range(axis, axis + 2 * len(self.block_shape), 2)),
-        ).reshape(
-            *vectors.shape[:axis],
-            -1,
-            *vectors.shape[axis + 1 :],
-        )
+        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            stacked = vectors.reshape(
+                *vectors.shape[:axis],
+                self.n_repeats,
+                *self.block_shape,
+                *vectors.shape[axis + 1 :],
+            )
+            return build_diagonal(
+                stacked,
+                axis,
+                out_shape=self.repeat_shape,
+                out_axes=tuple(range(axis, axis + 2 * len(self.block_shape), 2)),
+            ).reshape(
+                *vectors.shape[:axis],
+                -1,
+                *vectors.shape[axis + 1 :],
+            )
+
+        return BasisConversion(fn)
 
     @override
-    def __from_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __from_inner__[DT2: np.generic, DT3: np.generic](
+        self: BlockDiagonalBasis[Any, Any, ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT3, DT2, DT3]:
         axis %= vectors.ndim
 
-        # The vectors in the inner basis are stored in
-        # the shape [(list,momentum), (list,momentum),...]
-        k_shape = self.block_shape
-        list_shape = self.repeat_shape
-        inner_shape = tuple(
-            (n_list, n_k) for (n_k, n_list) in zip(k_shape, list_shape, strict=False)
-        )
-        stacked = vectors.reshape(
-            *vectors.shape[:axis],
-            *(itertools.chain(*inner_shape)),
-            *vectors.shape[axis + 1 :],
-        )
+        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            # The vectors in the inner basis are stored in
+            # the shape [(list,momentum), (list,momentum),...]
+            k_shape = self.block_shape
+            list_shape = self.repeat_shape
+            inner_shape = tuple(
+                (n_list, n_k)
+                for (n_k, n_list) in zip(k_shape, list_shape, strict=False)
+            )
+            stacked = vectors.reshape(
+                *vectors.shape[:axis],
+                *(itertools.chain(*inner_shape)),
+                *vectors.shape[axis + 1 :],
+            )
 
-        return extract_diagonal(
-            stacked, tuple(range(axis, axis + 2 * len(inner_shape), 2)), axis
-        )
+            return extract_diagonal(
+                stacked, tuple(range(axis, axis + 2 * len(inner_shape), 2)), axis
+            )
+
+        return BasisConversion(fn)
 
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, BlockDiagonalBasis)
-            and (other.inner == self.inner)  # type: ignore unknown
+            is_block_diagonal_basis(other)
+            and (other.inner == self.inner)
             and self.is_dual == other.is_dual
         )
 
@@ -187,14 +194,24 @@ class BlockDiagonalBasis[
         )
 
 
-def is_block_diagonal_basis[
+@overload
+def is_block_diagonal_basis[  # type: ignore not incompatible
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
     DT: ctype[Never],
 ](
     basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
-) -> TypeGuard[BlockDiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT]]:
+) -> TypeGuard[BlockDiagonalBasis[tuple[Basis[M0], Basis[M1]], E, DT]]: ...
+@overload
+def is_block_diagonal_basis(
+    basis: object,
+) -> TypeGuard[BlockDiagonalBasis[tuple[Basis, Basis], Never, ctype[Never]]]: ...
+
+
+def is_block_diagonal_basis(
+    basis: object,
+) -> TypeGuard[BlockDiagonalBasis[tuple[Basis, Basis], Any, ctype[Never]]]:
     return isinstance(basis, BlockDiagonalBasis)
 
 

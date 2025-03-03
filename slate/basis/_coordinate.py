@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Never, cast, override
+from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
@@ -12,9 +12,10 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 
-class CoordinateBasis[M: BasisMetadata, DT: ctype[Never]](  # noqa: PLW1641
-    WrappedBasis[Basis[M, DT], DT]
-):
+class CoordinateBasis[  # noqa: PLW1641
+    M: BasisMetadata = BasisMetadata,
+    DT: ctype[Never] = ctype[Never],
+](WrappedBasis[Basis[M, DT], DT]):
     """Represents a basis sampled evenly along an axis."""
 
     def __init__(
@@ -38,10 +39,10 @@ class CoordinateBasis[M: BasisMetadata, DT: ctype[Never]](  # noqa: PLW1641
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, CoordinateBasis):
+        if is_coordinate_basis(other):
             return (
                 np.allclose(self.inner_points, other.inner_points)
-                and other._inner == self._inner  # type: ignore unknown
+                and other._inner == self._inner
             )
         return False
 
@@ -126,3 +127,8 @@ class CoordinateBasis[M: BasisMetadata, DT: ctype[Never]](  # noqa: PLW1641
             .__from_inner__(self.inner.points)
             .ok()
         )
+
+
+def is_coordinate_basis(basis: object) -> TypeGuard[CoordinateBasis]:
+    """Check if a basis is a coordinate basis."""
+    return isinstance(basis, CoordinateBasis)

@@ -18,7 +18,7 @@ from slate.basis import (
     RecastBasis,
     WrappedBasis,
 )
-from slate.basis._basis import ctype
+from slate.basis._basis import BasisConversion, ctype
 from slate.basis._tuple import TupleBasis, TupleBasisLike, as_tuple_basis, from_metadata
 from slate.metadata import (
     BasisMetadata,
@@ -127,7 +127,7 @@ class ExplicitBasis[
         if isinstance(other, ExplicitBasis):
             return (
                 self.size == other.size
-                and other.inner == self.inner  # type: ignore unknown
+                and other.inner == self.inner
                 and other.direction == self.direction
                 and other._data_id == self._data_id
             )
@@ -150,15 +150,15 @@ class ExplicitBasis[
         return self._direction
 
     @override
-    def __into_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: ExplicitBasis[Array[TupleBasisLike], ctype[DT1]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[DT1, DT2, DT3]:
         swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
         flat = swapped.reshape(-1, vectors.shape[axis])
 
-        transform = self.transform
+        transform = self.transform()
         flat_basis = TupleBasis(
             (
                 FundamentalBasis.from_size(flat.shape[0]),
@@ -176,11 +176,11 @@ class ExplicitBasis[
         )
 
     @override
-    def __from_inner__(
-        self,
-        vectors: np.ndarray[Any, DT],
+    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
+        self: ExplicitBasis[Any, ctype[DT3]],
+        vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT]:
+    ) -> BasisConversion[ , DT2, DT3]:
         swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
         flat = swapped.reshape(-1, vectors.shape[axis])
 

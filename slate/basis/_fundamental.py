@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Any, Self, override
+from typing import Any, Self, TypeGuard, override
 
 import numpy as np
 
@@ -61,11 +61,8 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.gen
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, FundamentalBasis):
-            return (
-                other.metadata() == self.metadata()  # type: ignore unknown
-                and self.is_dual == other.is_dual
-            )
+        if is_fundamental_basis(other):
+            return other.metadata() == self.metadata() and self.is_dual == other.is_dual
         return False
 
     @override
@@ -118,3 +115,8 @@ def as_state_list[B: Basis](
 ) -> FundamentalBasis[BasisStateMetadata[B]]:
     """Get the fundamental basis for a given basis."""
     return FundamentalBasis(BasisStateMetadata(basis))
+
+
+def is_fundamental_basis(basis: object) -> TypeGuard[FundamentalBasis]:
+    """Check if a basis is a fundamental basis."""
+    return isinstance(basis, FundamentalBasis)

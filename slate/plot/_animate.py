@@ -4,9 +4,6 @@ from typing import TYPE_CHECKING, Never
 
 import numpy as np
 
-from slate import basis
-from slate.array._array import ArrayBuilder
-from slate.basis._tuple import TupleBasis
 from slate.metadata import shallow_shape_from_nested
 from slate.plot._plot import (
     array_against_axes_1d,
@@ -91,24 +88,11 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
-
-    basis_as_tuple = basis.as_tuple_basis(data.basis)
-    basis_x = basis.from_metadata(
-        data.basis.metadata().children[1], is_dual=data.basis.is_dual
-    )
-    final_basis = TupleBasis(
-        (basis.as_index_basis(basis_as_tuple.children[0]), basis_x)
-    ).upcast()
-
-    data = data.with_basis(final_basis).ok()
-    shape = shallow_shape_from_nested(basis_x.fundamental_shape)
-    idx = tuple(0 for _ in range(len(shape) - 1)) if idx is None else idx
-
     frames: list[tuple[Line2D]] = []
 
-    for raw_data in data.raw_data.reshape(data.basis.shape):
+    for d in data:
         _, _, line = array_against_axes_1d(
-            ArrayBuilder(basis_x, raw_data).ok(),
+            d,
             axes,
             idx,
             ax=ax,
@@ -154,7 +138,7 @@ def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_over_list_1d_k[DT: np.dtype[np.number]](  # noqa: PLR0913
+def animate_data_over_list_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     data: Array[TupleBasisLike[tuple[SimpleMetadata, SpacedVolumeMetadata]], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
@@ -166,23 +150,11 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.number]](  # noqa: PLR0913
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
 
-    basis_as_tuple = basis.as_tuple_basis(data.basis)
-    basis_k = basis.transformed_from_metadata(
-        data.basis.metadata()[1], is_dual=data.basis.is_dual
-    )
-    final_basis = TupleBasis(
-        (basis.as_index_basis(basis_as_tuple.children[0]), basis_k)
-    )
-
-    data = data.with_basis(final_basis)
-    shape = shallow_shape_from_nested(basis_k.fundamental_shape)
-    idx = tuple(0 for _ in range(len(shape) - 1)) if idx is None else idx
-
     frames: list[tuple[Line2D]] = []
 
-    for raw_data in data.raw_data.reshape(data.basis.shape):
+    for d in data:
         _, _, line = array_against_axes_1d_k(
-            ArrayBuilder(final_basis[1], raw_data),
+            d,
             axes,
             idx,
             ax=ax,
@@ -196,7 +168,7 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.number]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_1d_k[DT: np.dtype[np.number]](  # noqa: PLR0913
+def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     data: Array[Basis[SpacedVolumeMetadata], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
@@ -230,7 +202,7 @@ def animate_data_1d_k[DT: np.dtype[np.number]](  # noqa: PLR0913
 
 
 def animate_data_2d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
-    data: Array[SpacedVolumeMetadata, DT],
+    data: Array[Basis[SpacedVolumeMetadata], DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
@@ -281,8 +253,8 @@ def animate_data_2d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_2d_k[DT: np.dtype[np.number]](  # noqa: PLR0913
-    data: Array[SpacedVolumeMetadata, DT],
+def animate_data_2d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
+    data: Array[Basis[SpacedVolumeMetadata], DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,

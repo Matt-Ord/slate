@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Never, cast, override
+from typing import Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._wrapped import WrappedBasis
-from slate.metadata import BasisMetadata
 from slate.util._pad import (
     Padding,
     Truncation,
@@ -17,14 +16,14 @@ from slate.util._pad import (
 
 
 class TruncatedBasis[
-    B: Basis[BasisMetadata, ctype[Never]],
+    B: Basis = Basis,
     DT: ctype[Never] = ctype[Never],
 ](
     WrappedBasis[B, DT],
 ):
     """Represents a basis sampled evenly along an axis."""
 
-    def __init__[B_: Basis[BasisMetadata, ctype[Never]]](
+    def __init__[B_: Basis](
         self: TruncatedBasis[B_, ctype[Never]], truncation: Truncation, inner: B_
     ) -> None:
         self._truncation = truncation
@@ -50,10 +49,8 @@ class TruncatedBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, TruncatedBasis):
-            return (
-                self._truncation == other._truncation and other._inner == self._inner  # type: ignore unknown
-            )
+        if is_truncated_basis(other):
+            return self._truncation == other._truncation and other._inner == self._inner
         return False
 
     @property
@@ -136,3 +133,8 @@ class TruncatedBasis[
             .__from_inner__(self.inner.points)
             .ok()
         )
+
+
+def is_truncated_basis(basis: object) -> TypeGuard[TruncatedBasis]:
+    """Check if the basis is truncated."""
+    return isinstance(basis, TruncatedBasis)

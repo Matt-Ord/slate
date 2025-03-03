@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Never, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, overload
 
 import numpy as np
 
@@ -72,12 +72,11 @@ def imag[B: Basis, DT: np.dtype[np.generic]](
     )
 
 
-def angle[B: Basis, DT: np.dtype[np.complexfloating]](
+def angle[B: Basis[Any, ctype[np.number]], DT: np.dtype[np.complexfloating]](
     array: Array[B, DT],
 ) -> Array[B, np.dtype[np.floating]]:
     """Get the phase of data in the array."""
     converted = as_index_basis(array)
-    # TODO: this is a bug - if the basis can support complex floating it may not support float
     return (
         ArrayBuilder(converted.basis, np.angle(converted.raw_data))
         .ok()

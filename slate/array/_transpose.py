@@ -113,8 +113,6 @@ def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.dtype[np.generic]]
     *,
     axes: None = None,
 ) -> Array[TupleBasisLike[tuple[M2, M1], E], DT]: ...
-
-
 @overload
 def transpose[M: BasisMetadata, Any, DT: np.dtype[np.generic]](
     array: Array[TupleBasisLike[tuple[M, ...], Any], DT],

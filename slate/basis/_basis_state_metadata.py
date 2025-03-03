@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import override
+from typing import TypeGuard, override
 
 from slate.basis._basis import Basis
 from slate.metadata._metadata import SimpleMetadata
@@ -20,8 +20,13 @@ class BasisStateMetadata[B: Basis = Basis](SimpleMetadata):
 
     @override
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, BasisStateMetadata) and other.basis == self.basis  # type: ignore unknown
+        return is_basis_state_metadata(other) and other.basis == self.basis
 
     @override
     def __hash__(self) -> int:
         return hash(self.basis)
+
+
+def is_basis_state_metadata(obj: object) -> TypeGuard[BasisStateMetadata]:
+    """Check if an object is a basis state metadata."""
+    return isinstance(obj, BasisStateMetadata)

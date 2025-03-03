@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     import numpy as np
 
     from slate.array import Array
+    from slate.basis._basis import ctype
 
 
 def _get_einsum_result_basis(
@@ -138,7 +139,7 @@ class BasisSpecification:
     result_index: tuple[str, ...]
     result_basis: Basis | None
     part_index: tuple[tuple[str, ...], ...]
-    part_basis: tuple[RecastBasis[Basis, TupleBasisLike], ...]
+    part_basis: tuple[RecastBasis[Basis, Basis, TupleBasisLike], ...]
 
     def get_part_data(
         self, *arrays: Array[Basis, Any]
@@ -166,7 +167,7 @@ def reslove_basis(
     for arr, part in parts_iter:
         _collect_einsum_basis_hints(arr.basis, part, hints)
     basis_map = hints.resolve_basis_map()
-    part_basis = list[RecastBasis[Basis, TupleBasisLike],]()
+    part_basis = list[RecastBasis[Basis, Basis, TupleBasisLike],]()
     part_index = list[tuple[str, ...]]()
 
     for _arr, part in zip(arrays, specification.parts, strict=False):
@@ -174,7 +175,7 @@ def reslove_basis(
 
         part_basis.append(
             RecastBasis(
-                basis,
+                cast("Basis[Any, ctype[np.generic]]", basis),
                 from_shape(_flatten_nested(shape)),
                 from_shape(_flatten_nested(shape)),
             )

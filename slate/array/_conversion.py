@@ -146,8 +146,14 @@ def as_fundamental_basis[M: AnyMetadata, DT: np.dtype[np.generic]](
     return array.with_basis(basis.as_fundamental(array.basis)).ok()
 
 
+def as_transformed_basis[M: AnyMetadata, DT: np.dtype[np.complexfloating]](
+    array: Array[Basis[M, ctype[Never]], DT],
+) -> Array[Basis[M, ctype[np.complexfloating]], DT]:
+    return array.with_basis(basis.as_transformed(array.basis)).ok()
+
+
 def as_outer_array[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[RecastBasis[Basis, B, ctype[Never]], DT],
+    array: Array[RecastBasis[Basis, B, Basis, ctype[Never]], DT],
 ) -> Array[B, DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.

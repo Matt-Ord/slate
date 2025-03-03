@@ -179,7 +179,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         """Get the data as a (full) np.array."""
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
-        return self.with_basis(fundamental).ok().raw_data.reshape(shape)  # type: ignore bad inference
+        return self.with_basis(fundamental).ok().raw_data.reshape(shape)
 
     @overload
     @staticmethod
@@ -260,10 +260,11 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return ArrayConversion(self.raw_data, self.basis, basis)
 
     def __add__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-        other: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-    ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
-        as_add_basis = basis.as_add_basis(self.basis)
+        self: Array[Basis[M_], np.dtype[DT_]],
+        other: Array[Basis[M_], np.dtype[DT_]],
+    ) -> Array[Basis[M_], np.dtype[DT_]]:
+        # TODO: is this sound - both basis might not support each others types??
+        as_add_basis = cast("Basis[Any, Any]", basis.as_add_basis(self.basis))
         data = as_add_basis.add_data(
             self.with_basis(as_add_basis).ok().raw_data,
             other.with_basis(as_add_basis).ok().raw_data,

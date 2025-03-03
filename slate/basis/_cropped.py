@@ -10,10 +10,9 @@ from slate.metadata import BasisMetadata
 from slate.util import pad_ft_points
 
 
-class CroppedBasis[
-    B: Basis[BasisMetadata, ctype[Never]] = Basis[BasisMetadata, ctype[Never]],
-    DT: ctype[Never] = ctype[Never],
-](WrappedBasis[B, DT]):
+class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
+    WrappedBasis[B, DT]
+):
     """A Cropped Basis takes the first size states, using the fourier convention."""
 
     def __init__(self, size: int, inner: B) -> None:
@@ -27,10 +26,8 @@ class CroppedBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, CroppedBasis):
-            return (
-                self._size == other._size and other._inner == self._inner  # type: ignore unknown
-            )
+        if is_cropped_basis(other):
+            return self._size == other._size and other._inner == self._inner
         return False
 
     @override
@@ -85,7 +82,7 @@ class CroppedBasis[
                 )
 
             return BasisConversion(fn)
-
+        basis = cast("Basis[M_, ctype[DT3]]", basis)
         return WrappedBasis[Basis[M_, ctype[DT1]], ctype[DT1]].__convert_vector_into__(
             self, vectors, basis, axis
         )
@@ -148,6 +145,6 @@ class CroppedBasis[
         )
 
 
-def is_cropped_basis(basis: Basis) -> TypeGuard[CroppedBasis]:
+def is_cropped_basis(basis: object) -> TypeGuard[CroppedBasis]:
     """Is the basis a cropped basis."""
     return isinstance(basis, CroppedBasis)

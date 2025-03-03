@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, Never, cast, override
+from typing import Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
 from slate.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate.basis._tuple import TupleBasis
 from slate.basis._wrapped import WrappedBasis
-from slate.metadata._metadata import BasisMetadata
 from slate.metadata.util import nx_points
 
 
 class IsotropicBasis[
-    C: tuple[Basis[BasisMetadata, ctype[Never]], Basis[BasisMetadata, ctype[Never]]],
+    C: tuple[Basis, Basis],
     E,
-    DT: ctype[Never],
+    DT: ctype[Never] = ctype[Never],
 ](
     WrappedBasis[TupleBasis[C, E, DT], DT],
 ):
@@ -35,14 +34,17 @@ class IsotropicBasis[
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
-        swapped = vectors.swapaxes(axis, 0)
-        indices = nx_points(self.size)
-        displacement_matrix = np.mod(indices[:, None] - indices[None, :], self.size)
-        return (
-            swapped[displacement_matrix]
-            .reshape(-1, *swapped.shape[1:])
-            .swapaxes(axis, 0)
-        )
+        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            swapped = vectors.swapaxes(axis, 0)
+            indices = nx_points(self.size)
+            displacement_matrix = np.mod(indices[:, None] - indices[None, :], self.size)
+            return (
+                swapped[displacement_matrix]
+                .reshape(-1, *swapped.shape[1:])
+                .swapaxes(axis, 0)
+            )
+
+        return BasisConversion(fn)
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
@@ -50,16 +52,19 @@ class IsotropicBasis[
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
-        swapped = vectors.swapaxes(axis, 0)
-        stacked = swapped.reshape(self.size, self.size, *swapped.shape[1:])[0]
+        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+            swapped = vectors.swapaxes(axis, 0)
+            stacked = swapped.reshape(self.size, self.size, *swapped.shape[1:])[0]
 
-        return stacked.swapaxes(axis, 0)
+            return stacked.swapaxes(axis, 0)
+
+        return BasisConversion(fn)
 
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            isinstance(other, IsotropicBasis)
-            and (other.inner == self.inner)  # type: ignore unknown
+            is_isotropic_basis(other)
+            and (other.inner == self.inner)
             and self.is_dual == other.is_dual
         )
 
@@ -123,3 +128,10 @@ class IsotropicBasis[
             .__from_inner__(self.inner.points)
             .ok()
         )
+
+
+def is_isotropic_basis(
+    basis: object,
+) -> TypeGuard[IsotropicBasis[tuple[Basis, Basis], Any]]:
+    """Check if a basis is isotropic."""
+    return isinstance(basis, IsotropicBasis)
