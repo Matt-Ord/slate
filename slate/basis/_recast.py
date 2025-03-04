@@ -77,9 +77,9 @@ class RecastBasis[
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         return BasisConversion[DT1, DT2, DT3](
-            lambda: self._outer_recast.__convert_vector_into__(  # type: ignore safe
+            lambda: self._outer_recast.__convert_vector_into__(
                 vectors, self._inner_recast, axis
-            )
+            ).ok()  # type: ignore safe
         )
 
     @override
@@ -89,9 +89,9 @@ class RecastBasis[
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         return BasisConversion[DT1, DT2, DT3](
-            lambda: self._inner_recast.__convert_vector_into__(  # type: ignore safe
+            lambda: self._inner_recast.__convert_vector_into__(
                 vectors, self._outer_recast, axis
-            )
+            ).ok()  # type: ignore safe
         )
 
     @property

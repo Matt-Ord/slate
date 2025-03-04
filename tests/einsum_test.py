@@ -11,6 +11,7 @@ from slate._einsum._einstein_index import (
     parse_einsum_index,
 )
 from slate.array import build
+from slate.array._conversion import cast_basis
 from slate.basis import (
     CroppedBasis,
     FundamentalBasis,
@@ -97,9 +98,10 @@ def test_einsum_diagonal() -> None:
 
     data = rng.random((10,)) + 1j * rng.random((10,))
     vector = build(array.basis.children[0], data).ok()
-    diagonal_array = into_diagonal(array)
+    downcast_array = cast_basis(array, array.basis.downcast_metadata()).ok()
+    diagonal_array = into_diagonal(downcast_array)
 
-    _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
+    _test_einsum_in_basis(array, vector, diagonal_array.basis.inner.children[0])
 
     data = array.raw_data.reshape(array.basis.shape)
     data += np.conj(data.T)
@@ -111,12 +113,10 @@ def test_einsum_diagonal() -> None:
             )
         ).upcast(),
         data,
-    )
-    diagonal_array = into_diagonal_hermitian(array)
-    _test_einsum_in_basis(array, vector, diagonal_array.basis.inner[0])
-
-
-def test_einsum_specification_parse() -> None: ...
+    ).ok()
+    downcast_array = cast_basis(array, array.basis.downcast_metadata()).ok()
+    diagonal_array = into_diagonal_hermitian(downcast_array)
+    _test_einsum_in_basis(array, vector, diagonal_array.basis.inner.children[0])
 
 
 @pytest.mark.parametrize(

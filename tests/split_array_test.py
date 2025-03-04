@@ -19,7 +19,7 @@ def test_split_array_equals_diagonal() -> None:
     diagonal = array.with_basis(
         DiagonalBasis(
             TupleBasis((array.basis.children[0], array.basis.children[1])).upcast()
-        )
+        ).upcast()
     ).ok()
     split = array.with_basis(SplitBasis(diagonal.basis, diagonal.basis).upcast()).ok()
 
@@ -30,10 +30,10 @@ def test_split_array_equals_diagonal() -> None:
 
 def test_split_array_equals_transformed() -> None:
     data = np.diag(np.arange(1, 4)).astype(np.complex128)
-    basis_k = TransformedBasis(FundamentalBasis.from_size(3))
+    basis_k = TransformedBasis(FundamentalBasis.from_size(3)).upcast()
     array = build(TupleBasis((basis_k, basis_k)).upcast(), data).ok()
 
-    diagonal = array.with_basis(DiagonalBasis(array.basis)).ok()
+    diagonal = array.with_basis(DiagonalBasis(array.basis).upcast()).ok()
     fundamental = DiagonalBasis(from_metadata(array.basis.metadata()))
     split = build(
         SplitBasis(fundamental, diagonal.basis),

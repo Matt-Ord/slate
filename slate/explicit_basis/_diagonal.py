@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Never, cast
+from typing import Any, Never, cast, override
 
 import numpy as np
 
@@ -14,35 +14,30 @@ from slate.basis import (
     TupleBasis,
 )
 from slate.basis._basis import ctype
+from slate.basis._tuple import TupleBasisLike
 from slate.explicit_basis._explicit_basis import ExplicitUnitaryBasis
-from slate.metadata._metadata import SimpleMetadata
-from slate.metadata._stacked import TupleMetadata
+from slate.metadata._metadata import BasisMetadata, SimpleMetadata
 
 
 class TrivialExplicitBasis[
-    Transform: Array[
-        Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]],
-        Any,
-    ],
+    B1: Basis,
     DT: ctype[Never] = ctype[Never],
-](ExplicitUnitaryBasis[Transform, DT]):
-    def __init__[B1: Basis](
-        self: TrivialExplicitBasis[
-            Array[
-                DiagonalBasis[
-                    TupleBasis[
-                        tuple[
-                            FundamentalBasis[BasisStateMetadata[B1]],
-                            FundamentalBasis[BasisStateMetadata[B1]],
-                        ],
-                        None,
-                    ]
-                ],
-                np.dtype[np.number],
+](
+    ExplicitUnitaryBasis[
+        Array[
+            TupleBasisLike[
+                tuple[SimpleMetadata, BasisStateMetadata[B1]],
+                None,
+                ctype[np.generic],
             ],
-            ctype[Never],
+            np.dtype[np.float64],
         ],
-        inner: B1,
+        DT,
+    ]
+):
+    def __init__[B1_: Basis](
+        self: TrivialExplicitBasis[B1_, ctype[Never]],
+        inner: B1_,
     ) -> None:
         matrix = build(
             DiagonalBasis(
@@ -55,7 +50,10 @@ class TrivialExplicitBasis[
             ).upcast(),
             np.ones(inner.size),
         ).ok()
-        super().__init__(
-            cast("Any", matrix),
-            data_id=uuid.UUID(int=0),
-        )
+        super().__init__(cast("Any", matrix), data_id=uuid.UUID(int=0))
+
+    @override
+    def downcast_metadata[M: BasisMetadata](
+        self: TrivialExplicitBasis[Basis[M]],
+    ) -> Basis[M, DT]:
+        return cast("Basis[M, DT]", self)

@@ -109,7 +109,8 @@ class ArrayConversion[
         self._old_basis = cast("Basis[BasisMetadata, ctype[np.generic]]", old_basis)
         self._new_basis = new_basis
 
-    def _metadata_variance_fn(self, value: M0, _private: Never) -> None: ...
+    # metadata should be covariant - and it will inder the lowest common type
+    def _metadata_variance_fn(self, _private: Never) -> M0: ...
 
     def ok[M_: BasisMetadata, DT_: np.generic](
         self: ArrayConversion[M_, Basis[M_, ctype[DT_]], np.dtype[DT_]],
@@ -129,7 +130,15 @@ class ArrayConversion[
 class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
     def __init__(self, basis: B, data: np.ndarray[Any, DT]) -> None:
         self._basis = basis
-        self._data = data
+        self._data = data.ravel()
+
+    @property
+    def basis(self) -> B:
+        return self._basis
+
+    @property
+    def data(self) -> np.ndarray[tuple[int], DT]:
+        return self._data
 
     def ok[DT_: np.generic](
         self: ArrayBuilder[Basis[Any, ctype[DT_]], np.dtype[DT_]],

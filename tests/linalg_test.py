@@ -39,7 +39,9 @@ def slate_array_stacked() -> Array[
 
 def _test_into_diagonal(
     array: Array[
-        TupleBasisLike[tuple[BasisMetadata, BasisMetadata], None],
+        TupleBasisLike[
+            tuple[BasisMetadata, BasisMetadata], None, ctype[np.complexfloating]
+        ],
         np.dtype[np.complexfloating],
     ],
 ) -> None:
@@ -51,15 +53,23 @@ def _test_into_diagonal(
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(diagonal_basis.children[0].eigenvectors.basis)[1].is_dual
+        as_tuple_basis(
+            diagonal_basis.children[0].eigenvectors().basis.downcast_metadata()
+        )
+        .children[1]
+        .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(diagonal_basis.children[1].eigenvectors.basis)[1].is_dual
+        as_tuple_basis(
+            diagonal_basis.children[1].eigenvectors().basis.downcast_metadata()
+        )
+        .children[1]
+        .is_dual
         == original_as_tuple.children[1].is_dual
     )
 
-    full_as_diagonal = array.with_basis(diagonal.basis).ok()
+    full_as_diagonal = array.with_basis(diagonal.basis.downcast_metadata()).ok()
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data, atol=1e-15)
 
     diagonal_as_full = diagonal.with_basis(array.basis).ok()
@@ -81,7 +91,7 @@ def _test_into_diagonal(
 )
 def test_linalg_complex(
     basis: Basis[
-        TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None], ctype[np.generic]
+        TupleMetadata[tuple[BasisMetadata, BasisMetadata], None], ctype[np.generic]
     ],
 ) -> None:
     rng = np.random.default_rng()
@@ -93,7 +103,9 @@ def test_linalg_complex(
 
 def _test_into_diagonal_hermitian(
     array: Array[
-        TupleBasisLike[tuple[SimpleMetadata, SimpleMetadata], None],
+        TupleBasisLike[
+            tuple[SimpleMetadata, SimpleMetadata], None, ctype[np.complexfloating]
+        ],
         np.dtype[np.complexfloating],
     ],
 ) -> None:
@@ -101,16 +113,24 @@ def _test_into_diagonal_hermitian(
 
     original_as_tuple = as_tuple_basis(array.basis)
     diagonal_basis = diagonal.basis.inner
-    assert diagonal_basis[0].is_dual == original_as_tuple[0].is_dual
-    assert diagonal_basis[1].is_dual == original_as_tuple[1].is_dual
+    assert diagonal_basis.children[0].is_dual == original_as_tuple.children[0].is_dual
+    assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(diagonal_basis[0].eigenvectors.basis)[1].is_dual
-        == original_as_tuple[0].is_dual
+        as_tuple_basis(
+            diagonal_basis.children[0].eigenvectors().basis.downcast_metadata()
+        )
+        .children[1]
+        .is_dual
+        == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(diagonal_basis[1].eigenvectors.basis)[1].is_dual
-        == original_as_tuple[1].is_dual
+        as_tuple_basis(
+            diagonal_basis.children[1].eigenvectors().basis.downcast_metadata()
+        )
+        .children[1]
+        .is_dual
+        == original_as_tuple.children[1].is_dual
     )
 
     eigenvalues = get_eigenvalues_hermitian(array)
@@ -119,11 +139,10 @@ def _test_into_diagonal_hermitian(
     )
 
     np.testing.assert_allclose(diagonal.as_array(), array.as_array())
-
-    full_as_diagonal = array.with_basis(diagonal.basis)
+    full_as_diagonal = array.with_basis(diagonal.basis.downcast_metadata()).ok()
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data)
 
-    diagonal_as_full = diagonal.with_basis(array.basis)
+    diagonal_as_full = diagonal.with_basis(array.basis).ok()
     np.testing.assert_allclose(diagonal_as_full.raw_data, array.raw_data, atol=1e-15)
 
 
@@ -139,12 +158,14 @@ def _test_into_diagonal_hermitian(
     ],
 )
 def test_linalg_diagonal(
-    basis: Basis[Metadata2D[SimpleMetadata, SimpleMetadata, None], np.generic],
+    basis: Basis[
+        TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None], ctype[np.generic]
+    ],
 ) -> None:
     rng = np.random.default_rng()
     fundamental = from_metadata(basis.metadata())
     data = np.diag(rng.random(fundamental.shape[0])).astype(np.complex128)
-    array = build(fundamental, data).with_basis(basis)
+    array = build(fundamental, data).ok().with_basis(basis).ok()
 
     _test_into_diagonal_hermitian(array)
 
