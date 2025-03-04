@@ -14,9 +14,10 @@ from slate.basis import (
     FundamentalBasis,
     RecastBasis,
     TupleBasis,
+    TupleBasisLike,
+    ctype,
+    is_tuple_basis_like,
 )
-from slate.basis._basis import ctype
-from slate.basis._tuple import TupleBasisLike, is_tuple_basis_like
 from slate.metadata import AnyMetadata, BasisMetadata
 
 if TYPE_CHECKING:

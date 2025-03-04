@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Any, Never, cast, overload
 import numpy as np
 
 from slate import basis
-from slate.basis import Basis, FundamentalBasis, TupleBasis
-from slate.basis._tuple import is_tuple_basis_like
+from slate.basis import Basis, FundamentalBasis, TupleBasis, is_tuple_basis_like
 from slate.metadata import (
     BasisMetadata,
     NestedLength,
@@ -17,8 +16,7 @@ from slate.util._index import slice_along_axis
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from slate.basis._basis import ctype
-    from slate.basis._tuple import TupleBasisLike
+    from slate.basis import TupleBasisLike, ctype
     from slate.metadata import SimpleMetadata, TupleMetadata
 
 type Index = int | slice

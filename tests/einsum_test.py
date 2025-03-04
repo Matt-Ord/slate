@@ -6,12 +6,11 @@ import numpy as np
 import pytest
 
 from slate._einsum._einstein_index import (
-    EinsteinIndex,
+    EinsteinIndex,  # noqa: PLC2701
     NestedEinsteinIndex,
-    parse_einsum_index,
+    parse_einsum_index,  # noqa: PLC2701
 )
-from slate.array import build
-from slate.array._conversion import cast_basis
+from slate.array import build, cast_basis
 from slate.basis import (
     CroppedBasis,
     FundamentalBasis,
@@ -21,7 +20,7 @@ from slate.basis import (
     TupleBasis,
     with_child,
 )
-from slate.linalg._eig import into_diagonal, into_diagonal_hermitian
+from slate.linalg import into_diagonal, into_diagonal_hermitian
 
 if TYPE_CHECKING:
     from slate.array import Array

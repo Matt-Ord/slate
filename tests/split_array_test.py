@@ -6,10 +6,11 @@ from slate.array import Array, build
 from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
+    SplitBasis,
     TransformedBasis,
+    TupleBasis,
+    from_metadata,
 )
-from slate.basis._split import SplitBasis
-from slate.basis._tuple import TupleBasis, from_metadata
 
 
 def test_split_array_equals_diagonal() -> None:

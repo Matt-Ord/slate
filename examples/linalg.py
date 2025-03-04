@@ -14,7 +14,6 @@ if __name__ == "__main__":
 
     diagonal = into_diagonal(array)
     eigenvalues = get_eigenvalues(array)
-    a = diagonal.raw_data
 
     # Diagonal is a matrix with the eigenvalues along the diagonal
     np.testing.assert_allclose(diagonal.raw_data, eigenvalues.as_array())

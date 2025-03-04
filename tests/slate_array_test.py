@@ -16,10 +16,8 @@ from slate.basis import (
 )
 
 if TYPE_CHECKING:
-    from slate.basis._basis import ctype
-    from slate.basis._tuple import TupleBasis
-    from slate.metadata import SimpleMetadata, TupleMetadata
-    from slate.metadata._metadata import BasisMetadata
+    from slate.basis import TupleBasis, ctype
+    from slate.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
 
 
 def test_slate_array_as_array(
