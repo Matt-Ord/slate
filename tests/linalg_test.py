@@ -8,12 +8,14 @@ import pytest
 from slate import array as _array
 from slate.array import Array, build
 from slate.basis import (
+    BlockDiagonalBasis,
+    DiagonalBasis,
+    TupleBasisLike,
+    as_tuple_basis,
+    from_metadata,
     from_shape,
 )
-from slate.basis._block_diagonal import BlockDiagonalBasis
-from slate.basis._diagonal import DiagonalBasis
-from slate.basis._tuple import TupleBasisLike, as_tuple_basis, from_metadata
-from slate.linalg._eig import (
+from slate.linalg import (
     get_eigenvalues_hermitian,
     into_diagonal,
     into_diagonal_hermitian,

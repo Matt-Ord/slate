@@ -12,11 +12,11 @@ from slate.basis import (
     DiagonalBasis,
     FundamentalBasis,
     TupleBasis,
+    TupleBasisLike,
+    ctype,
 )
-from slate.basis._basis import ctype
-from slate.basis._tuple import TupleBasisLike
 from slate.explicit_basis._explicit_basis import ExplicitUnitaryBasis
-from slate.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate.metadata import BasisMetadata, SimpleMetadata
 
 
 class TrivialExplicitBasis[

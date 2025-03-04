@@ -6,14 +6,13 @@ import numpy as np
 
 from slate.array._array import build
 from slate.array._conversion import as_fundamental_basis, as_index_basis
-from slate.basis import Basis
+from slate.basis import Basis, ctype
 from slate.basis import is_tuple_basis_like as is_tuple_basis_like_basis
-from slate.basis._basis import ctype
 
 if TYPE_CHECKING:
     from slate.array._array import Array
-    from slate.basis._tuple import TupleBasisLike
-    from slate.metadata._metadata import BasisMetadata
+    from slate.basis import TupleBasisLike
+    from slate.metadata import BasisMetadata
 
 
 @overload

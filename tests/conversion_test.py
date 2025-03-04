@@ -8,16 +8,16 @@ import pytest
 from slate.array import Array, build
 from slate.basis import (
     BlockDiagonalBasis,
+    DiagonalBasis,
     FundamentalBasis,
     RecastBasis,
     TransformedBasis,
     TruncatedBasis,
     Truncation,
+    TupleBasis,
     from_shape,
     transformed_from_shape,
 )
-from slate.basis._diagonal import DiagonalBasis
-from slate.basis._tuple import TupleBasis
 
 if TYPE_CHECKING:
     from slate.basis._basis import Basis, ctype

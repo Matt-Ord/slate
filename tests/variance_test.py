@@ -7,15 +7,14 @@ from slate.array import build
 if TYPE_CHECKING:
     import numpy as np
 
-    from slate.array import Array
-    from slate.array._array import ArrayConversion
+    from slate.array import Array, ArrayConversion
     from slate.basis import (
         Basis,
         FundamentalBasis,
         TupleBasis,
         WrappedBasis,
+        ctype,
     )
-    from slate.basis._basis import ctype
     from slate.metadata import (
         BasisMetadata,
         SimpleMetadata,

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     import numpy as np
 
     from slate.array import Array
-    from slate.basis._basis import ctype
+    from slate.basis import ctype
 
 
 def _get_einsum_result_basis(
@@ -69,8 +69,8 @@ def _resolve_einsum_basis(
 
 class EinsumBasisHints:
     def __init__(self) -> None:
-        self._single_map = defaultdict[str, list[Basis[Any, Any]]](list)
-        self._diag_map = defaultdict[tuple[str, ...], list[Basis[Any, Any]]](list)
+        self._single_map = defaultdict[str, list[Basis]](list)
+        self._diag_map = defaultdict[tuple[str, ...], list[Basis]](list)
 
     def add_hint(self, idx: EinsteinIndex, basis: Basis) -> None:
         self._single_map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
