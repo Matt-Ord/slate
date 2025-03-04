@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     import numpy as np
 
     from slate.array import Array
+    from slate.array._array import ArrayConversion
     from slate.basis import (
         Basis,
         FundamentalBasis,
@@ -154,23 +155,39 @@ def array_basis_variance() -> None:
     basis = cast("Basis[SimpleMetadata, ctype[np.float64]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     a = build(basis, data).ok()
-    _ = a.as_array()
-    _ = a.with_basis(basis).ok()
+    _as_array_0 = a.as_array()
+    _with_basis = a.with_basis(basis).ok()
 
     basis = cast("Basis[SimpleMetadata, ctype[np.number]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
     a = build(basis, data).ok()
-    _ = a.as_array()
-    _ = a.with_basis(basis).ok()
+    _as_array_1 = a.as_array()
+    _with_basis_1 = a.with_basis(basis).ok()
     # It should block an incompatible basis
     incompatible_basis = cast("Basis[SimpleMetadata, ctype[np.float128]]", {})
     _ = a.with_basis(incompatible_basis).ok()  # type: ignore should fail
     # Note here that TupleMetadata is not compatible with SimpleMetadata
     incompatible_basis = cast("Basis[TupleMetadata[Any, Any], ctype[np.generic]]", {})
-    _ = a.with_basis(incompatible_basis)
+    _ = a.with_basis(incompatible_basis).ok()  # type: ignore should fail
     # but not a compatible one
-    compatible_basis = cast("Basis[SimpleMetadata, ctype[np.generic]]", {})
-    _ = a.with_basis(compatible_basis).ok()
+    compatible_basis_0 = cast("Basis[SimpleMetadata, ctype[np.generic]]", {})
+    _with_basis_2 = a.with_basis(compatible_basis_0).ok()
+    compatible_basis_1 = cast("Basis[BasisMetadata, ctype[np.generic]]", {})
+    _with_basis_3 = a.with_basis(compatible_basis_1).ok()
+
+    conversion = cast(
+        "ArrayConversion[SimpleMetadata, Basis[BasisMetadata, ctype[np.generic]], np.dtype[np.float64]]",
+        {},
+    )
+    conversion.ok()
+    _: ArrayConversion[
+        BasisMetadata, Basis[BasisMetadata, ctype[np.generic]], np.dtype[np.float64]
+    ] = conversion
+    conversion = cast(
+        "ArrayConversion[BasisMetadata, Basis[SimpleMetadata, ctype[np.generic]], np.dtype[np.float64]]",
+        {},
+    )
+    conversion.ok()
 
     basis = cast("Basis[SimpleMetadata, ctype[np.complexfloating]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})

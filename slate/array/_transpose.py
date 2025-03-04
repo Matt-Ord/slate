@@ -42,13 +42,14 @@ def _transpose_from_diagonal[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
+    DT1: ctype[Never],
     DT: np.dtype[np.generic],
 ](
     array: Array[
-        DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E]],
+        DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT1],
         DT,
     ],
-) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
+) -> Array[TupleBasisLike[tuple[M1, M0], E, DT1], DT]:
     return build(
         DiagonalBasis(
             TupleBasis(
@@ -64,10 +65,11 @@ def _transpose_from_tuple_simple[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
+    DT1: ctype[Never],
     DT: np.dtype[np.generic],
 ](
-    array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT],
-) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
+    array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E, DT1], DT],
+) -> Array[TupleBasisLike[tuple[M1, M0], E, DT1], DT]:
     return build(
         TupleBasis(
             (array.basis.children[1], array.basis.children[0]),
@@ -81,20 +83,26 @@ def _transpose_simple[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
+    DT1: ctype[Never],
     DT: np.dtype[np.generic],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E], DT],
-) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
+    array: Array[TupleBasisLike[tuple[M0, M1], E, DT1], DT],
+) -> Array[TupleBasisLike[tuple[M1, M0], E, DT1], DT]:
     as_diagonal = as_diagonal_basis(array)
     if as_diagonal is not None:
         return _transpose_from_diagonal(as_diagonal)
     return _transpose_from_tuple_simple(as_tuple_basis(array))
 
 
-def _transpose_from_tuple[M: BasisMetadata, E, DT: np.dtype[np.generic]](
-    array: Array[TupleBasis[tuple[Basis[M], ...], E], DT],
+def _transpose_from_tuple[
+    M: BasisMetadata,
+    E,
+    DT1: ctype[Never],
+    DT: np.dtype[np.generic],
+](
+    array: Array[TupleBasis[tuple[Basis[M], ...], E, DT1], DT],
     axes: tuple[int, ...] | None = None,
-) -> Array[TupleBasis[tuple[Basis[M], ...], E], DT]:
+) -> Array[TupleBasis[tuple[Basis[M], ...], E, DT1], DT]:
     # TODO: einsum based implementation would be preferred here...  # noqa: FIX002
     children = array.basis.children
     axes = tuple(range(len(children)))[::-1] if axes is None else axes
@@ -108,24 +116,30 @@ def _transpose_from_tuple[M: BasisMetadata, E, DT: np.dtype[np.generic]](
 
 
 @overload
-def transpose[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.dtype[np.generic]](
-    array: Array[TupleBasisLike[tuple[M1, M2], E], DT],
+def transpose[
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    DT1: ctype[Never],
+    E,
+    DT: np.dtype[np.generic],
+](
+    array: Array[TupleBasisLike[tuple[M1, M2], E, DT1], DT],
     *,
     axes: None = None,
-) -> Array[TupleBasisLike[tuple[M2, M1], E], DT]: ...
+) -> Array[TupleBasisLike[tuple[M2, M1], E, DT1], DT]: ...
 @overload
-def transpose[M: BasisMetadata, Any, DT: np.dtype[np.generic]](
-    array: Array[TupleBasisLike[tuple[M, ...], Any], DT],
+def transpose[M: BasisMetadata, Any, DT1: ctype[Never], DT: np.dtype[np.generic]](
+    array: Array[TupleBasisLike[tuple[M, ...], Any, DT1], DT],
     *,
     axes: tuple[int, ...] | None = None,
-) -> Array[TupleBasisLike[tuple[M, ...], Any], DT]: ...
+) -> Array[TupleBasisLike[tuple[M, ...], Any, DT1], DT]: ...
 
 
-def transpose[DT: np.dtype[np.generic]](
-    array: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any], DT],
+def transpose[DT: np.dtype[np.generic], DT1: ctype[Never]](
+    array: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any, DT1], DT],
     *,
     axes: tuple[int, ...] | None = None,
-) -> Array[TupleBasisLike[Any, Any], DT]:
+) -> Array[TupleBasisLike[Any, Any, DT1], DT]:
     """Transpose a slate array."""
     array = as_index_basis(array)
     if axes is None and is_tuple_basis_like(array, n_dim=2):

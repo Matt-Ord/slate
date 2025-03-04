@@ -36,7 +36,7 @@ class WrappedBasis[
     # It is not possible to specify this constraint in the type system, so instead
     # we enforce it at __init__ time.
     DT: ctype[Never] = ctype[Never],
-](Basis[Any, DT]):
+](Basis[BasisMetadata, DT]):
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
     def __init__[B_: Basis](self: WrappedBasis[B_, ctype[Never]], inner: B_) -> None:
@@ -47,6 +47,15 @@ class WrappedBasis[
     ) -> WrappedBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("WrappedBasis[B, DT_]", self)
+
+    def downcast_metadata[M: BasisMetadata](
+        self: WrappedBasis[Basis[M, Any], Any],
+    ) -> Basis[M, DT]:
+        """Metadata associated with the basis.
+
+        Note: this should be a property, but this would ruin variance.
+        """
+        return cast("Any", self)
 
     @override
     def metadata[M: BasisMetadata](self: WrappedBasis[Basis[M, Any], Any]) -> M:
