@@ -529,9 +529,15 @@ def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
 ) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]: ...
 
 
-def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
-    basis: TupleBasisLike[tuple[M, ...], E, DT],
-) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
+@overload
+def as_tuple_basis[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT],
+) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]: ...
+
+
+def as_tuple_basis[DT: ctype[Never]](
+    basis: Basis[BasisMetadata, DT],
+) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]:
     """Get the closest basis to basis that is a TupleBasis.
 
     - For a wrapped TupleBasis, this will return the unwrapped basis
@@ -546,7 +552,7 @@ def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
     """
     super_inner = get_wrapped_basis_super_inner(basis)
     if is_tuple_basis(super_inner):
-        return cast("Any", super_inner)
+        return super_inner
 
     return from_metadata(basis.metadata())  # type: ignore This is ok, since np.generic is a subtype of DT
 
