@@ -432,11 +432,45 @@ def is_tuple_basis(
     return isinstance(basis, TupleBasis)
 
 
+type TupleBasis1D[
+    C: tuple[Basis] = tuple[Basis],
+    E = Any,
+    DT: ctype[Never] = ctype[Never],
+] = TupleBasis[C, E, DT]
+type TupleBasis2D[
+    C: tuple[Basis, Basis] = tuple[Basis, Basis],
+    E = Any,
+    DT: ctype[Never] = ctype[Never],
+] = TupleBasis[C, E, DT]
+type TupleBasis3D[
+    C: tuple[Basis, Basis, Basis] = tuple[Basis, Basis, Basis],
+    E = Any,
+    DT: ctype[Never] = ctype[Never],
+] = TupleBasis[C, E, DT]
+
 type TupleBasisLike[
     M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
     E = Any,
     DT: ctype[Never] = ctype[Never],
 ] = Basis[TupleMetadata[M, E], DT]
+
+type TupleBasisLike1D[
+    M: tuple[BasisMetadata] = tuple[BasisMetadata],
+    E = Any,
+    DT: ctype[Never] = ctype[Never],
+] = TupleBasisLike[M, E, DT]
+type TupleBasisLike2D[
+    M: tuple[BasisMetadata, BasisMetadata] = tuple[BasisMetadata, BasisMetadata],
+    E = Any,
+    DT: ctype[Never] = ctype[Never],
+] = TupleBasisLike[M, E, DT]
+type TupleBasisLike3D[
+    M: tuple[BasisMetadata, BasisMetadata, BasisMetadata] = tuple[
+        BasisMetadata, BasisMetadata, BasisMetadata
+    ],
+    E = Any,
+    DT: ctype[Never] = ctype[Never],
+] = TupleBasisLike[M, E, DT]
 
 
 @overload

@@ -113,7 +113,6 @@ class ArrayConversion[
     def ok[M_: BasisMetadata, DT_: np.generic](
         self: ArrayConversion[M_, Basis[M_, ctype[DT_]], np.dtype[DT_]],
     ) -> Array[B1, DT]:
-        _a = self._old_basis.__convert_vector_into__(self._data, self._new_basis).ok()
         return cast(
             "Array[B1, DT]",
             build(
@@ -163,6 +162,12 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         self._basis = basis
         self._data = data.ravel()
 
+    @staticmethod
+    def build[B_: Basis, DT_: np.dtype[np.generic]](
+        basis: B_, data: np.ndarray[Any, DT_]
+    ) -> ArrayBuilder[B_, DT_]:
+        return ArrayBuilder(basis, data)
+
     @property
     def fundamental_shape(self) -> NestedLength:
         """Datatype of the data stored in the array."""
@@ -187,6 +192,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     def raw_data(self, data: np.ndarray[Any, np.dtype[np.generic]]) -> None:
         """Set the raw data for the array."""
         assert self.basis.size == data.size
+        assert self.raw_data.dtype == data.dtype
         self._data = cast("np.ndarray[tuple[int], Any]", data.ravel())
 
     def as_array(self) -> np.ndarray[Any, DT]:
