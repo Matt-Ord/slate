@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.array import Array, build
-from slate.basis import (
+from slate_core.array import Array, build
+from slate_core.basis import (
     DiagonalBasis,
     FundamentalBasis,
     SplitBasis,

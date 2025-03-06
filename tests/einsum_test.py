@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate._einsum._einstein_index import (
+from slate_core._einsum._einstein_index import (
     EinsteinIndex,  # noqa: PLC2701
     NestedEinsteinIndex,
     parse_einsum_index,  # noqa: PLC2701
 )
-from slate.array import build, cast_basis
-from slate.basis import (
+from slate_core.array import build, cast_basis
+from slate_core.basis import (
     CroppedBasis,
     FundamentalBasis,
     TransformedBasis,
@@ -20,11 +20,11 @@ from slate.basis import (
     TupleBasis,
     with_child,
 )
-from slate.linalg import into_diagonal, into_diagonal_hermitian
+from slate_core.linalg import into_diagonal, into_diagonal_hermitian
 
 if TYPE_CHECKING:
-    from slate.array import Array
-    from slate.basis import Basis
+    from slate_core.array import Array
+    from slate_core.basis import Basis
 
 
 def _test_einsum_in_basis(

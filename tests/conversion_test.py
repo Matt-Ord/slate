@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Never
 import numpy as np
 import pytest
 
-from slate.array import Array, build
-from slate.basis import (
+from slate_core.array import Array, build
+from slate_core.basis import (
     BlockDiagonalBasis,
     DiagonalBasis,
     FundamentalBasis,
@@ -20,9 +20,9 @@ from slate.basis import (
 )
 
 if TYPE_CHECKING:
-    from slate.basis._basis import Basis, ctype
-    from slate.metadata import SimpleMetadata
-    from slate.metadata._metadata import BasisMetadata
+    from slate_core.basis._basis import Basis, ctype
+    from slate_core.metadata import SimpleMetadata
+    from slate_core.metadata._metadata import BasisMetadata
 
 
 def test_transformed_basis_round_trip(

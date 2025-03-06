@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from slate.array import Array, cast_basis
-from slate.linalg import get_eigenvalues, into_diagonal
+from slate_core.array import Array, cast_basis
+from slate_core.linalg import get_eigenvalues, into_diagonal
 
 if __name__ == "__main__":
     rng = np.random.default_rng()
