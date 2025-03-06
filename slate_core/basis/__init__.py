@@ -36,6 +36,9 @@ from slate_core.basis._transformed import (
 from slate_core.basis._truncated import Padding, TruncatedBasis, Truncation
 from slate_core.basis._tuple import (
     TupleBasis,
+    TupleBasis1D,
+    TupleBasis2D,
+    TupleBasis3D,
     TupleBasisLike,
     TupleBasisLike1D,
     TupleBasisLike2D,
@@ -85,6 +88,9 @@ __all__ = [
     "TruncatedBasis",
     "Truncation",
     "TupleBasis",
+    "TupleBasis1D",
+    "TupleBasis2D",
+    "TupleBasis3D",
     "TupleBasisLike",
     "TupleBasisLike1D",
     "TupleBasisLike2D",
