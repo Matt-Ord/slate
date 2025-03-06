@@ -5,8 +5,8 @@ from pathlib import Path
 
 import numpy as np
 
-from slate import Array, Basis
-from slate.util import cached, timed
+from slate_core import Array, Basis
+from slate_core.util import cached, timed
 
 if __name__ == "__main__":
     with tempfile.TemporaryDirectory() as dir_name:

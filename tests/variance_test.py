@@ -2,20 +2,20 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Never, cast
 
-from slate.array import build
+from slate_core.array import build
 
 if TYPE_CHECKING:
     import numpy as np
 
-    from slate.array import Array, ArrayConversion
-    from slate.basis import (
+    from slate_core.array import Array, ArrayConversion
+    from slate_core.basis import (
         Basis,
         FundamentalBasis,
         TupleBasis,
         WrappedBasis,
         ctype,
     )
-    from slate.metadata import (
+    from slate_core.metadata import (
         BasisMetadata,
         SimpleMetadata,
         TupleMetadata,

@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from slate import array as _array
-from slate.array import Array, build
-from slate.basis import (
+from slate_core import array as _array
+from slate_core.array import Array, build
+from slate_core.basis import (
     BlockDiagonalBasis,
     DiagonalBasis,
     TupleBasisLike,
@@ -15,17 +15,17 @@ from slate.basis import (
     from_metadata,
     from_shape,
 )
-from slate.linalg import (
+from slate_core.linalg import (
     get_eigenvalues_hermitian,
     into_diagonal,
     into_diagonal_hermitian,
 )
 
 if TYPE_CHECKING:
-    from slate.basis import Basis, TupleBasis, ctype
-    from slate.basis._fundamental import FundamentalBasis
-    from slate.metadata import BasisMetadata, SimpleMetadata
-    from slate.metadata._stacked import TupleMetadata
+    from slate_core.basis import Basis, TupleBasis, ctype
+    from slate_core.basis._fundamental import FundamentalBasis
+    from slate_core.metadata import BasisMetadata, SimpleMetadata
+    from slate_core.metadata._stacked import TupleMetadata
 
 
 @pytest.fixture

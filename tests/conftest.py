@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate.array import Array
+from slate_core.array import Array
 
 if TYPE_CHECKING:
-    from slate.basis import TupleBasisLike
-    from slate.metadata import BasisMetadata
+    from slate_core.basis import TupleBasisLike
+    from slate_core.metadata import BasisMetadata
 
 
 @pytest.fixture

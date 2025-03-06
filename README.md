@@ -32,9 +32,9 @@ To create a `Array` with a given basis and data:
 
 ```python
 import numpy as np
-from slate.array import Array
-from slate.basis import FundamentalBasis
-from slate.metadata import SimpleMetadata
+from slate_core.array import Array
+from slate_core.basis import FundamentalBasis
+from slate_core.metadata import SimpleMetadata
 
 # Create some data
 data = np.array([[1, 2], [3, 4]])
@@ -50,8 +50,8 @@ print(slate_array.raw_data)
 SLATE supports various bases like `TruncatedBasis`, `CroppedBasis`, and `TransformedBasis`. Here is an example of using a `CroppedBasis`:
 
 ```python
-from slate.basis import CroppedBasis
-from slate.metadata import BasisMetadata
+from slate_core.basis import CroppedBasis
+from slate_core.metadata import BasisMetadata
 
 # Create a truncated basis
 truncated_basis = CroppedBasis(10, FundamentalBasis(SimpleMetadata((20,))))

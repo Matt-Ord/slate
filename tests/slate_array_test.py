@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate import array
-from slate.array import Array, build, conjugate, transpose
-from slate.basis import (
+from slate_core import array
+from slate_core.array import Array, build, conjugate, transpose
+from slate_core.basis import (
     Basis,
     BlockDiagonalBasis,
     DiagonalBasis,
@@ -16,8 +16,8 @@ from slate.basis import (
 )
 
 if TYPE_CHECKING:
-    from slate.basis import TupleBasis, ctype
-    from slate.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
+    from slate_core.basis import TupleBasis, ctype
+    from slate_core.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
 
 
 def test_slate_array_as_array(
