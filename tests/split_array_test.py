@@ -19,10 +19,14 @@ def test_split_array_equals_diagonal() -> None:
 
     diagonal = array.with_basis(
         DiagonalBasis(
-            TupleBasis((array.basis.children[0], array.basis.children[1])).upcast()
-        ).upcast()
+            TupleBasis(
+                (array.basis.children[0], array.basis.children[1])
+            ).resolve_ctype()
+        ).resolve_ctype()
     ).ok()
-    split = array.with_basis(SplitBasis(diagonal.basis, diagonal.basis).upcast()).ok()
+    split = array.with_basis(
+        SplitBasis(diagonal.basis, diagonal.basis).resolve_ctype()
+    ).ok()
 
     np.testing.assert_allclose(diagonal.raw_data, [1.0, 2.0, 3.0])
     np.testing.assert_allclose(split.raw_data, [1.0, 2.0, 3.0, 0, 0, 0])
@@ -31,10 +35,10 @@ def test_split_array_equals_diagonal() -> None:
 
 def test_split_array_equals_transformed() -> None:
     data = np.diag(np.arange(1, 4)).astype(np.complex128)
-    basis_k = TransformedBasis(FundamentalBasis.from_size(3)).upcast()
-    array = build(TupleBasis((basis_k, basis_k)).upcast(), data).ok()
+    basis_k = TransformedBasis(FundamentalBasis.from_size(3)).resolve_ctype()
+    array = build(TupleBasis((basis_k, basis_k)).resolve_ctype(), data).ok()
 
-    diagonal = array.with_basis(DiagonalBasis(array.basis).upcast()).ok()
+    diagonal = array.with_basis(DiagonalBasis(array.basis).resolve_ctype()).ok()
     fundamental = DiagonalBasis(from_metadata(array.basis.metadata()))
     split = build(
         SplitBasis(fundamental, diagonal.basis),

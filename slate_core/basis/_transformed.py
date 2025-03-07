@@ -48,7 +48,7 @@ class TransformedBasis[
         super().__init__(inner)
 
     @override
-    def upcast[DT_: np.complexfloating](
+    def resolve_ctype[DT_: np.complexfloating](
         self: TransformedBasis[Basis[Any, ComplexCtype[DT_]], Any],
     ) -> TransformedBasis[B, ComplexCtype[DT_]]:
         """Upcast the wrapped basis to a more specific type."""
@@ -265,7 +265,9 @@ def transformed_from_metadata(
     if isinstance(metadata, SimpleMetadata):
         is_dual = False if is_dual is None else is_dual
         assert isinstance(is_dual, bool)
-        return TransformedBasis(FundamentalBasis(metadata, is_dual=is_dual)).upcast()
+        return TransformedBasis(
+            FundamentalBasis(metadata, is_dual=is_dual)
+        ).resolve_ctype()
 
     assert is_tuple_metadata(metadata)
     is_dual = (
@@ -278,7 +280,7 @@ def transformed_from_metadata(
         transformed_from_metadata(c, is_dual=dual)
         for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
-    return TupleBasis(children, metadata.extra).upcast()
+    return TupleBasis(children, metadata.extra).resolve_ctype()
 
 
 @overload

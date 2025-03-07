@@ -61,7 +61,7 @@ def test_einsum() -> None:
                 FundamentalBasis.from_size(10),
                 FundamentalBasis.from_size(10).dual_basis(),
             )
-        ).upcast(),
+        ).resolve_ctype(),
         data,
     ).ok()
 
@@ -91,13 +91,13 @@ def test_einsum_diagonal() -> None:
                 FundamentalBasis.from_size(10),
                 FundamentalBasis.from_size(10).dual_basis(),
             )
-        ).upcast(),
+        ).resolve_ctype(),
         data,
     ).ok()
 
     data = rng.random((10,)) + 1j * rng.random((10,))
     vector = build(array.basis.children[0], data).ok()
-    downcast_array = cast_basis(array, array.basis.downcast_metadata()).ok()
+    downcast_array = cast_basis(array, array.basis.upcast()).ok()
     diagonal_array = into_diagonal(downcast_array)
 
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner.children[0])
@@ -110,10 +110,10 @@ def test_einsum_diagonal() -> None:
                 FundamentalBasis.from_size(10),
                 FundamentalBasis.from_size(10).dual_basis(),
             )
-        ).upcast(),
+        ).resolve_ctype(),
         data,
     ).ok()
-    downcast_array = cast_basis(array, array.basis.downcast_metadata()).ok()
+    downcast_array = cast_basis(array, array.basis.upcast()).ok()
     diagonal_array = into_diagonal_hermitian(downcast_array)
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner.children[0])
 

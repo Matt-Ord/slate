@@ -68,7 +68,7 @@ def _einsum_smart[DT: np.dtype[np.number]](
     if as_diagonal is not None:
         out_basis = TupleBasis(
             (as_tuple_0.children[0], as_diagonal.inner.children[1])
-        ).upcast()
+        ).resolve_ctype()
         array_0 = (
             arrays[0].with_basis(cast("Basis[Any, ctype[np.generic]]", as_tuple_0)).ok()
         )

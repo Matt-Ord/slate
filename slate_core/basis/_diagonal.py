@@ -17,6 +17,8 @@ from slate_core.basis._tuple import TupleBasis, TupleBasis2D
 from slate_core.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
 
+from ._upcast import AsUpcast
+
 if TYPE_CHECKING:
     from slate_core.metadata import TupleMetadata
 
@@ -36,21 +38,21 @@ class DiagonalBasis[
         assert self.inner.children[0].size == self.inner.children[1].size
 
     @override
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: DiagonalBasis[TupleBasis[tuple[Basis, Basis], Any, DT_], Any],
     ) -> DiagonalBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("DiagonalBasis[B, DT_]", self)
 
     @override
-    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+    def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
-    ) -> Basis[TupleMetadata[tuple[M0, M1], E], DT]:
+    ) -> AsUpcast[DiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
         """
-        return cast("Any", self)
+        return cast("Any", AsUpcast(self, self.metadata()))
 
     @property
     @override

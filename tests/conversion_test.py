@@ -33,7 +33,7 @@ def test_transformed_basis_round_trip(
     basis = TransformedBasis(slate_array_complex.basis)
 
     converted_array = slate_array_complex.with_basis(
-        TransformedBasis(slate_array_complex.basis).upcast()
+        TransformedBasis(slate_array_complex.basis).resolve_ctype()
     ).ok()
     assert converted_array.basis == basis
     np.testing.assert_array_almost_equal(
@@ -51,7 +51,7 @@ def test_transformed_basis_round_trip(
 
 def test_transformed_basis() -> None:
     fundamental_basis = FundamentalBasis.from_size(5)
-    transformed_basis = TransformedBasis(fundamental_basis).upcast()
+    transformed_basis = TransformedBasis(fundamental_basis).resolve_ctype()
 
     rng = np.random.default_rng()
     data = rng.random(fundamental_basis.size) + 1j * rng.random(fundamental_basis.size)
@@ -95,7 +95,7 @@ def test_transformed_basis() -> None:
 
 def test_diagonal_basis_round_trip() -> None:
     full_basis = from_shape((10, 10))
-    basis_diagonal = DiagonalBasis(full_basis).upcast()
+    basis_diagonal = DiagonalBasis(full_basis).resolve_ctype()
 
     array = build(full_basis, np.diag(np.ones(10))).ok()
 
@@ -132,17 +132,17 @@ def test_diagonal_basis_round_trip() -> None:
 
 def test_transform_spaced_basis() -> None:
     half_basis = from_shape((105,))
-    full_basis = TupleBasis((half_basis, half_basis)).upcast()
+    full_basis = TupleBasis((half_basis, half_basis)).resolve_ctype()
     spaced_basis = TruncatedBasis(
-        Truncation(3, 5, 0), TransformedBasis(half_basis).upcast()
-    ).upcast()
+        Truncation(3, 5, 0), TransformedBasis(half_basis).resolve_ctype()
+    ).resolve_ctype()
 
     array = build(
         RecastBasis(
-            DiagonalBasis(full_basis).upcast(),
+            DiagonalBasis(full_basis).resolve_ctype(),
             half_basis,
             spaced_basis,
-        ).upcast(),
+        ).resolve_ctype(),
         np.ones(spaced_basis.size, dtype=np.complex128),
     ).ok()
 
@@ -188,7 +188,7 @@ def test_dual_basis_transform(
     dual_child_basis = TupleBasis(
         tuple(child.dual_basis() for child in basis.children),
         extra=dual_basis.metadata().extra,
-    ).upcast()
+    ).resolve_ctype()
     array = build(basis, np.ones((10, 10), dtype=np.complex128)).ok()
 
     np.testing.assert_array_almost_equal(
@@ -209,7 +209,7 @@ def test_block_basis() -> None:
     data = np.arange(4 * 6).reshape(4, 6)
     array = Array.from_array(data)
 
-    block_basis = BlockDiagonalBasis(array.basis, (2, 2)).upcast()
+    block_basis = BlockDiagonalBasis(array.basis, (2, 2)).resolve_ctype()
 
     in_block_basis = array.with_basis(block_basis).ok()
 

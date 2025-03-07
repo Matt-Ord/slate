@@ -69,7 +69,10 @@ from slate_core.basis._wrapped import (
     get_wrapped_basis_super_inner,
 )
 
+from ._upcast import AsUpcast
+
 __all__ = [
+    "AsUpcast",
     "Basis",
     "BasisFeature",
     "BasisStateMetadata",

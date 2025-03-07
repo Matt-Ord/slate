@@ -7,6 +7,7 @@ import numpy as np
 
 from slate_core.array._array import Array, build
 from slate_core.basis import (
+    AsUpcast,
     Basis,
     BasisStateMetadata,
     DiagonalBasis,
@@ -20,13 +21,13 @@ from slate_core.metadata import BasisMetadata, SimpleMetadata
 
 
 class TrivialExplicitBasis[
-    B1: Basis,
+    B: Basis,
     DT: ctype[Never] = ctype[Never],
 ](
     ExplicitUnitaryBasis[
         Array[
             TupleBasisLike[
-                tuple[SimpleMetadata, BasisStateMetadata[B1]],
+                tuple[SimpleMetadata, BasisStateMetadata[B]],
                 None,
                 ctype[np.generic],
             ],
@@ -46,14 +47,14 @@ class TrivialExplicitBasis[
                         FundamentalBasis(BasisStateMetadata(inner)),
                         FundamentalBasis(BasisStateMetadata(inner)),
                     )
-                ).upcast()
-            ).upcast(),
+                ).resolve_ctype()
+            ).resolve_ctype(),
             np.ones(inner.size),
         ).ok()
         super().__init__(cast("Any", matrix), data_id=uuid.UUID(int=0))
 
     @override
-    def downcast_metadata[M: BasisMetadata](
+    def upcast[M: BasisMetadata](
         self: TrivialExplicitBasis[Basis[M]],
-    ) -> Basis[M, DT]:
-        return cast("Basis[M, DT]", self)
+    ) -> AsUpcast[TrivialExplicitBasis[B, DT], M, DT]:
+        return cast("Any", AsUpcast(self, self.metadata()))

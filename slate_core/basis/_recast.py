@@ -35,7 +35,7 @@ class RecastBasis[
         assert self._outer_recast.metadata() == self.inner_recast.metadata()
 
     @override
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: RecastBasis[Basis[Any, DT_], Basis[Any, DT_], Basis[Any, DT_], Any],
     ) -> RecastBasis[BInner, BInnerRecast, BOuterRecast, DT_]:
         """Upcast the wrapped basis to a more specific type."""

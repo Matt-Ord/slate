@@ -12,6 +12,7 @@ from slate_core.array import Array, build
 from slate_core.array._misc import cast_as_dual
 from slate_core.array._transpose import inv, transpose
 from slate_core.basis import (
+    AsUpcast,
     Basis,
     BasisFeature,
     BasisStateMetadata,
@@ -93,7 +94,7 @@ class ExplicitBasis[
         super().__init__(self.transform().basis.metadata().children[1].basis)
 
     @override
-    def downcast_metadata[M: BasisMetadata](
+    def upcast[M: BasisMetadata](
         self: ExplicitBasis[
             Array[
                 Basis[
@@ -106,8 +107,8 @@ class ExplicitBasis[
             ],
             Any,
         ],
-    ) -> Basis[M, DT]:
-        return cast("Basis[M, DT]", self)
+    ) -> AsUpcast[ExplicitBasis[Transform, DT], M, DT]:
+        return cast("Any", AsUpcast(self, self.metadata()))
 
     @override
     def metadata[M: BasisMetadata](
@@ -127,7 +128,7 @@ class ExplicitBasis[
         return cast("M", self.inner.metadata())
 
     @override
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: ExplicitBasis[
             Array[
                 Basis[
@@ -218,10 +219,8 @@ class ExplicitBasis[
         if inner_recast.children[1].is_dual:
             state_basis = state_basis.dual_basis()
 
-        inner = TupleBasis((inner_recast.children[0], state_basis)).upcast()
-        eigenvectors_basis = RecastBasis(
-            inner, inner_recast.downcast_metadata(), transposed.basis
-        )
+        inner = TupleBasis((inner_recast.children[0], state_basis)).resolve_ctype()
+        eigenvectors_basis = RecastBasis(inner, inner_recast.upcast(), transposed.basis)
         return _array.cast_basis(transposed, eigenvectors_basis)
 
     @override
@@ -481,9 +480,7 @@ class ExplicitUnitaryBasis[
 
 type ExplicitBasisWithInner[Inner: Basis] = ExplicitBasis[
     Array[
-        Basis[
-            TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis[Inner]]], None]
-        ],
+        Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Inner]], None]],
         np.dtype[np.number],
     ],
 ]
