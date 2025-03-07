@@ -208,7 +208,7 @@ def flatten[M: BasisMetadata, E, DT1: ctype[Never], DT: np.dtype[np.generic]](
 def flatten[DT: np.dtype[np.generic]](
     array: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any], DT],
 ) -> Array[Any, DT]:
-    basis_as_tuple = basis.as_tuple_basis(array.basis).upcast()
+    basis_as_tuple = basis.as_tuple_basis(array.basis).resolve_ctype()
     if len(basis_as_tuple.children) == 1:
         converted = as_tuple_basis(array)
         # Since the basis supports the same dtype as the original basis

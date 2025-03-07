@@ -98,7 +98,7 @@ class SplitBasis[
         super().__init__(get_common_basis(lhs, rhs))
 
     @override
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: SplitBasis[Basis[Any, DT_], Basis[Any, DT_], Any],
     ) -> SplitBasis[B0, B1, DT_]:
         """Upcast the wrapped basis to a more specific type."""

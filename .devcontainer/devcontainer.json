@@ -32,7 +32,7 @@
 				"python.testing.pytestEnabled": true,
 				"python.analysis.diagnosticMode": "workspace",
 				"python.analysis.include": [
-					"slate"
+					"slate_core"
 				],
 				"python.analysis.autoImportCompletions": true,
 				"cSpell.allowCompoundWords": true,

@@ -67,7 +67,7 @@ def tuple_basis_dtype_variance() -> None:
         "TupleBasis[tuple[Basis[BasisMetadata, ctype[np.float64]], ...],Any, ctype[Never]]",
         {},
     )
-    c_upcast = c.upcast()
+    c_upcast = c.resolve_ctype()
     _c_upcast_res: TupleBasis[
         tuple[Basis[BasisMetadata, ctype[Never]], ...], Any, ctype[np.float64]
     ] = c_upcast
@@ -76,7 +76,7 @@ def tuple_basis_dtype_variance() -> None:
         "TupleBasis[tuple[Basis[BasisMetadata, ctype[np.float64]]],Any, ctype[Never]]",
         {},
     )
-    d_upcast = d.upcast()
+    d_upcast = d.resolve_ctype()
     _d_upcast_res: TupleBasis[
         tuple[Basis[BasisMetadata, ctype[Never]], ...], Any, ctype[np.float64]
     ] = d_upcast
@@ -250,7 +250,7 @@ def wrappeed_basis_variance() -> None:
         {},
     )
     # Upcasting the basis should infer the correct type
-    b_upcast = b.upcast()
+    b_upcast = b.resolve_ctype()
     _h: WrappedBasis[Basis[SimpleMetadata, ctype[np.float64]], ctype[np.float64]] = (
         b_upcast
     )

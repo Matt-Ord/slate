@@ -35,6 +35,8 @@ from slate_core.metadata import (
     is_tuple_metadata,
 )
 
+from ._upcast import AsUpcast
+
 
 def _convert_tuple_basis_axes[
     E,
@@ -145,37 +147,37 @@ class TupleBasis[
         self._children = cast("C", children)
         self._extra = cast("E", extra)
 
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: TupleBasis[tuple[Basis[BasisMetadata, DT_], ...], Any, Any],
     ) -> TupleBasis[C, E, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("TupleBasis[C,E, DT_]", self)
 
     @overload
-    def downcast_metadata[M0: BasisMetadata, E_](
+    def upcast[M0: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M0]], E_, Any],
-    ) -> Basis[TupleMetadata[tuple[M0], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M0], E], DT]: ...
     @overload
-    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, E_](
+    def upcast[M0: BasisMetadata, M1: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M0], Basis[M1]], E_, Any],
-    ) -> Basis[TupleMetadata[tuple[M0, M1], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M0, M1], E], DT]: ...
     @overload
-    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E_](
+    def upcast[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E_, Any],
-    ) -> Basis[TupleMetadata[tuple[M0, M1, M2], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M0, M1, M2], E], DT]: ...
     @overload
-    def downcast_metadata(
-        self,
-    ) -> Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]: ...
+    def upcast[M_: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M_], ...], E_, Any],
+    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M_, ...], E], DT]: ...
 
-    def downcast_metadata(
+    def upcast(
         self,
-    ) -> Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]:
+    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[Any, ...], Any], DT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
         """
-        return cast("Any", self)
+        return cast("Any", AsUpcast(self, self.metadata()))
 
     @override
     def dual_basis(
@@ -411,15 +413,37 @@ def from_metadata(
         from_metadata(c, is_dual=dual)
         for (c, dual) in zip(metadata.children, is_dual, strict=False)
     )
-    return TupleBasis(children, metadata.extra).upcast()
+    return TupleBasis(children, metadata.extra).resolve_ctype()
 
 
 @overload
+def is_tuple_basis[M0: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M0], E, DT],
+) -> TypeGuard[TupleBasis[tuple[Basis[M0, DT]], E, DT]]: ...
+@overload
+def is_tuple_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M0, M1], E, DT],
+) -> TypeGuard[TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT]]: ...
+@overload
+def is_tuple_basis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+    DT: ctype[Never],
+](
+    basis: TupleBasisLike[tuple[M0, M1, M2], E, DT],
+) -> TypeGuard[
+    TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT], Basis[M2, DT]], E, DT]
+]: ...
+@overload
+def is_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
+    basis: TupleBasisLike[tuple[M, ...], E, DT],
+) -> TypeGuard[TupleBasis[tuple[Basis[M, DT], ...], E, DT]]: ...
+@overload
 def is_tuple_basis[M: BasisMetadata, DT: ctype[Never]](
     basis: Basis[M, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Never, DT]]: ...
-
-
+) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]]: ...
 @overload
 def is_tuple_basis(
     basis: object,

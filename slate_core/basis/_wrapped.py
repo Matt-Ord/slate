@@ -9,6 +9,8 @@ import numpy as np
 from slate_core.basis._basis import Basis, BasisConversion, NestedBool, ctype
 from slate_core.metadata import BasisMetadata
 
+from ._upcast import AsUpcast
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -42,20 +44,23 @@ class WrappedBasis[
     def __init__[B_: Basis](self: WrappedBasis[B_, ctype[Never]], inner: B_) -> None:
         self._inner = cast("B", inner)
 
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: WrappedBasis[Basis[Any, DT_], Any],
     ) -> WrappedBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("WrappedBasis[B, DT_]", self)
 
-    def downcast_metadata[M: BasisMetadata](
+    def upcast[M: BasisMetadata](
         self: WrappedBasis[Basis[M, Any], Any],
-    ) -> Basis[M, DT]:
+    ) -> AsUpcast[WrappedBasis[B, DT], M, DT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
         """
-        return cast("Any", self)
+        return cast(
+            "AsUpcast[WrappedBasis[B, DT], M, DT]",
+            AsUpcast(self._inner, self.metadata()),
+        )
 
     @override
     def metadata[M: BasisMetadata](self: WrappedBasis[Basis[M, Any], Any]) -> M:

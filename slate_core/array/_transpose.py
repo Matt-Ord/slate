@@ -55,7 +55,7 @@ def _transpose_from_diagonal[
             TupleBasis(
                 (array.basis.inner.children[1], array.basis.inner.children[0]),
                 array.basis.metadata().extra,
-            ).upcast()
+            ).resolve_ctype()
         ),
         array.raw_data,
     ).ok()  # type: ignore basis is ok
@@ -74,7 +74,7 @@ def _transpose_from_tuple_simple[
         TupleBasis(
             (array.basis.children[1], array.basis.children[0]),
             array.basis.metadata().extra,
-        ).upcast(),
+        ).resolve_ctype(),
         array.raw_data.reshape(array.basis.shape).transpose(),
     ).ok()  # type: ignore basis is ok
 
@@ -163,7 +163,7 @@ def _inv_from_diagonal[
                     array.basis.inner.children[0].dual_basis(),
                 ),
                 array.basis.metadata().extra,
-            ).upcast()
+            ).resolve_ctype()
         ),
         np.divide(1.0, array.raw_data),
     ).ok()  # type: ignore cant infer dtype

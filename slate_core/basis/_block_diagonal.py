@@ -11,8 +11,11 @@ from slate_core.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
 from slate_core.util._diagonal import build_diagonal, extract_diagonal
 
+from ._upcast import AsUpcast
+
 if TYPE_CHECKING:
     from slate_core.metadata._stacked import TupleMetadata
+
 
 # TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
 # arbitrary nested axes? Can we do this in a way which doesn't make the 'SimpleDiagonal'
@@ -44,39 +47,43 @@ class BlockDiagonalBasis[
         self._block_shape = block_shape
 
     @override
-    def upcast[DT_: ctype[Never]](
+    def resolve_ctype[DT_: ctype[Never]](
         self: BlockDiagonalBasis[TupleBasis[Any, Any, DT_], Any],
     ) -> BlockDiagonalBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("BlockDiagonalBasis[B, DT_]", self)
 
     @overload
-    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+    def upcast[M0: BasisMetadata, E](
         self: BlockDiagonalBasis[TupleBasis[tuple[Basis[M0]], E], Any],
-    ) -> Basis[TupleMetadata[tuple[M0], E], DT]: ...
+    ) -> AsUpcast[BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M0], E], DT]: ...
     @overload
-    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+    def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: BlockDiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
-    ) -> Basis[TupleMetadata[tuple[M0, M1], E], DT]: ...
+    ) -> AsUpcast[BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]: ...
     @overload
-    def downcast_metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
+    def upcast[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
         self: BlockDiagonalBasis[
             TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E], Any
         ],
-    ) -> Basis[TupleMetadata[tuple[M0, M1, M2], E], DT]: ...
+    ) -> AsUpcast[
+        BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1, M2], E], DT
+    ]: ...
     @overload
-    def downcast_metadata[M: BasisMetadata, E](
+    def upcast[M: BasisMetadata, E](
         self: BlockDiagonalBasis[TupleBasis[tuple[Basis[M], ...], E], Any],
-    ) -> Basis[TupleMetadata[tuple[M, ...], E], DT]: ...
+    ) -> AsUpcast[BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M, ...], E], DT]: ...
     @override
-    def downcast_metadata(
+    def upcast(
         self,
-    ) -> Basis[TupleMetadata[tuple[BasisMetadata, ...], Any], DT]:
+    ) -> AsUpcast[
+        BlockDiagonalBasis[B, DT], TupleMetadata[tuple[BasisMetadata, ...], Any], DT
+    ]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
         """
-        return cast("Any", self)
+        return cast("Any", AsUpcast(self, self.metadata()))
 
     @property
     def block_shape(self) -> tuple[int, ...]:

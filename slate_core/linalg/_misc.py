@@ -27,7 +27,9 @@ if TYPE_CHECKING:
 def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Basis[TupleMetadata[tuple[Any, M1], E]], DT],
 ) -> Array[Basis[M1, ctype[np.generic]], DT]:
-    b = DiagonalBasis(basis.as_tuple_basis(basis.as_fundamental(array.basis))).upcast()
+    b = DiagonalBasis(
+        basis.as_tuple_basis(basis.as_fundamental(array.basis))
+    ).resolve_ctype()
     converted = array.with_basis(b).ok()
 
     return build(converted.basis.inner.children[1], converted.raw_data).ok()
@@ -63,5 +65,5 @@ def norm[DT: np.dtype[np.number]](
     axis %= len(full_basis.children)
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    ).upcast()
+    ).resolve_ctype()
     return build(out_basis, data).ok()

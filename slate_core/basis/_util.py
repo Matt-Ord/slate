@@ -49,7 +49,7 @@ def with_modified_children[
     """Get the basis with modified children."""
     return TupleBasis[tuple[Basis[M, DT0], ...], E, DT0](
         tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata().extra
-    ).upcast()
+    ).resolve_ctype()
 
 
 def with_modified_child[

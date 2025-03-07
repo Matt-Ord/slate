@@ -9,7 +9,7 @@ from slate_core.basis import (
 
 if __name__ == "__main__":
     rng = np.random.default_rng()
-    data_basis = DiagonalBasis(basis.from_shape((3, 3))).upcast().downcast_metadata()
+    data_basis = DiagonalBasis(basis.from_shape((3, 3))).resolve_ctype().upcast()
     data = rng.random(data_basis.size).astype(np.complex128)
     arr = array.build(data_basis, data).ok()
 

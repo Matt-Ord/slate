@@ -55,23 +55,19 @@ def _test_into_diagonal(
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(
-            diagonal_basis.children[0].eigenvectors().basis.downcast_metadata()
-        )
+        as_tuple_basis(diagonal_basis.children[0].eigenvectors().basis.upcast())
         .children[1]
         .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(
-            diagonal_basis.children[1].eigenvectors().basis.downcast_metadata()
-        )
+        as_tuple_basis(diagonal_basis.children[1].eigenvectors().basis.upcast())
         .children[1]
         .is_dual
         == original_as_tuple.children[1].is_dual
     )
 
-    full_as_diagonal = array.with_basis(diagonal.basis.downcast_metadata()).ok()
+    full_as_diagonal = array.with_basis(diagonal.basis.upcast()).ok()
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data, atol=1e-15)
 
     diagonal_as_full = diagonal.with_basis(array.basis).ok()
@@ -119,17 +115,13 @@ def _test_into_diagonal_hermitian(
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(
-            diagonal_basis.children[0].eigenvectors().basis.downcast_metadata()
-        )
+        as_tuple_basis(diagonal_basis.children[0].eigenvectors().basis.upcast())
         .children[1]
         .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(
-            diagonal_basis.children[1].eigenvectors().basis.downcast_metadata()
-        )
+        as_tuple_basis(diagonal_basis.children[1].eigenvectors().basis.upcast())
         .children[1]
         .is_dual
         == original_as_tuple.children[1].is_dual
@@ -141,7 +133,7 @@ def _test_into_diagonal_hermitian(
     )
 
     np.testing.assert_allclose(diagonal.as_array(), array.as_array())
-    full_as_diagonal = array.with_basis(diagonal.basis.downcast_metadata()).ok()
+    full_as_diagonal = array.with_basis(diagonal.basis.upcast()).ok()
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data)
 
     diagonal_as_full = diagonal.with_basis(array.basis).ok()

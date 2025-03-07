@@ -52,7 +52,7 @@ def standard_deviation[DT: np.number](
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return build(out_basis.upcast(), data).ok()
+    return build(out_basis.resolve_ctype(), data).ok()
 
 
 @overload
@@ -91,7 +91,7 @@ def average[DT: np.number](
     axis %= len(full_basis.children)
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    ).upcast()
+    ).resolve_ctype()
     return build(out_basis, data).ok()
 
 
@@ -131,7 +131,7 @@ def min[DT: np.number](  # noqa: A001
     axis %= len(full_basis.children)
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    ).upcast()
+    ).resolve_ctype()
     return build(out_basis, data).ok()
 
 
@@ -171,5 +171,5 @@ def max[DT: np.number](  # noqa: A001
     axis %= len(full_basis.children)
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
-    ).upcast()
+    ).resolve_ctype()
     return build(out_basis, data).ok()
