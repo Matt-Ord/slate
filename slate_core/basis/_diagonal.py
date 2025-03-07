@@ -13,7 +13,7 @@ from typing import (
 import numpy as np
 
 from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
-from slate_core.basis._tuple import TupleBasis, TupleBasis2D
+from slate_core.basis._tuple import TupleBasis
 from slate_core.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
 
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 class DiagonalBasis[
-    B: TupleBasis2D = TupleBasis2D,
+    B: TupleBasis[tuple[Basis, Basis], Any] = TupleBasis[tuple[Basis, Basis], Any],
     DT: ctype[Never] = ctype[Never],
 ](
     WrappedBasis[B, DT],
