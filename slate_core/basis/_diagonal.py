@@ -45,6 +45,12 @@ class DiagonalBasis[
         return cast("DiagonalBasis[B, DT_]", self)
 
     @override
+    def metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+        self: DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
+    ) -> TupleMetadata[tuple[M0, M1], E]:
+        return self.upcast().metadata()
+
+    @override
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
     ) -> AsUpcast[DiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]:

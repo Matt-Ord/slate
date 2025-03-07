@@ -28,7 +28,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
 
     @property
     def inner(self) -> B:
-        """Unwrap the wrapped basis to a more specific type."""
+        """Get the original basis, with a less specific metadata type."""
         return self._basis
 
     @property
