@@ -460,17 +460,23 @@ type TupleBasis1D[
     C: tuple[Basis] = tuple[Basis],
     E = Any,
     DT: ctype[Never] = ctype[Never],
-] = TupleBasis[C, E, DT]
+] = AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[BasisMetadata], E], DT]
 type TupleBasis2D[
     C: tuple[Basis, Basis] = tuple[Basis, Basis],
     E = Any,
     DT: ctype[Never] = ctype[Never],
-] = TupleBasis[C, E, DT]
+] = AsUpcast[
+    TupleBasis[C, E, DT], TupleMetadata[tuple[BasisMetadata, BasisMetadata], E], DT
+]
 type TupleBasis3D[
     C: tuple[Basis, Basis, Basis] = tuple[Basis, Basis, Basis],
     E = Any,
     DT: ctype[Never] = ctype[Never],
-] = TupleBasis[C, E, DT]
+] = AsUpcast[
+    TupleBasis[C, E, DT],
+    TupleMetadata[tuple[BasisMetadata, BasisMetadata, BasisMetadata], E],
+    DT,
+]
 
 type TupleBasisLike[
     M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
