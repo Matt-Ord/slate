@@ -14,10 +14,8 @@ import numpy as np
 
 from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate_core.basis._tuple import TupleBasis
-from slate_core.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
+from slate_core.basis._wrapped import AsUpcast, WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
-
-from ._upcast import AsUpcast
 
 if TYPE_CHECKING:
     from slate_core.metadata import TupleMetadata
@@ -48,7 +46,7 @@ class DiagonalBasis[
     def metadata[M0: BasisMetadata, M1: BasisMetadata, E](
         self: DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
     ) -> TupleMetadata[tuple[M0, M1], E]:
-        return self.upcast().metadata()
+        return self.inner.metadata()
 
     @override
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E](

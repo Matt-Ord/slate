@@ -65,11 +65,10 @@ from slate_core.basis._util import (
     with_modified_children,
 )
 from slate_core.basis._wrapped import (
+    AsUpcast,
     WrappedBasis,
     get_wrapped_basis_super_inner,
 )
-
-from ._upcast import AsUpcast
 
 __all__ = [
     "AsUpcast",

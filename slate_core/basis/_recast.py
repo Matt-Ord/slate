@@ -11,6 +11,7 @@ from slate_core.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate_core.basis._tuple import TupleBasis, TupleBasisLike
+    from slate_core.basis._wrapped import AsUpcast
 
 
 class RecastBasis[
@@ -40,6 +41,19 @@ class RecastBasis[
     ) -> RecastBasis[BInner, BInnerRecast, BOuterRecast, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("RecastBasis[BInner, BInnerRecast, BOuterRecast, DT_]", self)
+
+    @override
+    def upcast[M: BasisMetadata](
+        self: RecastBasis[Basis[M, Any]],
+    ) -> AsUpcast[RecastBasis[BInner, BInnerRecast, BOuterRecast, DT], M, DT]:
+        """Metadata associated with the basis.
+
+        Note: this should be a property, but this would ruin variance.
+        """
+        return cast(
+            "AsUpcast[RecastBasis[BInner, BInnerRecast, BOuterRecast, DT], M, DT]",
+            super().upcast(),
+        )
 
     @override
     def __eq__(self, other: object) -> bool:

@@ -7,11 +7,9 @@ import numpy as np
 
 from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate_core.basis._tuple import TupleBasis
-from slate_core.basis._wrapped import WrappedBasis, wrapped_basis_iter_inner
+from slate_core.basis._wrapped import AsUpcast, WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
 from slate_core.util._diagonal import build_diagonal, extract_diagonal
-
-from ._upcast import AsUpcast
 
 if TYPE_CHECKING:
     from slate_core.metadata._stacked import TupleMetadata

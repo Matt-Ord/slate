@@ -23,6 +23,7 @@ from slate_core.basis._basis import (
 )
 from slate_core.basis._fundamental import FundamentalBasis
 from slate_core.basis._wrapped import (
+    AsUpcast,
     get_wrapped_basis_super_inner,
     is_wrapped_basis,
     wrapped_basis_iter_inner,
@@ -34,8 +35,6 @@ from slate_core.metadata import (
     TupleMetadata,
     is_tuple_metadata,
 )
-
-from ._upcast import AsUpcast
 
 
 def _convert_tuple_basis_axes[
@@ -107,7 +106,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
     if is_tuple_basis(super_inner):
         basis_as_tuple = super_inner
     else:
-        return initial.__convert_vector_into__(vectors, final, axis).ok()
+        return super_inner.__convert_vector_into__(vectors, final, axis).ok()
 
     converted = _convert_tuple_basis_vector_unsafe(
         vectors, initial, basis_as_tuple, axis

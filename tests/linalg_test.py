@@ -55,13 +55,13 @@ def _test_into_diagonal(
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(diagonal_basis.children[0].eigenvectors().basis.upcast())
+        as_tuple_basis(diagonal_basis.children[0].eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(diagonal_basis.children[1].eigenvectors().basis.upcast())
+        as_tuple_basis(diagonal_basis.children[1].eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[1].is_dual
@@ -115,13 +115,13 @@ def _test_into_diagonal_hermitian(
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(diagonal_basis.children[0].eigenvectors().basis.upcast())
+        as_tuple_basis(diagonal_basis.children[0].eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(diagonal_basis.children[1].eigenvectors().basis.upcast())
+        as_tuple_basis(diagonal_basis.children[1].eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[1].is_dual
