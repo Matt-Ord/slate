@@ -18,6 +18,7 @@ from slate_core.basis import (
     BasisStateMetadata,
     FundamentalBasis,
     RecastBasis,
+    TupleBasis2D,
     WrappedBasis,
 )
 from slate_core.basis._basis import BasisConversion, ctype
@@ -203,12 +204,15 @@ class ExplicitBasis[
             ]
         ],
     ) -> ArrayBuilder[
-        RecastBasis[
-            TupleBasis[tuple[Basis[M1_, ctype[np.generic]], BInner_], None],
-            TupleBasisLike[
-                tuple[M1_, BasisStateMetadata[BInner_]], None, ctype[np.generic]
+        AsUpcast[
+            RecastBasis[
+                TupleBasis2D[tuple[Basis[M1_, ctype[np.generic]], BInner_], None],
+                TupleBasisLike[
+                    tuple[M1_, BasisStateMetadata[BInner_]], None, ctype[np.generic]
+                ],
+                TupleBasisLike[tuple[M1_, BasisStateMetadata[BInner_]], None, DT1_],
             ],
-            TupleBasisLike[tuple[M1_, BasisStateMetadata[BInner_]], None, DT1_],
+            TupleMetadata[tuple[M1_, BasisMetadata], None],
         ],
         DT_,
     ]:
@@ -219,8 +223,12 @@ class ExplicitBasis[
         if inner_recast.children[1].is_dual:
             state_basis = state_basis.dual_basis()
 
-        inner = TupleBasis((inner_recast.children[0], state_basis)).resolve_ctype()
-        eigenvectors_basis = RecastBasis(inner, inner_recast.upcast(), transposed.basis)
+        inner = (
+            TupleBasis((inner_recast.children[0], state_basis)).resolve_ctype().upcast()
+        )
+        eigenvectors_basis = RecastBasis(
+            inner, inner_recast.upcast(), transposed.basis
+        ).upcast()
         return _array.cast_basis(transposed, eigenvectors_basis)
 
     @override
@@ -439,7 +447,7 @@ class ExplicitUnitaryBasis[
             states_tuple = (
                 self.eigenvectors()
                 .ok()
-                .with_basis(as_fundamental(self.eigenvectors().basis.inner))
+                .with_basis(as_fundamental(self.eigenvectors().basis))
                 .ok()
             )
             _assert_unitary(

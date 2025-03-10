@@ -10,6 +10,7 @@ from slate_core.basis import (
     FundamentalBasis,
     TransformedBasis,
     TupleBasis,
+    TupleBasisLike,
     ctype,
 )
 from slate_core.metadata import (
@@ -29,6 +30,7 @@ __all__ = [
     "SimpleMetadata",
     "TransformedBasis",
     "TupleBasis",
+    "TupleBasisLike",
     "TupleMetadata",
     "array",
     "basis",
