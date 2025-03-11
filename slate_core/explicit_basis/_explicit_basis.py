@@ -96,36 +96,12 @@ class ExplicitBasis[
 
     @override
     def upcast[M: BasisMetadata](
-        self: ExplicitBasis[
-            Array[
-                Basis[
-                    TupleMetadata[
-                        tuple[Any, BasisStateMetadata[Basis[M]]],
-                        Any,
-                    ]
-                ],
-                Any,
-            ],
-            Any,
-        ],
+        self: ExplicitBasisWithMetadata[M, Any],
     ) -> AsUpcast[ExplicitBasis[Transform, CT], M, CT]:
         return cast("Any", AsUpcast(self, self.metadata()))
 
     @override
-    def metadata[M: BasisMetadata](
-        self: ExplicitBasis[
-            Array[
-                Basis[
-                    TupleMetadata[
-                        tuple[SimpleMetadata, BasisStateMetadata[Basis[M]]],
-                        None,
-                    ]
-                ],
-                np.dtype[np.number],
-            ],
-            Any,
-        ],
-    ) -> M:
+    def metadata[M: BasisMetadata](self: ExplicitBasisWithMetadata[M, Any]) -> M:
         return cast("M", self.inner.metadata())
 
     @property
@@ -497,3 +473,16 @@ type ExplicitBasisWithInner[Inner: Basis] = ExplicitBasis[
         np.dtype[np.number],
     ],
 ]
+type ExplicitBasisWithMetadata[M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]] = (
+    ExplicitBasis[
+        Array[
+            Basis[
+                TupleMetadata[
+                    tuple[SimpleMetadata, BasisStateMetadata[Basis[M, CT]]], None
+                ]
+            ],
+            np.dtype[np.number],
+        ],
+        CT,
+    ]
+)
