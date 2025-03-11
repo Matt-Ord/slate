@@ -168,6 +168,13 @@ class WrappedBasis[
             AsUpcast(self, self.metadata()),
         )
 
+    @override
+    def resolve_ctype[DT_: ctype[Never]](
+        self: WrappedBasis[Basis[Any, DT_], Any],
+    ) -> WrappedBasis[B, DT_]:
+        """Upcast the wrapped basis to a more specific type."""
+        return cast("WrappedBasis[B, DT_]", self)
+
 
 class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
     WrappedBasisWithMetadata[B, DT, M],
