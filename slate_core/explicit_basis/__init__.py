@@ -7,11 +7,15 @@ from slate_core.explicit_basis._diagonal import (
 )
 from slate_core.explicit_basis._explicit_basis import (
     ExplicitBasis,
+    ExplicitBasisWithInner,
+    ExplicitBasisWithMetadata,
     ExplicitUnitaryBasis,
 )
 
 __all__ = [
     "ExplicitBasis",
+    "ExplicitBasisWithInner",
+    "ExplicitBasisWithMetadata",
     "ExplicitUnitaryBasis",
     "TrivialExplicitBasis",
 ]

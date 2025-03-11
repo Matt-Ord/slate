@@ -24,7 +24,9 @@ from slate_core.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate_core.basis._tuple import TupleBasisLike
-    from slate_core.explicit_basis._explicit_basis import ExplicitBasisWithInner
+    from slate_core.explicit_basis._explicit_basis import (
+        ExplicitBasisWithMetadata,
+    )
     from slate_core.metadata._metadata import SimpleMetadata
 
 
@@ -37,9 +39,7 @@ def _diagonal_basis_as_explicit[
     basis: DiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT],
 ) -> DiagonalBasis[
     TupleBasis[
-        tuple[
-            ExplicitBasisWithInner[Basis[M0, CT]], ExplicitBasisWithInner[Basis[M1, CT]]
-        ],
+        tuple[ExplicitBasisWithMetadata[M0, CT], ExplicitBasisWithMetadata[M1, CT]],
         E,
         CT,
     ],
@@ -81,8 +81,8 @@ def _eig_from_tuple[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
+                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
+                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
             ],
             E,
             Ctype[np.complexfloating],
@@ -151,8 +151,8 @@ def _eig_from_block_diagonal_basis[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
+                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
+                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
             ],
             E,
             Ctype[np.complexfloating],
@@ -227,8 +227,8 @@ def into_diagonal[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
+                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
+                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
             ],
             E,
             Ctype[np.complexfloating],
@@ -292,8 +292,8 @@ def _eigh_from_tuple[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
+                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
+                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
             ],
             E,
             Ctype[np.complexfloating],
@@ -370,8 +370,8 @@ def _eigh_from_block_diagonal_basis[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
+                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
+                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
             ],
             E,
             Ctype[np.complexfloating],
@@ -447,8 +447,8 @@ def into_diagonal_hermitian[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
+                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
+                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
             ],
             E,
             Ctype[np.complexfloating],
