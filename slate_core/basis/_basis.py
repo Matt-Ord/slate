@@ -76,7 +76,11 @@ class Ctype[T: np.generic]:
         self, dtype: np.dtype[T_]
     ) -> TypeGuard[Ctype[T_]]:
         """Check if the type supports the given data type."""
-        return issubclass(dtype.type, self._dtype)
+        return self.supports_type(dtype.type)
+
+    def supports_type[T_: np.generic](self, ty: type[T_]) -> TypeGuard[Ctype[T_]]:
+        """Check if the type supports the given data type."""
+        return issubclass(ty, self._dtype)
 
     def _variance_fn(self, value: T, _private: Never) -> None: ...
 
@@ -85,14 +89,12 @@ class UnionCtype[T: np.generic](Ctype[T]):
     def __init__[T_: np.generic](
         self: UnionCtype[T_], dtypes: tuple[Ctype[T_], ...]
     ) -> None:
-        self._dtypes = cast("tuple[Ctype[np.generic],...]", dtypes)
+        self._ctypes = cast("tuple[Ctype[np.generic],...]", dtypes)
 
     @override
-    def supports_dtype[T_: np.generic](
-        self, dtype: np.dtype[T_]
-    ) -> TypeGuard[Ctype[T_]]:
+    def supports_type[T_: np.generic](self, ty: type[T_]) -> TypeGuard[Ctype[T_]]:
         """Check if the type supports the given data type."""
-        return all(ty.supports_dtype(dtype) for ty in self._dtypes)
+        return all(t.supports_type(ty) for t in self._ctypes)
 
 
 class BasisConversion[DT1: np.generic, DT2: np.generic, DT3: np.generic]:
@@ -235,6 +237,17 @@ class Basis[M: BasisMetadata = BasisMetadata, CT: Ctype[Never] = Ctype[Never]](A
     def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         msg = "points not implemented for this basis, requires the INDEX feature"
         raise NotImplementedError(msg)
+
+
+def supports_type[M: BasisMetadata, DT: np.generic](
+    basis: Basis[M], dtype: type[DT]
+) -> TypeGuard[Basis[M, Ctype[DT]]]:
+    """Check if the basis supports the given data type.
+
+    This is a type guard, so it will narrow the type of the basis to
+    `Basis[M, Ctype[DT]]` if it returns `True`.
+    """
+    return basis.ctype.supports_type(dtype)
 
 
 def supports_dtype[M: BasisMetadata, DT: np.generic](

@@ -142,6 +142,10 @@ class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
     ) -> Array[B, DT]:
         return cast("Any", Array(self._basis, self._data, 0))  # type: ignore safe to construct
 
+    def assert_ok(self) -> Array[B, DT]:
+        assert self._basis.ctype.supports_dtype(self._data.dtype)
+        return self.ok()  # type: ignore safe to construct
+
 
 def build[B: Basis, DT: np.dtype[np.generic]](
     basis: B, data: np.ndarray[Any, DT]
