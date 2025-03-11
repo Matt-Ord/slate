@@ -20,7 +20,7 @@ from slate_core.basis import (
 )
 
 if TYPE_CHECKING:
-    from slate_core.basis._basis import Basis, ctype
+    from slate_core.basis._basis import Basis, Ctype
     from slate_core.metadata import SimpleMetadata
     from slate_core.metadata._metadata import BasisMetadata
 
@@ -179,9 +179,9 @@ def test_transform_spaced_basis() -> None:
 )
 def test_dual_basis_transform(
     basis: TupleBasis[
-        tuple[Basis[BasisMetadata, ctype[np.complex128]], ...],
+        tuple[Basis[BasisMetadata, Ctype[np.complex128]], ...],
         Never,
-        ctype[np.complex128],
+        Ctype[np.complex128],
     ],
 ) -> None:
     dual_basis = basis.dual_basis()

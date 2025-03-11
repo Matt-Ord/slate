@@ -6,8 +6,9 @@ import numpy as np
 
 from slate_core.array._array import build
 from slate_core.array._conversion import as_fundamental_basis, as_index_basis
-from slate_core.basis import Basis, ctype
+from slate_core.basis import Basis, Ctype
 from slate_core.basis import is_tuple_basis_like as is_tuple_basis_like_basis
+from slate_core.basis import supports_dtype as supports_dtype_basis
 
 if TYPE_CHECKING:
     from slate_core.array._array import Array
@@ -16,17 +17,17 @@ if TYPE_CHECKING:
 
 
 @overload
-def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
     array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[1]
 ) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata], Never, DT], DT1]]: ...
 @overload
-def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
     array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[2]
 ) -> TypeGuard[
     Array[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, DT], DT1]
 ]: ...
 @overload
-def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
     array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[3]
 ) -> TypeGuard[
     Array[
@@ -35,12 +36,12 @@ def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
     ]
 ]: ...
 @overload
-def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
     array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: int | None = None
 ) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT], DT1]]: ...
 
 
-def is_tuple_basis_like[DT: ctype[Never], DT1: np.dtype[np.generic]](
+def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
     array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: int | None = None
 ) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT], DT1]]:
     return is_tuple_basis_like_basis(array.basis, n_dim=n_dim)
@@ -72,7 +73,7 @@ def imag[B: Basis, DT: np.dtype[np.generic]](
     )
 
 
-def angle[B: Basis[Any, ctype[np.number]], DT: np.dtype[np.complexfloating]](
+def angle[B: Basis[Any, Ctype[np.number]], DT: np.dtype[np.complexfloating]](
     array: Array[B, DT],
 ) -> Array[B, np.dtype[np.floating]]:
     """Get the phase of data in the array."""
@@ -363,17 +364,26 @@ def cast_as_dual[B: Basis, DT: np.dtype[np.generic]](
     array: Array[B, DT],
 ) -> Array[B, DT]:
     """Cast a slate array as an array in dual space."""
-    # Since b has the same dtype and metadata as the original basis
-    # it is safe to use it in a conversion.
-    # Unfortunately, it is not possible to express this invariant in the type system.
-    return build(array.basis.dual_basis(), array.raw_data).ok()  # type: ignore safe, since outer_recast must support DT
+    basis = array.basis.dual_basis()
+    assert supports_dtype_basis(basis, array.dtype)
+    return build(basis, array.raw_data).ok()
 
 
 def dual_basis[B: Basis, DT: np.dtype[np.generic]](
     array: Array[B, DT],
 ) -> Array[B, DT]:
     """Cast a slate array as an array in dual space."""
-    # Since b has the same dtype and metadata as the original basis
-    # it is safe to use it in a conversion.
-    # Unfortunately, it is not possible to express this invariant in the type system.
-    return array.with_basis(array.basis.dual_basis()).ok()  # type: ignore safe, since outer_recast must support DT
+    basis = array.basis.dual_basis()
+    assert supports_dtype_basis(basis, array.dtype)
+    return array.with_basis(basis).ok()
+
+
+def supports_dtype[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
+    array: Array[Basis[M], DT], dtype: np.dtype[T]
+) -> TypeGuard[Array[Basis[M, Ctype[T]], DT]]:
+    """Check if the basis supports the given data type.
+
+    This is a type guard, so it will narrow the type of the basis to
+    `Array[Basis[BasisMetadata, Ctype[T]], DT]` if it returns `True`.
+    """
+    return array.basis.ctype.supports_dtype(dtype)

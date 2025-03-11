@@ -12,7 +12,7 @@ from typing import (
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._tuple import TupleBasis
 from slate_core.basis._wrapped import AsUpcast, WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
@@ -23,20 +23,25 @@ if TYPE_CHECKING:
 
 class DiagonalBasis[
     B: TupleBasis[tuple[Basis, Basis], Any] = TupleBasis[tuple[Basis, Basis], Any],
-    DT: ctype[Never] = ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ](
-    WrappedBasis[B, DT],
+    WrappedBasis[B, CT],
 ):
     """Represents a diagonal basis."""
 
     def __init__[B_: TupleBasis[tuple[Basis, Basis], Any]](
-        self: DiagonalBasis[B_, ctype[Never]], inner: B_
+        self: DiagonalBasis[B_, Ctype[Never]], inner: B_
     ) -> None:
         super().__init__(cast("B", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 
+    @property
     @override
-    def resolve_ctype[DT_: ctype[Never]](
+    def ctype(self) -> CT:
+        return cast("CT", self.inner.ctype)
+
+    @override
+    def resolve_ctype[DT_: Ctype[Never]](
         self: DiagonalBasis[TupleBasis[tuple[Basis, Basis], Any, DT_], Any],
     ) -> DiagonalBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
@@ -51,7 +56,7 @@ class DiagonalBasis[
     @override
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
-    ) -> AsUpcast[DiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]:
+    ) -> AsUpcast[DiagonalBasis[B, CT], TupleMetadata[tuple[M0, M1], E], CT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -65,7 +70,7 @@ class DiagonalBasis[
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic](
-        self: DiagonalBasis[Any, ctype[DT1]],
+        self: DiagonalBasis[Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT1]:
@@ -94,7 +99,7 @@ class DiagonalBasis[
 
     @override
     def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: DiagonalBasis[Any, ctype[DT3]],
+        self: DiagonalBasis[Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT3, DT2, DT3]:
@@ -179,20 +184,20 @@ class DiagonalBasis[
             raise NotImplementedError(msg)
 
         return (
-            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            cast("WrappedBasis[Any, Ctype[np.int_]]", self)
             .__from_inner__(self.inner.points)
             .ok()
         )
 
 
 @overload
-def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](  # type: ignore not overlapping
+def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: Ctype[Never]](  # type: ignore not overlapping
     basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
 ) -> TypeGuard[
     DiagonalBasis[TupleBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E], DT]
 ]: ...
 @overload
-def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](
+def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT],
 ) -> TypeGuard[
     DiagonalBasis[
@@ -208,11 +213,11 @@ def is_diagonal_basis(basis: object) -> TypeGuard[DiagonalBasis]:
 
 
 @overload
-def as_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: ctype[Never]](  # type: ignore not overlapping
+def as_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: Ctype[Never]](  # type: ignore not overlapping
     basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
 ) -> DiagonalBasis[TupleBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E], DT] | None: ...
 @overload
-def as_diagonal_basis[DT: ctype[Never]](
+def as_diagonal_basis[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT],
 ) -> (
     DiagonalBasis[
@@ -222,7 +227,7 @@ def as_diagonal_basis[DT: ctype[Never]](
 ): ...
 
 
-def as_diagonal_basis[DT: ctype[Never]](
+def as_diagonal_basis[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT],
 ) -> DiagonalBasis[Any, DT] | None:
     """Get the closest basis that supports the feature set."""

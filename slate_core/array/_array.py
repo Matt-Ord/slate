@@ -16,7 +16,7 @@ from slate_core.util._index import slice_along_axis
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from slate_core.basis import TupleBasisLike, ctype
+    from slate_core.basis import Ctype, TupleBasisLike
     from slate_core.metadata import SimpleMetadata, TupleMetadata
 
 type Index = int | slice
@@ -104,14 +104,14 @@ class ArrayConversion[
         self._data = data
         # This is not the true type - but this is safe as it must at least be able to support
         # the data into the new basis.
-        self._old_basis = cast("Basis[BasisMetadata, ctype[np.generic]]", old_basis)
+        self._old_basis = cast("Basis[BasisMetadata, Ctype[np.generic]]", old_basis)
         self._new_basis = new_basis
 
     # metadata should be covariant - and it will inder the lowest common type
     def _metadata_variance_fn(self, _private: Never) -> M0: ...
 
     def ok[M_: BasisMetadata, DT_: np.generic](
-        self: ArrayConversion[M_, Basis[M_, ctype[DT_]], np.dtype[DT_]],
+        self: ArrayConversion[M_, Basis[M_, Ctype[DT_]], np.dtype[DT_]],
     ) -> Array[B1, DT]:
         return cast(
             "Array[B1, DT]",
@@ -138,7 +138,7 @@ class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
         return self._data
 
     def ok[DT_: np.generic](
-        self: ArrayBuilder[Basis[Any, ctype[DT_]], np.dtype[DT_]],
+        self: ArrayBuilder[Basis[Any, Ctype[DT_]], np.dtype[DT_]],
     ) -> Array[B, DT]:
         return cast("Any", Array(self._basis, self._data, 0))  # type: ignore safe to construct
 
@@ -207,7 +207,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         array: np.ndarray[tuple[int,], DT_],
     ) -> Array[
         TupleBasis[
-            tuple[FundamentalBasis[SimpleMetadata]], None, ctype[np.generic[Any]]
+            tuple[FundamentalBasis[SimpleMetadata]], None, Ctype[np.generic[Any]]
         ],
         DT_,
     ]: ...
@@ -223,7 +223,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
                 FundamentalBasis[SimpleMetadata],
             ],
             None,
-            ctype[np.generic[Any]],
+            Ctype[np.generic[Any]],
         ],
         DT_,
     ]: ...
@@ -240,7 +240,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
                 FundamentalBasis[SimpleMetadata],
             ],
             None,
-            ctype[np.generic[Any]],
+            Ctype[np.generic[Any]],
         ],
         DT_,
     ]: ...
@@ -251,7 +251,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         array: np.ndarray[tuple[int, ...], DT_],
     ) -> Array[
         TupleBasis[
-            tuple[FundamentalBasis[SimpleMetadata], ...], None, ctype[np.generic[Any]]
+            tuple[FundamentalBasis[SimpleMetadata], ...], None, Ctype[np.generic[Any]]
         ],
         DT_,
     ]: ...
@@ -261,7 +261,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         array: np.ndarray[tuple[int, ...], DT_],
     ) -> Array[
         TupleBasis[
-            tuple[FundamentalBasis[SimpleMetadata], ...], None, ctype[np.generic[Any]]
+            tuple[FundamentalBasis[SimpleMetadata], ...], None, Ctype[np.generic[Any]]
         ],
         DT_,
     ]:
@@ -280,9 +280,9 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return ArrayConversion(self.raw_data, self.basis, basis)
 
     def __add__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-        other: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-    ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
+        self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+        other: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         as_add_basis = basis.as_add_basis(self.basis)
         data = as_add_basis.add_data(
             self.with_basis(as_add_basis).ok().raw_data,
@@ -292,9 +292,9 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return build(as_add_basis, data).ok()
 
     def __sub__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-        other: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
-    ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
+        self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+        other: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         as_sub_basis = basis.as_sub_basis(self.basis)
         data = as_sub_basis.sub_data(
             self.with_basis(as_sub_basis).ok().raw_data,
@@ -304,9 +304,9 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return build(as_sub_basis, data).ok()
 
     def __mul__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, ctype[DT_]], np.dtype[DT_]],
+        self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
         other: float,
-    ) -> Array[Basis[M_, ctype[DT_]], np.dtype[DT_]]:
+    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         as_mul_basis = basis.as_mul_basis(self.basis)
         data = as_mul_basis.mul_data(self.with_basis(as_mul_basis).ok().raw_data, other)
         return build(as_mul_basis, data).ok()
@@ -356,15 +356,15 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         )
 
     @overload
-    def __getitem__[DT1: ctype[Never], DT_: np.dtype[np.generic]](
+    def __getitem__[DT1: Ctype[Never], DT_: np.dtype[np.generic]](
         self: Array[Any, DT_], index: int
     ) -> DT_: ...
     @overload
-    def __getitem__[DT1: ctype[Never], DT_: np.dtype[np.generic]](
+    def __getitem__[DT1: Ctype[Never], DT_: np.dtype[np.generic]](
         self: Array[Basis[Any, DT1], DT_], index: tuple[NestedIndex, ...] | slice
     ) -> Array[Basis[BasisMetadata, DT1], DT_]: ...
 
-    def __getitem__[DT1: ctype[Never], DT_: np.dtype[np.generic]](
+    def __getitem__[DT1: Ctype[Never], DT_: np.dtype[np.generic]](
         self: Array[Basis[Any, DT1], DT_],
         index: NestedIndex,
     ) -> Array[Basis[BasisMetadata, Any], DT_] | DT_:

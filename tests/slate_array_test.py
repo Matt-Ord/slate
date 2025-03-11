@@ -16,7 +16,7 @@ from slate_core.basis import (
 )
 
 if TYPE_CHECKING:
-    from slate_core.basis import TupleBasis, ctype
+    from slate_core.basis import Ctype, TupleBasis
     from slate_core.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
 
 
@@ -86,7 +86,7 @@ def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
 )
 def test_transpose_with_axes(
     basis: Basis[
-        TupleMetadata[tuple[BasisMetadata, BasisMetadata], Any], ctype[np.generic]
+        TupleMetadata[tuple[BasisMetadata, BasisMetadata], Any], Ctype[np.generic]
     ],
     axes: tuple[int, ...] | None,
 ) -> None:
@@ -111,11 +111,11 @@ def test_transpose_with_axes(
 def test_conjugate_array(
     basis: TupleBasis[
         tuple[
-            Basis[SimpleMetadata, ctype[np.generic]],
-            Basis[SimpleMetadata, ctype[np.generic]],
+            Basis[SimpleMetadata, Ctype[np.generic]],
+            Basis[SimpleMetadata, Ctype[np.generic]],
         ],
         None,
-        ctype[np.generic],
+        Ctype[np.generic],
     ],
 ) -> None:
     data = np.array([1, 2, 3, 4, 4, 6])

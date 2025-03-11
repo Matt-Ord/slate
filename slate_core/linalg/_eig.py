@@ -10,7 +10,7 @@ from slate_core.basis import (
     DiagonalBasis,
     FundamentalBasis,
 )
-from slate_core.basis._basis import Basis, ctype
+from slate_core.basis._basis import Basis, Ctype
 from slate_core.basis._basis_state_metadata import BasisStateMetadata
 from slate_core.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
 from slate_core.basis._diagonal import as_diagonal_basis
@@ -32,18 +32,18 @@ def _diagonal_basis_as_explicit[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: ctype[np.complexfloating],
+    CT: Ctype[np.complexfloating],
 ](
-    basis: DiagonalBasis[TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E], DT],
+    basis: DiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT],
 ) -> DiagonalBasis[
     TupleBasis[
         tuple[
-            ExplicitBasisWithInner[Basis[M0, DT]], ExplicitBasisWithInner[Basis[M1, DT]]
+            ExplicitBasisWithInner[Basis[M0, CT]], ExplicitBasisWithInner[Basis[M1, CT]]
         ],
         E,
-        DT,
+        CT,
     ],
-    DT,
+    CT,
 ]:
     return DiagonalBasis(  # type: ignore cant infer
         TupleBasis(
@@ -81,13 +81,13 @@ def _eig_from_tuple[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
             ],
             E,
-            ctype[np.complexfloating],
+            Ctype[np.complexfloating],
         ],
-        ctype[np.complexfloating],
+        Ctype[np.complexfloating],
     ],
     np.dtype[np.complexfloating],
 ]:
@@ -139,8 +139,8 @@ def _eig_from_block_diagonal_basis[
         BlockDiagonalBasis[
             TupleBasis[
                 tuple[
-                    Basis[M0, ctype[np.complexfloating]],
-                    Basis[M1, ctype[np.complexfloating]],
+                    Basis[M0, Ctype[np.complexfloating]],
+                    Basis[M1, Ctype[np.complexfloating]],
                 ],
                 E,
             ]
@@ -151,13 +151,13 @@ def _eig_from_block_diagonal_basis[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
             ],
             E,
-            ctype[np.complexfloating],
+            Ctype[np.complexfloating],
         ],
-        ctype[np.complexfloating],
+        Ctype[np.complexfloating],
     ],
     np.dtype[np.complexfloating],
 ]:
@@ -222,18 +222,18 @@ def into_diagonal[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, ctype[np.complexfloating]], DT],
+    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[np.complexfloating]], DT],
 ) -> Array[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
             ],
             E,
-            ctype[np.complexfloating],
+            Ctype[np.complexfloating],
         ],
-        ctype[np.complexfloating],
+        Ctype[np.complexfloating],
     ],
     np.dtype[np.complexfloating],
 ]:
@@ -281,8 +281,8 @@ def _eigh_from_tuple[
     array: Array[
         TupleBasis[
             tuple[
-                Basis[M0, ctype[np.complexfloating]],
-                Basis[M1, ctype[np.complexfloating]],
+                Basis[M0, Ctype[np.complexfloating]],
+                Basis[M1, Ctype[np.complexfloating]],
             ],
             E,
         ],
@@ -292,13 +292,13 @@ def _eigh_from_tuple[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
             ],
             E,
-            ctype[np.complexfloating],
+            Ctype[np.complexfloating],
         ],
-        ctype[np.complexfloating],
+        Ctype[np.complexfloating],
     ],
     np.dtype[np.complexfloating],
 ]:
@@ -358,8 +358,8 @@ def _eigh_from_block_diagonal_basis[
         BlockDiagonalBasis[
             TupleBasis[
                 tuple[
-                    Basis[M0, ctype[np.complexfloating]],
-                    Basis[M1, ctype[np.complexfloating]],
+                    Basis[M0, Ctype[np.complexfloating]],
+                    Basis[M1, Ctype[np.complexfloating]],
                 ],
                 E,
             ]
@@ -370,13 +370,13 @@ def _eigh_from_block_diagonal_basis[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
             ],
             E,
-            ctype[np.complexfloating],
+            Ctype[np.complexfloating],
         ],
-        ctype[np.complexfloating],
+        Ctype[np.complexfloating],
     ],
     np.dtype[np.complexfloating],
 ]:
@@ -442,18 +442,18 @@ def into_diagonal_hermitian[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, ctype[np.complexfloating]], DT],
+    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[np.complexfloating]], DT],
 ) -> Array[
     DiagonalBasis[
         TupleBasis[
             tuple[
-                ExplicitBasisWithInner[Basis[M0, ctype[np.complexfloating]]],
-                ExplicitBasisWithInner[Basis[M1, ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M0, Ctype[np.complexfloating]]],
+                ExplicitBasisWithInner[Basis[M1, Ctype[np.complexfloating]]],
             ],
             E,
-            ctype[np.complexfloating],
+            Ctype[np.complexfloating],
         ],
-        ctype[np.complexfloating],
+        Ctype[np.complexfloating],
     ],
     np.dtype[np.complexfloating],
 ]:

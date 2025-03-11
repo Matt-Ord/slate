@@ -17,9 +17,10 @@ from slate_core.basis._basis import (
     Basis,
     BasisConversion,
     BasisFeature,
+    Ctype,
     NestedBool,
     NestedBoolOrNone,
-    ctype,
+    UnionCtype,
 )
 from slate_core.basis._fundamental import FundamentalBasis
 from slate_core.basis._wrapped import (
@@ -43,10 +44,10 @@ def _convert_tuple_basis_axes[
 ](
     vectors: np.ndarray[Any, np.dtype[DT]],
     initial_basis: TupleBasis[
-        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+        tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], E, Ctype[np.generic]
     ],
     final_basis: TupleBasis[
-        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+        tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], E, Ctype[np.generic]
     ],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
@@ -66,10 +67,10 @@ def _convert_tuple_basis_vector_unsafe[
 ](
     vectors: np.ndarray[Any, np.dtype[DT]],
     initial_basis: TupleBasis[
-        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+        tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], E, Ctype[np.generic]
     ],
     final_basis: TupleBasis[
-        tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+        tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], E, Ctype[np.generic]
     ],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
@@ -92,9 +93,9 @@ def _convert_tuple_basis_vector_unsafe[
 
 
 def _convert_vectors_unsafe[DT2: np.generic](
-    initial: TupleBasis[Any, Any, ctype[np.generic]],
+    initial: TupleBasis[Any, Any, Ctype[np.generic]],
     vectors: np.ndarray[Any, np.dtype[DT2]],
-    final: Basis[Any, ctype[np.generic]],
+    final: Basis[Any, Ctype[np.generic]],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT2]]:
     assert initial.metadata() == final.metadata()
@@ -120,33 +121,41 @@ def _convert_vectors_unsafe[DT2: np.generic](
 class TupleBasis[
     C: tuple[Basis, ...],
     E,
-    DT: ctype[Never] = ctype[Never],
-](Basis[TupleMetadata[tuple[BasisMetadata, ...], E], DT]):
+    CT: Ctype[Never] = Ctype[Never],
+](Basis[TupleMetadata[tuple[BasisMetadata, ...], E], CT]):
     """Represents a Tuple of independent basis."""
 
     @overload
     def __init__[C_: tuple[Basis, ...], E_](
-        self: TupleBasis[C_, E_, ctype[Never]],
+        self: TupleBasis[C_, E_, Ctype[Never]],
         children: C_,
         extra: E_,
     ) -> None: ...
 
     @overload
     def __init__[C_: tuple[Basis, ...]](
-        self: TupleBasis[C_, None, ctype[Never]],
+        self: TupleBasis[C_, None, Ctype[Never]],
         children: C_,
         extra: None = None,
     ) -> None: ...
 
     def __init__[C_: tuple[Basis, ...], E_](
-        self: TupleBasis[C_, E_, ctype[Never]],
+        self: TupleBasis[C_, E_, Ctype[Never]],
         children: C_,
         extra: E_ | None = None,
     ) -> None:
         self._children = cast("C", children)
         self._extra = cast("E", extra)
 
-    def resolve_ctype[DT_: ctype[Never]](
+    @property
+    @override
+    def ctype(self) -> CT:
+        return cast(
+            "CT",
+            UnionCtype(tuple(c.ctype for c in self.children)),
+        )
+
+    def resolve_ctype[DT_: Ctype[Never]](
         self: TupleBasis[tuple[Basis[BasisMetadata, DT_], ...], Any, Any],
     ) -> TupleBasis[C, E, DT_]:
         """Upcast the wrapped basis to a more specific type."""
@@ -155,23 +164,23 @@ class TupleBasis[
     @overload
     def upcast[M0: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M0]], E_, Any],
-    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M0], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[M0], E], CT]: ...
     @overload
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M0], Basis[M1]], E_, Any],
-    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M0, M1], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[M0, M1], E], CT]: ...
     @overload
     def upcast[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E_, Any],
-    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M0, M1, M2], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[M0, M1, M2], E], CT]: ...
     @overload
     def upcast[M_: BasisMetadata, E_](
         self: TupleBasis[tuple[Basis[M_], ...], E_, Any],
-    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[M_, ...], E], DT]: ...
+    ) -> AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[M_, ...], E], CT]: ...
 
     def upcast(
         self,
-    ) -> AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[Any, ...], Any], DT]:
+    ) -> AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[Any, ...], Any], CT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -181,10 +190,10 @@ class TupleBasis[
     @override
     def dual_basis(
         self,
-    ) -> TupleBasis[C, E, DT]:
+    ) -> TupleBasis[C, E, CT]:
         copied = copy(self)
         copied._children = tuple(c.dual_basis() for c in self.children)  # noqa: SLF001
-        return cast("TupleBasis[C, E, DT]", copied)
+        return cast("TupleBasis[C, E, CT]", copied)
 
     @property
     @override
@@ -233,7 +242,7 @@ class TupleBasis[
 
     @override
     def __into_fundamental__[DT1: np.generic, DT2: np.generic](
-        self: TupleBasis[tuple[Basis[BasisMetadata, ctype[DT1]], ...], Any, ctype[DT1]],
+        self: TupleBasis[tuple[Basis[BasisMetadata, Ctype[DT1]], ...], Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.generic]:
@@ -244,7 +253,7 @@ class TupleBasis[
 
     @override
     def __from_fundamental__[DT2: np.generic, DT3: np.generic](
-        self: TupleBasis[tuple[Basis[BasisMetadata, ctype[DT3]], ...], Any, ctype[DT3]],
+        self: TupleBasis[tuple[Basis[BasisMetadata, Ctype[DT3]], ...], Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.generic, DT2, DT3]:
@@ -260,9 +269,9 @@ class TupleBasis[
         DT2: np.generic,
         DT3: np.generic,
     ](
-        self: Basis[M_, ctype[DT1]],
+        self: Basis[M_, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, ctype[DT3]],
+        basis: Basis[M_, Ctype[DT3]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         return BasisConversion[DT1, DT2, DT3](
@@ -331,7 +340,7 @@ class TupleBasis[
             raise NotImplementedError(msg)
 
         return (
-            cast("TupleBasis[Any, Any, ctype[np.int_]]", self)
+            cast("TupleBasis[Any, Any, Ctype[np.int_]]", self)
             .__from_fundamental__(np.arange(self.size))
             .ok()
         )
@@ -342,7 +351,7 @@ def from_metadata[M0: BasisMetadata, E](
     metadata: TupleMetadata[tuple[M0], E],
     *,
     is_dual: NestedBoolOrNone = None,
-) -> TupleBasis[tuple[Basis[M0, ctype[np.generic]]], E, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[Basis[M0, Ctype[np.generic]]], E, Ctype[np.generic]]: ...
 
 
 @overload
@@ -352,11 +361,11 @@ def from_metadata[M0: BasisMetadata, M1: BasisMetadata, E](
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
     tuple[
-        Basis[M0, ctype[np.generic]],
-        Basis[M1, ctype[np.generic]],
+        Basis[M0, Ctype[np.generic]],
+        Basis[M1, Ctype[np.generic]],
     ],
     E,
-    ctype[np.generic],
+    Ctype[np.generic],
 ]: ...
 
 
@@ -367,19 +376,19 @@ def from_metadata[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
     tuple[
-        Basis[M0, ctype[np.generic]],
-        Basis[M1, ctype[np.generic]],
-        Basis[M2, ctype[np.generic]],
+        Basis[M0, Ctype[np.generic]],
+        Basis[M1, Ctype[np.generic]],
+        Basis[M2, Ctype[np.generic]],
     ],
     E,
-    ctype[np.generic],
+    Ctype[np.generic],
 ]: ...
 
 
 @overload
 def from_metadata[M: BasisMetadata, E](
     metadata: TupleMetadata[tuple[M, ...], E], *, is_dual: NestedBoolOrNone = None
-) -> TupleBasis[tuple[Basis[M, ctype[np.generic]], ...], E, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[Basis[M, Ctype[np.generic]], ...], E, Ctype[np.generic]]: ...
 
 
 @overload
@@ -391,12 +400,12 @@ def from_metadata[M: SimpleMetadata](
 @overload
 def from_metadata[M: AnyMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
-) -> Basis[M, ctype[np.generic]]: ...
+) -> Basis[M, Ctype[np.generic]]: ...
 
 
 def from_metadata(
     metadata: AnyMetadata, *, is_dual: NestedBoolOrNone = None
-) -> Basis[Any, ctype[np.generic]]:
+) -> Basis[Any, Ctype[np.generic]]:
     """Get a basis with the basis at idx set to inner."""
     if isinstance(metadata, SimpleMetadata):
         is_dual = False if is_dual is None else is_dual
@@ -418,11 +427,11 @@ def from_metadata(
 
 
 @overload
-def is_tuple_basis[M0: BasisMetadata, E, DT: ctype[Never]](
+def is_tuple_basis[M0: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasisLike[tuple[M0], E, DT],
 ) -> TypeGuard[TupleBasis[tuple[Basis[M0, DT]], E, DT]]: ...
 @overload
-def is_tuple_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: ctype[Never]](
+def is_tuple_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasisLike[tuple[M0, M1], E, DT],
 ) -> TypeGuard[TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT]]: ...
 @overload
@@ -431,18 +440,18 @@ def is_tuple_basis[
     M1: BasisMetadata,
     M2: BasisMetadata,
     E,
-    DT: ctype[Never],
+    DT: Ctype[Never],
 ](
     basis: TupleBasisLike[tuple[M0, M1, M2], E, DT],
 ) -> TypeGuard[
     TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT], Basis[M2, DT]], E, DT]
 ]: ...
 @overload
-def is_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
+def is_tuple_basis[M: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasisLike[tuple[M, ...], E, DT],
 ) -> TypeGuard[TupleBasis[tuple[Basis[M, DT], ...], E, DT]]: ...
 @overload
-def is_tuple_basis[M: BasisMetadata, DT: ctype[Never]](
+def is_tuple_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
 ) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]]: ...
 @overload
@@ -460,19 +469,19 @@ def is_tuple_basis(
 type TupleBasis1D[
     C: tuple[Basis] = tuple[Basis],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[BasisMetadata], E], DT]
 type TupleBasis2D[
     C: tuple[Basis, Basis] = tuple[Basis, Basis],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = AsUpcast[
     TupleBasis[C, E, DT], TupleMetadata[tuple[BasisMetadata, BasisMetadata], E], DT
 ]
 type TupleBasis3D[
     C: tuple[Basis, Basis, Basis] = tuple[Basis, Basis, Basis],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = AsUpcast[
     TupleBasis[C, E, DT],
     TupleMetadata[tuple[BasisMetadata, BasisMetadata, BasisMetadata], E],
@@ -482,62 +491,62 @@ type TupleBasis3D[
 type TupleBasisLike[
     M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = Basis[TupleMetadata[M, E], DT]
 
 type TupleBasisLike1D[
     M: tuple[BasisMetadata] = tuple[BasisMetadata],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = TupleBasisLike[M, E, DT]
 type TupleBasisLike2D[
     M: tuple[BasisMetadata, BasisMetadata] = tuple[BasisMetadata, BasisMetadata],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = TupleBasisLike[M, E, DT]
 type TupleBasisLike3D[
     M: tuple[BasisMetadata, BasisMetadata, BasisMetadata] = tuple[
         BasisMetadata, BasisMetadata, BasisMetadata
     ],
     E = Any,
-    DT: ctype[Never] = ctype[Never],
+    DT: Ctype[Never] = Ctype[Never],
 ] = TupleBasisLike[M, E, DT]
 
 
 @overload
-def is_tuple_basis_like[DT: ctype[Never]](
+def is_tuple_basis_like[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT], *, n_dim: Literal[1]
 ) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata], Never, DT]]: ...
 @overload
-def is_tuple_basis_like[DT: ctype[Never]](
+def is_tuple_basis_like[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT], *, n_dim: Literal[2]
 ) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, DT]]: ...
 @overload
-def is_tuple_basis_like[DT: ctype[Never]](
+def is_tuple_basis_like[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT], *, n_dim: Literal[3]
 ) -> TypeGuard[
     TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, DT]
 ]: ...
 @overload
-def is_tuple_basis_like[DT: ctype[Never]](
+def is_tuple_basis_like[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT], *, n_dim: int | None = None
 ) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]: ...
 
 
-def is_tuple_basis_like[DT: ctype[Never]](
+def is_tuple_basis_like[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT], *, n_dim: int | None = None
 ) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]:
     return is_tuple_metadata(basis.metadata(), n_dim=n_dim)
 
 
 @overload
-def as_tuple_basis[M0: BasisMetadata, E, DT: ctype[Never]](
+def as_tuple_basis[M0: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasisLike[tuple[M0], E, DT],
 ) -> TupleBasis[tuple[Basis[M0, DT]], E, DT]: ...
 
 
 @overload
-def as_tuple_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: ctype[Never]](
+def as_tuple_basis[M0: BasisMetadata, M1: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasisLike[tuple[M0, M1], E, DT],
 ) -> TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT]: ...
 
@@ -548,25 +557,25 @@ def as_tuple_basis[
     M1: BasisMetadata,
     M2: BasisMetadata,
     E,
-    DT: ctype[Never],
+    DT: Ctype[Never],
 ](
     basis: TupleBasisLike[tuple[M0, M1, M2], E, DT],
 ) -> TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT], Basis[M2, DT]], E, DT]: ...
 
 
 @overload
-def as_tuple_basis[M: BasisMetadata, E, DT: ctype[Never]](
+def as_tuple_basis[M: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasisLike[tuple[M, ...], E, DT],
 ) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]: ...
 
 
 @overload
-def as_tuple_basis[DT: ctype[Never]](
+def as_tuple_basis[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT],
 ) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]: ...
 
 
-def as_tuple_basis[DT: ctype[Never]](
+def as_tuple_basis[DT: Ctype[Never]](
     basis: Basis[BasisMetadata, DT],
 ) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]:
     """Get the closest basis to basis that is a TupleBasis.
@@ -588,7 +597,7 @@ def as_tuple_basis[DT: ctype[Never]](
     return from_metadata(basis.metadata())  # type: ignore This is ok, since np.generic is a subtype of DT
 
 
-def as_feature_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_feature_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT], features: set[BasisFeature]
 ) -> Basis[M, DT]:
     """Get the closest basis that supports the feature set."""
@@ -608,7 +617,7 @@ def as_feature_basis[M: BasisMetadata, DT: ctype[Never]](
     return from_metadata(basis.metadata(), is_dual=basis.is_dual)  # type: ignore does not understand everything is generic
 
 
-def as_index_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_index_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
     """Get the closest basis that supports INDEX.

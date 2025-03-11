@@ -20,13 +20,13 @@ from slate_core.metadata import (
 
 if TYPE_CHECKING:
     from slate_core.array import Array
-    from slate_core.basis._basis import ctype
+    from slate_core.basis._basis import Ctype
     from slate_core.basis._tuple import TupleBasisLike
 
 
 def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Basis[TupleMetadata[tuple[Any, M1], E]], DT],
-) -> Array[Basis[M1, ctype[np.generic]], DT]:
+) -> Array[Basis[M1, Ctype[np.generic]], DT]:
     b = DiagonalBasis(
         basis.as_tuple_basis(basis.as_fundamental(array.basis))
     ).resolve_ctype()
@@ -38,13 +38,13 @@ def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
 @overload
 def norm[M: SimpleMetadata, DT: np.dtype[np.number]](
     array: Array[TupleBasisLike[tuple[Any, M], None], DT], *, axis: Literal[0]
-) -> Array[TupleBasisLike[tuple[M], None, ctype[np.generic]], DT]: ...
+) -> Array[TupleBasisLike[tuple[M], None, Ctype[np.generic]], DT]: ...
 
 
 @overload
 def norm[M: BasisMetadata, DT: np.dtype[np.number]](
     array: Array[TupleBasisLike[tuple[M, ...]], DT], *, axis: int
-) -> Array[TupleBasisLike[tuple[M, ...], None, ctype[np.generic]], DT]: ...
+) -> Array[TupleBasisLike[tuple[M, ...], None, Ctype[np.generic]], DT]: ...
 
 
 @overload

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._tuple import TupleBasis
 from slate_core.basis._wrapped import AsUpcast, WrappedBasis
 from slate_core.metadata._metadata import BasisMetadata
@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 
 class IsotropicBasis[
     B: TupleBasis[tuple[Basis, Basis], Any],
-    DT: ctype[Never] = ctype[Never],
-](WrappedBasis[B, DT]):
+    CT: Ctype[Never] = Ctype[Never],
+](WrappedBasis[B, CT]):
     """Represents an isotropic basis."""
 
     def __init__[B_: TupleBasis[tuple[Basis, Basis], Any]](
@@ -26,12 +26,17 @@ class IsotropicBasis[
         super().__init__(cast("B", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 
+    @property
     @override
-    def resolve_ctype[DT_: ctype[Never]](
-        self: IsotropicBasis[TupleBasis[tuple[Basis, Basis], Any, DT_], Any],
-    ) -> IsotropicBasis[B, DT_]:
+    def ctype(self) -> CT:
+        return cast("CT", self.inner.ctype)
+
+    @override
+    def resolve_ctype[CT_: Ctype[Never]](
+        self: IsotropicBasis[TupleBasis[tuple[Basis, Basis], Any, CT_], Any],
+    ) -> IsotropicBasis[B, CT_]:
         """Upcast the wrapped basis to a more specific type."""
-        return cast("IsotropicBasis[B, DT_]", self)
+        return cast("IsotropicBasis[B, CT_]", self)
 
     @override
     def metadata[M0: BasisMetadata, M1: BasisMetadata, E](
@@ -42,7 +47,7 @@ class IsotropicBasis[
     @override
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: IsotropicBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
-    ) -> AsUpcast[IsotropicBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]:
+    ) -> AsUpcast[IsotropicBasis[B, CT], TupleMetadata[tuple[M0, M1], E], CT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -56,7 +61,7 @@ class IsotropicBasis[
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: WrappedBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+        self: WrappedBasis[Basis[Any, Ctype[DT3]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -74,7 +79,7 @@ class IsotropicBasis[
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: WrappedBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+        self: WrappedBasis[Basis[Any, Ctype[DT1]], Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -150,7 +155,7 @@ class IsotropicBasis[
             raise NotImplementedError(msg)
 
         return (
-            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            cast("WrappedBasis[Any, Ctype[np.int_]]", self)
             .__from_inner__(self.inner.points)
             .ok()
         )

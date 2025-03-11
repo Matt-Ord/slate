@@ -4,20 +4,25 @@ from typing import Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._wrapped import WrappedBasis
 from slate_core.metadata import BasisMetadata
 from slate_core.util import pad_ft_points
 
 
-class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
-    WrappedBasis[B, DT]
+class CroppedBasis[B: Basis = Basis, CT: Ctype[Never] = Ctype[Never]](
+    WrappedBasis[B, CT]
 ):
     """A Cropped Basis takes the first size states, using the fourier convention."""
 
     def __init__(self, size: int, inner: B) -> None:
         self._size = size
         super().__init__(inner)
+
+    @property
+    @override
+    def ctype(self) -> CT:
+        return cast("CT", self.inner.ctype)
 
     @property
     @override
@@ -36,7 +41,7 @@ class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: CroppedBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+        self: CroppedBasis[Basis[Any, Ctype[DT3]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -46,7 +51,7 @@ class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: CroppedBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+        self: CroppedBasis[Basis[Any, Ctype[DT1]], Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -61,9 +66,9 @@ class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
         DT2: np.generic,
         DT3: np.generic,
     ](
-        self: CroppedBasis[Basis[M_, ctype[DT1]], ctype[DT1]],
+        self: CroppedBasis[Basis[M_, Ctype[DT1]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, ctype[DT3]],
+        basis: Basis[M_, Ctype[DT3]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         assert self.metadata() == basis.metadata()
@@ -82,8 +87,8 @@ class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
                 )
 
             return BasisConversion(fn)
-        basis = cast("Basis[M_, ctype[DT3]]", basis)
-        return WrappedBasis[Basis[M_, ctype[DT1]], ctype[DT1]].__convert_vector_into__(
+        basis = cast("Basis[M_, Ctype[DT3]]", basis)
+        return WrappedBasis[Basis[M_, Ctype[DT1]], Ctype[DT1]].__convert_vector_into__(
             self, vectors, basis, axis
         )
 
@@ -139,7 +144,7 @@ class CroppedBasis[B: Basis = Basis, DT: ctype[Never] = ctype[Never]](
             raise NotImplementedError(msg)
 
         return (
-            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            cast("WrappedBasis[Any, Ctype[np.int_]]", self)
             .__from_inner__(self.inner.points)
             .ok()
         )
