@@ -1,27 +1,53 @@
 from __future__ import annotations
 
-from typing import Any, Never, TypeGuard, cast, override
+from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
 from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate_core.basis._tuple import TupleBasis
-from slate_core.basis._wrapped import WrappedBasis
+from slate_core.basis._wrapped import AsUpcast, WrappedBasis
+from slate_core.metadata._metadata import BasisMetadata
 from slate_core.metadata.util import nx_points
+
+if TYPE_CHECKING:
+    from slate_core.metadata._stacked import TupleMetadata
 
 
 class IsotropicBasis[
-    C: tuple[Basis, Basis],
-    E,
+    B: TupleBasis[tuple[Basis, Basis], Any],
     DT: ctype[Never] = ctype[Never],
-](
-    WrappedBasis[TupleBasis[C, E, DT], DT],
-):
+](WrappedBasis[B, DT]):
     """Represents an isotropic basis."""
 
-    def __init__(self, inner: TupleBasis[C, E, DT]) -> None:
-        super().__init__(inner)
+    def __init__[B_: TupleBasis[tuple[Basis, Basis], Any]](
+        self: IsotropicBasis[B_], inner: B_
+    ) -> None:
+        super().__init__(cast("B", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
+
+    @override
+    def resolve_ctype[DT_: ctype[Never]](
+        self: IsotropicBasis[TupleBasis[tuple[Basis, Basis], Any, DT_], Any],
+    ) -> IsotropicBasis[B, DT_]:
+        """Upcast the wrapped basis to a more specific type."""
+        return cast("IsotropicBasis[B, DT_]", self)
+
+    @override
+    def metadata[M0: BasisMetadata, M1: BasisMetadata, E](
+        self: IsotropicBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
+    ) -> TupleMetadata[tuple[M0, M1], E]:
+        return self.inner.metadata()
+
+    @override
+    def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
+        self: IsotropicBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
+    ) -> AsUpcast[IsotropicBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]:
+        """Metadata associated with the basis.
+
+        Note: this should be a property, but this would ruin variance.
+        """
+        return cast("Any", AsUpcast(self, self.metadata()))
 
     @property
     @override
@@ -132,6 +158,6 @@ class IsotropicBasis[
 
 def is_isotropic_basis(
     basis: object,
-) -> TypeGuard[IsotropicBasis[tuple[Basis, Basis], Any]]:
+) -> TypeGuard[IsotropicBasis[TupleBasis[tuple[Basis, Basis], Any]]]:
     """Check if a basis is isotropic."""
     return isinstance(basis, IsotropicBasis)
