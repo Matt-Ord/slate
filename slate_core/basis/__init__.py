@@ -68,7 +68,10 @@ from slate_core.basis._util import (
 from slate_core.basis._wrapped import (
     AsUpcast,
     WrappedBasis,
+    WrappedBasisWithMetadata,
     get_wrapped_basis_super_inner,
+    is_wrapped_basis,
+    wrapped_basis_iter_inner,
 )
 
 __all__ = [
@@ -100,6 +103,7 @@ __all__ = [
     "TupleBasisLike2D",
     "TupleBasisLike3D",
     "WrappedBasis",
+    "WrappedBasisWithMetadata",
     "are_dual",
     "are_dual_shapes",
     "as_add_basis",
@@ -127,9 +131,11 @@ __all__ = [
     "is_recast_basis",
     "is_tuple_basis",
     "is_tuple_basis_like",
+    "is_wrapped_basis",
     "transformed_from_metadata",
     "transformed_from_shape",
     "with_child",
     "with_modified_child",
     "with_modified_children",
+    "wrapped_basis_iter_inner",
 ]
