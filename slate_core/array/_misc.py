@@ -378,6 +378,17 @@ def dual_basis[B: Basis, DT: np.dtype[np.generic]](
     return array.with_basis(basis).ok()
 
 
+def supports_type[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
+    array: Array[Basis[M], DT], ty: type[T]
+) -> TypeGuard[Array[Basis[M, Ctype[T]], DT]]:
+    """Check if the basis supports the given data type.
+
+    This is a type guard, so it will narrow the type of the basis to
+    `Array[Basis[BasisMetadata, Ctype[T]], DT]` if it returns `True`.
+    """
+    return array.basis.ctype.supports_type(ty)
+
+
 def supports_dtype[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
     array: Array[Basis[M], DT], dtype: np.dtype[T]
 ) -> TypeGuard[Array[Basis[M, Ctype[T]], DT]]:
