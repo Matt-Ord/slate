@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from slate_core.basis._basis import (
     Basis,
+    BasisConversion,
     BasisFeature,
     NestedBool,
     NestedBoolOrNone,
@@ -73,6 +74,7 @@ from slate_core.basis._wrapped import (
 __all__ = [
     "AsUpcast",
     "Basis",
+    "BasisConversion",
     "BasisFeature",
     "BasisStateMetadata",
     "BlockDiagonalBasis",

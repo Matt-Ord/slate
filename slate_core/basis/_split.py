@@ -7,7 +7,8 @@ import numpy as np
 
 from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
 from slate_core.basis._util import get_common_basis
-from slate_core.basis._wrapped import WrappedBasis
+from slate_core.basis._wrapped import AsUpcast, WrappedBasis
+from slate_core.metadata._metadata import BasisMetadata
 from slate_core.util import Padding, pad_along_axis, slice_along_axis
 
 
@@ -103,6 +104,16 @@ class SplitBasis[
     ) -> SplitBasis[B0, B1, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("SplitBasis[B0, B1, DT_]", self)
+
+    @override
+    def upcast[M: BasisMetadata](
+        self: SplitBasis[Basis[M], Basis[M]],
+    ) -> AsUpcast[SplitBasis[B0, B1, DT], M, DT]:
+        """Metadata associated with the basis.
+
+        Note: this should be a property, but this would ruin variance.
+        """
+        return cast("Any", AsUpcast(self, self.metadata()))
 
     @property
     def lhs(self) -> B0:
