@@ -7,11 +7,11 @@ from slate_core.array import Array
 from slate_core.basis import (
     Basis,
     BasisFeature,
+    Ctype,
     FundamentalBasis,
     TransformedBasis,
     TupleBasis,
     TupleBasisLike,
-    ctype,
 )
 from slate_core.metadata import (
     AnyMetadata,
@@ -26,6 +26,7 @@ __all__ = [
     "Basis",
     "BasisFeature",
     "BasisMetadata",
+    "Ctype",
     "FundamentalBasis",
     "SimpleMetadata",
     "TransformedBasis",
@@ -34,7 +35,6 @@ __all__ = [
     "TupleMetadata",
     "array",
     "basis",
-    "ctype",
     "explicit_basis",
     "metadata",
     "plot",

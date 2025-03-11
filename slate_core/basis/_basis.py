@@ -8,7 +8,9 @@ from typing import (
     Literal,
     Never,
     Self,
+    TypeGuard,
     cast,
+    override,
 )
 
 import numpy as np
@@ -64,10 +66,33 @@ def are_dual[M: BasisMetadata](lhs: Basis[M, Any], rhs: Basis[M, Any]) -> bool:
     )
 
 
-class ctype[D: np.generic]:  # noqa: N801
+class Ctype[T: np.generic]:
     """A type which is contravariant in the data type D."""
 
-    def _variance_fn(self, value: D, _private: Never) -> None: ...
+    def __init__[T_: np.generic](self: Ctype[T_], dtype: type[T_]) -> None:
+        self._dtype = cast("type[np.generic]", dtype)
+
+    def supports_dtype[T_: np.generic](
+        self, dtype: np.dtype[T_]
+    ) -> TypeGuard[Ctype[T_]]:
+        """Check if the type supports the given data type."""
+        return issubclass(dtype.type, self._dtype)
+
+    def _variance_fn(self, value: T, _private: Never) -> None: ...
+
+
+class UnionCtype[T: np.generic](Ctype[T]):
+    def __init__[T_: np.generic](
+        self: UnionCtype[T_], dtypes: tuple[Ctype[T_], ...]
+    ) -> None:
+        self._dtypes = cast("tuple[Ctype[np.generic],...]", dtypes)
+
+    @override
+    def supports_dtype[T_: np.generic](
+        self, dtype: np.dtype[T_]
+    ) -> TypeGuard[Ctype[T_]]:
+        """Check if the type supports the given data type."""
+        return all(ty.supports_dtype(dtype) for ty in self._dtypes)
 
 
 class BasisConversion[DT1: np.generic, DT2: np.generic, DT3: np.generic]:
@@ -85,9 +110,9 @@ class BasisConversion[DT1: np.generic, DT2: np.generic, DT3: np.generic]:
 
 
 def _convert_vectors_unsafe[DT2: np.generic](
-    initial: Basis[Any, ctype[np.generic]],
+    initial: Basis[Any, Ctype[np.generic]],
     vectors: np.ndarray[Any, np.dtype[DT2]],
-    final: Basis[Any, ctype[np.generic]],
+    final: Basis[Any, Ctype[np.generic]],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT2]]:
     assert initial.metadata() == final.metadata()
@@ -99,11 +124,17 @@ def _convert_vectors_unsafe[DT2: np.generic](
     return final.__from_fundamental__(fundamental, axis).ok()
 
 
-class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](ABC):
+class Basis[M: BasisMetadata = BasisMetadata, CT: Ctype[Never] = Ctype[Never]](ABC):
     """Base class for a basis."""
 
     def __init__(self, metadata: M) -> None:
         self._metadata = metadata
+
+    @property
+    @abstractmethod
+    def ctype(self) -> CT:
+        """The type of data the basis supports."""
+        ...
 
     @property
     @abstractmethod
@@ -134,7 +165,7 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
 
     @abstractmethod
     def __into_fundamental__[DT1: np.generic, DT2: np.generic](
-        self: Basis[Any, ctype[DT1]],
+        self: Basis[Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.generic]:
@@ -142,7 +173,7 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
 
     @abstractmethod
     def __from_fundamental__[DT2: np.generic, DT3: np.generic](
-        self: Basis[Any, ctype[DT3]],
+        self: Basis[Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.generic, DT2, DT3]:
@@ -167,9 +198,9 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
         DT2: np.generic,
         DT3: np.generic,
     ](
-        self: Basis[M_, ctype[DT1]],
+        self: Basis[M_, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, ctype[DT3]],
+        basis: Basis[M_, Ctype[DT3]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         return BasisConversion[DT1, DT2, DT3](
@@ -204,3 +235,14 @@ class Basis[M: BasisMetadata = BasisMetadata, DT: ctype[Never] = ctype[Never]](A
     def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         msg = "points not implemented for this basis, requires the INDEX feature"
         raise NotImplementedError(msg)
+
+
+def supports_dtype[M: BasisMetadata, DT: np.generic](
+    basis: Basis[M], dtype: np.dtype[DT]
+) -> TypeGuard[Basis[M, Ctype[DT]]]:
+    """Check if the basis supports the given data type.
+
+    This is a type guard, so it will narrow the type of the basis to
+    `Basis[M, Ctype[DT]]` if it returns `True`.
+    """
+    return basis.ctype.supports_dtype(dtype)

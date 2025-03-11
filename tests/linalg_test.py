@@ -22,7 +22,7 @@ from slate_core.linalg import (
 )
 
 if TYPE_CHECKING:
-    from slate_core.basis import Basis, TupleBasis, ctype
+    from slate_core.basis import Basis, Ctype, TupleBasis
     from slate_core.basis._fundamental import FundamentalBasis
     from slate_core.metadata import BasisMetadata, SimpleMetadata
     from slate_core.metadata._stacked import TupleMetadata
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def slate_array_stacked() -> Array[
-    TupleBasis[tuple[FundamentalBasis, ...], None, ctype[np.generic]],
+    TupleBasis[tuple[FundamentalBasis, ...], None, Ctype[np.generic]],
     np.dtype[np.complexfloating],
 ]:
     rng = np.random.default_rng()
@@ -42,7 +42,7 @@ def slate_array_stacked() -> Array[
 def _test_into_diagonal(
     array: Array[
         TupleBasisLike[
-            tuple[BasisMetadata, BasisMetadata], None, ctype[np.complexfloating]
+            tuple[BasisMetadata, BasisMetadata], None, Ctype[np.complexfloating]
         ],
         np.dtype[np.complexfloating],
     ],
@@ -89,7 +89,7 @@ def _test_into_diagonal(
 )
 def test_linalg_complex(
     basis: Basis[
-        TupleMetadata[tuple[BasisMetadata, BasisMetadata], None], ctype[np.generic]
+        TupleMetadata[tuple[BasisMetadata, BasisMetadata], None], Ctype[np.generic]
     ],
 ) -> None:
     rng = np.random.default_rng()
@@ -102,7 +102,7 @@ def test_linalg_complex(
 def _test_into_diagonal_hermitian(
     array: Array[
         TupleBasisLike[
-            tuple[SimpleMetadata, SimpleMetadata], None, ctype[np.complexfloating]
+            tuple[SimpleMetadata, SimpleMetadata], None, Ctype[np.complexfloating]
         ],
         np.dtype[np.complexfloating],
     ],
@@ -153,7 +153,7 @@ def _test_into_diagonal_hermitian(
 )
 def test_linalg_diagonal(
     basis: Basis[
-        TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None], ctype[np.generic]
+        TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None], Ctype[np.generic]
     ],
 ) -> None:
     rng = np.random.default_rng()
@@ -178,7 +178,7 @@ def test_linalg_diagonal(
 def test_linalg_complex_hermitian(
     basis: Basis[
         TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None],
-        ctype[np.generic],
+        Ctype[np.generic],
     ],
 ) -> None:
     rng = np.random.default_rng()
@@ -203,7 +203,7 @@ def test_linalg_complex_hermitian(
 )
 def test_linalg_real_hermitian(
     basis: Basis[
-        TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None], ctype[np.generic]
+        TupleMetadata[tuple[SimpleMetadata, SimpleMetadata], None], Ctype[np.generic]
     ],
 ) -> None:
     rng = np.random.default_rng()

@@ -10,11 +10,11 @@ from slate_core.basis import (
     AsUpcast,
     Basis,
     BasisStateMetadata,
+    Ctype,
     DiagonalBasis,
     FundamentalBasis,
     TupleBasis,
     TupleBasisLike,
-    ctype,
 )
 from slate_core.explicit_basis._explicit_basis import ExplicitUnitaryBasis
 from slate_core.metadata import BasisMetadata, SimpleMetadata
@@ -22,22 +22,22 @@ from slate_core.metadata import BasisMetadata, SimpleMetadata
 
 class TrivialExplicitBasis[
     B: Basis,
-    DT: ctype[Never] = ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ](
     ExplicitUnitaryBasis[
         Array[
             TupleBasisLike[
                 tuple[SimpleMetadata, BasisStateMetadata[B]],
                 None,
-                ctype[np.generic],
+                Ctype[np.generic],
             ],
             np.dtype[np.float64],
         ],
-        DT,
+        CT,
     ]
 ):
     def __init__[B1_: Basis](
-        self: TrivialExplicitBasis[B1_, ctype[Never]],
+        self: TrivialExplicitBasis[B1_, Ctype[Never]],
         inner: B1_,
     ) -> None:
         matrix = build(
@@ -56,5 +56,5 @@ class TrivialExplicitBasis[
     @override
     def upcast[M: BasisMetadata](
         self: TrivialExplicitBasis[Basis[M]],
-    ) -> AsUpcast[TrivialExplicitBasis[B, DT], M, DT]:
+    ) -> AsUpcast[TrivialExplicitBasis[B, CT], M, CT]:
         return cast("Any", AsUpcast(self, self.metadata()))

@@ -9,7 +9,7 @@ from typing import (
     overload,
 )
 
-from slate_core.basis._basis import Basis, NestedBool, ctype
+from slate_core.basis._basis import Basis, Ctype, NestedBool
 from slate_core.basis._tuple import (
     TupleBasis,
     TupleBasisLike,
@@ -40,8 +40,8 @@ if TYPE_CHECKING:
 def with_modified_children[
     M: BasisMetadata,
     E,
-    DT0: ctype[Never],
-    DT1: ctype[Never],
+    DT0: Ctype[Never],
+    DT1: Ctype[Never],
 ](
     basis: TupleBasis[tuple[Basis[M, DT0], ...], E, DT1],
     wrapper: Callable[[int, Basis[M, DT0]], Basis[M, DT0]],
@@ -55,8 +55,8 @@ def with_modified_children[
 def with_modified_child[
     M: BasisMetadata,
     E,
-    DT0: ctype[Never],
-    DT1: ctype[Never],
+    DT0: Ctype[Never],
+    DT1: Ctype[Never],
 ](
     basis: TupleBasis[tuple[Basis[M, DT0], ...], E, DT1],
     wrapper: Callable[[Basis[M, DT0]], Basis[M, DT0]],
@@ -66,27 +66,27 @@ def with_modified_child[
     return with_modified_children(basis, lambda i, b: b if i != idx else wrapper(b))
 
 
-def with_child[M: BasisMetadata, E, DT: ctype[Never]](
+def with_child[M: BasisMetadata, E, DT: Ctype[Never]](
     basis: TupleBasis[tuple[Basis[M, DT], ...], E, DT], inner: Basis[M, DT], idx: int
 ) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
     """Get a basis with the basis at idx set to inner."""
     return with_modified_child(basis, lambda _: inner, idx)
 
 
-def as_fundamental[M: AnyMetadata, DT: ctype[Never]](
+def as_fundamental[M: AnyMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
-) -> Basis[M, ctype[np.generic]]:
+) -> Basis[M, Ctype[np.generic]]:
     return from_metadata(basis.metadata(), is_dual=basis.is_dual)
 
 
 @overload
 def from_shape[E](
     shape: tuple[int], *, extra: None = None, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis[tuple[FundamentalBasis], None, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[FundamentalBasis], None, Ctype[np.generic]]: ...
 @overload
 def from_shape[E](
     shape: tuple[int], *, extra: E, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis[tuple[FundamentalBasis], E, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[FundamentalBasis], E, Ctype[np.generic]]: ...
 
 
 @overload
@@ -95,14 +95,14 @@ def from_shape[E](
     *,
     extra: None = None,
     is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[tuple[FundamentalBasis, FundamentalBasis], None, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[FundamentalBasis, FundamentalBasis], None, Ctype[np.generic]]: ...
 @overload
 def from_shape[E](
     shape: tuple[int, int],
     *,
     extra: E,
     is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[tuple[FundamentalBasis, FundamentalBasis], E, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[FundamentalBasis, FundamentalBasis], E, Ctype[np.generic]]: ...
 
 
 @overload
@@ -112,7 +112,7 @@ def from_shape[E](
     extra: None = None,
     is_dual: tuple[bool, ...] | None = None,
 ) -> TupleBasis[
-    tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis], None, ctype[np.generic]
+    tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis], None, Ctype[np.generic]
 ]: ...
 @overload
 def from_shape[E](
@@ -121,7 +121,7 @@ def from_shape[E](
     extra: E,
     is_dual: tuple[bool, ...] | None = None,
 ) -> TupleBasis[
-    tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis], E, ctype[np.generic]
+    tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis], E, Ctype[np.generic]
 ]: ...
 
 
@@ -131,14 +131,14 @@ def from_shape[E](
     *,
     extra: None = None,
     is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[tuple[FundamentalBasis, ...], None, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[FundamentalBasis, ...], None, Ctype[np.generic]]: ...
 @overload
 def from_shape[E](
     shape: tuple[int, ...],
     *,
     extra: E,
     is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[tuple[FundamentalBasis, ...], E, ctype[np.generic]]: ...
+) -> TupleBasis[tuple[FundamentalBasis, ...], E, Ctype[np.generic]]: ...
 
 
 @overload
@@ -148,7 +148,7 @@ def from_shape[E](
     extra: None = None,
     is_dual: tuple[NestedBool, ...] | None = None,
 ) -> TupleBasis[
-    tuple[Basis[BasisMetadata, ctype[np.generic]], ...], None, ctype[np.generic]
+    tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], None, Ctype[np.generic]
 ]: ...
 @overload
 def from_shape[E](
@@ -157,7 +157,7 @@ def from_shape[E](
     extra: E,
     is_dual: tuple[NestedBool, ...] | None = None,
 ) -> TupleBasis[
-    tuple[Basis[BasisMetadata, ctype[np.generic]], ...], E, ctype[np.generic]
+    tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], E, Ctype[np.generic]
 ]: ...
 
 
@@ -168,7 +168,7 @@ def from_shape[E](
     extra: None = None,
     is_dual: bool | None = None,
 ) -> TupleBasis[
-    tuple[Basis[BasisMetadata, ctype[np.generic]], ...], None, ctype[np.generic]
+    tuple[Basis[BasisMetadata, Ctype[np.generic]], ...], None, Ctype[np.generic]
 ]: ...
 
 
@@ -177,15 +177,15 @@ def from_shape[E](
     *,
     extra: Any | None = None,
     is_dual: NestedBool | None = None,
-) -> Basis[Any, ctype[np.generic]]:
+) -> Basis[Any, Ctype[np.generic]]:
     """Get a basis from the shape provided."""
     return from_metadata(TupleMetadata.from_shape(shape, extra=extra), is_dual=is_dual)
 
 
-def get_common_basis[M: BasisMetadata, DT: ctype[Never]](
+def get_common_basis[M: BasisMetadata, DT: Ctype[Never]](
     lhs: Basis[M, DT],
     rhs: Basis[M, DT],
-) -> Basis[M, DT | ctype[np.generic]]:
+) -> Basis[M, DT | Ctype[np.generic]]:
     """Get the closest common basis of two bases."""
     assert rhs.metadata() == lhs.metadata()
     lhs_rev = list(wrapped_basis_iter_inner(lhs))
@@ -221,15 +221,15 @@ def flatten[B: Basis](basis: TupleBasis[tuple[B], Any, Any]) -> B: ...
 
 
 @overload
-def flatten[M: BasisMetadata, DT: ctype[Never]](
-    basis: TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], Never, DT],
-) -> TupleBasis[tuple[Basis[M, DT], ...], None, DT]: ...
+def flatten[M: BasisMetadata, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], Never, CT],
+) -> TupleBasis[tuple[Basis[M, CT], ...], None, CT]: ...
 
 
 @overload
-def flatten[DT: ctype[Never]](
-    basis: Basis[TupleMetadata, DT],
-) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], None, DT]: ...
+def flatten[CT: Ctype[Never]](
+    basis: Basis[TupleMetadata, CT],
+) -> TupleBasis[tuple[Basis[BasisMetadata, CT], ...], None, CT]: ...
 
 
 def flatten(
@@ -253,7 +253,7 @@ def flatten(
     return TupleBasis(children, as_tuple.metadata().extra)
 
 
-def as_add_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_add_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
     """Get the closest basis that supports addition.
@@ -265,7 +265,7 @@ def as_add_basis[M: BasisMetadata, DT: ctype[Never]](
     return as_feature_basis(basis, {"ADD"})
 
 
-def as_sub_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_sub_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
     """Get the closest basis that supports subtraction.
@@ -277,7 +277,7 @@ def as_sub_basis[M: BasisMetadata, DT: ctype[Never]](
     return as_feature_basis(basis, {"SUB"})
 
 
-def as_mul_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_mul_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
     """Get the closest basis that supports MUL.
@@ -289,7 +289,7 @@ def as_mul_basis[M: BasisMetadata, DT: ctype[Never]](
     return as_feature_basis(basis, {"MUL"})
 
 
-def as_linear_map_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_linear_map_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT],
 ) -> Basis[M, DT]:
     """Get the closest basis that supports LINEAR_MAP.
@@ -301,9 +301,9 @@ def as_linear_map_basis[M: BasisMetadata, DT: ctype[Never]](
     return as_feature_basis(basis, {"LINEAR_MAP"})
 
 
-def as_is_dual_basis[M: BasisMetadata, DT: ctype[Never]](
+def as_is_dual_basis[M: BasisMetadata, DT: Ctype[Never]](
     basis: Basis[M, DT], is_dual: NestedBool
-) -> Basis[M, DT | ctype[np.generic]]:
+) -> Basis[M, DT | Ctype[np.generic]]:
     """Get the closest basis that supports IS_DUAL.
 
     If the basis is already an IS_DUAL basis, return it.

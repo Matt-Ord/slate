@@ -21,7 +21,7 @@ from slate_core.basis import (
     TupleBasis2D,
     WrappedBasis,
 )
-from slate_core.basis._basis import BasisConversion, ctype
+from slate_core.basis._basis import BasisConversion, Ctype, UnionCtype
 from slate_core.basis._tuple import TupleBasis, TupleBasisLike
 from slate_core.basis._util import as_fundamental
 from slate_core.metadata import (
@@ -42,9 +42,9 @@ class ExplicitBasis[
         Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]],
         np.dtype[np.number],
     ],
-    DT: ctype[Never] = ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ](
-    WrappedBasis[Basis, DT],
+    WrappedBasis[Basis, CT],
 ):
     """Represents an explicit basis."""
 
@@ -57,7 +57,7 @@ class ExplicitBasis[
             np.dtype[np.number],
         ],
     ](
-        self: ExplicitBasis[Transform_, ctype[Never]],
+        self: ExplicitBasis[Transform_, Ctype[Never]],
         matrix: Transform_,
         *,
         direction: Literal["forward"] = "forward",
@@ -67,11 +67,11 @@ class ExplicitBasis[
     @overload
     def __init__[
         M_: TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None],
-        DT_: ctype[Never],
+        DT_: Ctype[Never],
     ](
         self: ExplicitBasis[
             Array[Basis[M_, DT_], np.dtype[np.number]],
-            ctype[Never],
+            Ctype[Never],
         ],
         matrix: Array[Basis[M_, DT_], np.dtype[np.number]],
         *,
@@ -108,7 +108,7 @@ class ExplicitBasis[
             ],
             Any,
         ],
-    ) -> AsUpcast[ExplicitBasis[Transform, DT], M, DT]:
+    ) -> AsUpcast[ExplicitBasis[Transform, CT], M, CT]:
         return cast("Any", AsUpcast(self, self.metadata()))
 
     @override
@@ -128,8 +128,13 @@ class ExplicitBasis[
     ) -> M:
         return cast("M", self.inner.metadata())
 
+    @property
     @override
-    def resolve_ctype[DT_: ctype[Never]](
+    def ctype(self) -> CT:
+        return cast("CT", UnionCtype((self.inner.ctype, Ctype(np.number))))
+
+    @override
+    def resolve_ctype[DT_: Ctype[Never]](
         self: ExplicitBasis[
             Array[
                 Basis[
@@ -173,11 +178,11 @@ class ExplicitBasis[
         M0_: SimpleMetadata,
         M1_: BasisStateMetadata[Basis],
         DT_: np.dtype[np.number],
-        DT1_: ctype[Never],
+        DT1_: Ctype[Never],
     ](
         self: ExplicitBasis[
             Array[Basis[TupleMetadata[tuple[M0_, M1_], None], DT1_], DT_],
-            ctype[Never],
+            Ctype[Never],
         ],
     ) -> Array[Basis[TupleMetadata[tuple[M1_, M0_], None], DT1_], DT_]:
         return cast(
@@ -193,7 +198,7 @@ class ExplicitBasis[
         M1_: SimpleMetadata,
         BInner_: Basis,
         DT_: np.dtype[np.number],
-        DT1_: ctype[Never],
+        DT1_: Ctype[Never],
     ](
         self: ExplicitBasis[
             Array[
@@ -206,9 +211,9 @@ class ExplicitBasis[
     ) -> ArrayBuilder[
         AsUpcast[
             RecastBasis[
-                TupleBasis2D[tuple[Basis[M1_, ctype[np.generic]], BInner_], None],
+                TupleBasis2D[tuple[Basis[M1_, Ctype[np.generic]], BInner_], None],
                 TupleBasisLike[
-                    tuple[M1_, BasisStateMetadata[BInner_]], None, ctype[np.generic]
+                    tuple[M1_, BasisStateMetadata[BInner_]], None, Ctype[np.generic]
                 ],
                 TupleBasisLike[tuple[M1_, BasisStateMetadata[BInner_]], None, DT1_],
             ],
@@ -260,7 +265,7 @@ class ExplicitBasis[
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic](
-        self: ExplicitBasis[Any, ctype[DT1]],
+        self: ExplicitBasis[Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT1]:
@@ -291,7 +296,7 @@ class ExplicitBasis[
 
     @override
     def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: ExplicitBasis[Any, ctype[DT3]],
+        self: ExplicitBasis[Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT3, DT2, DT3]:
@@ -395,8 +400,8 @@ class ExplicitUnitaryBasis[
         Basis[TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None]],
         Any,
     ],
-    DT: ctype[Never] = ctype[Never],
-](ExplicitBasis[Transform, DT]):
+    CT: Ctype[Never] = Ctype[Never],
+](ExplicitBasis[Transform, CT]):
     """Represents a truncated basis."""
 
     @overload
@@ -408,7 +413,7 @@ class ExplicitUnitaryBasis[
             np.dtype[np.number],
         ],
     ](
-        self: ExplicitUnitaryBasis[Transform_, ctype[Never]],
+        self: ExplicitUnitaryBasis[Transform_, Ctype[Never]],
         matrix: Transform_,
         *,
         direction: Literal["forward"] = "forward",
@@ -419,10 +424,10 @@ class ExplicitUnitaryBasis[
     @overload
     def __init__[
         M_: TupleMetadata[tuple[SimpleMetadata, BasisStateMetadata[Basis]], None],
-        DT_: ctype[Never],
+        DT_: Ctype[Never],
     ](
         self: ExplicitUnitaryBasis[
-            Array[Basis[M_, DT_], np.dtype[np.number]], ctype[Never]
+            Array[Basis[M_, DT_], np.dtype[np.number]], Ctype[Never]
         ],
         matrix: Array[Basis[M_, DT_], np.dtype[np.number]],
         *,
@@ -473,7 +478,7 @@ class ExplicitUnitaryBasis[
     ](
         self: ExplicitUnitaryBasis[
             Array[Basis[TupleMetadata[tuple[M0_, M1_], None]], DT_],
-            ctype[Never],
+            Ctype[Never],
         ],
     ) -> Array[Basis[TupleMetadata[tuple[M1_, M0_], None]], DT_]:
         return cast(

@@ -4,7 +4,7 @@ from typing import Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._wrapped import WrappedBasis
 from slate_core.util._pad import (
     Padding,
@@ -17,20 +17,25 @@ from slate_core.util._pad import (
 
 class TruncatedBasis[
     B: Basis = Basis,
-    DT: ctype[Never] = ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ](
-    WrappedBasis[B, DT],
+    WrappedBasis[B, CT],
 ):
     """Represents a basis sampled evenly along an axis."""
 
     def __init__[B_: Basis](
-        self: TruncatedBasis[B_, ctype[Never]], truncation: Truncation, inner: B_
+        self: TruncatedBasis[B_, Ctype[Never]], truncation: Truncation, inner: B_
     ) -> None:
         self._truncation = truncation
         super().__init__(cast("B", inner))
         assert_unique_indices(
             self._inner.size, self._truncation.n, self._truncation.step
         )
+
+    @property
+    @override
+    def ctype(self) -> CT:
+        return cast("CT", self.inner.ctype)
 
     @override
     def __hash__(self) -> int:
@@ -59,7 +64,7 @@ class TruncatedBasis[
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: TruncatedBasis[Basis[Any, ctype[DT3]], ctype[DT1]],
+        self: TruncatedBasis[Basis[Any, Ctype[DT3]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -69,7 +74,7 @@ class TruncatedBasis[
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: TruncatedBasis[Basis[Any, ctype[DT1]], ctype[DT3]],
+        self: TruncatedBasis[Basis[Any, Ctype[DT1]], Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -129,7 +134,7 @@ class TruncatedBasis[
             raise NotImplementedError(msg)
 
         return (
-            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            cast("WrappedBasis[Any, Ctype[np.int_]]", self)
             .__from_inner__(self.inner.points)
             .ok()
         )

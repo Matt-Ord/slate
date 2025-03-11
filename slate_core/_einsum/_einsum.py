@@ -19,7 +19,7 @@ from slate_core.basis._tuple import TupleBasis, as_tuple_basis, is_tuple_basis_l
 
 if TYPE_CHECKING:
     from slate_core.array import Array
-    from slate_core.basis._basis import Basis, ctype
+    from slate_core.basis._basis import Basis, Ctype
 
 
 def _einsum_numpy[DT: np.dtype[np.number]](
@@ -70,11 +70,11 @@ def _einsum_smart[DT: np.dtype[np.number]](
             (as_tuple_0.children[0], as_diagonal.inner.children[1])
         ).resolve_ctype()
         array_0 = (
-            arrays[0].with_basis(cast("Basis[Any, ctype[np.generic]]", as_tuple_0)).ok()
+            arrays[0].with_basis(cast("Basis[Any, Ctype[np.generic]]", as_tuple_0)).ok()
         )
         array_1 = (
             arrays[1]
-            .with_basis(cast("Basis[Any, ctype[np.generic]]", as_diagonal))
+            .with_basis(cast("Basis[Any, Ctype[np.generic]]", as_diagonal))
             .ok()
         )
 
@@ -97,11 +97,11 @@ def _einsum_smart[DT: np.dtype[np.number]](
             (as_tuple_0.children[0], as_block_diagonal.inner.children[1])
         )
         array_0 = (
-            arrays[0].with_basis(cast("Basis[Any, ctype[np.generic]]", as_tuple_0)).ok()
+            arrays[0].with_basis(cast("Basis[Any, Ctype[np.generic]]", as_tuple_0)).ok()
         )
         array_1 = (
             arrays[1]
-            .with_basis(cast("Basis[Any, ctype[np.generic]]", as_block_diagonal))
+            .with_basis(cast("Basis[Any, Ctype[np.generic]]", as_block_diagonal))
             .ok()
         )
 

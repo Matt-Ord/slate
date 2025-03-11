@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, override
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._wrapped import WrappedBasis
 from slate_core.metadata import BasisMetadata
 
@@ -14,18 +14,23 @@ if TYPE_CHECKING:
 
 class CoordinateBasis[  # noqa: PLW1641
     M: BasisMetadata = BasisMetadata,
-    DT: ctype[Never] = ctype[Never],
-](WrappedBasis[Basis[M, DT], DT]):
+    CT: Ctype[Never] = Ctype[Never],
+](WrappedBasis[Basis[M, CT], CT]):
     """Represents a basis sampled evenly along an axis."""
 
     def __init__(
         self,
         points: Sequence[int] | np.ndarray[Any, np.dtype[np.int_]],
-        inner: Basis[M, DT],
+        inner: Basis[M, CT],
     ) -> None:
         self._inner_points = np.sort(points)
         super().__init__(inner)
         assert np.unique(self._inner_points).size == self._inner_points.size
+
+    @property
+    @override
+    def ctype(self) -> CT:
+        return self.inner.ctype
 
     @property
     def inner_points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
@@ -48,7 +53,7 @@ class CoordinateBasis[  # noqa: PLW1641
 
     @override
     def __into_inner__[DT2: np.generic, DT3: np.generic](
-        self: CoordinateBasis[Any, ctype[DT3]],
+        self: CoordinateBasis[Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.generic, DT2, DT3]:
@@ -62,7 +67,7 @@ class CoordinateBasis[  # noqa: PLW1641
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic](
-        self: CoordinateBasis[Any, ctype[DT1]],
+        self: CoordinateBasis[Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.generic]:
@@ -123,7 +128,7 @@ class CoordinateBasis[  # noqa: PLW1641
             raise NotImplementedError(msg)
 
         return (
-            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            cast("WrappedBasis[Any, Ctype[np.int_]]", self)
             .__from_inner__(self.inner.points)
             .ok()
         )

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, overrid
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._tuple import TupleBasis
 from slate_core.basis._wrapped import AsUpcast, WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
@@ -27,14 +27,14 @@ if TYPE_CHECKING:
 
 class BlockDiagonalBasis[
     B: TupleBasis[tuple[Basis, ...], Any] = TupleBasis[tuple[Basis, ...], Any],
-    DT: ctype[Never] = ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ](
-    WrappedBasis[B, DT],
+    WrappedBasis[B, CT],
 ):
     """Represents a diagonal basis."""
 
     def __init__[B_: TupleBasis[tuple[Basis, ...], Any]](
-        self: BlockDiagonalBasis[B_, ctype[Never]],
+        self: BlockDiagonalBasis[B_, Ctype[Never]],
         inner: B_,
         block_shape: tuple[int, ...],
     ) -> None:
@@ -44,8 +44,13 @@ class BlockDiagonalBasis[
 
         self._block_shape = block_shape
 
+    @property
     @override
-    def resolve_ctype[DT_: ctype[Never]](
+    def ctype(self) -> CT:
+        return cast("CT", self.inner.ctype)
+
+    @override
+    def resolve_ctype[DT_: Ctype[Never]](
         self: BlockDiagonalBasis[TupleBasis[Any, Any, DT_], Any],
     ) -> BlockDiagonalBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
@@ -54,28 +59,28 @@ class BlockDiagonalBasis[
     @overload
     def upcast[M0: BasisMetadata, E](
         self: BlockDiagonalBasis[TupleBasis[tuple[Basis[M0]], E], Any],
-    ) -> AsUpcast[BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M0], E], DT]: ...
+    ) -> AsUpcast[BlockDiagonalBasis[B, CT], TupleMetadata[tuple[M0], E], CT]: ...
     @overload
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: BlockDiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
-    ) -> AsUpcast[BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1], E], DT]: ...
+    ) -> AsUpcast[BlockDiagonalBasis[B, CT], TupleMetadata[tuple[M0, M1], E], CT]: ...
     @overload
     def upcast[M0: BasisMetadata, M1: BasisMetadata, M2: BasisMetadata, E](
         self: BlockDiagonalBasis[
             TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E], Any
         ],
     ) -> AsUpcast[
-        BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M0, M1, M2], E], DT
+        BlockDiagonalBasis[B, CT], TupleMetadata[tuple[M0, M1, M2], E], CT
     ]: ...
     @overload
     def upcast[M: BasisMetadata, E](
         self: BlockDiagonalBasis[TupleBasis[tuple[Basis[M], ...], E], Any],
-    ) -> AsUpcast[BlockDiagonalBasis[B, DT], TupleMetadata[tuple[M, ...], E], DT]: ...
+    ) -> AsUpcast[BlockDiagonalBasis[B, CT], TupleMetadata[tuple[M, ...], E], CT]: ...
     @override
     def upcast(
         self,
     ) -> AsUpcast[
-        BlockDiagonalBasis[B, DT], TupleMetadata[tuple[BasisMetadata, ...], Any], DT
+        BlockDiagonalBasis[B, CT], TupleMetadata[tuple[BasisMetadata, ...], Any], CT
     ]:
         """Metadata associated with the basis.
 
@@ -108,7 +113,7 @@ class BlockDiagonalBasis[
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic](
-        self: BlockDiagonalBasis[Any, ctype[DT1]],
+        self: BlockDiagonalBasis[Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT1]:
@@ -136,7 +141,7 @@ class BlockDiagonalBasis[
 
     @override
     def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: BlockDiagonalBasis[Any, ctype[DT3]],
+        self: BlockDiagonalBasis[Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT3, DT2, DT3]:
@@ -227,7 +232,7 @@ class BlockDiagonalBasis[
             raise NotImplementedError(msg)
 
         return (
-            cast("WrappedBasis[Any, ctype[np.int_]]", self)
+            cast("WrappedBasis[Any, Ctype[np.int_]]", self)
             .__from_inner__(self.inner.points)
             .ok()
         )
@@ -238,23 +243,23 @@ def is_block_diagonal_basis[  # type: ignore not incompatible
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: ctype[Never],
+    CT: Ctype[Never],
 ](
-    basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
+    basis: Basis[TupleMetadata[tuple[M0, M1], E], CT],
 ) -> TypeGuard[
-    BlockDiagonalBasis[TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E], DT]
+    BlockDiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT]
 ]: ...
 @overload
 def is_block_diagonal_basis(
     basis: object,
 ) -> TypeGuard[
-    BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Never], ctype[Never]]
+    BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Never], Ctype[Never]]
 ]: ...
 
 
 def is_block_diagonal_basis(
     basis: object,
-) -> TypeGuard[BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Any], ctype[Never]]]:
+) -> TypeGuard[BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Any], Ctype[Never]]]:
     return isinstance(basis, BlockDiagonalBasis)
 
 
@@ -262,10 +267,10 @@ def as_block_diagonal_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
-    DT: ctype[Never],
+    CT: Ctype[Never],
 ](
-    basis: Basis[TupleMetadata[tuple[M0, M1], E], DT],
-) -> BlockDiagonalBasis[TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E], DT] | None:
+    basis: Basis[TupleMetadata[tuple[M0, M1], E], CT],
+) -> BlockDiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT] | None:
     """Get the closest basis that is block diagonal."""
     return next(
         (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal_basis(b)),

@@ -38,7 +38,7 @@ if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
 
-    from slate_core.basis._basis import Basis, ctype
+    from slate_core.basis._basis import Basis, Ctype
     from slate_core.basis._tuple import TupleBasisLike
     from slate_core.metadata import BasisMetadata, SpacedVolumeMetadata, TupleMetadata
     from slate_core.metadata.length import SpacedLengthMetadata
@@ -111,7 +111,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
 ) -> tuple[Figure, Axes, Line2D]:
     """Plot two arrays against each other."""
     common_basis = cast(
-        "Basis[Any, ctype[np.generic]]",
+        "Basis[Any, Ctype[np.generic]]",
         basis.get_common_basis(
             basis.as_index_basis(x_data.basis), basis.as_index_basis(y_data.basis)
         ),
@@ -142,7 +142,7 @@ def _get_basis_coordinates(
 
 
 def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
-    data: Array[Basis[M, ctype[np.floating]], DT],
+    data: Array[Basis[M, Ctype[np.floating]], DT],
     *,
     y_error: Array[Basis[M], np.dtype[np.floating]] | None = None,
     periodic: bool = False,
@@ -178,7 +178,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
 
 
 def array_against_axes_1d[DT: np.dtype[np.number]](
-    data: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any, ctype[np.floating]], DT],
+    data: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any, Ctype[np.floating]], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],

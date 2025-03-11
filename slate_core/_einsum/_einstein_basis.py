@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     import numpy as np
 
     from slate_core.array import Array
-    from slate_core.basis import ctype
+    from slate_core.basis._basis import Ctype
 
 
 def _get_einsum_result_basis(
@@ -175,7 +175,7 @@ def reslove_basis(
 
         part_basis.append(
             RecastBasis(
-                cast("Basis[Any, ctype[np.generic]]", basis),
+                cast("Basis[Any, Ctype[np.generic]]", basis),
                 from_shape(_flatten_nested(shape)),
                 from_shape(_flatten_nested(shape)),
             )

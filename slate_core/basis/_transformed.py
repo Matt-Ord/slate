@@ -8,8 +8,9 @@ from slate_core.basis._basis import (
     Basis,
     BasisConversion,
     BasisFeature,
+    Ctype,
     NestedBoolOrNone,
-    ctype,
+    UnionCtype,
 )
 from slate_core.basis._fundamental import FundamentalBasis
 from slate_core.basis._tuple import TupleBasis
@@ -24,19 +25,19 @@ from slate_core.metadata._stacked import is_tuple_metadata
 
 type TransformDirection = Literal["forward", "backward"]
 
-type ComplexCtype[DT: np.complexfloating] = ctype[DT]
+type ComplexCtype[DT: np.complexfloating] = Ctype[DT]
 
 
 class TransformedBasis[
     B: Basis = Basis,
-    DT: ComplexCtype[Never] = ComplexCtype[Never],
+    CT: ComplexCtype[Never] = ComplexCtype[Never],
 ](
-    WrappedBasis[B, DT],
+    WrappedBasis[B, CT],
 ):
     """Represents a fourier transformed basis."""
 
     def __init__[B_: Basis](
-        self: TransformedBasis[B_, ctype[Never]],
+        self: TransformedBasis[B_, Ctype[Never]],
         inner: B,
         direction: TransformDirection | None = None,
     ) -> None:
@@ -47,6 +48,14 @@ class TransformedBasis[
         )
         super().__init__(inner)
 
+    @property
+    @override
+    def ctype(self) -> CT:
+        return cast(
+            "CT",
+            UnionCtype((self.inner.ctype, Ctype(np.complexfloating))),
+        )
+
     @override
     def resolve_ctype[DT_: np.complexfloating](
         self: TransformedBasis[Basis[Any, ComplexCtype[DT_]], Any],
@@ -55,7 +64,7 @@ class TransformedBasis[
         # Note that np.complexfloating is the most general set of data
         # that can be used with this basis. real numbers (ie np.floating)
         # are not supported.
-        return cast("TransformedBasis[B, ctype[DT_]]", self)
+        return cast("TransformedBasis[B, Ctype[DT_]]", self)
 
     @property
     def direction(self) -> TransformDirection:
@@ -112,7 +121,7 @@ class TransformedBasis[
 
     @override
     def __into_inner__[DT2: np.complexfloating, DT3: np.generic](
-        self: TransformedBasis[Basis[Any, ctype[DT3]]],
+        self: TransformedBasis[Basis[Any, Ctype[DT3]]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.complexfloating, DT2, DT3]:
@@ -126,7 +135,7 @@ class TransformedBasis[
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.complexfloating](
-        self: TransformedBasis[Basis[Any, ctype[DT1]]],
+        self: TransformedBasis[Basis[Any, Ctype[DT1]]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.complexfloating]:
@@ -194,7 +203,7 @@ def transformed_from_metadata[M0: BasisMetadata, E](
     *,
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
-    tuple[Basis[M0, ctype[np.complexfloating]]], E, ctype[np.complexfloating]
+    tuple[Basis[M0, Ctype[np.complexfloating]]], E, Ctype[np.complexfloating]
 ]: ...
 
 
@@ -209,11 +218,11 @@ def transformed_from_metadata[
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
     tuple[
-        Basis[M0, ctype[np.complexfloating]],
-        Basis[M1, ctype[np.complexfloating]],
+        Basis[M0, Ctype[np.complexfloating]],
+        Basis[M1, Ctype[np.complexfloating]],
     ],
     E,
-    ctype[np.complexfloating],
+    Ctype[np.complexfloating],
 ]: ...
 
 
@@ -229,12 +238,12 @@ def transformed_from_metadata[
     is_dual: NestedBoolOrNone = None,
 ) -> TupleBasis[
     tuple[
-        Basis[M0, ctype[np.complexfloating]],
-        Basis[M1, ctype[np.complexfloating]],
-        Basis[M2, ctype[np.complexfloating]],
+        Basis[M0, Ctype[np.complexfloating]],
+        Basis[M1, Ctype[np.complexfloating]],
+        Basis[M2, Ctype[np.complexfloating]],
     ],
     E,
-    ctype[np.complexfloating],
+    Ctype[np.complexfloating],
 ]: ...
 
 
@@ -242,25 +251,25 @@ def transformed_from_metadata[
 def transformed_from_metadata[M: BasisMetadata, E](
     metadata: TupleMetadata[tuple[M, ...], E], *, is_dual: NestedBoolOrNone = None
 ) -> TupleBasis[
-    tuple[Basis[M, ctype[np.complexfloating]], ...], E, ctype[np.complexfloating]
+    tuple[Basis[M, Ctype[np.complexfloating]], ...], E, Ctype[np.complexfloating]
 ]: ...
 
 
 @overload
 def transformed_from_metadata[M: SimpleMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
-) -> TransformedBasis[FundamentalBasis[M], ctype[np.complexfloating]]: ...
+) -> TransformedBasis[FundamentalBasis[M], Ctype[np.complexfloating]]: ...
 
 
 @overload
 def transformed_from_metadata[M: AnyMetadata](
     metadata: M, *, is_dual: NestedBoolOrNone = None
-) -> Basis[M, ctype[np.complexfloating]]: ...
+) -> Basis[M, Ctype[np.complexfloating]]: ...
 
 
 def transformed_from_metadata(
     metadata: AnyMetadata, *, is_dual: NestedBoolOrNone = None
-) -> Basis[AnyMetadata, ctype[np.complexfloating]]:
+) -> Basis[AnyMetadata, Ctype[np.complexfloating]]:
     """Get a transformed fundamental basis with the given metadata."""
     if isinstance(metadata, SimpleMetadata):
         is_dual = False if is_dual is None else is_dual
@@ -287,7 +296,7 @@ def transformed_from_metadata(
 def as_transformed[M0: BasisMetadata, E](
     basis: Basis[TupleMetadata[tuple[M0], E]],
 ) -> TupleBasis[
-    tuple[Basis[M0, ctype[np.complexfloating]]], E, ctype[np.complexfloating]
+    tuple[Basis[M0, Ctype[np.complexfloating]]], E, Ctype[np.complexfloating]
 ]: ...
 
 
@@ -300,11 +309,11 @@ def as_transformed[
     basis: Basis[TupleMetadata[tuple[M0, M1], E]],
 ) -> TupleBasis[
     tuple[
-        Basis[M0, ctype[np.complexfloating]],
-        Basis[M1, ctype[np.complexfloating]],
+        Basis[M0, Ctype[np.complexfloating]],
+        Basis[M1, Ctype[np.complexfloating]],
     ],
     E,
-    ctype[np.complexfloating],
+    Ctype[np.complexfloating],
 ]: ...
 
 
@@ -318,12 +327,12 @@ def as_transformed[
     basis: Basis[TupleMetadata[tuple[M0, M1, M2], E]],
 ) -> TupleBasis[
     tuple[
-        Basis[M0, ctype[np.complexfloating]],
-        Basis[M1, ctype[np.complexfloating]],
-        Basis[M2, ctype[np.complexfloating]],
+        Basis[M0, Ctype[np.complexfloating]],
+        Basis[M1, Ctype[np.complexfloating]],
+        Basis[M2, Ctype[np.complexfloating]],
     ],
     E,
-    ctype[np.complexfloating],
+    Ctype[np.complexfloating],
 ]: ...
 
 
@@ -331,36 +340,36 @@ def as_transformed[
 def as_transformed[M: BasisMetadata, E](
     basis: Basis[TupleMetadata[tuple[M, ...], E]],
 ) -> TupleBasis[
-    tuple[Basis[M, ctype[np.complexfloating]], ...], E, ctype[np.complexfloating]
+    tuple[Basis[M, Ctype[np.complexfloating]], ...], E, Ctype[np.complexfloating]
 ]: ...
 
 
 @overload
 def as_transformed[M: SimpleMetadata](
     basis: Basis[M],
-) -> TransformedBasis[FundamentalBasis[M], ctype[np.complexfloating]]: ...
+) -> TransformedBasis[FundamentalBasis[M], Ctype[np.complexfloating]]: ...
 
 
 @overload
 def as_transformed[M: AnyMetadata](
     basis: Basis[M],
-) -> Basis[M, ctype[np.complexfloating]]: ...
+) -> Basis[M, Ctype[np.complexfloating]]: ...
 
 
 def as_transformed(
     basis: Basis,
-) -> Basis[AnyMetadata, ctype[np.complexfloating]]:
+) -> Basis[AnyMetadata, Ctype[np.complexfloating]]:
     return transformed_from_metadata(basis.metadata(), is_dual=basis.is_dual)
 
 
 @overload
 def transformed_from_shape[E](
     shape: tuple[int], *, extra: None = None, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis[tuple[FundamentalBasis], None, ctype[np.complexfloating]]: ...
+) -> TupleBasis[tuple[FundamentalBasis], None, Ctype[np.complexfloating]]: ...
 @overload
 def transformed_from_shape[E](
     shape: tuple[int], *, extra: E, is_dual: tuple[bool, ...] | None = None
-) -> TupleBasis[tuple[FundamentalBasis], E, ctype[np.complexfloating]]: ...
+) -> TupleBasis[tuple[FundamentalBasis], E, Ctype[np.complexfloating]]: ...
 
 
 @overload
@@ -370,7 +379,7 @@ def transformed_from_shape[E](
     extra: None = None,
     is_dual: tuple[bool, ...] | None = None,
 ) -> TupleBasis[
-    tuple[FundamentalBasis, FundamentalBasis], None, ctype[np.complexfloating]
+    tuple[FundamentalBasis, FundamentalBasis], None, Ctype[np.complexfloating]
 ]: ...
 @overload
 def transformed_from_shape[E](
@@ -379,7 +388,7 @@ def transformed_from_shape[E](
     extra: E,
     is_dual: tuple[bool, ...] | None = None,
 ) -> TupleBasis[
-    tuple[FundamentalBasis, FundamentalBasis], E, ctype[np.complexfloating]
+    tuple[FundamentalBasis, FundamentalBasis], E, Ctype[np.complexfloating]
 ]: ...
 
 
@@ -392,7 +401,7 @@ def transformed_from_shape[E](
 ) -> TupleBasis[
     tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis],
     None,
-    ctype[np.complexfloating],
+    Ctype[np.complexfloating],
 ]: ...
 @overload
 def transformed_from_shape[E](
@@ -403,7 +412,7 @@ def transformed_from_shape[E](
 ) -> TupleBasis[
     tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis],
     E,
-    ctype[np.complexfloating],
+    Ctype[np.complexfloating],
 ]: ...
 
 
@@ -413,14 +422,14 @@ def transformed_from_shape[E](
     *,
     extra: None = None,
     is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[tuple[FundamentalBasis, ...], None, ctype[np.complexfloating]]: ...
+) -> TupleBasis[tuple[FundamentalBasis, ...], None, Ctype[np.complexfloating]]: ...
 @overload
 def transformed_from_shape[E](
     shape: tuple[int, ...],
     *,
     extra: E,
     is_dual: tuple[bool, ...] | None = None,
-) -> TupleBasis[tuple[FundamentalBasis, ...], E, ctype[np.complexfloating]]: ...
+) -> TupleBasis[tuple[FundamentalBasis, ...], E, Ctype[np.complexfloating]]: ...
 
 
 def transformed_from_shape(
@@ -428,7 +437,7 @@ def transformed_from_shape(
     *,
     extra: Any | None = None,
     is_dual: tuple[bool, ...] | None = None,
-) -> Basis[Any, ctype[np.complexfloating]]:
+) -> Basis[Any, Ctype[np.complexfloating]]:
     """Get a basis with the basis at idx set to inner."""
     return transformed_from_metadata(
         TupleMetadata.from_shape(shape, extra=extra), is_dual=is_dual

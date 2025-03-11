@@ -10,8 +10,8 @@ from slate_core.basis._basis import (
     Basis,
     BasisConversion,
     BasisFeature,
+    Ctype,
     NestedBool,
-    ctype,
 )
 from slate_core.metadata import BasisMetadata
 
@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 
 
 def _convert_vectors_unsafe[DT2: np.generic](
-    initial: WrappedBasis[Basis[Any, ctype[np.generic]], ctype[np.generic]],
+    initial: WrappedBasis[Basis[Any, Ctype[np.generic]], Ctype[np.generic]],
     vectors: np.ndarray[Any, np.dtype[DT2]],
-    final: Basis[Any, ctype[np.generic]],
+    final: Basis[Any, Ctype[np.generic]],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT2]]:
     assert initial.metadata() == final.metadata()
@@ -41,20 +41,20 @@ class WrappedBasisWithMetadata[
     # Invariant: DT must also be supported by all basis in B.
     # It is not possible to specify this constraint in the type system, so instead
     # we enforce it at __init__ time.
-    DT: ctype[Never] = ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
     # This allows us to make AsUpcast a WrappedBasisWithMetadata
     # but Unsafe_M should not be exposed in any "user facing" basis types.
     Unsafe_M: BasisMetadata = BasisMetadata,
-](Basis[Unsafe_M, DT]):
+](Basis[Unsafe_M, CT]):
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
     def __init__[B_: Basis](
-        self: WrappedBasisWithMetadata[B_, ctype[Never]], inner: B_
+        self: WrappedBasisWithMetadata[B_, Ctype[Never]], inner: B_
     ) -> None:
         self._inner = cast("B", inner)
         super().__init__(self._inner.metadata())
 
-    def resolve_ctype[DT_: ctype[Never]](
+    def resolve_ctype[DT_: Ctype[Never]](
         self: WrappedBasisWithMetadata[Basis[Any, DT_], Any],
     ) -> WrappedBasisWithMetadata[B, DT_, Unsafe_M]:
         """Upcast the wrapped basis to a more specific type."""
@@ -62,7 +62,7 @@ class WrappedBasisWithMetadata[
 
     def upcast(
         self,
-    ) -> AsUpcast[WrappedBasisWithMetadata[B, DT, Unsafe_M], Unsafe_M, DT]:
+    ) -> AsUpcast[WrappedBasisWithMetadata[B, CT, Unsafe_M], Unsafe_M, CT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -87,21 +87,21 @@ class WrappedBasisWithMetadata[
 
     @abstractmethod
     def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: WrappedBasisWithMetadata[Basis[Any, ctype[DT3]], ctype[DT1]],
+        self: WrappedBasisWithMetadata[Basis[Any, Ctype[DT3]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]: ...
 
     @abstractmethod
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: WrappedBasisWithMetadata[Basis[Any, ctype[DT1]], ctype[DT3]],
+        self: WrappedBasisWithMetadata[Basis[Any, Ctype[DT1]], Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]: ...
 
     @override
     def __into_fundamental__[DT1: np.generic, DT2: np.generic](
-        self: WrappedBasisWithMetadata[Basis[Any, ctype[DT1]], ctype[DT1]],
+        self: WrappedBasisWithMetadata[Basis[Any, Ctype[DT1]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.generic]:
@@ -112,7 +112,7 @@ class WrappedBasisWithMetadata[
 
     @override
     def __from_fundamental__[DT2: np.generic, DT3: np.generic](
-        self: WrappedBasisWithMetadata[Basis[Any, ctype[DT3]], ctype[DT3]],
+        self: WrappedBasisWithMetadata[Basis[Any, Ctype[DT3]], Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.generic, DT2, DT3]:
@@ -128,9 +128,9 @@ class WrappedBasisWithMetadata[
         DT2: np.generic,
         DT3: np.generic,
     ](
-        self: WrappedBasisWithMetadata[Basis[M_, ctype[DT1]], ctype[DT1]],
+        self: WrappedBasisWithMetadata[Basis[M_, Ctype[DT1]], Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, ctype[DT3]],
+        basis: Basis[M_, Ctype[DT3]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         return BasisConversion[DT1, DT2, DT3](
@@ -143,8 +143,8 @@ class WrappedBasis[
     # Invariant: DT must also be supported by all basis in B.
     # It is not possible to specify this constraint in the type system, so instead
     # we enforce it at __init__ time.
-    DT: ctype[Never] = ctype[Never],
-](WrappedBasisWithMetadata[B, DT]):
+    CT: Ctype[Never] = Ctype[Never],
+](WrappedBasisWithMetadata[B, CT]):
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
     @override
@@ -158,26 +158,26 @@ class WrappedBasis[
     @override
     def upcast[M: BasisMetadata](
         self: WrappedBasis[Basis[M, Any], Any],
-    ) -> AsUpcast[WrappedBasis[B, DT], M, DT]:
+    ) -> AsUpcast[WrappedBasis[B, CT], M, CT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
         """
         return cast(
-            "AsUpcast[WrappedBasis[B, DT], M, DT]",
+            "AsUpcast[WrappedBasis[B, CT], M, CT]",
             AsUpcast(self, self.metadata()),
         )
 
     @override
-    def resolve_ctype[DT_: ctype[Never]](
+    def resolve_ctype[DT_: Ctype[Never]](
         self: WrappedBasis[Basis[Any, DT_], Any],
     ) -> WrappedBasis[B, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("WrappedBasis[B, DT_]", self)
 
 
-class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
-    WrappedBasisWithMetadata[B, DT, M],
+class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
+    WrappedBasisWithMetadata[B, CT, M],
 ):
     def __init__[B_: Basis, M_: BasisMetadata](
         self: AsUpcast[B_, M_],
@@ -187,8 +187,13 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
         assert basis.metadata() == metadata
         super().__init__(cast("B", basis))
 
+    @property
     @override
-    def resolve_ctype[DT_: ctype[Never]](
+    def ctype(self) -> CT:
+        return cast("CT", self._inner.ctype)
+
+    @override
+    def resolve_ctype[DT_: Ctype[Never]](
         self: AsUpcast[Basis[Any, DT_], Any],
     ) -> AsUpcast[B, M, DT_]:
         return cast("AsUpcast[B, M, DT_]", self)
@@ -206,7 +211,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
 
     @override
     def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: AsUpcast[Basis[Any, Any], Any, ctype[DT1]],
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.generic]:
@@ -214,7 +219,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
 
     @override
     def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: AsUpcast[Basis[Any, Any], Any, ctype[DT3]],
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.generic, DT2, DT3]:
@@ -222,7 +227,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
 
     @override
     def __into_fundamental__[DT1: np.generic, DT2: np.generic](
-        self: AsUpcast[Basis[Any, Any], Any, ctype[DT1]],
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, np.generic]:
@@ -231,7 +236,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
 
     @override
     def __from_fundamental__[DT2: np.generic, DT3: np.generic](
-        self: AsUpcast[Basis[Any, Any], Any, ctype[DT3]],
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT3]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[np.generic, DT2, DT3]:
@@ -245,9 +250,9 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
         DT2: np.generic,
         DT3: np.generic,
     ](
-        self: AsUpcast[Basis[Any, Any], Any, ctype[DT1]],
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT1]],
         vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, ctype[DT3]],
+        basis: Basis[M_, Ctype[DT3]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
         return self._inner.__convert_vector_into__(vectors, basis, axis)
@@ -284,16 +289,16 @@ class AsUpcast[B: Basis, M: BasisMetadata, DT: ctype[Never] = ctype[Never]](
 
 def is_wrapped_basis[
     M: BasisMetadata,
-    DT: ctype[Never],
-](basis: Basis[M, DT]) -> TypeGuard[WrappedBasisWithMetadata[Basis[M, DT], DT]]:
+    CT: Ctype[Never],
+](basis: Basis[M, CT]) -> TypeGuard[WrappedBasisWithMetadata[Basis[M, CT], CT]]:
     """Check if a basis is a wrapped basis."""
     return isinstance(basis, WrappedBasisWithMetadata)
 
 
 def wrapped_basis_iter_inner[
     M: BasisMetadata,
-    DT: ctype[Never],
-](basis: Basis[M, DT]) -> Iterator[Basis[M, DT]]:
+    CT: Ctype[Never],
+](basis: Basis[M, CT]) -> Iterator[Basis[M, CT]]:
     """Return successive calls to basis.inner until the basis is not a WrappedBasis."""
     yield basis
     if is_wrapped_basis(basis):
@@ -302,8 +307,8 @@ def wrapped_basis_iter_inner[
 
 def get_wrapped_basis_super_inner[
     M: BasisMetadata,
-    DT: ctype[Never],
-](basis: Basis[M, DT]) -> Basis[M, DT]:
+    CT: Ctype[Never],
+](basis: Basis[M, CT]) -> Basis[M, CT]:
     """Get the `super inner` of a wrapped basis.
 
     If the inner is itself a wrapped basis, return the super inner of that basis.

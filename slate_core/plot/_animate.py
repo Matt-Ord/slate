@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
     from slate_core.array import Array
     from slate_core.basis import TupleBasisLike
-    from slate_core.basis._basis import Basis, ctype
+    from slate_core.basis._basis import Basis, Ctype
     from slate_core.metadata import (
         BasisMetadata,
         SimpleMetadata,
@@ -46,7 +46,7 @@ def _get_slice_idx(
 
 def animate_array_over_list[DT: np.dtype[np.number]](
     data: Array[
-        TupleBasisLike[tuple[SimpleMetadata, BasisMetadata], Never, ctype[np.floating]],
+        TupleBasisLike[tuple[SimpleMetadata, BasisMetadata], Never, Ctype[np.floating]],
         DT,
     ],
     *,
@@ -107,7 +107,7 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
 
 
 def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
-    data: Array[Basis[SpacedVolumeMetadata, ctype[np.floating]], DT],
+    data: Array[Basis[SpacedVolumeMetadata, Ctype[np.floating]], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,

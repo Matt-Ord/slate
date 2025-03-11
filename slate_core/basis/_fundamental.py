@@ -5,11 +5,11 @@ from typing import Any, Self, TypeGuard, override
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, ctype
+from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._basis_state_metadata import BasisStateMetadata, SimpleMetadata
 
 
-class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.generic]]):
+class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, Ctype[np.generic]]):
     """Represents a full fundamental basis."""
 
     def __init__[M_: SimpleMetadata](
@@ -17,6 +17,11 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, ctype[np.gen
     ) -> None:
         self._is_dual = is_dual
         super().__init__(metadata)
+
+    @property
+    @override
+    def ctype(self) -> Ctype[np.generic]:
+        return Ctype(np.generic)
 
     @property
     @override
