@@ -209,7 +209,9 @@ class TupleBasis[
         self: TupleBasis[tuple[Basis[M0], Basis[M1], Basis[M2]], E_, Any],
     ) -> TupleMetadata[tuple[M0, M1, M2], E]: ...
     @overload
-    def metadata(self) -> TupleMetadata[tuple[BasisMetadata, ...], E]: ...
+    def metadata[M: BasisMetadata, E_](
+        self: TupleBasis[tuple[Basis[M], ...], E_, Any],
+    ) -> TupleMetadata[tuple[M, ...], E]: ...
 
     @override
     def metadata(self) -> TupleMetadata[tuple[BasisMetadata, ...], E]:
