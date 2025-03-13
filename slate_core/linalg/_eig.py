@@ -24,8 +24,8 @@ from slate_core.metadata import BasisMetadata
 
 if TYPE_CHECKING:
     from slate_core.basis._tuple import TupleBasisLike
-    from slate_core.explicit_basis._explicit_basis import (
-        ExplicitBasisWithMetadata,
+    from slate_core.explicit_basis import (
+        ExplicitDiagonalBasis,
     )
     from slate_core.metadata._metadata import SimpleMetadata
 
@@ -37,14 +37,7 @@ def _diagonal_basis_as_explicit[
     CT: Ctype[np.complexfloating],
 ](
     basis: DiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT],
-) -> DiagonalBasis[
-    TupleBasis[
-        tuple[ExplicitBasisWithMetadata[M0, CT], ExplicitBasisWithMetadata[M1, CT]],
-        E,
-        CT,
-    ],
-    CT,
-]:
+) -> ExplicitDiagonalBasis[M0, M1, E, CT]:
     return DiagonalBasis(  # type: ignore cant infer
         TupleBasis(
             (
@@ -78,17 +71,7 @@ def _eig_from_tuple[
         DT,
     ],
 ) -> Array[
-    DiagonalBasis[
-        TupleBasis[
-            tuple[
-                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
-                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
-            ],
-            E,
-            Ctype[np.complexfloating],
-        ],
-        Ctype[np.complexfloating],
-    ],
+    ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     eig = np.linalg.eig(array.raw_data.reshape(array.basis.shape))
@@ -148,17 +131,7 @@ def _eig_from_block_diagonal_basis[
         DT,
     ],
 ) -> Array[
-    DiagonalBasis[
-        TupleBasis[
-            tuple[
-                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
-                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
-            ],
-            E,
-            Ctype[np.complexfloating],
-        ],
-        Ctype[np.complexfloating],
-    ],
+    ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     assert array.basis.inner.shape[0] == array.basis.inner.shape[1]
@@ -224,17 +197,7 @@ def into_diagonal[
 ](
     array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[np.complexfloating]], DT],
 ) -> Array[
-    DiagonalBasis[
-        TupleBasis[
-            tuple[
-                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
-                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
-            ],
-            E,
-            Ctype[np.complexfloating],
-        ],
-        Ctype[np.complexfloating],
-    ],
+    ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     """Get the diagonal form of a matrix.
@@ -289,17 +252,7 @@ def _eigh_from_tuple[
         DT,
     ],
 ) -> Array[
-    DiagonalBasis[
-        TupleBasis[
-            tuple[
-                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
-                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
-            ],
-            E,
-            Ctype[np.complexfloating],
-        ],
-        Ctype[np.complexfloating],
-    ],
+    ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     eig = np.linalg.eigh(array.raw_data.reshape(array.basis.shape))
@@ -367,17 +320,7 @@ def _eigh_from_block_diagonal_basis[
         np.dtype[np.complexfloating],
     ],
 ) -> Array[
-    DiagonalBasis[
-        TupleBasis[
-            tuple[
-                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
-                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
-            ],
-            E,
-            Ctype[np.complexfloating],
-        ],
-        Ctype[np.complexfloating],
-    ],
+    ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     assert array.basis.inner.shape[0] == array.basis.inner.shape[1]
@@ -444,17 +387,7 @@ def into_diagonal_hermitian[
 ](
     array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[np.complexfloating]], DT],
 ) -> Array[
-    DiagonalBasis[
-        TupleBasis[
-            tuple[
-                ExplicitBasisWithMetadata[M0, Ctype[np.complexfloating]],
-                ExplicitBasisWithMetadata[M1, Ctype[np.complexfloating]],
-            ],
-            E,
-            Ctype[np.complexfloating],
-        ],
-        Ctype[np.complexfloating],
-    ],
+    ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     diagonal = as_diagonal_basis(array.basis)

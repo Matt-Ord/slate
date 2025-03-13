@@ -22,6 +22,7 @@ from slate_core.basis import (
     WrappedBasis,
 )
 from slate_core.basis._basis import BasisConversion, Ctype, UnionCtype
+from slate_core.basis._diagonal import DiagonalBasis
 from slate_core.basis._tuple import TupleBasis, TupleBasisLike
 from slate_core.basis._util import as_fundamental
 from slate_core.metadata import (
@@ -486,3 +487,24 @@ type ExplicitBasisWithMetadata[M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]
         CT,
     ]
 )
+type UpcastExplicitBasisWithMetadata[
+    M: BasisMetadata,
+    CT: Ctype[Never] = Ctype[Never],
+] = AsUpcast[ExplicitBasisWithMetadata[M, CT], M, CT]
+
+type ExplicitDiagonalBasis[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+    CT: Ctype[Never],
+] = DiagonalBasis[
+    TupleBasis[
+        tuple[
+            UpcastExplicitBasisWithMetadata[M0, CT],
+            UpcastExplicitBasisWithMetadata[M1, CT],
+        ],
+        E,
+        CT,
+    ],
+    CT,
+]
