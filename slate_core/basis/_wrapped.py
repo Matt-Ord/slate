@@ -31,7 +31,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
         return vectors
 
     as_inner = initial.__into_inner__(vectors, axis).ok()
-    if is_wrapped_basis(final) and initial.inner == final.inner:
+    if is_wrapped(final) and initial.inner == final.inner:
         return final.__from_inner__(as_inner, axis).ok()
     return initial.inner.__convert_vector_into__(as_inner, final, axis=axis).ok()
 
@@ -287,7 +287,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
         return self._inner.points
 
 
-def is_wrapped_basis[
+def is_wrapped[
     M: BasisMetadata,
     CT: Ctype[Never],
 ](basis: Basis[M, CT]) -> TypeGuard[WrappedBasisWithMetadata[Basis[M, CT], CT]]:
@@ -301,7 +301,7 @@ def wrapped_basis_iter_inner[
 ](basis: Basis[M, CT]) -> Iterator[Basis[M, CT]]:
     """Return successive calls to basis.inner until the basis is not a WrappedBasis."""
     yield basis
-    if is_wrapped_basis(basis):
+    if is_wrapped(basis):
         yield from wrapped_basis_iter_inner(basis.inner)
 
 

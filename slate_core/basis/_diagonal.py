@@ -123,7 +123,7 @@ class DiagonalBasis[
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            is_diagonal_basis(other)
+            is_diagonal(other)
             and (other.inner == self.inner)
             and self.is_dual == other.is_dual
         )
@@ -191,49 +191,47 @@ class DiagonalBasis[
 
 
 @overload
-def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: Ctype[Never]](  # type: ignore not overlapping
-    basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
+def is_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](  # type: ignore not overlapping
+    basis: Basis[TupleMetadata[tuple[M1, M2], E], CT],
 ) -> TypeGuard[
-    DiagonalBasis[TupleBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E], DT]
+    DiagonalBasis[TupleBasis[tuple[Basis[M1, CT], Basis[M2, CT]], E], CT]
 ]: ...
 @overload
-def is_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT],
+def is_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT],
 ) -> TypeGuard[
     DiagonalBasis[
-        TupleBasis[tuple[Basis[BasisMetadata, DT], Basis[BasisMetadata, DT]], Never], DT
+        TupleBasis[tuple[Basis[BasisMetadata, CT], Basis[BasisMetadata, CT]], Never], CT
     ]
 ]: ...
 @overload
-def is_diagonal_basis(basis: object) -> TypeGuard[DiagonalBasis]: ...
+def is_diagonal(basis: object) -> TypeGuard[DiagonalBasis]: ...
 
 
-def is_diagonal_basis(basis: object) -> TypeGuard[DiagonalBasis]:
+def is_diagonal(basis: object) -> TypeGuard[DiagonalBasis]:
     return isinstance(basis, DiagonalBasis)
 
 
 @overload
-def as_diagonal_basis[M1: BasisMetadata, M2: BasisMetadata, E, DT: Ctype[Never]](  # type: ignore not overlapping
-    basis: Basis[TupleMetadata[tuple[M1, M2], E], DT],
-) -> DiagonalBasis[TupleBasis[tuple[Basis[M1, DT], Basis[M2, DT]], E], DT] | None: ...
+def as_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](  # type: ignore not overlapping
+    basis: Basis[TupleMetadata[tuple[M1, M2], E], CT],
+) -> DiagonalBasis[TupleBasis[tuple[Basis[M1, CT], Basis[M2, CT]], E], CT] | None: ...
 @overload
-def as_diagonal_basis[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT],
+def as_diagonal[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT],
 ) -> (
     DiagonalBasis[
-        TupleBasis[tuple[Basis[BasisMetadata, DT], Basis[BasisMetadata, DT]], Never], DT
+        TupleBasis[tuple[Basis[BasisMetadata, CT], Basis[BasisMetadata, CT]], Never], CT
     ]
     | None
 ): ...
 
 
-def as_diagonal_basis[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT],
-) -> DiagonalBasis[Any, DT] | None:
+def as_diagonal[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT],
+) -> DiagonalBasis[Any, CT] | None:
     """Get the closest basis that supports the feature set."""
     shape = basis.metadata().fundamental_shape
     if isinstance(shape, int) or len(shape) != 2:  # noqa: PLR2004
         return None
-    return next(
-        (b for b in wrapped_basis_iter_inner(basis) if is_diagonal_basis(b)), None
-    )
+    return next((b for b in wrapped_basis_iter_inner(basis) if is_diagonal(b)), None)

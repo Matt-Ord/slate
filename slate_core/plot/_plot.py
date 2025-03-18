@@ -112,9 +112,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
     """Plot two arrays against each other."""
     common_basis = cast(
         "Basis[Any, Ctype[np.generic]]",
-        basis.get_common_basis(
-            basis.as_index_basis(x_data.basis), basis.as_index_basis(y_data.basis)
-        ),
+        basis.get_common(basis.as_index(x_data.basis), basis.as_index(y_data.basis)),
     )
 
     y_errors = (

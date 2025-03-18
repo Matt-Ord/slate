@@ -12,11 +12,13 @@ from slate_core._einsum._einstein_index import (
 from slate_core.basis import (
     Basis,
     RecastBasis,
-    as_diagonal_basis,
     as_fundamental,
-    as_linear_map_basis,
-    as_tuple_basis,
+    as_linear_map,
+    as_tuple,
     from_shape,
+)
+from slate_core.basis import (
+    as_diagonal as as_diagonal_basis,
 )
 from slate_core.basis._tuple import TupleBasis, TupleBasisLike, is_tuple_basis_like
 from slate_core.metadata import NestedLength
@@ -86,7 +88,7 @@ class EinsumBasisHints:
             # Get unique bases, but preserve insertion order
             bases_list = list(dict.fromkeys(bases))
             if len(bases_list) == 1:
-                as_linear = as_linear_map_basis(bases_list[0])
+                as_linear = as_linear_map(bases_list[0])
                 inner_basis_map.set_single(EinsteinIndex(idx), as_linear)
             else:
                 common_parent = as_fundamental(bases_list[0])
@@ -119,7 +121,7 @@ def _collect_einsum_basis_hints(
         idx = cast("tuple[EinsteinIndex, ...]", idx)
         hints.add_diag_hint(idx, basis)
     assert is_tuple_basis_like(basis)
-    basis_as_tuple = as_tuple_basis(basis)
+    basis_as_tuple = as_tuple(basis)
     for n, i in enumerate(idx):
         child = basis_as_tuple.children[n]
         _collect_einsum_basis_hints(child, i, hints)

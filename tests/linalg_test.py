@@ -11,7 +11,7 @@ from slate_core.basis import (
     BlockDiagonalBasis,
     DiagonalBasis,
     TupleBasisLike,
-    as_tuple_basis,
+    as_tuple,
     from_metadata,
     from_shape,
 )
@@ -49,19 +49,19 @@ def _test_into_diagonal(
 ) -> None:
     diagonal = into_diagonal(array)
 
-    original_as_tuple = as_tuple_basis(array.basis)
+    original_as_tuple = as_tuple(array.basis)
     diagonal_basis = diagonal.basis.inner
     assert diagonal_basis.children[0].is_dual == original_as_tuple.children[0].is_dual
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(diagonal_basis.children[0].inner.eigenvectors().basis)
+        as_tuple(diagonal_basis.children[0].inner.eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(diagonal_basis.children[1].inner.eigenvectors().basis)
+        as_tuple(diagonal_basis.children[1].inner.eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[1].is_dual
@@ -109,19 +109,19 @@ def _test_into_diagonal_hermitian(
 ) -> None:
     diagonal = into_diagonal_hermitian(array)
 
-    original_as_tuple = as_tuple_basis(array.basis)
+    original_as_tuple = as_tuple(array.basis)
     diagonal_basis = diagonal.basis.inner
     assert diagonal_basis.children[0].is_dual == original_as_tuple.children[0].is_dual
     assert diagonal_basis.children[1].is_dual == original_as_tuple.children[1].is_dual
 
     assert (
-        as_tuple_basis(diagonal_basis.children[0].inner.eigenvectors().basis)
+        as_tuple(diagonal_basis.children[0].inner.eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[0].is_dual
     )
     assert (
-        as_tuple_basis(diagonal_basis.children[1].inner.eigenvectors().basis)
+        as_tuple(diagonal_basis.children[1].inner.eigenvectors().basis)
         .children[1]
         .is_dual
         == original_as_tuple.children[1].is_dual

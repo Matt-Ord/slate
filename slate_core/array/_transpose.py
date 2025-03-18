@@ -35,7 +35,7 @@ def conjugate[B: Basis, DT: np.dtype[np.generic]](
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
-    return converted.with_basis(array.basis).ok()  # type: ignore see above
+    return converted.with_basis(array.basis).assert_ok()
 
 
 def _transpose_from_diagonal[
@@ -46,7 +46,7 @@ def _transpose_from_diagonal[
     DT: np.dtype[np.generic],
 ](
     array: Array[
-        DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT1],
+        DiagonalBasis[TupleBasis[tuple[Basis[M0, DT1], Basis[M1, DT1]], E], DT1],
         DT,
     ],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E, DT1], DT]:
@@ -56,9 +56,11 @@ def _transpose_from_diagonal[
                 (array.basis.inner.children[1], array.basis.inner.children[0]),
                 array.basis.metadata().extra,
             ).resolve_ctype()
-        ),
+        )
+        .resolve_ctype()
+        .upcast(),
         array.raw_data,
-    ).ok()  # type: ignore basis is ok
+    ).assert_ok()
 
 
 def _transpose_from_tuple_simple[
@@ -68,15 +70,17 @@ def _transpose_from_tuple_simple[
     DT1: Ctype[Never],
     DT: np.dtype[np.generic],
 ](
-    array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E, DT1], DT],
+    array: Array[TupleBasis[tuple[Basis[M0, DT1], Basis[M1, DT1]], E, DT1], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E, DT1], DT]:
     return build(
         TupleBasis(
             (array.basis.children[1], array.basis.children[0]),
             array.basis.metadata().extra,
-        ).resolve_ctype(),
+        )
+        .resolve_ctype()
+        .upcast(),
         array.raw_data.reshape(array.basis.shape).transpose(),
-    ).ok()  # type: ignore basis is ok
+    ).assert_ok()
 
 
 def _transpose_simple[
@@ -100,19 +104,19 @@ def _transpose_from_tuple[
     DT1: Ctype[Never],
     DT: np.dtype[np.generic],
 ](
-    array: Array[TupleBasis[tuple[Basis[M], ...], E, DT1], DT],
+    array: Array[TupleBasis[tuple[Basis[M, DT1], ...], E, DT1], DT],
     axes: tuple[int, ...] | None = None,
-) -> Array[TupleBasis[tuple[Basis[M], ...], E, DT1], DT]:
+) -> Array[TupleBasis[tuple[Basis[M, DT1], ...], E, DT1], DT]:
     # TODO: einsum based implementation would be preferred here...  # noqa: FIX002
     children = array.basis.children
     axes = tuple(range(len(children)))[::-1] if axes is None else axes
     out_basis = TupleBasis(
         tuple(children[i] for i in axes), array.basis.metadata().extra
-    )
+    ).resolve_ctype()
     # SAFE, since if the original basis supports the data, the new basis will too.
     return build(
         out_basis, array.raw_data.reshape(array.basis.shape).transpose(axes)
-    ).ok()  # type: ignore see above
+    ).assert_ok()
 
 
 @overload

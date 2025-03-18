@@ -263,7 +263,7 @@ def is_block_diagonal_basis(
     return isinstance(basis, BlockDiagonalBasis)
 
 
-def as_block_diagonal_basis[
+def as_block_diagonal[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,

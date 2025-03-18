@@ -11,7 +11,7 @@ from slate_core.basis._basis import (
     Ctype,
     UnionCtype,
 )
-from slate_core.basis._diagonal import DiagonalBasis, as_diagonal_basis
+from slate_core.basis._diagonal import DiagonalBasis, as_diagonal
 from slate_core.basis._wrapped import WrappedBasis
 from slate_core.metadata import BasisMetadata
 
@@ -199,7 +199,7 @@ def as_recast_diagonal_basis[
     | None
 ):
     """Get the basis as a recast diagonal basis."""
-    basis_as_diagonal = as_diagonal_basis(basis)
+    basis_as_diagonal = as_diagonal(basis)
     if basis_as_diagonal is None:
         return None
     return recast_basis_from_diagonal(basis_as_diagonal)
