@@ -11,11 +11,15 @@ from slate_core._einsum._einstein_index import (
 from slate_core.array._array import build
 from slate_core.basis import (
     FundamentalBasis,
-    as_block_diagonal_basis,
-    as_diagonal_basis,
-    as_linear_map_basis,
+    as_linear_map,
 )
-from slate_core.basis._tuple import TupleBasis, as_tuple_basis, is_tuple_basis_like
+from slate_core.basis import (
+    as_block_diagonal as as_block_diagonal_basis,
+)
+from slate_core.basis import (
+    as_diagonal as as_diagonal_basis,
+)
+from slate_core.basis._tuple import TupleBasis, as_tuple, is_tuple_basis_like
 
 if TYPE_CHECKING:
     from slate_core.array import Array
@@ -58,8 +62,8 @@ def _einsum_smart[DT: np.dtype[np.number]](
 ) -> Array[Any, DT]:
     assert idx == "(i j'),(j k)->(i k)"
     assert is_tuple_basis_like(arrays[0].basis)
-    as_linear = as_linear_map_basis(arrays[1].basis)
-    as_tuple_0 = as_tuple_basis(arrays[0].basis)
+    as_linear = as_linear_map(arrays[1].basis)
+    as_tuple_0 = as_tuple(arrays[0].basis)
     as_diagonal = (
         as_diagonal_basis(as_linear)
         if is_tuple_basis_like(as_linear, n_dim=2)

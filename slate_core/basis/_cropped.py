@@ -31,7 +31,7 @@ class CroppedBasis[B: Basis = Basis, CT: Ctype[Never] = Ctype[Never]](
 
     @override
     def __eq__(self, other: object) -> bool:
-        if is_cropped_basis(other):
+        if is_cropped(other):
             return self._size == other._size and other._inner == self._inner
         return False
 
@@ -76,7 +76,7 @@ class CroppedBasis[B: Basis = Basis, CT: Ctype[Never] = Ctype[Never]](
         if self == basis:
             return BasisConversion(lambda: vectors)
 
-        if is_cropped_basis(basis) and self.inner == basis.inner:
+        if is_cropped(basis) and self.inner == basis.inner:
 
             def fn() -> np.ndarray[Any, np.dtype[DT2]]:
                 out = pad_ft_points(vectors, s=(basis.size,), axes=(axis,))
@@ -150,6 +150,6 @@ class CroppedBasis[B: Basis = Basis, CT: Ctype[Never] = Ctype[Never]](
         )
 
 
-def is_cropped_basis(basis: object) -> TypeGuard[CroppedBasis]:
+def is_cropped(basis: object) -> TypeGuard[CroppedBasis]:
     """Is the basis a cropped basis."""
     return isinstance(basis, CroppedBasis)

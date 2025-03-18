@@ -4,18 +4,17 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate_core import basis
 from slate_core.array import Array, build
-from slate_core.array._conversion import cast_basis
+from slate_core.array._conversion import as_supports_type_basis, cast_basis
 from slate_core.basis import (
     DiagonalBasis,
     FundamentalBasis,
 )
 from slate_core.basis._basis import Basis, Ctype
 from slate_core.basis._basis_state_metadata import BasisStateMetadata
-from slate_core.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal_basis
-from slate_core.basis._diagonal import as_diagonal_basis
-from slate_core.basis._tuple import TupleBasis, as_tuple_basis
+from slate_core.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal
+from slate_core.basis._diagonal import as_diagonal
+from slate_core.basis._tuple import TupleBasis, as_tuple
 from slate_core.explicit_basis import (
     ExplicitBasis,
     ExplicitUnitaryBasis,
@@ -196,7 +195,7 @@ def into_diagonal[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[Any]], DT],
+    array: Array[TupleBasisLike[tuple[M0, M1], E], DT],
 ) -> Array[
     ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
@@ -210,19 +209,16 @@ def into_diagonal[
         :lineno-start: 1
         :dedent: 4
     """
-    diagonal = as_diagonal_basis(array.basis)
-    if diagonal is not None and diagonal.ctype.supports_type(np.complexfloating):
-        return array.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
+    suporting = as_supports_type_basis(array, np.complexfloating)
+    diagonal = as_diagonal(suporting.basis)
+    if diagonal is not None:
+        return suporting.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
 
-    block_diagonal = as_block_diagonal_basis(array.basis)
-    if block_diagonal is not None and block_diagonal.ctype.supports_type(
-        np.complexfloating
-    ):
-        return _eig_from_block_diagonal_basis(array.with_basis(block_diagonal).ok())
+    block_diagonal = as_block_diagonal(suporting.basis)
+    if block_diagonal is not None:
+        return _eig_from_block_diagonal_basis(suporting.with_basis(block_diagonal).ok())
 
-    tuple_basis = as_tuple_basis(array.basis)
-    if not tuple_basis.ctype.supports_type(np.complexfloating):
-        tuple_basis = basis.from_metadata(tuple_basis.metadata())
+    tuple_basis = as_tuple(suporting.basis)
     converted = cast_basis(
         array.with_basis(tuple_basis.upcast()).ok(), tuple_basis
     ).ok()
@@ -390,24 +386,23 @@ def into_diagonal_hermitian[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[Any]], DT],
+    array: Array[TupleBasisLike[tuple[M0, M1], E], DT],
 ) -> Array[
     ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
-    diagonal = as_diagonal_basis(array.basis)
-    if diagonal is not None and diagonal.ctype.supports_type(np.complexfloating):
-        return array.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
+    suporting = as_supports_type_basis(array, np.complexfloating)
+    diagonal = as_diagonal(suporting.basis)
+    if diagonal is not None:
+        return suporting.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
 
-    block_diagonal = as_block_diagonal_basis(array.basis)
-    if block_diagonal is not None and block_diagonal.ctype.supports_type(
-        np.complexfloating
-    ):
-        return _eigh_from_block_diagonal_basis(array.with_basis(block_diagonal).ok())
+    block_diagonal = as_block_diagonal(suporting.basis)
+    if block_diagonal is not None:
+        return _eigh_from_block_diagonal_basis(
+            suporting.with_basis(block_diagonal).ok()
+        )
 
-    tuple_basis = as_tuple_basis(array.basis)
-    if not tuple_basis.ctype.supports_type(np.complexfloating):
-        tuple_basis = basis.from_metadata(tuple_basis.metadata())
+    tuple_basis = as_tuple(suporting.basis)
     converted = cast_basis(
         array.with_basis(tuple_basis.upcast()).ok(), tuple_basis
     ).ok()

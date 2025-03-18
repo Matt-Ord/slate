@@ -12,7 +12,7 @@ from slate_core.basis._basis import (
     Ctype,
     UnionCtype,
 )
-from slate_core.basis._util import get_common_basis
+from slate_core.basis._util import get_common
 from slate_core.basis._wrapped import AsUpcast, WrappedBasis
 from slate_core.metadata._metadata import BasisMetadata
 from slate_core.util import Padding, pad_along_axis, slice_along_axis
@@ -102,7 +102,7 @@ class SplitBasis[
     ](self: SplitBasis[B0_, B1_, Ctype[Never]], lhs: B0_, rhs: B1_) -> None:
         self._lhs: B0 = lhs
         self._rhs: B1 = rhs
-        super().__init__(get_common_basis(lhs, rhs))
+        super().__init__(get_common(lhs, rhs))
 
     @property
     @override

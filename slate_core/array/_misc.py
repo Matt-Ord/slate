@@ -17,33 +17,33 @@ if TYPE_CHECKING:
 
 
 @overload
-def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[1]
-) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata], Never, DT], DT1]]: ...
+def is_tuple_basis_like[CT: Ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, CT], DT1], *, n_dim: Literal[1]
+) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata], Never, CT], DT1]]: ...
 @overload
-def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[2]
+def is_tuple_basis_like[CT: Ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, CT], DT1], *, n_dim: Literal[2]
 ) -> TypeGuard[
-    Array[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, DT], DT1]
+    Array[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, CT], DT1]
 ]: ...
 @overload
-def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: Literal[3]
+def is_tuple_basis_like[CT: Ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, CT], DT1], *, n_dim: Literal[3]
 ) -> TypeGuard[
     Array[
-        TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, DT],
+        TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, CT],
         DT1,
     ]
 ]: ...
 @overload
-def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: int | None = None
-) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT], DT1]]: ...
+def is_tuple_basis_like[CT: Ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, CT], DT1], *, n_dim: int | None = None
+) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, CT], DT1]]: ...
 
 
-def is_tuple_basis_like[DT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[Basis[BasisMetadata, DT], DT1], *, n_dim: int | None = None
-) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT], DT1]]:
+def is_tuple_basis_like[CT: Ctype[Never], DT1: np.dtype[np.generic]](
+    array: Array[Basis[BasisMetadata, CT], DT1], *, n_dim: int | None = None
+) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, CT], DT1]]:
     return is_tuple_basis_like_basis(array.basis, n_dim=n_dim)
 
 

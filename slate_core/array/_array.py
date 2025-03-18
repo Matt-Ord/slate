@@ -51,7 +51,7 @@ def _index_tuple_raw_along_axis(
     axis: int = -1,
 ) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, Any]]:
     axis &= data.ndim
-    tuple_basis = basis.as_tuple_basis(basis.as_linear_map_basis(data_basis))
+    tuple_basis = basis.as_tuple(basis.as_linear_map(data_basis))
     if tuple_basis is None:
         msg = "Cannot index a non-tuple basis."
         raise ValueError(msg)
@@ -291,7 +291,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
         other: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_add_basis = basis.as_add_basis(self.basis)
+        as_add_basis = basis.as_add(self.basis)
         data = as_add_basis.add_data(
             self.with_basis(as_add_basis).ok().raw_data,
             other.with_basis(as_add_basis).ok().raw_data,
@@ -303,7 +303,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
         other: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_sub_basis = basis.as_sub_basis(self.basis)
+        as_sub_basis = basis.as_sub(self.basis)
         data = as_sub_basis.sub_data(
             self.with_basis(as_sub_basis).ok().raw_data,
             other.with_basis(as_sub_basis).ok().raw_data,
@@ -315,7 +315,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
         other: float,
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_mul_basis = basis.as_mul_basis(self.basis)
+        as_mul_basis = basis.as_mul(self.basis)
         data = as_mul_basis.mul_data(self.with_basis(as_mul_basis).ok().raw_data, other)
         return build(as_mul_basis, data).ok()
 
@@ -345,7 +345,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         self: Array[Basis[TupleMetadata[tuple[BasisMetadata, ...], Any]], Any], /
     ) -> Iterator[Array[Any, Any]]:
         basis_as_tuple = basis.with_modified_child(
-            basis.as_tuple_basis(self.basis), basis.as_fundamental, 0
+            basis.as_tuple(self.basis), basis.as_fundamental, 0
         )
         as_tuple = self.with_basis(basis_as_tuple).ok()
         children = as_tuple.basis.children[1:]

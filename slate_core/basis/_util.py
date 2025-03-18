@@ -13,11 +13,13 @@ from slate_core.basis._basis import Basis, Ctype, NestedBool
 from slate_core.basis._tuple import (
     TupleBasis,
     TupleBasisLike,
-    as_feature_basis,
-    as_tuple_basis,
+    as_feature,
     from_metadata,
-    is_tuple_basis,
+    is_tuple,
     is_tuple_basis_like,
+)
+from slate_core.basis._tuple import (
+    as_tuple as as_tuple_basis,
 )
 from slate_core.basis._wrapped import (
     wrapped_basis_iter_inner,
@@ -66,15 +68,15 @@ def with_modified_child[
     return with_modified_children(basis, lambda i, b: b if i != idx else wrapper(b))
 
 
-def with_child[M: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasis[tuple[Basis[M, DT], ...], E, DT], inner: Basis[M, DT], idx: int
-) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]:
+def with_child[M: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasis[tuple[Basis[M, CT], ...], E, CT], inner: Basis[M, CT], idx: int
+) -> TupleBasis[tuple[Basis[M, CT], ...], E, CT]:
     """Get a basis with the basis at idx set to inner."""
     return with_modified_child(basis, lambda _: inner, idx)
 
 
-def as_fundamental[M: AnyMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT],
+def as_fundamental[M: AnyMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT],
 ) -> Basis[M, Ctype[np.generic]]:
     return from_metadata(basis.metadata(), is_dual=basis.is_dual)
 
@@ -182,20 +184,16 @@ def from_shape[E](
     return from_metadata(TupleMetadata.from_shape(shape, extra=extra), is_dual=is_dual)
 
 
-def get_common_basis[M: BasisMetadata, DT: Ctype[Never]](
-    lhs: Basis[M, DT],
-    rhs: Basis[M, DT],
-) -> Basis[M, DT | Ctype[np.generic]]:
+def get_common[M: BasisMetadata, CT: Ctype[Never]](
+    lhs: Basis[M, CT],
+    rhs: Basis[M, CT],
+) -> Basis[M, CT | Ctype[np.generic]]:
     """Get the closest common basis of two bases."""
     assert rhs.metadata() == lhs.metadata()
     lhs_rev = list(wrapped_basis_iter_inner(lhs))
     rhs_rev = list(wrapped_basis_iter_inner(rhs))
 
-    if (
-        is_tuple_basis(lhs_rev[-1])
-        and is_tuple_basis(rhs_rev[-1])
-        and lhs_rev != rhs_rev
-    ):
+    if is_tuple(lhs_rev[-1]) and is_tuple(rhs_rev[-1]) and lhs_rev != rhs_rev:
         # For a TupleBasis, we can do a bit better
         # By finding the common basis of the children
         lhs_children = lhs_rev[-1].children
@@ -203,10 +201,10 @@ def get_common_basis[M: BasisMetadata, DT: Ctype[Never]](
         children = zip(lhs_children, rhs_children, strict=True)
 
         basis = TupleBasis(
-            tuple(starmap(get_common_basis, children)),
+            tuple(starmap(get_common, children)),
             rhs_rev[-1].metadata().extra,
         )
-        return cast("Basis[M, DT]", basis)
+        return cast("Basis[M, CT]", basis)
 
     last_common = from_metadata(rhs.metadata(), is_dual=rhs.is_dual)
     for a, b in zip(reversed(lhs_rev), reversed(rhs_rev), strict=False):
@@ -253,57 +251,57 @@ def flatten(
     return TupleBasis(children, as_tuple.metadata().extra)
 
 
-def as_add_basis[M: BasisMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT],
-) -> Basis[M, DT]:
+def as_add[M: BasisMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT],
+) -> Basis[M, CT]:
     """Get the closest basis that supports addition.
 
     If the basis is already an ADD basis, return it.
     If it wraps an ADD basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return as_feature_basis(basis, {"ADD"})
+    return as_feature(basis, {"ADD"})
 
 
-def as_sub_basis[M: BasisMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT],
-) -> Basis[M, DT]:
+def as_sub[M: BasisMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT],
+) -> Basis[M, CT]:
     """Get the closest basis that supports subtraction.
 
     If the basis is already a SUB basis, return it.
     If it wraps a SUB basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return as_feature_basis(basis, {"SUB"})
+    return as_feature(basis, {"SUB"})
 
 
-def as_mul_basis[M: BasisMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT],
-) -> Basis[M, DT]:
+def as_mul[M: BasisMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT],
+) -> Basis[M, CT]:
     """Get the closest basis that supports MUL.
 
     If the basis is already a MUL basis, return it.
     If it wraps a MUL basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return as_feature_basis(basis, {"MUL"})
+    return as_feature(basis, {"MUL"})
 
 
-def as_linear_map_basis[M: BasisMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT],
-) -> Basis[M, DT]:
+def as_linear_map[M: BasisMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT],
+) -> Basis[M, CT]:
     """Get the closest basis that supports LINEAR_MAP.
 
     If the basis is already a LINEAR_MAP basis, return it.
     If it wraps a LINEAR_MAP basis, return the inner basis.
     Otherwise, return the fundamental.
     """
-    return as_feature_basis(basis, {"LINEAR_MAP"})
+    return as_feature(basis, {"LINEAR_MAP"})
 
 
-def as_is_dual_basis[M: BasisMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT], is_dual: NestedBool
-) -> Basis[M, DT | Ctype[np.generic]]:
+def as_is_dual[M: BasisMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT], is_dual: NestedBool
+) -> Basis[M, CT | Ctype[np.generic]]:
     """Get the closest basis that supports IS_DUAL.
 
     If the basis is already an IS_DUAL basis, return it.
@@ -322,11 +320,11 @@ def as_is_dual_basis[M: BasisMetadata, DT: Ctype[Never]](
         return from_metadata(basis.metadata(), is_dual=is_dual)
 
     return cast(
-        "Basis[M, DT]",
+        "Basis[M, CT]",
         TupleBasis(
             tuple(
                 starmap(
-                    as_is_dual_basis,
+                    as_is_dual,
                     zip(basis_as_tuple.children, is_dual, strict=False),
                 )
             ),

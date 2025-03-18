@@ -41,8 +41,7 @@ def as_feature_basis[
 ) -> Array[Basis[M, DT1], DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
-    # Unfortunately is not possible to express this invariant in the type system.
-    return array.with_basis(basis.as_feature_basis(array.basis, features)).ok()  # type: ignore see above
+    return array.with_basis(basis.as_feature(array.basis, features)).assert_ok()
 
 
 def as_index_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
@@ -75,6 +74,16 @@ def as_linear_map_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[N
     return as_feature_basis(array, {"LINEAR_MAP"})
 
 
+def as_supports_type_basis[
+    M: BasisMetadata,
+    DT: np.dtype[np.generic],
+    T: np.generic,
+](array: Array[Basis[M], DT], ty: type[T]) -> Array[Basis[M, Ctype[T]], DT]:
+    converted = basis.as_supports_type(array.basis, ty)
+    # The basis is guaranteed to also support the original dtype
+    return array.with_basis(converted).assert_ok()
+
+
 def as_diagonal_basis[
     M0: BasisMetadata,
     M1: BasisMetadata,
@@ -87,13 +96,13 @@ def as_diagonal_basis[
     Array[DiagonalBasis[TupleBasis[tuple[Basis[M0, DT1], Basis[M1, DT1]], E], DT1], DT]
     | None
 ):
-    b = basis.as_diagonal_basis(array.basis)
+    b = basis.as_diagonal(array.basis)
     if b is None:
         return None
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
-    return array.with_basis(b).ok()  # type: ignore see above
+    return array.with_basis(b).assert_ok()
 
 
 @overload
@@ -138,11 +147,11 @@ def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT1: np.dtype[np.gener
 def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT1: np.dtype[np.generic]](
     array: Array[Basis[TupleMetadata[tuple[M, ...], E], CT], DT1],
 ) -> Array[TupleBasis[tuple[Basis[M, CT], ...], E, CT], DT1]:
-    b = basis.as_tuple_basis(array.basis)
+    b = basis.as_tuple(array.basis)
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
-    return array.with_basis(b).ok()  # type: ignore see above
+    return array.with_basis(b).assert_ok()
 
 
 def as_fundamental_basis[M: AnyMetadata, DT: np.dtype[np.generic]](
@@ -158,12 +167,12 @@ def as_transformed_basis[M: AnyMetadata, DT: np.dtype[np.complexfloating]](
 
 
 def as_outer_array[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[RecastBasis[Basis, B, Basis, Ctype[Never]], DT],
+    array: Array[RecastBasis[Basis, Basis, B, Ctype[Never]], DT],
 ) -> Array[B, DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
-    return cast_basis(array, array.basis.outer_recast).ok()  # type: ignore safe, since outer_recast must support DT
+    return cast_basis(array, array.basis.outer_recast).assert_ok()
 
 
 def as_diagonal_array[B: Basis, DT: np.dtype[np.generic]](
@@ -172,7 +181,7 @@ def as_diagonal_array[B: Basis, DT: np.dtype[np.generic]](
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
-    return cast_basis(array, array.basis.inner[1]).ok()  # type: ignore safe, since inner[1] must support DT
+    return cast_basis(array, array.basis.inner.children[1]).assert_ok()
 
 
 def nest[
@@ -184,7 +193,7 @@ def nest[
     # Since the basis supports the same dtype as the original basis
     # it is safe to call ok on the builder.
     # Unfortunately is not possible to express this invariant in the type system.
-    return cast_basis(array, TupleBasis((array.basis,))).ok()  # type: ignore see above
+    return cast_basis(array, TupleBasis((array.basis,))).assert_ok()
 
 
 @overload
@@ -208,20 +217,20 @@ def flatten[M: BasisMetadata, E, DT1: Ctype[Never], DT: np.dtype[np.generic]](
 def flatten[DT: np.dtype[np.generic]](
     array: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any], DT],
 ) -> Array[Any, DT]:
-    basis_as_tuple = basis.as_tuple_basis(array.basis).resolve_ctype()
+    basis_as_tuple = basis.as_tuple(array.basis).resolve_ctype()
     if len(basis_as_tuple.children) == 1:
         converted = as_tuple_basis(array)
         # Since the basis supports the same dtype as the original basis
         # it is safe to call ok on the builder.
         # Unfortunately is not possible to express this invariant in the type system.
-        return cast_basis(converted, basis_as_tuple.children[0]).ok()  # type: ignore see above
+        return cast_basis(converted, basis_as_tuple.children[0]).assert_ok()
     children = tuple(
-        basis.as_tuple_basis(c) if is_tuple_basis_like(c) else c
+        basis.as_tuple(c) if is_tuple_basis_like(c) else c
         for c in basis_as_tuple.children
     )
     final_basis = TupleBasis(children, array.basis.metadata().extra)
-    converted = array.with_basis(final_basis)
-    return cast_basis(converted, basis.flatten(basis_as_tuple)).ok()  # type: ignore see above
+    converted = array.with_basis(final_basis).assert_ok()
+    return cast_basis(converted, basis.flatten(basis_as_tuple)).assert_ok()
 
 
 def as_raw_array[DT: np.dtype[np.generic], B: Basis](

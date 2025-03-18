@@ -27,9 +27,7 @@ if TYPE_CHECKING:
 def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: Array[Basis[TupleMetadata[tuple[Any, M1], E]], DT],
 ) -> Array[Basis[M1, Ctype[np.generic]], DT]:
-    b = DiagonalBasis(
-        basis.as_tuple_basis(basis.as_fundamental(array.basis))
-    ).resolve_ctype()
+    b = DiagonalBasis(basis.as_tuple(basis.as_fundamental(array.basis))).resolve_ctype()
     converted = array.with_basis(b).ok()
 
     return build(converted.basis.inner.children[1], converted.raw_data).ok()
