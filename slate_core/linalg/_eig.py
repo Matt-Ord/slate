@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
+from slate_core import basis
 from slate_core.array import Array, build
 from slate_core.array._conversion import cast_basis
 from slate_core.basis import (
@@ -195,7 +196,7 @@ def into_diagonal[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[np.complexfloating]], DT],
+    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[Any]], DT],
 ) -> Array[
     ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
@@ -210,14 +211,18 @@ def into_diagonal[
         :dedent: 4
     """
     diagonal = as_diagonal_basis(array.basis)
-    if diagonal is not None:
+    if diagonal is not None and diagonal.ctype.supports_type(np.complexfloating):
         return array.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
 
     block_diagonal = as_block_diagonal_basis(array.basis)
-    if block_diagonal is not None:
+    if block_diagonal is not None and block_diagonal.ctype.supports_type(
+        np.complexfloating
+    ):
         return _eig_from_block_diagonal_basis(array.with_basis(block_diagonal).ok())
 
     tuple_basis = as_tuple_basis(array.basis)
+    if not tuple_basis.ctype.supports_type(np.complexfloating):
+        tuple_basis = basis.from_metadata(tuple_basis.metadata())
     converted = cast_basis(
         array.with_basis(tuple_basis.upcast()).ok(), tuple_basis
     ).ok()
@@ -385,21 +390,24 @@ def into_diagonal_hermitian[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[np.complexfloating]], DT],
+    array: Array[TupleBasisLike[tuple[M0, M1], E, Ctype[Any]], DT],
 ) -> Array[
     ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
     diagonal = as_diagonal_basis(array.basis)
-    if diagonal is not None:
+    if diagonal is not None and diagonal.ctype.supports_type(np.complexfloating):
         return array.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
 
     block_diagonal = as_block_diagonal_basis(array.basis)
-    if block_diagonal is not None:
-        array.with_basis(block_diagonal).ok()
+    if block_diagonal is not None and block_diagonal.ctype.supports_type(
+        np.complexfloating
+    ):
         return _eigh_from_block_diagonal_basis(array.with_basis(block_diagonal).ok())
 
     tuple_basis = as_tuple_basis(array.basis)
+    if not tuple_basis.ctype.supports_type(np.complexfloating):
+        tuple_basis = basis.from_metadata(tuple_basis.metadata())
     converted = cast_basis(
         array.with_basis(tuple_basis.upcast()).ok(), tuple_basis
     ).ok()

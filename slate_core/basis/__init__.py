@@ -13,6 +13,7 @@ from slate_core.basis._basis import (
     are_dual,
     are_dual_shapes,
     supports_dtype,
+    supports_type,
 )
 from slate_core.basis._basis_state_metadata import (
     BasisStateMetadata,
@@ -136,6 +137,7 @@ __all__ = [
     "is_tuple_basis_like",
     "is_wrapped_basis",
     "supports_dtype",
+    "supports_type",
     "transformed_from_metadata",
     "transformed_from_shape",
     "with_child",
