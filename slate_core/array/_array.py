@@ -123,6 +123,10 @@ class ArrayConversion[
             ).ok(),
         )
 
+    def assert_ok(self) -> Array[B1, DT]:
+        assert self._new_basis.ctype.supports_dtype(self._data.dtype)
+        return self.ok()  # type: ignore safe to construct
+
 
 class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
     def __init__(self, basis: B, data: np.ndarray[Any, DT]) -> None:
