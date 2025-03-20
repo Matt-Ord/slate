@@ -292,16 +292,16 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         DT_: np.number,
     ](
         self: Array[Basis[M_, Any], np.dtype[np.generic]],
-        dtype: np.dtype[DT_],
+        ty: type[DT_],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_type_basis = basis.as_supports_type(self.basis, dtype.type)
+        as_type_basis = basis.as_supports_type(self.basis, ty)
         converted = self.with_basis(as_type_basis).assert_ok()
-        return self.build(converted.basis, converted.raw_data.astype(dtype)).ok()
+        return self.build(converted.basis, converted.raw_data.astype(ty)).ok()
 
     def __add__[M_: BasisMetadata, DT_: np.number](
         self: Array[Basis[M_], np.dtype[DT_]],
         other: Array[Basis[M_], np.dtype[DT_]],
-    ) -> Array[Basis[M_], np.dtype[DT_]]:
+    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         final_basis = basis.as_supports_type(
             basis.as_add(self.basis), np.result_type(self.dtype, other.dtype).type
         )

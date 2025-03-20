@@ -46,17 +46,19 @@ def norm[M: BasisMetadata, DT: np.dtype[np.number]](
 
 
 @overload
-def norm[DT: np.dtype[np.number]](
-    array: Array[Basis, DT], *, axis: None = ...
+def norm[DT: np.number](
+    array: Array[Basis, np.dtype[DT]], *, axis: None = ...
 ) -> DT: ...
 
 
-def norm[DT: np.dtype[np.number]](
-    array: Array[Basis, DT], axis: int | None = None
-) -> Array[Any, DT] | DT:
+def norm[DT: np.number](
+    array: Array[Basis, np.dtype[DT]], axis: int | None = None
+) -> Array[Any, np.dtype[DT]] | DT:
     if axis is None:
         return np.linalg.norm(array.as_array(), axis=axis)  # type: ignore unknown
-    data = cast("np.ndarray[Any, DT]", np.linalg.norm(array.as_array(), axis=axis))
+    data = cast(
+        "np.ndarray[Any, np.dtype[DT]]", np.linalg.norm(array.as_array(), axis=axis)
+    )
     assert is_tuple_basis_like(array.basis)
     full_basis = basis.from_metadata(array.basis.metadata())
 
