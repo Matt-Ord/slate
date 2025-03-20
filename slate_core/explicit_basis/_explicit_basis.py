@@ -30,7 +30,7 @@ from slate_core.metadata import (
     SimpleMetadata,
     shallow_shape_from_nested,
 )
-from slate_core.metadata._stacked import TupleMetadata
+from slate_core.metadata._tuple import TupleMetadata
 
 if TYPE_CHECKING:
     from slate_core.array._array import ArrayBuilder

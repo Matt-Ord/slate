@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from slate_core.basis import Basis, Ctype, TupleBasis
     from slate_core.basis._fundamental import FundamentalBasis
     from slate_core.metadata import BasisMetadata, SimpleMetadata
-    from slate_core.metadata._stacked import TupleMetadata
+    from slate_core.metadata._tuple import TupleMetadata
 
 
 @pytest.fixture

@@ -11,7 +11,7 @@ from slate_core.metadata._metadata import BasisMetadata
 from slate_core.metadata.util import nx_points
 
 if TYPE_CHECKING:
-    from slate_core.metadata._stacked import TupleMetadata
+    from slate_core.metadata._tuple import TupleMetadata
 
 
 class IsotropicBasis[
