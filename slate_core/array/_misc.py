@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, overload
+from typing import TYPE_CHECKING, Literal, Never, TypeGuard, overload
 
 import numpy as np
 
 from slate_core.array._array import build
-from slate_core.array._conversion import as_fundamental_basis, as_index_basis
+from slate_core.array._conversion import (
+    as_fundamental_basis,
+    as_index_basis,
+    as_supports_type_basis,
+)
 from slate_core.basis import Basis, Ctype
 from slate_core.basis import is_tuple_basis_like as is_tuple_basis_like_basis
 from slate_core.basis import supports_dtype as supports_dtype_basis
@@ -73,17 +77,12 @@ def imag[B: Basis, DT: np.dtype[np.generic]](
     )
 
 
-def angle[B: Basis[Any, Ctype[np.number]], DT: np.dtype[np.complexfloating]](
-    array: Array[B, DT],
-) -> Array[B, np.dtype[np.floating]]:
+def angle[M: BasisMetadata](
+    array: Array[Basis[M], np.dtype[np.complexfloating]],
+) -> Array[Basis[M], np.dtype[np.floating]]:
     """Get the phase of data in the array."""
-    converted = as_index_basis(array)
-    return (
-        build(converted.basis, np.angle(converted.raw_data))
-        .ok()
-        .with_basis(array.basis)
-        .ok()
-    )
+    converted = as_supports_type_basis(as_index_basis(array), np.floating)
+    return build(converted.basis, np.angle(converted.raw_data)).ok()
 
 
 def abs[B: Basis, DT: np.dtype[np.generic]](  # noqa: A001
