@@ -228,7 +228,7 @@ class Basis[M: BasisMetadata = BasisMetadata, CT: Ctype[Never] = Ctype[Never]](A
     def mul_data[DT_: np.dtype[np.number]](
         self,
         lhs: np.ndarray[Any, DT_],
-        rhs: float,
+        rhs: complex,
     ) -> np.ndarray[Any, DT_]:
         msg = "mul_data not implemented for this basis"
         raise NotImplementedError(msg)

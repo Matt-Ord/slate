@@ -287,37 +287,54 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         """Get the Array with the basis set to basis."""
         return ArrayConversion(self.raw_data, self.basis, basis)
 
-    def __add__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
-        other: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+    def as_type[
+        M_: BasisMetadata,
+        DT_: np.number,
+    ](
+        self: Array[Basis[M_, Any], np.dtype[np.generic]],
+        dtype: np.dtype[DT_],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_add_basis = basis.as_add(self.basis)
-        data = as_add_basis.add_data(
-            self.with_basis(as_add_basis).ok().raw_data,
-            other.with_basis(as_add_basis).ok().raw_data,
+        as_type_basis = basis.as_supports_type(self.basis, dtype.type)
+        converted = self.with_basis(as_type_basis).assert_ok()
+        return self.build(converted.basis, converted.raw_data.astype(dtype)).ok()
+
+    def __add__[M_: BasisMetadata, DT_: np.number](
+        self: Array[Basis[M_], np.dtype[DT_]],
+        other: Array[Basis[M_], np.dtype[DT_]],
+    ) -> Array[Basis[M_], np.dtype[DT_]]:
+        final_basis = basis.as_supports_type(
+            basis.as_add(self.basis), np.result_type(self.dtype, other.dtype).type
+        )
+        data = final_basis.add_data(
+            self.with_basis(final_basis).ok().raw_data,
+            other.with_basis(final_basis).ok().raw_data,
         )
 
-        return build(as_add_basis, data).ok()
+        return build(final_basis, data).ok()
 
     def __sub__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
-        other: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+        self: Array[Basis[M_], np.dtype[DT_]],
+        other: Array[Basis[M_], np.dtype[DT_]],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_sub_basis = basis.as_sub(self.basis)
-        data = as_sub_basis.sub_data(
-            self.with_basis(as_sub_basis).ok().raw_data,
-            other.with_basis(as_sub_basis).ok().raw_data,
+        final_basis = basis.as_supports_type(
+            basis.as_sub(self.basis), np.result_type(self.dtype, other.dtype).type
+        )
+        data = final_basis.sub_data(
+            self.with_basis(final_basis).ok().raw_data,
+            other.with_basis(final_basis).ok().raw_data,
         )
 
-        return build(as_sub_basis, data).ok()
+        return build(final_basis, data).ok()
 
     def __mul__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]],
-        other: float,
-    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
-        as_mul_basis = basis.as_mul(self.basis)
-        data = as_mul_basis.mul_data(self.with_basis(as_mul_basis).ok().raw_data, other)
-        return build(as_mul_basis, data).ok()
+        self: Array[Basis[M_], np.dtype[DT_]],
+        other: complex,
+    ) -> Array[Basis[M_], np.dtype[np.number]]:
+        final_basis = basis.as_supports_type(
+            basis.as_mul(self.basis), np.result_type(self.dtype, other).type
+        )
+        data = final_basis.mul_data(self.with_basis(final_basis).ok().raw_data, other)
+        return build(final_basis, data).ok()
 
     @overload
     def __iter__[DT_: np.dtype[np.generic]](

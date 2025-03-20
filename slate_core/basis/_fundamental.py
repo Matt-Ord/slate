@@ -96,7 +96,7 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, Ctype[np.gen
 
     @override
     def mul_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: float
+        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: complex
     ) -> np.ndarray[Any, np.dtype[DT1]]:
         return (lhs * rhs).astype(lhs.dtype)
 
