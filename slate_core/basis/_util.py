@@ -42,14 +42,13 @@ if TYPE_CHECKING:
 def with_modified_children[
     M: BasisMetadata,
     E,
-    DT0: Ctype[Never],
-    DT1: Ctype[Never],
+    T: np.generic,
 ](
-    basis: TupleBasis[tuple[Basis[M, DT0], ...], E, DT1],
-    wrapper: Callable[[int, Basis[M, DT0]], Basis[M, DT0]],
-) -> TupleBasis[tuple[Basis[M, DT0], ...], E, DT0]:
+    basis: TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]],
+    wrapper: Callable[[int, Basis[M, Ctype[T]]], Basis[M, Ctype[T]]],
+) -> TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]]:
     """Get the basis with modified children."""
-    return TupleBasis[tuple[Basis[M, DT0], ...], E, DT0](
+    return TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]](
         tuple(starmap(wrapper, enumerate(basis.children))), basis.metadata().extra
     ).resolve_ctype()
 
@@ -57,20 +56,21 @@ def with_modified_children[
 def with_modified_child[
     M: BasisMetadata,
     E,
-    DT0: Ctype[Never],
-    DT1: Ctype[Never],
+    T: np.generic,
 ](
-    basis: TupleBasis[tuple[Basis[M, DT0], ...], E, DT1],
-    wrapper: Callable[[Basis[M, DT0]], Basis[M, DT0]],
+    basis: TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]],
+    wrapper: Callable[[Basis[M, Ctype[T]]], Basis[M, Ctype[T]]],
     idx: int,
-) -> TupleBasis[tuple[Basis[M, DT0], ...], E, DT0]:
+) -> TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]]:
     """Get the basis with modified child."""
     return with_modified_children(basis, lambda i, b: b if i != idx else wrapper(b))
 
 
-def with_child[M: BasisMetadata, E, CT: Ctype[Never]](
-    basis: TupleBasis[tuple[Basis[M, CT], ...], E, CT], inner: Basis[M, CT], idx: int
-) -> TupleBasis[tuple[Basis[M, CT], ...], E, CT]:
+def with_child[M: BasisMetadata, E, T: np.generic](
+    basis: TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]],
+    inner: Basis[M, Ctype[T]],
+    idx: int,
+) -> TupleBasis[tuple[Basis[M, Ctype[T]], ...], E, Ctype[T]]:
     """Get a basis with the basis at idx set to inner."""
     return with_modified_child(basis, lambda _: inner, idx)
 
