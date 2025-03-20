@@ -12,7 +12,7 @@ from slate_core.metadata import BasisMetadata
 from slate_core.util._diagonal import build_diagonal, extract_diagonal
 
 if TYPE_CHECKING:
-    from slate_core.metadata._stacked import TupleMetadata
+    from slate_core.metadata._tuple import TupleMetadata
 
 
 # TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002

@@ -18,7 +18,7 @@ from slate_core.metadata._shape import (
     shallow_shape_from_nested,
     size_from_nested_shape,
 )
-from slate_core.metadata._stacked import AnyMetadata, TupleMetadata, is_tuple_metadata
+from slate_core.metadata._tuple import AnyMetadata, TupleMetadata, is_tuple_metadata
 from slate_core.metadata.length import LengthMetadata, SpacedLengthMetadata
 from slate_core.metadata.util import (
     fundamental_nk_points,

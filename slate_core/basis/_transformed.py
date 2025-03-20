@@ -21,7 +21,7 @@ from slate_core.metadata import (
     SimpleMetadata,
     TupleMetadata,
 )
-from slate_core.metadata._stacked import is_tuple_metadata
+from slate_core.metadata._tuple import is_tuple_metadata
 
 type TransformDirection = Literal["forward", "backward"]
 

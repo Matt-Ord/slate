@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, overload, override
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    Never,
+    TypeGuard,
+    cast,
+    overload,
+    override,
+)
 
 from slate_core.metadata._metadata import BasisMetadata, SimpleMetadata
 from slate_core.metadata._shape import size_from_nested_shape
@@ -15,9 +24,18 @@ class TupleMetadata[
 ](BasisMetadata):
     """Metadata built from a tuple of individual metadata entries."""
 
-    def __init__(self, children: C, extra: E) -> None:
+    @overload
+    def __init__[C_: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...], E_ = Never](
+        self: TupleMetadata[C_, E_], children: C_, extra: E_
+    ) -> None: ...
+    @overload
+    def __init__[C_: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...]](
+        self: TupleMetadata[C_, None], children: C_, extra: None = None
+    ) -> None: ...
+
+    def __init__(self, children: C, extra: E | None = None) -> None:
         self._children = children
-        self._extra = extra
+        self._extra = cast("E", extra)
 
     @property
     def shape(self) -> tuple[int, ...]:
