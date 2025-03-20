@@ -277,7 +277,7 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
     def mul_data[DT_: np.dtype[np.number]](
         self,
         lhs: np.ndarray[Any, DT_],
-        rhs: float,
+        rhs: complex,
     ) -> np.ndarray[Any, DT_]:
         return self._inner.mul_data(lhs, rhs)
 
