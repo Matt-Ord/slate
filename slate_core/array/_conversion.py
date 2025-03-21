@@ -18,7 +18,7 @@ from slate_core.basis import (
     TupleBasisLike,
     is_tuple_basis_like,
 )
-from slate_core.basis._wrapped import AsUpcast, WrappedBasis
+from slate_core.basis._wrapped import AsUpcast, WrappedBasisWithMetadata
 from slate_core.metadata import AnyMetadata, BasisMetadata
 
 if TYPE_CHECKING:
@@ -189,7 +189,7 @@ def as_upcast_basis[
 
 
 def as_inner_basis[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[WrappedBasis[B, Any], DT],
+    array: Array[WrappedBasisWithMetadata[B, Any], DT],
 ) -> Array[B, DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
