@@ -36,42 +36,42 @@ def cast_basis[B: Basis, DT: np.dtype[np.generic]](
 def as_feature_basis[
     M: BasisMetadata,
     DT: np.dtype[np.generic],
-    DT1: Ctype[Never],
+    CT: Ctype[Never],
 ](
-    array: Array[Basis[M, DT1], DT], features: set[BasisFeature]
-) -> Array[Basis[M, DT1], DT]:
+    array: Array[Basis[M, CT], DT], features: set[BasisFeature]
+) -> Array[Basis[M, CT], DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     return array.with_basis(basis.as_feature(array.basis, features)).assert_ok()
 
 
-def as_index_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
-    array: Array[Basis[M, DT1], DT],
-) -> Array[Basis[M, DT1], DT]:
+def as_index_basis[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
+    array: Array[Basis[M, CT], DT],
+) -> Array[Basis[M, CT], DT]:
     return as_feature_basis(array, {"INDEX"})
 
 
-def as_mul_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
-    array: Array[Basis[M, DT1], DT],
-) -> Array[Basis[M, DT1], DT]:
+def as_mul_basis[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
+    array: Array[Basis[M, CT], DT],
+) -> Array[Basis[M, CT], DT]:
     return as_feature_basis(array, {"MUL"})
 
 
-def as_sub_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
-    array: Array[Basis[M, DT1], DT],
-) -> Array[Basis[M, DT1], DT]:
+def as_sub_basis[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
+    array: Array[Basis[M, CT], DT],
+) -> Array[Basis[M, CT], DT]:
     return as_feature_basis(array, {"SUB"})
 
 
-def as_add_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
-    array: Array[Basis[M, DT1], DT],
-) -> Array[Basis[M, DT1], DT]:
+def as_add_basis[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
+    array: Array[Basis[M, CT], DT],
+) -> Array[Basis[M, CT], DT]:
     return as_feature_basis(array, {"ADD"})
 
 
-def as_linear_map_basis[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
-    array: Array[Basis[M, DT1], DT],
-) -> Array[Basis[M, DT1], DT]:
+def as_linear_map_basis[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
+    array: Array[Basis[M, CT], DT],
+) -> Array[Basis[M, CT], DT]:
     return as_feature_basis(array, {"LINEAR_MAP"})
 
 
@@ -90,11 +90,11 @@ def as_diagonal_basis[
     M1: BasisMetadata,
     E,
     DT: np.dtype[np.generic],
-    DT1: Ctype[Never],
+    CT: Ctype[Never],
 ](
-    array: Array[Basis[TupleMetadata[tuple[M0, M1], E], DT1], DT],
+    array: Array[Basis[TupleMetadata[tuple[M0, M1], E], CT], DT],
 ) -> (
-    Array[DiagonalBasis[TupleBasis[tuple[Basis[M0, DT1], Basis[M1, DT1]], E], DT1], DT]
+    Array[DiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT], DT]
     | None
 ):
     b = basis.as_diagonal(array.basis)
@@ -225,15 +225,15 @@ def flatten[B: Basis, DT: np.dtype[np.generic]](
 
 
 @overload
-def flatten[M: BasisMetadata, DT: np.dtype[np.generic], DT1: Ctype[Never]](
-    array: Array[TupleBasisLike[tuple[M], Never, DT1], DT],
-) -> Array[Basis[M, DT1], DT]: ...
+def flatten[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
+    array: Array[TupleBasisLike[tuple[M], Never, CT], DT],
+) -> Array[Basis[M, CT], DT]: ...
 
 
 @overload
-def flatten[M: BasisMetadata, E, DT1: Ctype[Never], DT: np.dtype[np.generic]](
-    array: Array[TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], E, DT1], DT],
-) -> Array[TupleBasis[tuple[Basis[M], ...], E, DT1], DT]: ...
+def flatten[M: BasisMetadata, E, CT: Ctype[Never], DT: np.dtype[np.generic]](
+    array: Array[TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], E, CT], DT],
+) -> Array[TupleBasis[tuple[Basis[M], ...], E, CT], DT]: ...
 
 
 def flatten[DT: np.dtype[np.generic]](
