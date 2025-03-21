@@ -399,3 +399,6 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         if indexed_basis is None:
             return cast("DT_", indexed_data.item())
         return build(indexed_basis, indexed_data).ok()
+
+
+type ArrayWithMetadata[M: BasisMetadata, DT: np.dtype[np.generic]] = Array[Basis[M], DT]
