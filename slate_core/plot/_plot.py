@@ -140,7 +140,7 @@ def _get_basis_coordinates(
 
 
 def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
-    data: Array[Basis[M, Ctype[np.floating]], DT],
+    data: Array[Basis[M], DT],
     *,
     y_error: Array[Basis[M], np.dtype[np.floating]] | None = None,
     periodic: bool = False,
@@ -164,7 +164,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     -------
     tuple[Figure, Axes, Line2D]
     """
-    converted = array.as_index_basis(data)
+    converted = array.as_index_basis(array.as_supports_type_basis(data, np.floating))
     coordinates = _get_basis_coordinates(converted.basis)
     return array_against_array(
         array.build(converted.basis, coordinates).ok(),
@@ -176,7 +176,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
 
 
 def array_against_axes_1d[DT: np.dtype[np.number]](
-    data: Array[TupleBasisLike[tuple[BasisMetadata, ...], Any, Ctype[np.floating]], DT],
+    data: Array[TupleBasisLike[tuple[BasisMetadata, ...]], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
