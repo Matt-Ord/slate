@@ -41,23 +41,23 @@ def _get_rhs_vectors[DT1: np.generic](
 
 def _into_inner[DT: np.number](
     basis: SplitBasis[
-        Basis[Any, Ctype[np.generic]], Basis[Any, Ctype[np.generic]], Ctype[np.generic]
+        Basis[BasisMetadata, Ctype[np.generic]],
+        Basis[BasisMetadata, Ctype[np.generic]],
+        Ctype[np.generic],
     ],
     vectors: np.ndarray[Any, np.dtype[DT]],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
     lhs_fundamental = basis.lhs.__convert_vector_into__(
         _get_lhs_vectors(basis, vectors, axis),
-        cast("Basis[Any, Ctype[np.generic]]", basis.inner),
+        cast("Basis[BasisMetadata, Ctype[np.generic]]", basis.inner),
         axis,
     ).ok()
-
     rhs_fundamental = basis.rhs.__convert_vector_into__(
         _get_rhs_vectors(basis, vectors, axis),
-        cast("Basis[Any, Ctype[np.generic]]", basis.inner),
+        cast("Basis[BasisMetadata, Ctype[np.generic]]", basis.inner),
         axis,
     ).ok()
-
     return cast(
         "np.ndarray[Any, np.dtype[DT]]",
         lhs_fundamental + rhs_fundamental,
@@ -66,13 +66,15 @@ def _into_inner[DT: np.number](
 
 def _from_inner[DT: np.number](
     basis: SplitBasis[
-        Basis[Any, Ctype[np.generic]], Basis[Any, Ctype[np.generic]], Ctype[np.generic]
+        Basis[BasisMetadata, Ctype[np.generic]],
+        Basis[BasisMetadata, Ctype[np.generic]],
+        Ctype[np.generic],
     ],
     vectors: np.ndarray[Any, np.dtype[DT]],
     axis: int = -1,
 ) -> np.ndarray[Any, np.dtype[DT]]:
     lhs_vector = (
-        cast("Basis[Any, Ctype[np.generic]]", basis.inner)
+        cast("Basis[BasisMetadata, Ctype[np.generic]]", basis.inner)
         .__convert_vector_into__(vectors, basis.lhs, axis)
         .ok()
     )
@@ -114,7 +116,7 @@ class SplitBasis[
 
     @override
     def resolve_ctype[DT_: Ctype[Never]](
-        self: SplitBasis[Basis[Any, DT_], Basis[Any, DT_], Any],
+        self: SplitBasis[Basis[BasisMetadata, DT_], Basis[BasisMetadata, DT_], Any],
     ) -> SplitBasis[B0, B1, DT_]:
         """Upcast the wrapped basis to a more specific type."""
         return cast("SplitBasis[B0, B1, DT_]", self)
@@ -164,7 +166,11 @@ class SplitBasis[
 
     @override
     def __into_inner__[DT1: np.number, DT2: np.generic, DT3: np.generic](
-        self: SplitBasis[Basis[Any, Ctype[DT3]], Basis[Any, Ctype[DT3]], Ctype[DT1]],
+        self: SplitBasis[
+            Basis[BasisMetadata, Ctype[DT3]],
+            Basis[BasisMetadata, Ctype[DT3]],
+            Ctype[DT1],
+        ],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:
@@ -172,7 +178,11 @@ class SplitBasis[
 
     @override
     def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.number](
-        self: SplitBasis[Basis[Any, Ctype[DT1]], Basis[Any, Ctype[DT1]], Ctype[DT3]],
+        self: SplitBasis[
+            Basis[BasisMetadata, Ctype[DT1]],
+            Basis[BasisMetadata, Ctype[DT1]],
+            Ctype[DT3],
+        ],
         vectors: np.ndarray[Any, np.dtype[DT2]],
         axis: int = -1,
     ) -> BasisConversion[DT1, DT2, DT3]:

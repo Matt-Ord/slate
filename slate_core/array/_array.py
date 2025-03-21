@@ -25,11 +25,11 @@ type NestedIndex = Index | tuple[NestedIndex, ...]
 
 def _index_single_raw_along_axis(
     index: Index,
-    data_basis: Basis[BasisMetadata],
+    data_basis: Basis,
     data: np.ndarray[Any, Any],
     *,
     axis: int = -1,
-) -> tuple[Basis[BasisMetadata] | None, np.ndarray[Any, Any]]:
+) -> tuple[Basis | None, np.ndarray[Any, Any]]:
     if index == slice(None):
         return data_basis, data
     basis.as_fundamental(data_basis)
@@ -49,7 +49,7 @@ def _index_tuple_raw_along_axis(
     data: np.ndarray[Any, Any],
     *,
     axis: int = -1,
-) -> tuple[Basis[BasisMetadata] | None, np.ndarray[Any, Any]]:
+) -> tuple[Basis | None, np.ndarray[Any, Any]]:
     axis &= data.ndim
     tuple_basis = basis.as_tuple(basis.as_linear_map(data_basis))
     if tuple_basis is None:
@@ -83,7 +83,7 @@ def _index_raw_along_axis[DT: np.dtype[np.generic]](
     basis: Basis,
     data: np.ndarray[Any, DT],
     axis: int,
-) -> tuple[Basis[BasisMetadata] | None, np.ndarray[Any, DT]]:
+) -> tuple[Basis | None, np.ndarray[Any, DT]]:
     if isinstance(index, tuple):
         assert is_tuple_basis_like(basis)
         return _index_tuple_raw_along_axis(index, basis, data, axis=axis)
@@ -382,23 +382,24 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
     @overload
     def __getitem__[DT_: np.dtype[np.generic]](
-        self: Array[Any, DT_], index: int
+        self: Array[Basis, DT_], index: int
     ) -> DT_: ...
     @overload
     def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
-        self: Array[Basis[Any, CT], DT_], index: tuple[NestedIndex, ...] | slice
+        self: Array[Basis[BasisMetadata, CT], DT_],
+        index: tuple[NestedIndex, ...] | slice,
     ) -> Array[Basis[BasisMetadata, CT], DT_]: ...
 
     def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
-        self: Array[Basis[Any, CT], DT_],
+        self: Array[Basis[BasisMetadata, CT], DT_],
         index: NestedIndex,
-    ) -> Array[Basis[BasisMetadata, Any], DT_] | DT_:
+    ) -> Array[Basis[BasisMetadata], DT_] | DT_:
         indexed_basis, indexed_data = _index_raw_along_axis(
             index, self.basis, self.raw_data.reshape(-1, 1), axis=0
         )
         if indexed_basis is None:
             return cast("DT_", indexed_data.item())
-        return build(indexed_basis, indexed_data).ok()
+        return build(indexed_basis, indexed_data).assert_ok()
 
 
 type ArrayWithMetadata[M: BasisMetadata, DT: np.dtype[np.generic]] = Array[Basis[M], DT]

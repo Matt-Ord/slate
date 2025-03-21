@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 def cast_basis[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[Any, DT], basis: B
+    array: Array[Basis, DT], basis: B
 ) -> ArrayBuilder[B, DT]:
     assert array.basis.size == basis.size
     return build(basis, array.raw_data)
@@ -189,7 +189,7 @@ def as_upcast_basis[
 
 
 def as_inner_basis[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[WrappedBasisWithMetadata[B, Any], DT],
+    array: Array[WrappedBasisWithMetadata[B], DT],
 ) -> Array[B, DT]:
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
@@ -207,7 +207,7 @@ def as_diagonal_array[B: Basis, DT: np.dtype[np.generic]](
 
 
 def nest[
-    B: Basis[Any, Ctype[Never]],
+    B: Basis[BasisMetadata, Ctype[Never]],
     DT: np.dtype[np.generic],
 ](
     array: Array[B, DT],

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 
 def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
-    array: ArrayWithMetadata[TupleMetadata[tuple[Any, M1], E], DT],
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, M1], E], DT],
 ) -> Array[Basis[M1, Ctype[np.generic]], DT]:
     b = DiagonalBasis(basis.as_tuple(basis.as_fundamental(array.basis))).resolve_ctype()
     converted = array.with_basis(b).ok()
@@ -35,7 +35,7 @@ def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
 
 @overload
 def norm[M: SimpleMetadata, DT: np.dtype[np.number]](
-    array: Array[TupleBasisLike[tuple[Any, M], None], DT], *, axis: Literal[0]
+    array: Array[TupleBasisLike[tuple[BasisMetadata, M], None], DT], *, axis: Literal[0]
 ) -> Array[TupleBasisLike[tuple[M], None, Ctype[np.generic]], DT]: ...
 
 
@@ -53,7 +53,7 @@ def norm[DT: np.number](
 
 def norm[DT: np.number](
     array: Array[Basis, np.dtype[DT]], axis: int | None = None
-) -> Array[Any, np.dtype[DT]] | DT:
+) -> Array[Basis, np.dtype[DT]] | DT:
     if axis is None:
         return np.linalg.norm(array.as_array(), axis=axis)  # type: ignore unknown
     data = cast(
@@ -61,7 +61,6 @@ def norm[DT: np.number](
     )
     assert is_tuple_basis_like(array.basis)
     full_basis = basis.from_metadata(array.basis.metadata())
-
     axis %= len(full_basis.children)
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
