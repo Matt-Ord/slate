@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Never, overload
 import numpy as np
 
 from slate_core import basis
-from slate_core.array._array import build
+from slate_core.array._array import ArrayWithMetadata, build
 from slate_core.basis import (
     Basis,
     BasisFeature,
@@ -79,7 +79,7 @@ def as_supports_type_basis[
     M: BasisMetadata,
     DT: np.dtype[np.generic],
     T: np.generic,
-](array: Array[Basis[M], DT], ty: type[T]) -> Array[Basis[M, Ctype[T]], DT]:
+](array: ArrayWithMetadata[M, DT], ty: type[T]) -> Array[Basis[M, Ctype[T]], DT]:
     converted = basis.as_supports_type(array.basis, ty)
     # The basis is guaranteed to also support the original dtype
     return array.with_basis(converted).assert_ok()
@@ -156,13 +156,13 @@ def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT1: np.dtype[np.gener
 
 
 def as_fundamental_basis[M: AnyMetadata, DT: np.dtype[np.generic]](
-    array: Array[Basis[M, Ctype[Never]], DT],
+    array: ArrayWithMetadata[M, DT],
 ) -> Array[Basis[M, Ctype[np.generic]], DT]:
     return array.with_basis(basis.as_fundamental(array.basis)).ok()
 
 
 def as_transformed_basis[M: AnyMetadata, DT: np.dtype[np.complexfloating]](
-    array: Array[Basis[M, Ctype[Never]], DT],
+    array: ArrayWithMetadata[M, DT],
 ) -> Array[Basis[M, Ctype[np.complexfloating]], DT]:
     return array.with_basis(basis.as_transformed(array.basis)).ok()
 

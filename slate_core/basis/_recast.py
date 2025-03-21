@@ -60,7 +60,7 @@ class RecastBasis[
 
     @override
     def upcast[M: BasisMetadata](
-        self: RecastBasis[Basis[M, Any]],
+        self: RecastBasis[Basis[M]],
     ) -> AsUpcast[RecastBasis[BInner, BInnerRecast, BOuterRecast, CT], M, CT]:
         """Metadata associated with the basis.
 

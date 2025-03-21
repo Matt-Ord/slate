@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate_core.array import Array, build
+from slate_core.array import build
 from slate_core.array._conversion import as_supports_type_basis, cast_basis
 from slate_core.basis import (
     DiagonalBasis,
@@ -14,7 +14,7 @@ from slate_core.basis._basis import Basis, Ctype
 from slate_core.basis._basis_state_metadata import BasisStateMetadata
 from slate_core.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal
 from slate_core.basis._diagonal import as_diagonal
-from slate_core.basis._tuple import TupleBasis, as_tuple
+from slate_core.basis._tuple import TupleBasis, TupleBasisLike, as_tuple
 from slate_core.explicit_basis import (
     ExplicitBasis,
     ExplicitUnitaryBasis,
@@ -23,11 +23,13 @@ from slate_core.explicit_basis import (
 from slate_core.metadata import BasisMetadata
 
 if TYPE_CHECKING:
-    from slate_core.basis._tuple import TupleBasisLike
+    from slate_core.array import ArrayWithMetadata
+    from slate_core.array._array import Array
     from slate_core.explicit_basis import (
         ExplicitDiagonalBasis,
     )
     from slate_core.metadata._metadata import SimpleMetadata
+    from slate_core.metadata._tuple import TupleMetadata
 
 
 def _diagonal_basis_as_explicit[
@@ -50,7 +52,7 @@ def _diagonal_basis_as_explicit[
 
 
 def get_eigenvalues[M: BasisMetadata, E, DT: np.dtype[np.complexfloating]](
-    array: Array[TupleBasisLike[tuple[M, ...], E], DT],
+    array: ArrayWithMetadata[TupleMetadata[tuple[M, ...], E], DT],
 ) -> Array[
     FundamentalBasis[SimpleMetadata],
     np.dtype[np.complexfloating],
@@ -79,7 +81,6 @@ def _eig_from_tuple[
         "np.ndarray[Any, np.dtype[np.complexfloating]]",
         np.transpose(eig.eigenvectors),
     )
-
     states_basis_0 = (
         TupleBasis(
             (
@@ -138,7 +139,6 @@ def _eig_from_block_diagonal_basis[
     n_states = array.basis.inner.shape[0]
     n_repeats = array.basis.n_repeats
     n_block = array.basis.block_shape[0]
-
     eigenvalues = np.empty((n_repeats, n_block), dtype=array.dtype)
     eigenvectors = np.empty((n_repeats, n_block, n_block), dtype=array.dtype)
     raw_data = array.raw_data.reshape((n_repeats, n_block, n_block))
@@ -160,7 +160,6 @@ def _eig_from_block_diagonal_basis[
         .resolve_ctype()
         .upcast()
     )
-
     basis_0 = ExplicitBasis(build(states_basis_0, eigenvectors).ok()).resolve_ctype()
     states_basis_1 = (
         BlockDiagonalBasis(
@@ -180,7 +179,6 @@ def _eig_from_block_diagonal_basis[
         data_id=basis_0.data_id,
         direction="backward",
     ).resolve_ctype()
-
     return build(  # type: ignore cant infer
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
@@ -213,11 +211,9 @@ def into_diagonal[
     diagonal = as_diagonal(suporting.basis)
     if diagonal is not None:
         return suporting.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
-
     block_diagonal = as_block_diagonal(suporting.basis)
     if block_diagonal is not None:
         return _eig_from_block_diagonal_basis(suporting.with_basis(block_diagonal).ok())
-
     tuple_basis = as_tuple(suporting.basis)
     converted = cast_basis(
         array.with_basis(tuple_basis.upcast()).ok(), tuple_basis
@@ -230,8 +226,9 @@ def get_eigenvalues_hermitian[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M, ...], E], DT],
+    array: ArrayWithMetadata[TupleMetadata[tuple[M, ...], E], DT],
 ) -> Array[FundamentalBasis[SimpleMetadata], np.dtype[np.floating]]:
+    """Get the eigenvalues of a Hermitian matrix."""
     a = np.linalg.eigvalsh(array.as_array())
     return build(FundamentalBasis.from_size(a.size), a).ok()
 
@@ -261,7 +258,6 @@ def _eigh_from_tuple[
         "np.ndarray[Any, np.dtype[np.complexfloating]]",
         np.transpose(eig.eigenvectors),
     )
-
     states_basis_0 = (
         TupleBasis(
             (
@@ -272,7 +268,6 @@ def _eigh_from_tuple[
         .resolve_ctype()
         .upcast()
     )
-
     basis_0 = ExplicitUnitaryBasis(
         build(states_basis_0, eigenvectors).ok(),
         direction="forward",
@@ -294,7 +289,6 @@ def _eigh_from_tuple[
         direction="backward",
         assert_unitary=False,
     ).resolve_ctype()
-
     return build(  # type: ignore cant infer
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
@@ -328,7 +322,6 @@ def _eigh_from_block_diagonal_basis[
     n_states = array.basis.inner.shape[0]
     n_repeats = array.basis.n_repeats
     n_block = array.basis.block_shape[0]
-
     eigenvalues = np.empty((n_repeats, n_block), dtype=array.dtype)
     eigenvectors = np.empty((n_repeats, n_block, n_block), dtype=array.dtype)
     raw_data = array.raw_data.reshape((n_repeats, n_block, n_block))
@@ -371,7 +364,6 @@ def _eigh_from_block_diagonal_basis[
         data_id=basis_0.data_id,
         direction="backward",
     ).resolve_ctype()
-
     return build(  # type: ignore cant infer
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
@@ -386,22 +378,21 @@ def into_diagonal_hermitian[
     E,
     DT: np.dtype[np.complexfloating],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E], DT],
+    array: ArrayWithMetadata[TupleMetadata[tuple[M0, M1], E], DT],
 ) -> Array[
     ExplicitDiagonalBasis[M0, M1, E, Ctype[np.complexfloating]],
     np.dtype[np.complexfloating],
 ]:
+    """Get the diagonal form of a Hermitian matrix."""
     suporting = as_supports_type_basis(array, np.complexfloating)
     diagonal = as_diagonal(suporting.basis)
     if diagonal is not None:
         return suporting.with_basis(_diagonal_basis_as_explicit(diagonal)).ok()
-
     block_diagonal = as_block_diagonal(suporting.basis)
     if block_diagonal is not None:
         return _eigh_from_block_diagonal_basis(
             suporting.with_basis(block_diagonal).ok()
         )
-
     tuple_basis = as_tuple(suporting.basis)
     converted = cast_basis(
         array.with_basis(tuple_basis.upcast()).ok(), tuple_basis
