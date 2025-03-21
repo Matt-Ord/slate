@@ -25,11 +25,11 @@ type NestedIndex = Index | tuple[NestedIndex, ...]
 
 def _index_single_raw_along_axis(
     index: Index,
-    data_basis: Basis[BasisMetadata, Any],
+    data_basis: Basis[BasisMetadata],
     data: np.ndarray[Any, Any],
     *,
     axis: int = -1,
-) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, Any]]:
+) -> tuple[Basis[BasisMetadata] | None, np.ndarray[Any, Any]]:
     if index == slice(None):
         return data_basis, data
     basis.as_fundamental(data_basis)
@@ -49,7 +49,7 @@ def _index_tuple_raw_along_axis(
     data: np.ndarray[Any, Any],
     *,
     axis: int = -1,
-) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, Any]]:
+) -> tuple[Basis[BasisMetadata] | None, np.ndarray[Any, Any]]:
     axis &= data.ndim
     tuple_basis = basis.as_tuple(basis.as_linear_map(data_basis))
     if tuple_basis is None:
@@ -83,7 +83,7 @@ def _index_raw_along_axis[DT: np.dtype[np.generic]](
     basis: Basis,
     data: np.ndarray[Any, DT],
     axis: int,
-) -> tuple[Basis[BasisMetadata, Any] | None, np.ndarray[Any, DT]]:
+) -> tuple[Basis[BasisMetadata] | None, np.ndarray[Any, DT]]:
     if isinstance(index, tuple):
         assert is_tuple_basis_like(basis)
         return _index_tuple_raw_along_axis(index, basis, data, axis=axis)
@@ -281,7 +281,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         M0_: BasisMetadata,
         B1_: Basis,
     ](
-        self: Array[Basis[M0_, Any], DT_],
+        self: ArrayWithMetadata[M0_, DT_],
         basis: B1_,
     ) -> ArrayConversion[M0_, B1_, DT_]:
         """Get the Array with the basis set to basis."""
@@ -291,7 +291,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         M_: BasisMetadata,
         DT_: np.number,
     ](
-        self: Array[Basis[M_, Any], np.dtype[np.generic]],
+        self: ArrayWithMetadata[M_, np.dtype[np.generic]],
         ty: type[DT_],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         as_type_basis = basis.as_supports_type(self.basis, ty)
@@ -299,8 +299,8 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return self.build(converted.basis, converted.raw_data.astype(ty)).ok()
 
     def __add__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_], np.dtype[DT_]],
-        other: Array[Basis[M_], np.dtype[DT_]],
+        self: ArrayWithMetadata[M_, np.dtype[DT_]],
+        other: ArrayWithMetadata[M_, np.dtype[DT_]],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         final_basis = basis.as_supports_type(
             basis.as_add(self.basis), np.result_type(self.dtype, other.dtype).type
@@ -313,8 +313,8 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return build(final_basis, data).ok()
 
     def __sub__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_], np.dtype[DT_]],
-        other: Array[Basis[M_], np.dtype[DT_]],
+        self: ArrayWithMetadata[M_, np.dtype[DT_]],
+        other: ArrayWithMetadata[M_, np.dtype[DT_]],
     ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
         final_basis = basis.as_supports_type(
             basis.as_sub(self.basis), np.result_type(self.dtype, other.dtype).type
@@ -327,9 +327,9 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         return build(final_basis, data).ok()
 
     def __mul__[M_: BasisMetadata, DT_: np.number](
-        self: Array[Basis[M_], np.dtype[DT_]],
+        self: ArrayWithMetadata[M_, np.dtype[DT_]],
         other: complex,
-    ) -> Array[Basis[M_], np.dtype[np.number]]:
+    ) -> ArrayWithMetadata[M_, np.dtype[np.number]]:
         final_basis = basis.as_supports_type(
             basis.as_mul(self.basis), np.result_type(self.dtype, other).type
         )
@@ -345,7 +345,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     def __iter__[M1: BasisMetadata, DT_: np.dtype[np.generic]](
         self: Array[Basis[TupleMetadata[tuple[BasisMetadata, M1], Any], Any], DT_],
         /,
-    ) -> Iterator[Array[Basis[M1, Any], DT_]]: ...
+    ) -> Iterator[ArrayWithMetadata[M1, DT_]]: ...
     @overload
     def __iter__[M1: BasisMetadata, M2: BasisMetadata, DT_: np.dtype[np.generic]](
         self: Array[Basis[TupleMetadata[tuple[BasisMetadata, M1, M2], Any], Any], DT_],

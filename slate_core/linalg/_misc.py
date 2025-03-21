@@ -19,13 +19,13 @@ from slate_core.metadata import (
 )
 
 if TYPE_CHECKING:
-    from slate_core.array import Array
+    from slate_core.array import Array, ArrayWithMetadata
     from slate_core.basis._basis import Ctype
     from slate_core.basis._tuple import TupleBasisLike
 
 
 def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
-    array: Array[Basis[TupleMetadata[tuple[Any, M1], E]], DT],
+    array: ArrayWithMetadata[TupleMetadata[tuple[Any, M1], E], DT],
 ) -> Array[Basis[M1, Ctype[np.generic]], DT]:
     b = DiagonalBasis(basis.as_tuple(basis.as_fundamental(array.basis))).resolve_ctype()
     converted = array.with_basis(b).ok()

@@ -56,7 +56,7 @@ def are_dual_shapes(lhs: NestedBool, rhs: NestedBool) -> bool:
     raise ValueError(msg)
 
 
-def are_dual[M: BasisMetadata](lhs: Basis[M, Any], rhs: Basis[M, Any]) -> bool:
+def are_dual[M: BasisMetadata](lhs: Basis[M], rhs: Basis[M]) -> bool:
     """Check if two bases are dual to each other.
 
     The two basis must have the same shape, otherwise a `ValueError` will be raised.

@@ -148,7 +148,7 @@ class WrappedBasis[
     """A wrapped basis, represents some transformation over an underlying 'inner' basis."""
 
     @override
-    def metadata[M: BasisMetadata](self: WrappedBasis[Basis[M, Any], Any]) -> M:
+    def metadata[M: BasisMetadata](self: WrappedBasis[Basis[M]]) -> M:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -157,7 +157,7 @@ class WrappedBasis[
 
     @override
     def upcast[M: BasisMetadata](
-        self: WrappedBasis[Basis[M, Any], Any],
+        self: WrappedBasis[Basis[M]],
     ) -> AsUpcast[WrappedBasis[B, CT], M, CT]:
         """Metadata associated with the basis.
 

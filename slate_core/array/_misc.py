@@ -15,7 +15,7 @@ from slate_core.basis import is_tuple_basis_like as is_tuple_basis_like_basis
 from slate_core.basis import supports_dtype as supports_dtype_basis
 
 if TYPE_CHECKING:
-    from slate_core.array._array import Array
+    from slate_core.array._array import Array, ArrayWithMetadata
     from slate_core.basis import TupleBasisLike
     from slate_core.metadata import BasisMetadata
 
@@ -78,8 +78,8 @@ def imag[B: Basis, DT: np.dtype[np.generic]](
 
 
 def angle[M: BasisMetadata](
-    array: Array[Basis[M], np.dtype[np.complexfloating]],
-) -> Array[Basis[M], np.dtype[np.floating]]:
+    array: ArrayWithMetadata[M, np.dtype[np.complexfloating]],
+) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
     """Get the phase of data in the array."""
     converted = as_supports_type_basis(as_index_basis(array), np.floating)
     return build(converted.basis, np.angle(converted.raw_data)).ok()
@@ -378,7 +378,7 @@ def dual_basis[B: Basis, DT: np.dtype[np.generic]](
 
 
 def supports_type[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
-    array: Array[Basis[M], DT], ty: type[T]
+    array: ArrayWithMetadata[M, DT], ty: type[T]
 ) -> TypeGuard[Array[Basis[M, Ctype[T]], DT]]:
     """Check if the basis supports the given data type.
 
@@ -389,7 +389,7 @@ def supports_type[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
 
 
 def supports_dtype[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
-    array: Array[Basis[M], DT], dtype: np.dtype[T]
+    array: ArrayWithMetadata[M, DT], dtype: np.dtype[T]
 ) -> TypeGuard[Array[Basis[M, Ctype[T]], DT]]:
     """Check if the basis supports the given data type.
 
