@@ -427,33 +427,33 @@ def from_metadata(
 
 
 @overload
-def is_tuple[M0: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[M0], E, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[M0, DT]], E, DT]]: ...
+def is_tuple[M0: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[M0], E, CT],
+) -> TypeGuard[TupleBasis[tuple[Basis[M0, CT]], E, CT]]: ...
 @overload
-def is_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[M0, M1], E, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT]]: ...
+def is_tuple[M0: BasisMetadata, M1: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[M0, M1], E, CT],
+) -> TypeGuard[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E, CT]]: ...
 @overload
 def is_tuple[
     M0: BasisMetadata,
     M1: BasisMetadata,
     M2: BasisMetadata,
     E,
-    DT: Ctype[Never],
+    CT: Ctype[Never],
 ](
-    basis: TupleBasisLike[tuple[M0, M1, M2], E, DT],
+    basis: TupleBasisLike[tuple[M0, M1, M2], E, CT],
 ) -> TypeGuard[
-    TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT], Basis[M2, DT]], E, DT]
+    TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT], Basis[M2, CT]], E, CT]
 ]: ...
 @overload
-def is_tuple[M: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[M, ...], E, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[M, DT], ...], E, DT]]: ...
+def is_tuple[M: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[M, ...], E, CT],
+) -> TypeGuard[TupleBasis[tuple[Basis[M, CT], ...], E, CT]]: ...
 @overload
-def is_tuple[M: BasisMetadata, DT: Ctype[Never]](
-    basis: Basis[M, DT],
-) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]]: ...
+def is_tuple[M: BasisMetadata, CT: Ctype[Never]](
+    basis: Basis[M, CT],
+) -> TypeGuard[TupleBasis[tuple[Basis[BasisMetadata, CT], ...], Any, CT]]: ...
 @overload
 def is_tuple(
     basis: object,
@@ -469,86 +469,86 @@ def is_tuple(
 type TupleBasis1D[
     C: tuple[Basis] = tuple[Basis],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
-] = AsUpcast[TupleBasis[C, E, DT], TupleMetadata[tuple[BasisMetadata], E], DT]
+    CT: Ctype[Never] = Ctype[Never],
+] = AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[BasisMetadata], E], CT]
 type TupleBasis2D[
     C: tuple[Basis, Basis] = tuple[Basis, Basis],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ] = AsUpcast[
-    TupleBasis[C, E, DT], TupleMetadata[tuple[BasisMetadata, BasisMetadata], E], DT
+    TupleBasis[C, E, CT], TupleMetadata[tuple[BasisMetadata, BasisMetadata], E], CT
 ]
 type TupleBasis3D[
     C: tuple[Basis, Basis, Basis] = tuple[Basis, Basis, Basis],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Never],
 ] = AsUpcast[
-    TupleBasis[C, E, DT],
+    TupleBasis[C, E, CT],
     TupleMetadata[tuple[BasisMetadata, BasisMetadata, BasisMetadata], E],
-    DT,
+    CT,
 ]
 
 type TupleBasisLike[
     M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
-] = Basis[TupleMetadata[M, E], DT]
+    CT: Ctype[Never] = Ctype[Never],
+] = Basis[TupleMetadata[M, E], CT]
 
 type TupleBasisLike1D[
     M: tuple[BasisMetadata] = tuple[BasisMetadata],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
-] = TupleBasisLike[M, E, DT]
+    CT: Ctype[Never] = Ctype[Never],
+] = TupleBasisLike[M, E, CT]
 type TupleBasisLike2D[
     M: tuple[BasisMetadata, BasisMetadata] = tuple[BasisMetadata, BasisMetadata],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
-] = TupleBasisLike[M, E, DT]
+    CT: Ctype[Never] = Ctype[Never],
+] = TupleBasisLike[M, E, CT]
 type TupleBasisLike3D[
     M: tuple[BasisMetadata, BasisMetadata, BasisMetadata] = tuple[
         BasisMetadata, BasisMetadata, BasisMetadata
     ],
     E = Any,
-    DT: Ctype[Never] = Ctype[Never],
-] = TupleBasisLike[M, E, DT]
+    CT: Ctype[Never] = Ctype[Never],
+] = TupleBasisLike[M, E, CT]
 
 
 @overload
-def is_tuple_basis_like[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT], *, n_dim: Literal[1]
-) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata], Never, DT]]: ...
+def is_tuple_basis_like[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT], *, n_dim: Literal[1]
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata], Never, CT]]: ...
 @overload
-def is_tuple_basis_like[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT], *, n_dim: Literal[2]
-) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, DT]]: ...
+def is_tuple_basis_like[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT], *, n_dim: Literal[2]
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, BasisMetadata], Never, CT]]: ...
 @overload
-def is_tuple_basis_like[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT], *, n_dim: Literal[3]
+def is_tuple_basis_like[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT], *, n_dim: Literal[3]
 ) -> TypeGuard[
-    TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, DT]
+    TupleBasisLike[tuple[BasisMetadata, BasisMetadata, BasisMetadata], Never, CT]
 ]: ...
 @overload
-def is_tuple_basis_like[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT], *, n_dim: int | None = None
-) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]: ...
+def is_tuple_basis_like[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT], *, n_dim: int | None = None
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, CT]]: ...
 
 
-def is_tuple_basis_like[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT], *, n_dim: int | None = None
-) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, DT]]:
+def is_tuple_basis_like[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT], *, n_dim: int | None = None
+) -> TypeGuard[TupleBasisLike[tuple[BasisMetadata, ...], Never, CT]]:
     return is_tuple_metadata(basis.metadata(), n_dim=n_dim)
 
 
 @overload
-def as_tuple[M0: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[M0], E, DT],
-) -> TupleBasis[tuple[Basis[M0, DT]], E, DT]: ...
+def as_tuple[M0: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[M0], E, CT],
+) -> TupleBasis[tuple[Basis[M0, CT]], E, CT]: ...
 
 
 @overload
-def as_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[M0, M1], E, DT],
-) -> TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT]], E, DT]: ...
+def as_tuple[M0: BasisMetadata, M1: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[M0, M1], E, CT],
+) -> TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E, CT]: ...
 
 
 @overload
@@ -557,27 +557,27 @@ def as_tuple[
     M1: BasisMetadata,
     M2: BasisMetadata,
     E,
-    DT: Ctype[Never],
+    CT: Ctype[Never],
 ](
-    basis: TupleBasisLike[tuple[M0, M1, M2], E, DT],
-) -> TupleBasis[tuple[Basis[M0, DT], Basis[M1, DT], Basis[M2, DT]], E, DT]: ...
+    basis: TupleBasisLike[tuple[M0, M1, M2], E, CT],
+) -> TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT], Basis[M2, CT]], E, CT]: ...
 
 
 @overload
-def as_tuple[M: BasisMetadata, E, DT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[M, ...], E, DT],
-) -> TupleBasis[tuple[Basis[M, DT], ...], E, DT]: ...
+def as_tuple[M: BasisMetadata, E, CT: Ctype[Never]](
+    basis: TupleBasisLike[tuple[M, ...], E, CT],
+) -> TupleBasis[tuple[Basis[M, CT], ...], E, CT]: ...
 
 
 @overload
-def as_tuple[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT],
-) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]: ...
+def as_tuple[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT],
+) -> TupleBasis[tuple[Basis[BasisMetadata, CT], ...], Any, CT]: ...
 
 
-def as_tuple[DT: Ctype[Never]](
-    basis: Basis[BasisMetadata, DT],
-) -> TupleBasis[tuple[Basis[BasisMetadata, DT], ...], Any, DT]:
+def as_tuple[CT: Ctype[Never]](
+    basis: Basis[BasisMetadata, CT],
+) -> TupleBasis[tuple[Basis[BasisMetadata, CT], ...], Any, CT]:
     """Get the closest basis to basis that is a TupleBasis.
 
     - For a wrapped TupleBasis, this will return the unwrapped basis

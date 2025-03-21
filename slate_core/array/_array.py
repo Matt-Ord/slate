@@ -381,16 +381,16 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         )
 
     @overload
-    def __getitem__[DT1: Ctype[Never], DT_: np.dtype[np.generic]](
+    def __getitem__[DT_: np.dtype[np.generic]](
         self: Array[Any, DT_], index: int
     ) -> DT_: ...
     @overload
-    def __getitem__[DT1: Ctype[Never], DT_: np.dtype[np.generic]](
-        self: Array[Basis[Any, DT1], DT_], index: tuple[NestedIndex, ...] | slice
-    ) -> Array[Basis[BasisMetadata, DT1], DT_]: ...
+    def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
+        self: Array[Basis[Any, CT], DT_], index: tuple[NestedIndex, ...] | slice
+    ) -> Array[Basis[BasisMetadata, CT], DT_]: ...
 
-    def __getitem__[DT1: Ctype[Never], DT_: np.dtype[np.generic]](
-        self: Array[Basis[Any, DT1], DT_],
+    def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
+        self: Array[Basis[Any, CT], DT_],
         index: NestedIndex,
     ) -> Array[Basis[BasisMetadata, Any], DT_] | DT_:
         indexed_basis, indexed_data = _index_raw_along_axis(
