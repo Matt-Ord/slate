@@ -75,7 +75,7 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
     from matplotlib.scale import ScaleBase
     from matplotlib.text import Text
-    from matplotlib.transforms import Transform
+    from matplotlib.transforms import Bbox, Transform
     from matplotlib.typing import ColorType
     from numpy.typing import ArrayLike
 
@@ -198,6 +198,11 @@ class Figure(MPLFigureBase):
         fname: str | os.PathLike[Any] | IO[Any],
         *,
         transparent: bool | None = ...,
+        dpi: Literal["figure"] | float = "figure",
+        format: str | None = None,
+        bbox_inches: str | Bbox | None = None,
+        pad_inches: float = 0.1,
+        facecolor: Literal["none"] | None = None,
     ) -> None: ...
 
 
