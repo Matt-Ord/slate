@@ -40,11 +40,11 @@ def _diagonal_basis_as_explicit[
 ](
     basis: DiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT],
 ) -> ExplicitDiagonalBasis[M0, M1, E, CT]:
-    return DiagonalBasis(  # type: ignore cant infer
+    return DiagonalBasis(
         TupleBasis(
             (
-                TrivialExplicitBasis(basis.inner.children[0]).resolve_ctype(),
-                TrivialExplicitBasis(basis.inner.children[1]).resolve_ctype(),
+                TrivialExplicitBasis(basis.inner.children[0]).resolve_ctype().upcast(),
+                TrivialExplicitBasis(basis.inner.children[1]).resolve_ctype().upcast(),
             ),
             basis.metadata().extra,
         ).resolve_ctype()
@@ -91,7 +91,7 @@ def _eig_from_tuple[
         .resolve_ctype()
         .upcast()
     )
-    basis_0 = ExplicitBasis(build(states_basis_0, matrix).ok()).resolve_ctype()
+    basis_0 = ExplicitBasis(build(states_basis_0, matrix).ok()).resolve_ctype().upcast()
     states_basis_1 = (
         TupleBasis(
             (
@@ -102,13 +102,19 @@ def _eig_from_tuple[
         .resolve_ctype()
         .upcast()
     )
-    basis_1 = ExplicitBasis(
-        build(states_basis_1, matrix).ok(),
-        data_id=basis_0.data_id,
-        direction="backward",
-    ).resolve_ctype()
-    return build(  # type: ignore cant infer
-        DiagonalBasis(TupleBasis((basis_0, basis_1), array.basis.metadata().extra)),
+    basis_1 = (
+        ExplicitBasis(
+            build(states_basis_1, matrix).ok(),
+            data_id=basis_0.inner.data_id,
+            direction="backward",
+        )
+        .resolve_ctype()
+        .upcast()
+    )
+    return build(  # type: ignore unkown
+        DiagonalBasis(
+            TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
+        ).resolve_ctype(),
         eig.eigenvalues,
     ).ok()
 
@@ -160,7 +166,9 @@ def _eig_from_block_diagonal_basis[
         .resolve_ctype()
         .upcast()
     )
-    basis_0 = ExplicitBasis(build(states_basis_0, eigenvectors).ok()).resolve_ctype()
+    basis_0 = (
+        ExplicitBasis(build(states_basis_0, eigenvectors).ok()).resolve_ctype().upcast()
+    )
     states_basis_1 = (
         BlockDiagonalBasis(
             TupleBasis(
@@ -174,12 +182,16 @@ def _eig_from_block_diagonal_basis[
         .resolve_ctype()
         .upcast()
     )
-    basis_1 = ExplicitBasis(
-        build(states_basis_1, eigenvectors).ok(),
-        data_id=basis_0.data_id,
-        direction="backward",
-    ).resolve_ctype()
-    return build(  # type: ignore cant infer
+    basis_1 = (
+        ExplicitBasis(
+            build(states_basis_1, eigenvectors).ok(),
+            data_id=basis_0.inner.data_id,
+            direction="backward",
+        )
+        .resolve_ctype()
+        .upcast()
+    )
+    return build(
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
         ).resolve_ctype(),
@@ -268,11 +280,15 @@ def _eigh_from_tuple[
         .resolve_ctype()
         .upcast()
     )
-    basis_0 = ExplicitUnitaryBasis(
-        build(states_basis_0, eigenvectors).ok(),
-        direction="forward",
-        assert_unitary=False,
-    ).resolve_ctype()
+    basis_0 = (
+        ExplicitUnitaryBasis(
+            build(states_basis_0, eigenvectors).ok(),
+            direction="forward",
+            assert_unitary=False,
+        )
+        .resolve_ctype()
+        .upcast()
+    )
     states_basis_1 = (
         TupleBasis(
             (
@@ -283,13 +299,17 @@ def _eigh_from_tuple[
         .resolve_ctype()
         .upcast()
     )
-    basis_1 = ExplicitUnitaryBasis(
-        build(states_basis_1, eigenvectors).ok(),
-        data_id=basis_0.data_id,
-        direction="backward",
-        assert_unitary=False,
-    ).resolve_ctype()
-    return build(  # type: ignore cant infer
+    basis_1 = (
+        ExplicitUnitaryBasis(
+            build(states_basis_1, eigenvectors).ok(),
+            data_id=basis_0.inner.data_id,
+            direction="backward",
+            assert_unitary=False,
+        )
+        .resolve_ctype()
+        .upcast()
+    )
+    return build(
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
         ).resolve_ctype(),
@@ -343,9 +363,13 @@ def _eigh_from_block_diagonal_basis[
         .resolve_ctype()
         .upcast()
     )
-    basis_0 = ExplicitUnitaryBasis(
-        build(states_basis_0, eigenvectors).ok(),
-    ).resolve_ctype()
+    basis_0 = (
+        ExplicitUnitaryBasis(
+            build(states_basis_0, eigenvectors).ok(),
+        )
+        .resolve_ctype()
+        .upcast()
+    )
     states_basis_1 = (
         BlockDiagonalBasis(
             TupleBasis(
@@ -359,12 +383,16 @@ def _eigh_from_block_diagonal_basis[
         .resolve_ctype()
         .upcast()
     )
-    basis_1 = ExplicitUnitaryBasis(
-        build(states_basis_1, eigenvectors).ok(),
-        data_id=basis_0.data_id,
-        direction="backward",
-    ).resolve_ctype()
-    return build(  # type: ignore cant infer
+    basis_1 = (
+        ExplicitUnitaryBasis(
+            build(states_basis_1, eigenvectors).ok(),
+            data_id=basis_0.inner.data_id,
+            direction="backward",
+        )
+        .resolve_ctype()
+        .upcast()
+    )
+    return build(
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
         ).resolve_ctype(),
