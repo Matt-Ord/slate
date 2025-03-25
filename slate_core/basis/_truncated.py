@@ -63,21 +63,21 @@ class TruncatedBasis[
         return Padding(self._inner.size, self._truncation.step, self._truncation.offset)
 
     @override
-    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: TruncatedBasis[Basis[Any, Ctype[DT3]], Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_inner__[T1: np.generic, T2: np.generic, T3: np.generic](
+        self: TruncatedBasis[Basis[Any, Ctype[T3]], Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
+    ) -> BasisConversion[T1, T2, T3]:
         return BasisConversion(
             lambda: pad_along_axis(vectors, self._inner_padding, axis)
         )
 
     @override
-    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: TruncatedBasis[Basis[Any, Ctype[DT1]], Ctype[DT3]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_inner__[T1: np.generic, T2: np.generic, T3: np.generic](
+        self: TruncatedBasis[Basis[Any, Ctype[T1]], Ctype[T3]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
+    ) -> BasisConversion[T1, T2, T3]:
         return BasisConversion(
             lambda: truncate_along_axis(vectors, self.truncation, axis)
         )
@@ -96,31 +96,31 @@ class TruncatedBasis[
         return out
 
     @override
-    def add_data[DT1: np.number](
+    def add_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: complex
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def mul_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: complex
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number](
+    def sub_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)

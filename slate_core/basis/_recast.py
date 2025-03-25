@@ -101,24 +101,24 @@ class RecastBasis[
         return self._outer_recast
 
     @override
-    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: RecastBasis[Basis, Basis[BasisMetadata, Ctype[DT3]], Basis, Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_inner__[T1: np.generic, T2: np.generic](
+        self: RecastBasis[Any, Any, Basis[Any, Ctype[T1]], Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
-        return BasisConversion[DT1, DT2, DT3](
+    ) -> BasisConversion[T1, T2, T1]:
+        return BasisConversion[T1, T2, T1](
             lambda: self._outer_recast.__convert_vector_into__(
                 vectors, self._inner_recast, axis
             ).ok()  # type: ignore safe
         )
 
     @override
-    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: RecastBasis[Basis, Basis, Basis[BasisMetadata, Ctype[DT1]], Ctype[DT3]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_inner__[T1: np.generic, T2: np.generic](
+        self: RecastBasis[Any, Any, Basis[Any, Ctype[T1]], Ctype[T2]],
+        vectors: np.ndarray[Any, np.dtype[T1]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
-        return BasisConversion[DT1, DT2, DT3](
+    ) -> BasisConversion[T1, T1, T2]:
+        return BasisConversion[T1, T1, T2](
             lambda: self._inner_recast.__convert_vector_into__(
                 vectors, self._outer_recast, axis
             ).ok()  # type: ignore safe
@@ -139,31 +139,31 @@ class RecastBasis[
         return out
 
     @override
-    def add_data[DT1: np.number](
+    def add_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: complex
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def mul_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: complex
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number](
+    def sub_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)

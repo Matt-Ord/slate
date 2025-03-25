@@ -25,7 +25,7 @@ from slate_core.metadata._tuple import is_tuple_metadata
 
 type TransformDirection = Literal["forward", "backward"]
 
-type ComplexCtype[DT: np.complexfloating] = Ctype[DT]
+type ComplexCtype[T: np.complexfloating] = Ctype[T]
 
 
 class TransformedBasis[
@@ -98,33 +98,33 @@ class TransformedBasis[
         return self.inner.size
 
     @classmethod
-    def _transform_backward[DT1: np.dtype[np.complexfloating]](
+    def _transform_backward[T: np.dtype[np.complexfloating]](
         cls,
-        vectors: np.ndarray[Any, DT1],
+        vectors: np.ndarray[Any, T],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT1]:
+    ) -> np.ndarray[Any, T]:
         return cast(
-            "np.ndarray[Any, DT1]",
+            "np.ndarray[Any, T]",
             np.fft.ifft(vectors, axis=axis, norm="ortho"),
         )
 
     @classmethod
-    def _transform_forward[DT1: np.dtype[np.complexfloating]](
+    def _transform_forward[T: np.dtype[np.complexfloating]](
         cls,
-        vectors: np.ndarray[Any, DT1],
+        vectors: np.ndarray[Any, T],
         axis: int = -1,
-    ) -> np.ndarray[Any, DT1]:
+    ) -> np.ndarray[Any, T]:
         return cast(
-            "np.ndarray[Any, DT1]",
+            "np.ndarray[Any, T]",
             np.fft.fft(vectors, axis=axis, norm="ortho"),
         )
 
     @override
-    def __into_inner__[DT2: np.complexfloating, DT3: np.generic](
-        self: TransformedBasis[Basis[Any, Ctype[DT3]]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_inner__[T1: np.complexfloating, T2: np.generic](
+        self: TransformedBasis[Basis[Any, Ctype[T2]]],
+        vectors: np.ndarray[Any, np.dtype[T1]],
         axis: int = -1,
-    ) -> BasisConversion[np.complexfloating, DT2, DT3]:
+    ) -> BasisConversion[np.complexfloating, T1, T2]:
         return BasisConversion(
             lambda: (
                 self._transform_backward(vectors, axis)
@@ -134,12 +134,12 @@ class TransformedBasis[
         )
 
     @override
-    def __from_inner__[DT1: np.generic, DT2: np.complexfloating](
-        self: TransformedBasis[Basis[Any, Ctype[DT1]]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_inner__[T1: np.generic, T2: np.complexfloating](
+        self: TransformedBasis[Basis[Any, Ctype[T1]]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, np.complexfloating]:
-        return BasisConversion[DT1, DT2, np.complexfloating](
+    ) -> BasisConversion[T1, T2, np.complexfloating]:
+        return BasisConversion[T1, T2, np.complexfloating](
             lambda: (
                 self._transform_forward(vectors, axis)
                 if self.direction == "forward"
@@ -159,31 +159,31 @@ class TransformedBasis[
         return out
 
     @override
-    def add_data[DT1: np.number](
+    def add_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: complex
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def mul_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: complex
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number](
+    def sub_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)
