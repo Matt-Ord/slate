@@ -107,9 +107,9 @@ def as_diagonal_basis[
 
 
 @overload
-def as_tuple_basis[M0: BasisMetadata, E, CT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[TupleBasisLike[tuple[M0], E, CT], DT1],
-) -> Array[TupleBasis[tuple[Basis[M0, CT]], E, CT], DT1]: ...
+def as_tuple_basis[M0: BasisMetadata, E, CT: Ctype[Never], DT: np.dtype[np.generic]](
+    array: Array[TupleBasisLike[tuple[M0], E, CT], DT],
+) -> Array[TupleBasis[tuple[Basis[M0, CT]], E, CT], DT]: ...
 
 
 @overload
@@ -118,10 +118,10 @@ def as_tuple_basis[
     M1: BasisMetadata,
     E,
     CT: Ctype[Never],
-    DT1: np.dtype[np.generic],
+    DT: np.dtype[np.generic],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1], E, CT], DT1],
-) -> Array[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E, CT], DT1]: ...
+    array: Array[TupleBasisLike[tuple[M0, M1], E, CT], DT],
+) -> Array[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E, CT], DT]: ...
 
 
 @overload
@@ -131,23 +131,23 @@ def as_tuple_basis[
     M2: BasisMetadata,
     E,
     CT: Ctype[Never],
-    DT1: np.dtype[np.generic],
+    DT: np.dtype[np.generic],
 ](
-    array: Array[TupleBasisLike[tuple[M0, M1, M2], E, CT], DT1],
+    array: Array[TupleBasisLike[tuple[M0, M1, M2], E, CT], DT],
 ) -> Array[
-    TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT], Basis[M2, CT]], E, CT], DT1
+    TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT], Basis[M2, CT]], E, CT], DT
 ]: ...
 
 
 @overload
-def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[TupleBasisLike[tuple[M, ...], E, CT], DT1],
-) -> Array[TupleBasis[tuple[Basis[M, CT], ...], E, CT], DT1]: ...
+def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT: np.dtype[np.generic]](
+    array: Array[TupleBasisLike[tuple[M, ...], E, CT], DT],
+) -> Array[TupleBasis[tuple[Basis[M, CT], ...], E, CT], DT]: ...
 
 
-def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT1: np.dtype[np.generic]](
-    array: Array[Basis[TupleMetadata[tuple[M, ...], E], CT], DT1],
-) -> Array[TupleBasis[tuple[Basis[M, CT], ...], E, CT], DT1]:
+def as_tuple_basis[M: BasisMetadata, E, CT: Ctype[Never], DT: np.dtype[np.generic]](
+    array: Array[Basis[TupleMetadata[tuple[M, ...], E], CT], DT],
+) -> Array[TupleBasis[tuple[Basis[M, CT], ...], E, CT], DT]:
     b = basis.as_tuple(array.basis)
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.

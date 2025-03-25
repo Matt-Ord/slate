@@ -18,36 +18,36 @@ from slate_core.metadata._metadata import BasisMetadata
 from slate_core.util import Padding, pad_along_axis, slice_along_axis
 
 
-def _get_lhs_vectors[DT1: np.generic](
+def _get_lhs_vectors[T: np.generic](
     basis: SplitBasis[Basis, Basis, Any],
-    vectors: np.ndarray[Any, np.dtype[DT1]],
+    vectors: np.ndarray[Any, np.dtype[T]],
     axis: int = -1,
-) -> np.ndarray[Any, np.dtype[DT1]]:
+) -> np.ndarray[Any, np.dtype[T]]:
     r"""Get the vector corresponding to ..math::`\hat{A}`."""
     start = 0
     end = basis.lhs.size
     return vectors[slice_along_axis(slice(start, end), axis)]
 
 
-def _get_rhs_vectors[DT1: np.generic](
+def _get_rhs_vectors[T: np.generic](
     basis: SplitBasis[Basis, Basis, Any],
-    vectors: np.ndarray[Any, np.dtype[DT1]],
+    vectors: np.ndarray[Any, np.dtype[T]],
     axis: int = -1,
-) -> np.ndarray[Any, np.dtype[DT1]]:
+) -> np.ndarray[Any, np.dtype[T]]:
     r"""Get the vector corresponding to ..math::`\hat{B}`."""
     start = basis.lhs.size
     return vectors[slice_along_axis(slice(start, None), axis)]
 
 
-def _into_inner[DT: np.number](
+def _into_inner[T: np.number](
     basis: SplitBasis[
         Basis[BasisMetadata, Ctype[np.generic]],
         Basis[BasisMetadata, Ctype[np.generic]],
         Ctype[np.generic],
     ],
-    vectors: np.ndarray[Any, np.dtype[DT]],
+    vectors: np.ndarray[Any, np.dtype[T]],
     axis: int = -1,
-) -> np.ndarray[Any, np.dtype[DT]]:
+) -> np.ndarray[Any, np.dtype[T]]:
     lhs_fundamental = basis.lhs.__convert_vector_into__(
         _get_lhs_vectors(basis, vectors, axis),
         cast("Basis[BasisMetadata, Ctype[np.generic]]", basis.inner),
@@ -59,20 +59,20 @@ def _into_inner[DT: np.number](
         axis,
     ).ok()
     return cast(
-        "np.ndarray[Any, np.dtype[DT]]",
+        "np.ndarray[Any, np.dtype[T]]",
         lhs_fundamental + rhs_fundamental,
     )
 
 
-def _from_inner[DT: np.number](
+def _from_inner[T: np.number](
     basis: SplitBasis[
         Basis[BasisMetadata, Ctype[np.generic]],
         Basis[BasisMetadata, Ctype[np.generic]],
         Ctype[np.generic],
     ],
-    vectors: np.ndarray[Any, np.dtype[DT]],
+    vectors: np.ndarray[Any, np.dtype[T]],
     axis: int = -1,
-) -> np.ndarray[Any, np.dtype[DT]]:
+) -> np.ndarray[Any, np.dtype[T]]:
     lhs_vector = (
         cast("Basis[BasisMetadata, Ctype[np.generic]]", basis.inner)
         .__convert_vector_into__(vectors, basis.lhs, axis)
@@ -165,27 +165,27 @@ class SplitBasis[
         return self.lhs.size + self.rhs.size
 
     @override
-    def __into_inner__[DT1: np.number, DT2: np.generic, DT3: np.generic](
+    def __into_inner__[T1: np.number, T2: np.generic, T3: np.generic](
         self: SplitBasis[
-            Basis[BasisMetadata, Ctype[DT3]],
-            Basis[BasisMetadata, Ctype[DT3]],
-            Ctype[DT1],
+            Basis[BasisMetadata, Ctype[T3]],
+            Basis[BasisMetadata, Ctype[T3]],
+            Ctype[T1],
         ],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
+    ) -> BasisConversion[T1, T2, T1]:
         return BasisConversion(lambda: _into_inner(self, vectors, axis))  # type: ignore safe due to wrapper
 
     @override
-    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.number](
+    def __from_inner__[T1: np.generic, T2: np.generic, T3: np.number](
         self: SplitBasis[
-            Basis[BasisMetadata, Ctype[DT1]],
-            Basis[BasisMetadata, Ctype[DT1]],
-            Ctype[DT3],
+            Basis[BasisMetadata, Ctype[T1]],
+            Basis[BasisMetadata, Ctype[T1]],
+            Ctype[T3],
         ],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
+    ) -> BasisConversion[T1, T2, T1]:
         return BasisConversion(lambda: _from_inner(self, vectors, axis))  # type: ignore safe due to wrapper
 
     @property
@@ -200,31 +200,31 @@ class SplitBasis[
         return out
 
     @override
-    def add_data[DT1: np.number](
+    def add_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: complex
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def mul_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: complex
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number](
+    def sub_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)

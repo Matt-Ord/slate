@@ -155,15 +155,15 @@ class ExplicitBasis[
         M0_: SimpleMetadata,
         M1_: BasisStateMetadata[Basis],
         DT_: np.dtype[np.number],
-        DT1_: Ctype[Never],
+        CT_: Ctype[Never],
     ](
         self: ExplicitBasis[
-            Array[Basis[TupleMetadata[tuple[M0_, M1_], None], DT1_], DT_],
+            Array[Basis[TupleMetadata[tuple[M0_, M1_], None], CT_], DT_],
             Ctype[Never],
         ],
-    ) -> Array[Basis[TupleMetadata[tuple[M1_, M0_], None], DT1_], DT_]:
+    ) -> Array[Basis[TupleMetadata[tuple[M1_, M0_], None], CT_], DT_]:
         return cast(
-            "Array[Basis[TupleMetadata[tuple[M1_, M0_], None], DT1_], DT_]",
+            "Array[Basis[TupleMetadata[tuple[M1_, M0_], None], CT_], DT_]",
             (
                 inv(self._matrix)
                 if self.direction == "forward"
@@ -175,12 +175,12 @@ class ExplicitBasis[
         M1_: SimpleMetadata,
         BInner_: Basis,
         DT_: np.dtype[np.number],
-        DT1_: Ctype[Never],
+        CT_: Ctype[Never],
     ](
         self: ExplicitBasis[
             Array[
                 Basis[
-                    TupleMetadata[tuple[M1_, BasisStateMetadata[BInner_]], None], DT1_
+                    TupleMetadata[tuple[M1_, BasisStateMetadata[BInner_]], None], CT_
                 ],
                 DT_,
             ]
@@ -192,7 +192,7 @@ class ExplicitBasis[
                 TupleBasisLike[
                     tuple[M1_, BasisStateMetadata[BInner_]], None, Ctype[np.generic]
                 ],
-                TupleBasisLike[tuple[M1_, BasisStateMetadata[BInner_]], None, DT1_],
+                TupleBasisLike[tuple[M1_, BasisStateMetadata[BInner_]], None, CT_],
             ],
             TupleMetadata[tuple[M1_, BasisMetadata], None],
         ],
@@ -241,12 +241,12 @@ class ExplicitBasis[
         return self._direction
 
     @override
-    def __into_inner__[DT1: np.generic, DT2: np.generic](
-        self: ExplicitBasis[Any, Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_inner__[T1: np.generic, T2: np.generic](
+        self: ExplicitBasis[Any, Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT1]:
-        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+    ) -> BasisConversion[T1, T2, T1]:
+        def fn() -> np.ndarray[Any, np.dtype[T2]]:
             swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
             flat = swapped.reshape(-1, vectors.shape[axis])
 
@@ -272,12 +272,12 @@ class ExplicitBasis[
         return BasisConversion(fn)
 
     @override
-    def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: ExplicitBasis[Any, Ctype[DT3]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_inner__[T2: np.generic, T3: np.generic](
+        self: ExplicitBasis[Any, Ctype[T3]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT3, DT2, DT3]:
-        def fn() -> np.ndarray[Any, np.dtype[DT2]]:
+    ) -> BasisConversion[T3, T2, T3]:
+        def fn() -> np.ndarray[Any, np.dtype[T2]]:
             swapped = cast("np.ndarray[Any, np.dtype[Any]]", vectors).swapaxes(axis, -1)
             flat = swapped.reshape(-1, vectors.shape[axis])
 
@@ -316,31 +316,31 @@ class ExplicitBasis[
         return out
 
     @override
-    def add_data[DT1: np.number](
+    def add_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: complex
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def mul_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: complex
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number](
+    def sub_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)

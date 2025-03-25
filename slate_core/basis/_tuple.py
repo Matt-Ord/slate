@@ -241,40 +241,40 @@ class TupleBasis[
         return tuple(x.size for x in self.children)
 
     @override
-    def __into_fundamental__[DT1: np.generic, DT2: np.generic](
-        self: TupleBasis[tuple[Basis[BasisMetadata, Ctype[DT1]], ...], Any, Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_fundamental__[T1: np.generic, T2: np.generic](
+        self: TupleBasis[tuple[Basis[BasisMetadata, Ctype[T1]], ...], Any, Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, np.generic]:
+    ) -> BasisConversion[T1, T2, np.generic]:
         fundamental = from_metadata(self.metadata())
-        return BasisConversion[DT1, DT2, np.generic](
+        return BasisConversion[T1, T2, np.generic](
             lambda: _convert_tuple_basis_vector_unsafe(vectors, self, fundamental, axis)  # type: ignore BasisConversion makes this safe
         )
 
     @override
-    def __from_fundamental__[DT2: np.generic, DT3: np.generic](
-        self: TupleBasis[tuple[Basis[BasisMetadata, Ctype[DT3]], ...], Any, Ctype[DT3]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_fundamental__[T2: np.generic, T3: np.generic](
+        self: TupleBasis[tuple[Basis[BasisMetadata, Ctype[T3]], ...], Any, Ctype[T3]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[np.generic, DT2, DT3]:
+    ) -> BasisConversion[np.generic, T2, T3]:
         fundamental = from_metadata(self.metadata())
-        return BasisConversion[np.generic, DT2, DT3](
+        return BasisConversion[np.generic, T2, T3](
             lambda: _convert_tuple_basis_vector_unsafe(vectors, fundamental, self, axis)  # type: ignore BasisConversion makes this safe
         )
 
     @override
     def __convert_vector_into__[
         M_: TupleMetadata[Any, Any],
-        DT1: np.generic,
-        DT2: np.generic,
-        DT3: np.generic,
+        T1: np.generic,
+        T2: np.generic,
+        T3: np.generic,
     ](
-        self: Basis[M_, Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, Ctype[DT3]],
+        self: Basis[M_, Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
+        basis: Basis[M_, Ctype[T3]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
-        return BasisConversion[DT1, DT2, DT3](
+    ) -> BasisConversion[T1, T2, T3]:
+        return BasisConversion[T1, T2, T3](
             lambda: _convert_vectors_unsafe(self, vectors, basis, axis)  # type: ignore BasisConversion makes this safe
         )
 
@@ -302,31 +302,27 @@ class TupleBasis[
         return out
 
     @override
-    def add_data[DT1: np.number](
-        self, lhs: np.ndarray[Any, np.dtype[DT1]], rhs: np.ndarray[Any, np.dtype[DT1]]
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def add_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: np.ndarray[Any, np.dtype[T]]
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "add_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs + rhs).astype(lhs.dtype)
 
     @override
-    def mul_data[DT1: np.number](
-        self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: complex,
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def mul_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: complex
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "mul_data not implemented for this basis"
             raise NotImplementedError(msg)
         return (lhs * rhs).astype(lhs.dtype)
 
     @override
-    def sub_data[DT1: np.number](
-        self,
-        lhs: np.ndarray[Any, np.dtype[DT1]],
-        rhs: np.ndarray[Any, np.dtype[DT1]],
-    ) -> np.ndarray[Any, np.dtype[DT1]]:
+    def sub_data[T: np.number](
+        self, lhs: np.ndarray[Any, np.dtype[T]], rhs: np.ndarray[Any, np.dtype[T]]
+    ) -> np.ndarray[Any, np.dtype[T]]:
         if "LINEAR_MAP" not in self.features:
             msg = "sub_data not implemented for this basis"
             raise NotImplementedError(msg)

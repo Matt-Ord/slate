@@ -86,18 +86,18 @@ class WrappedBasisWithMetadata[
         return self._inner
 
     @abstractmethod
-    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: WrappedBasisWithMetadata[Basis[Any, Ctype[DT3]], Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_inner__[T1: np.generic, T2: np.generic, T3: np.generic](
+        self: WrappedBasisWithMetadata[Basis[Any, Ctype[T3]], Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]: ...
+    ) -> BasisConversion[T1, T2, T3]: ...
 
     @abstractmethod
-    def __from_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: WrappedBasisWithMetadata[Basis[Any, Ctype[DT1]], Ctype[DT3]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_inner__[T1: np.generic, T2: np.generic, T3: np.generic](
+        self: WrappedBasisWithMetadata[Basis[Any, Ctype[T1]], Ctype[T3]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]: ...
+    ) -> BasisConversion[T1, T2, T3]: ...
 
     @override
     def __into_fundamental__[DT1: np.generic, DT2: np.generic](
@@ -124,16 +124,16 @@ class WrappedBasisWithMetadata[
     @override
     def __convert_vector_into__[
         M_: BasisMetadata,
-        DT1: np.generic,
-        DT2: np.generic,
-        DT3: np.generic,
+        T1: np.generic,
+        T2: np.generic,
+        T3: np.generic,
     ](
-        self: WrappedBasisWithMetadata[Basis[M_, Ctype[DT1]], Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, Ctype[DT3]],
+        self: WrappedBasisWithMetadata[Basis[M_, Ctype[T1]], Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
+        basis: Basis[M_, Ctype[T3]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
-        return BasisConversion[DT1, DT2, DT3](
+    ) -> BasisConversion[T1, T2, T3]:
+        return BasisConversion[T1, T2, T3](
             lambda: _convert_vectors_unsafe(self, vectors, basis, axis)  # type: ignore BasisConversion makes this safe
         )
 
@@ -210,20 +210,20 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
         return self._inner.features
 
     @override
-    def __into_inner__[DT1: np.generic, DT2: np.generic, DT3: np.generic](
-        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __into_inner__[T1: np.generic, T2: np.generic](
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, np.generic]:
-        return BasisConversion[DT1, DT2, np.generic](lambda: vectors)
+    ) -> BasisConversion[T1, T2, np.generic]:
+        return BasisConversion[T1, T2, np.generic](lambda: vectors)
 
     @override
-    def __from_inner__[DT2: np.generic, DT3: np.generic](
-        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT3]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
+    def __from_inner__[T2: np.generic, T3: np.generic](
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[T3]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
-    ) -> BasisConversion[np.generic, DT2, DT3]:
-        return BasisConversion[np.generic, DT2, DT3](lambda: vectors)
+    ) -> BasisConversion[np.generic, T2, T3]:
+        return BasisConversion[np.generic, T2, T3](lambda: vectors)
 
     @override
     def __into_fundamental__[DT1: np.generic, DT2: np.generic](
@@ -246,39 +246,39 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
     @override
     def __convert_vector_into__[
         M_: BasisMetadata,
-        DT1: np.generic,
-        DT2: np.generic,
-        DT3: np.generic,
+        T1: np.generic,
+        T2: np.generic,
+        T3: np.generic,
     ](
-        self: AsUpcast[Basis[Any, Any], Any, Ctype[DT1]],
-        vectors: np.ndarray[Any, np.dtype[DT2]],
-        basis: Basis[M_, Ctype[DT3]],
+        self: AsUpcast[Basis[Any, Any], Any, Ctype[T1]],
+        vectors: np.ndarray[Any, np.dtype[T2]],
+        basis: Basis[M_, Ctype[T3]],
         axis: int = -1,
-    ) -> BasisConversion[DT1, DT2, DT3]:
+    ) -> BasisConversion[T1, T2, T3]:
         return self._inner.__convert_vector_into__(vectors, basis, axis)
 
     @override
-    def add_data[DT_: np.dtype[np.number]](
+    def add_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, DT_],
-        rhs: np.ndarray[Any, DT_],
-    ) -> np.ndarray[Any, DT_]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         return self._inner.add_data(lhs, rhs)
 
     @override
-    def sub_data[DT_: np.dtype[np.number]](
+    def sub_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, DT_],
-        rhs: np.ndarray[Any, DT_],
-    ) -> np.ndarray[Any, DT_]:
+        lhs: np.ndarray[Any, np.dtype[T]],
+        rhs: np.ndarray[Any, np.dtype[T]],
+    ) -> np.ndarray[Any, np.dtype[T]]:
         return self._inner.sub_data(lhs, rhs)
 
     @override
-    def mul_data[DT_: np.dtype[np.number]](
+    def mul_data[T: np.number](
         self,
-        lhs: np.ndarray[Any, DT_],
+        lhs: np.ndarray[Any, np.dtype[T]],
         rhs: complex,
-    ) -> np.ndarray[Any, DT_]:
+    ) -> np.ndarray[Any, np.dtype[T]]:
         return self._inner.mul_data(lhs, rhs)
 
     @property
