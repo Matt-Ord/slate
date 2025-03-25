@@ -110,8 +110,8 @@ class ArrayConversion[
     # metadata should be covariant - and it will inder the lowest common type
     def _metadata_variance_fn(self, _private: Never) -> M0: ...
 
-    def ok[M_: BasisMetadata, DT_: np.generic](
-        self: ArrayConversion[M_, Basis[M_, Ctype[DT_]], np.dtype[DT_]],
+    def ok[M_: BasisMetadata, T: np.generic](
+        self: ArrayConversion[M_, Basis[M_, Ctype[T]], np.dtype[T]],
     ) -> Array[B1, DT]:
         return cast(
             "Array[B1, DT]",
@@ -141,8 +141,8 @@ class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
     def data(self) -> np.ndarray[tuple[int], DT]:
         return self._data
 
-    def ok[DT_: np.generic](
-        self: ArrayBuilder[Basis[Any, Ctype[DT_]], np.dtype[DT_]],
+    def ok[T: np.generic](
+        self: ArrayBuilder[Basis[Any, Ctype[T]], np.dtype[T]],
     ) -> Array[B, DT]:
         return cast("Any", Array(self._basis, self._data, 0))  # type: ignore safe to construct
 
@@ -289,19 +289,19 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
     def as_type[
         M_: BasisMetadata,
-        DT_: np.number,
+        T: np.number,
     ](
         self: ArrayWithMetadata[M_, np.dtype[np.generic]],
-        ty: type[DT_],
-    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
+        ty: type[T],
+    ) -> Array[Basis[M_, Ctype[T]], np.dtype[T]]:
         as_type_basis = basis.as_supports_type(self.basis, ty)
         converted = self.with_basis(as_type_basis).assert_ok()
         return self.build(converted.basis, converted.raw_data.astype(ty)).ok()
 
-    def __add__[M_: BasisMetadata, DT_: np.number](
-        self: ArrayWithMetadata[M_, np.dtype[DT_]],
-        other: ArrayWithMetadata[M_, np.dtype[DT_]],
-    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
+    def __add__[M_: BasisMetadata, T: np.number](
+        self: ArrayWithMetadata[M_, np.dtype[T]],
+        other: ArrayWithMetadata[M_, np.dtype[T]],
+    ) -> Array[Basis[M_, Ctype[T]], np.dtype[T]]:
         final_basis = basis.as_supports_type(
             basis.as_add(self.basis), np.result_type(self.dtype, other.dtype).type
         )
@@ -312,10 +312,10 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
         return build(final_basis, data).ok()
 
-    def __sub__[M_: BasisMetadata, DT_: np.number](
-        self: ArrayWithMetadata[M_, np.dtype[DT_]],
-        other: ArrayWithMetadata[M_, np.dtype[DT_]],
-    ) -> Array[Basis[M_, Ctype[DT_]], np.dtype[DT_]]:
+    def __sub__[M_: BasisMetadata, T: np.number](
+        self: ArrayWithMetadata[M_, np.dtype[T]],
+        other: ArrayWithMetadata[M_, np.dtype[T]],
+    ) -> Array[Basis[M_, Ctype[T]], np.dtype[T]]:
         final_basis = basis.as_supports_type(
             basis.as_sub(self.basis), np.result_type(self.dtype, other.dtype).type
         )
@@ -326,8 +326,8 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
 
         return build(final_basis, data).ok()
 
-    def __mul__[M_: BasisMetadata, DT_: np.number](
-        self: ArrayWithMetadata[M_, np.dtype[DT_]],
+    def __mul__[M_: BasisMetadata, T: np.number](
+        self: ArrayWithMetadata[M_, np.dtype[T]],
         other: complex,
     ) -> ArrayWithMetadata[M_, np.dtype[np.number]]:
         final_basis = basis.as_supports_type(
@@ -381,14 +381,12 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         )
 
     @overload
-    def __getitem__[DT_: np.dtype[np.generic]](
-        self: Array[Basis, DT_], index: int
-    ) -> DT_: ...
+    def __getitem__(self, index: int) -> DT: ...
     @overload
-    def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
-        self: Array[Basis[BasisMetadata, CT], DT_],
+    def __getitem__[CT: Ctype[Never]](
+        self: Array[Basis[BasisMetadata, CT], DT],
         index: tuple[NestedIndex, ...] | slice,
-    ) -> Array[Basis[BasisMetadata, CT], DT_]: ...
+    ) -> Array[Basis[BasisMetadata, CT], DT]: ...
 
     def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
         self: Array[Basis[BasisMetadata, CT], DT_],
