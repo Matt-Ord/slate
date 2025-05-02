@@ -12,7 +12,7 @@ from slate_core.util import pad_along_axis, truncate_along_axis
 def test_pad_cropped() -> None:
     data = np.array([1, 2, 3, 4, 5])
     rng = np.random.default_rng()
-    n = rng.integers(data.size, 2 * data.size)
+    n = rng.integers(data.size, 2 * data.size).item()
     padded = pad_along_axis(data, Padding(n, 1, 0))
     expected = np.zeros(n)
     expected[: data.size] = data
@@ -51,7 +51,7 @@ def test_pad_with_step() -> None:
 def test_truncate_cropped() -> None:
     data = np.array([1, 2, 3, 4, 5])
     rng = np.random.default_rng()
-    n = rng.integers(0, data.size)
+    n = rng.integers(0, data.size).item()
     padded = truncate_along_axis(data, Truncation(n, 1, 0))
     expected = data[:n]
     np.testing.assert_array_equal(padded, expected)

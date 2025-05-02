@@ -52,9 +52,6 @@ def _index_tuple_raw_along_axis(
 ) -> tuple[Basis | None, np.ndarray[Any, Any]]:
     axis &= data.ndim
     tuple_basis = basis.as_tuple(basis.as_linear_map(data_basis))
-    if tuple_basis is None:
-        msg = "Cannot index a non-tuple basis."
-        raise ValueError(msg)
     children = tuple_basis.children
     stacked_shape = (
         data.shape[:axis] + tuple(c.size for c in children) + data.shape[axis + 1 :]
@@ -72,7 +69,7 @@ def _index_tuple_raw_along_axis(
     if len(final_basis) == 0:
         return None, data.reshape(data.shape[:axis] + data.shape[axis + 1 :])
 
-    data = data.reshape(data.shape[:axis] + (-1,) + data.shape[axis + 1 :])
+    data = data.reshape((*data.shape[:axis], -1, *data.shape[axis + 1 :]))
     if len(final_basis) == 1:
         return final_basis[0], data
     return TupleBasis(tuple(final_basis), None), data

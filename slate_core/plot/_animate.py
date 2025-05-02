@@ -41,7 +41,7 @@ def _get_slice_idx(
     idx: tuple[int, ...],
 ) -> tuple[int, ...]:
     insert_pos = axes[0] - len([i for i in axes if i < axes[0]])
-    return idx[:insert_pos] + (x_0_idx,) + idx[insert_pos:]
+    return (*idx[:insert_pos], x_0_idx, *idx[insert_pos:])
 
 
 def animate_array_over_list[DT: np.dtype[np.number]](

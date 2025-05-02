@@ -98,7 +98,7 @@ class TransformedBasis[
         return self.inner.size
 
     @classmethod
-    def _transform_backward[T: np.dtype[np.complexfloating]](
+    def _transform_backward[T: np.dtype[np.generic]](
         cls,
         vectors: np.ndarray[Any, T],
         axis: int = -1,
@@ -109,7 +109,7 @@ class TransformedBasis[
         )
 
     @classmethod
-    def _transform_forward[T: np.dtype[np.complexfloating]](
+    def _transform_forward[T: np.dtype[np.generic]](
         cls,
         vectors: np.ndarray[Any, T],
         axis: int = -1,
@@ -120,7 +120,7 @@ class TransformedBasis[
         )
 
     @override
-    def __into_inner__[T1: np.complexfloating, T2: np.generic](
+    def __into_inner__[T1: np.generic, T2: np.generic](
         self: TransformedBasis[Basis[Any, Ctype[T2]]],
         vectors: np.ndarray[Any, np.dtype[T1]],
         axis: int = -1,
@@ -134,7 +134,7 @@ class TransformedBasis[
         )
 
     @override
-    def __from_inner__[T1: np.generic, T2: np.complexfloating](
+    def __from_inner__[T1: np.generic, T2: np.generic](
         self: TransformedBasis[Basis[Any, Ctype[T1]]],
         vectors: np.ndarray[Any, np.dtype[T2]],
         axis: int = -1,
