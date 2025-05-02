@@ -234,9 +234,6 @@ def flatten(
     basis: Basis[TupleMetadata, Any],
 ) -> Basis:
     as_tuple = as_tuple_basis(basis)
-    if as_tuple is None:
-        msg = "Cannot flatten a non-tuple basis."
-        raise ValueError(msg)
     if len(as_tuple.shape) == 1:
         return as_tuple.children[0]
 
@@ -316,8 +313,6 @@ def as_is_dual[M: BasisMetadata, CT: Ctype[Never]](
     assert isinstance(basis.is_dual, tuple)
 
     basis_as_tuple = as_tuple_basis(cast("Basis[TupleMetadata[Any,Any], Any]", basis))
-    if basis_as_tuple is None:
-        return from_metadata(basis.metadata(), is_dual=is_dual)
 
     return cast(
         "Basis[M, CT]",

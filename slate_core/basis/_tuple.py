@@ -264,7 +264,7 @@ class TupleBasis[
 
     @override
     def __convert_vector_into__[
-        M_: TupleMetadata[Any, Any],
+        M_: BasisMetadata,
         T1: np.generic,
         T2: np.generic,
         T3: np.generic,
