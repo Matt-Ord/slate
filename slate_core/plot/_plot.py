@@ -302,7 +302,7 @@ def _get_coordinates_grid(
 
 
 def array_against_axes_2d[
-    M: TupleMetadata,
+    M: TupleMetadata[tuple[BasisMetadata, ...], Any],
     DT: np.dtype[np.number],
 ](
     data: Array[Basis[M], DT],
