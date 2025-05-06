@@ -220,7 +220,7 @@ def flatten[B: Basis](basis: TupleBasis[tuple[B], Any, Any]) -> B: ...
 
 @overload
 def flatten[M: BasisMetadata, CT: Ctype[Never]](
-    basis: TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], Never, CT],
+    basis: TupleBasisLike[tuple[TupleMetadata[tuple[M, ...]], ...], Any, CT],
 ) -> TupleBasis[tuple[Basis[M, CT], ...], None, CT]: ...
 
 

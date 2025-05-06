@@ -84,7 +84,7 @@ def _from_inner[T: np.number](
 class SplitBasis[
     B0: Basis = Basis,
     B1: Basis = Basis,
-    CT: Ctype[Never] = Ctype[np.number],
+    CT: Ctype[Never] = Ctype[Never],
 ](
     WrappedBasis[Basis, CT],
 ):

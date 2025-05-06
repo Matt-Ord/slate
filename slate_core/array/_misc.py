@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Never, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, cast, overload
 
 import numpy as np
 
@@ -11,6 +11,7 @@ from slate_core.array._conversion import (
     as_supports_type_basis,
 )
 from slate_core.basis import Basis, Ctype
+from slate_core.basis import from_metadata as basis_from_metadata
 from slate_core.basis import is_tuple_basis_like as is_tuple_basis_like_basis
 from slate_core.basis import supports_dtype as supports_dtype_basis
 
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
     from slate_core.array._array import Array, ArrayWithMetadata
     from slate_core.basis import TupleBasisLike
     from slate_core.metadata import BasisMetadata
+    from slate_core.metadata._tuple import TupleMetadata
 
 
 @overload
@@ -286,3 +288,12 @@ def supports_dtype[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
     `Array[Basis[BasisMetadata, Ctype[T]], DT]` if it returns `True`.
     """
     return array.basis.ctype.supports_dtype(dtype)
+
+
+def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
+    array: ArrayWithMetadata[TupleMetadata[tuple[M, M], Any], DT],
+) -> ArrayWithMetadata[M, DT]:
+    """Extract the diagonal of a 2D slate array."""
+    out_basis = basis_from_metadata(array.basis.metadata().children[0])
+    data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
+    return build(out_basis, data).ok()
