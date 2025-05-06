@@ -88,9 +88,7 @@ class CroppedBasis[B: Basis = Basis, CT: Ctype[Never] = Ctype[Never]](
 
             return BasisConversion(fn)
         basis = cast("Basis[M_, Ctype[T3]]", basis)
-        return WrappedBasis[Basis[M_, Ctype[T1]], Ctype[T1]].__convert_vector_into__(
-            self, vectors, basis, axis
-        )
+        return WrappedBasis.__convert_vector_into__(self, vectors, basis, axis)  # type: ignore bad inference
 
     @property
     @override
