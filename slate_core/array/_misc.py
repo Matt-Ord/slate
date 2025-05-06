@@ -293,7 +293,11 @@ def supports_dtype[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
 def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
     array: ArrayWithMetadata[TupleMetadata[tuple[M, M], Any], DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Extract the diagonal of a 2D slate array."""
+    """Extract the diagonal of a 2D slate array.
+
+    Note that this traets the data as a raw 2d array of data, it does not return the eigenstates
+    of the array, even if it is already diagonalised.
+    """
     out_basis = basis_from_metadata(array.basis.metadata().children[0])
     data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
     return build(out_basis, data).ok()
