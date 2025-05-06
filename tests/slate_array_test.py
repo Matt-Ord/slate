@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate_core import array
+from slate_core import array, basis
 from slate_core.array import Array, build, conjugate, transpose
 from slate_core.basis import (
     Basis,
@@ -138,3 +138,10 @@ def test_add_mul_array() -> None:
         data.as_array() - data.as_array(), (data - data).as_array()
     )
     np.testing.assert_array_equal(2 * data.as_array(), (data * 2).as_array())
+
+
+def test_extract_diagonal() -> None:
+    data = np.array([1, 2, 3, 4, 4, 6, 7, 8, 9]).reshape(3, 3)
+    slate_array = Array.build(basis.from_shape((3, 3)).upcast(), data).assert_ok()
+    diagonal = array.extract_diagonal(slate_array)
+    np.testing.assert_array_equal(diagonal.as_array(), data.diagonal())
