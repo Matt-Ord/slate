@@ -286,6 +286,16 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
     def points(self) -> np.ndarray[Any, np.dtype[np.int_]]:
         return self._inner.points
 
+    @override
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, AsUpcast):
+            return self._inner == cast("AsUpcast[Any, Any]", value).inner
+        return True
+
+    @override
+    def __hash__(self) -> int:
+        return hash(self._inner)
+
 
 def is_wrapped[
     M: BasisMetadata,
