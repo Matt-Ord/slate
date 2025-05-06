@@ -288,9 +288,9 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
 
     @override
     def __eq__(self, value: object) -> bool:
-        if not isinstance(value, AsUpcast):
+        if isinstance(value, AsUpcast):
             return self._inner == cast("AsUpcast[Any, Any]", value).inner
-        return True
+        return False
 
     @override
     def __hash__(self) -> int:
