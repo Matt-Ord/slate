@@ -220,13 +220,13 @@ def nest[
 
 @overload
 def flatten[B: Basis, DT: np.dtype[np.generic]](
-    array: Array[TupleBasis[tuple[B], Never], DT],
+    array: Array[TupleBasis[tuple[B], Any], DT],
 ) -> Array[B, DT]: ...
 
 
 @overload
 def flatten[M: BasisMetadata, DT: np.dtype[np.generic], CT: Ctype[Never]](
-    array: Array[TupleBasisLike[tuple[M], Never, CT], DT],
+    array: Array[TupleBasisLike[tuple[M], Any, CT], DT],
 ) -> Array[Basis[M, CT], DT]: ...
 
 
