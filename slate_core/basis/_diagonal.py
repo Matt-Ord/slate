@@ -22,16 +22,18 @@ if TYPE_CHECKING:
 
 
 class DiagonalBasis[
-    B: TupleBasis[tuple[Basis, Basis], Any] = TupleBasis[tuple[Basis, Basis], Any],
+    B: TupleBasis[
+        tuple[Basis[BasisMetadata, Any], Basis[BasisMetadata, Any]], Any
+    ] = TupleBasis[tuple[Basis, Basis], Any],
     CT: Ctype[Never] = Ctype[Never],
 ](
     WrappedBasis[B, CT],
 ):
     """Represents a diagonal basis."""
 
-    def __init__[B_: TupleBasis[tuple[Basis, Basis], Any]](
-        self: DiagonalBasis[B_, Ctype[Never]], inner: B_
-    ) -> None:
+    def __init__[
+        B_: TupleBasis[tuple[Basis[BasisMetadata, Any], Basis[BasisMetadata, Any]], Any]
+    ](self: DiagonalBasis[B_, Ctype[Never]], inner: B_) -> None:
         super().__init__(cast("B", inner))
         assert self.inner.children[0].size == self.inner.children[1].size
 

@@ -4,16 +4,15 @@ from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, cast, overload
 
 import numpy as np
 
+from slate_core import basis
 from slate_core.array._array import build
 from slate_core.array._conversion import (
     as_fundamental_basis,
     as_index_basis,
     as_supports_type_basis,
+    cast_basis,
 )
 from slate_core.basis import Basis, Ctype
-from slate_core.basis import from_metadata as basis_from_metadata
-from slate_core.basis import is_tuple_basis_like as is_tuple_basis_like_basis
-from slate_core.basis import supports_dtype as supports_dtype_basis
 
 if TYPE_CHECKING:
     from slate_core.array._array import Array, ArrayWithMetadata
@@ -50,7 +49,7 @@ def is_tuple_basis_like[CT: Ctype[Never], DT: np.dtype[np.generic]](
 def is_tuple_basis_like[CT: Ctype[Never], DT: np.dtype[np.generic]](
     array: Array[Basis[BasisMetadata, CT], DT], *, n_dim: int | None = None
 ) -> TypeGuard[Array[TupleBasisLike[tuple[BasisMetadata, ...], Never, CT], DT]]:
-    return is_tuple_basis_like_basis(array.basis, n_dim=n_dim)
+    return basis.is_tuple_basis_like(array.basis, n_dim=n_dim)
 
 
 def real[M: BasisMetadata](
@@ -254,18 +253,18 @@ def cast_as_dual[B: Basis, DT: np.dtype[np.generic]](
     array: Array[B, DT],
 ) -> Array[B, DT]:
     """Cast a slate array as an array in dual space."""
-    basis = array.basis.dual_basis()
-    assert supports_dtype_basis(basis, array.dtype)
-    return build(basis, array.raw_data).ok()
+    basis_dual = array.basis.dual_basis()
+    assert basis.supports_dtype(basis_dual, array.dtype)
+    return build(basis_dual, array.raw_data).ok()
 
 
 def dual_basis[B: Basis, DT: np.dtype[np.generic]](
     array: Array[B, DT],
 ) -> Array[B, DT]:
     """Cast a slate array as an array in dual space."""
-    basis = array.basis.dual_basis()
-    assert supports_dtype_basis(basis, array.dtype)
-    return array.with_basis(basis).ok()
+    basis_dual = array.basis.dual_basis()
+    assert basis.supports_dtype(basis_dual, array.dtype)
+    return array.with_basis(basis_dual).ok()
 
 
 def supports_type[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](
@@ -298,6 +297,11 @@ def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
     Note that this traets the data as a raw 2d array of data, it does not return the eigenstates
     of the array, even if it is already diagonalised.
     """
-    out_basis = basis_from_metadata(array.basis.metadata().children[0])
+    as_diagonal = basis.as_diagonal(basis.as_index(array.basis))
+    if as_diagonal is not None:
+        return cast_basis(
+            array.with_basis(as_diagonal).assert_ok(), as_diagonal.inner.children[0]
+        ).assert_ok()
+    out_basis = basis.from_metadata(array.basis.metadata().children[0])
     data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
     return build(out_basis, data).ok()
