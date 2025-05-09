@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from copy import copy
-from typing import TYPE_CHECKING, Any, Never, Self, TypeGuard, cast, override
+from typing import TYPE_CHECKING, Any, Never, Self, TypeGuard, cast, overload, override
 
 import numpy as np
 
@@ -255,6 +255,8 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
         basis: Basis[M_, Ctype[T3]],
         axis: int = -1,
     ) -> BasisConversion[T1, T2, T3]:
+        if self == basis:
+            return BasisConversion[T1, T2, T3](lambda: vectors)
         return self._inner.__convert_vector_into__(vectors, basis, axis)
 
     @override
@@ -290,17 +292,29 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
     def __eq__(self, value: object) -> bool:
         if isinstance(value, AsUpcast):
             return self._inner == cast("AsUpcast[Any, Any]", value).inner
-        return False
+        return self._inner == value
 
     @override
     def __hash__(self) -> int:
         return hash(self._inner)
 
 
+@overload
 def is_wrapped[
     M: BasisMetadata,
     CT: Ctype[Never],
-](basis: Basis[M, CT]) -> TypeGuard[WrappedBasisWithMetadata[Basis[M, CT], CT]]:
+](basis: Basis[M, CT]) -> TypeGuard[WrappedBasisWithMetadata[Basis[M, CT], CT]]: ...
+
+
+@overload
+def is_wrapped(
+    basis: object,
+) -> TypeGuard[WrappedBasisWithMetadata]: ...
+
+
+def is_wrapped(
+    basis: object,
+) -> TypeGuard[WrappedBasisWithMetadata[Basis[Any, Any], Any]]:
     """Check if a basis is a wrapped basis."""
     return isinstance(basis, WrappedBasisWithMetadata)
 

@@ -282,6 +282,9 @@ class TupleBasis[
     def __eq__(self, other: object) -> bool:
         if is_tuple(other):
             return other.children == self.children
+        if is_wrapped(other):
+            # Check if the inner basis is equal
+            return other == self  # type: ignore this is simply not true?
         return False
 
     @override
