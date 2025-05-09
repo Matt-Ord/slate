@@ -161,9 +161,24 @@ def as_fundamental_basis[M: AnyMetadata, DT: np.dtype[np.generic]](
     return array.with_basis(basis.as_fundamental(array.basis)).ok()
 
 
+@overload
+def as_transformed_basis[M: AnyMetadata, DT: np.dtype[np.complexfloating], E](
+    array: ArrayWithMetadata[TupleMetadata[tuple[M, ...], E], DT],
+) -> Array[
+    TupleBasis[
+        tuple[Basis[M, Ctype[np.complexfloating]], ...], E, Ctype[np.complexfloating]
+    ],
+    DT,
+]: ...
+@overload
 def as_transformed_basis[M: AnyMetadata, DT: np.dtype[np.complexfloating]](
     array: ArrayWithMetadata[M, DT],
-) -> Array[Basis[M, Ctype[np.complexfloating]], DT]:
+) -> Array[Basis[M, Ctype[np.complexfloating]], DT]: ...
+
+
+def as_transformed_basis[M: AnyMetadata, DT: np.dtype[np.complexfloating]](
+    array: ArrayWithMetadata[M, DT],
+) -> Array[Basis, DT]:
     return array.with_basis(basis.as_transformed(array.basis)).ok()
 
 
@@ -259,3 +274,17 @@ def as_raw[DT: np.dtype[np.generic], B: Basis](
     array: Array[B, DT],
 ) -> Array[FundamentalBasis[BasisStateMetadata[B]], DT]:
     return cast_basis(array, FundamentalBasis(BasisStateMetadata(array.basis))).ok()
+
+
+def as_raw_tuple[DT: np.dtype[np.generic], B: Basis, E](
+    array: Array[TupleBasis[tuple[B, ...], E], DT],
+) -> Array[TupleBasis[tuple[FundamentalBasis[BasisStateMetadata[B]], ...], E], DT]:
+    return cast_basis(
+        array,
+        TupleBasis(
+            tuple(
+                FundamentalBasis(BasisStateMetadata(c)) for c in array.basis.children
+            ),
+            array.basis.metadata().extra,
+        ),
+    ).assert_ok()
