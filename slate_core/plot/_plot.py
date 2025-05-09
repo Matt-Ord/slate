@@ -241,7 +241,7 @@ def array_against_axes_1d_k[DT: np.dtype[np.complexfloating]](
     tuple[Figure, Axes, Line2D]
     """
     metadata = data.basis.metadata()
-    converted_data = array.as_transformed_basis(data)
+    converted_data = array.as_raw_tuple(array.as_transformed_basis(data))
 
     idx = tuple(0 for _ in range(metadata.n_dim - 1)) if idx is None else idx
 
@@ -428,11 +428,12 @@ def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
     tuple[Figure, Axes, QuadMesh]
     """
     metadata = data.basis.metadata()
-    converted_data = array.as_transformed_basis(data)
-    converted_basis = basis.as_transformed(converted_data.basis)
+    converted_data = array.as_raw_tuple(array.as_transformed_basis(data))
 
     idx = (
-        get_max_idx(converted_data.raw_data.reshape(converted_basis.shape), axes=axes)
+        get_max_idx(
+            converted_data.raw_data.reshape(converted_data.basis.shape), axes=axes
+        )
         if idx is None
         else idx
     )
