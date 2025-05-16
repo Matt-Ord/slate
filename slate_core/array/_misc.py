@@ -305,3 +305,11 @@ def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
     out_basis = basis.from_metadata(array.basis.metadata().children[0])
     data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
     return build(out_basis, data).ok()
+
+
+def max_arg[M: BasisMetadata, DT: np.dtype[np.generic]](
+    array: ArrayWithMetadata[M, DT],
+) -> int:
+    """Get the index of the maximum value in a slate array."""
+    converted = as_fundamental_basis(array)
+    return np.argmax(converted.raw_data).item()
