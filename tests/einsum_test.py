@@ -10,7 +10,7 @@ from slate_core._einsum._einstein_index import (
     NestedEinsteinIndex,
     parse_einsum_index,  # noqa: PLC2701
 )
-from slate_core.array import build, cast_basis
+from slate_core.array import Array, cast_basis
 from slate_core.basis import (
     CroppedBasis,
     FundamentalBasis,
@@ -23,7 +23,6 @@ from slate_core.basis import (
 from slate_core.linalg import into_diagonal, into_diagonal_hermitian
 
 if TYPE_CHECKING:
-    from slate_core.array import Array
     from slate_core.basis import Basis
 
 
@@ -34,8 +33,8 @@ def _test_einsum_in_basis(
 ) -> None:
     transformed_array = array.with_basis(
         with_child(array.basis, basis.dual_basis(), 1),
-    ).ok()
-    transformed_vector = vector.with_basis(basis).ok()
+    )
+    transformed_vector = vector.with_basis(basis)
 
     np.testing.assert_allclose(
         np.einsum(  # type: ignore libary
@@ -55,7 +54,7 @@ def _test_einsum_in_basis(
 def test_einsum() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = build(
+    array = Array(
         TupleBasis(
             (
                 FundamentalBasis.from_size(10),
@@ -63,10 +62,10 @@ def test_einsum() -> None:
             )
         ).resolve_ctype(),
         data,
-    ).ok()
+    )
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = build(array.basis.children[0], data).ok()
+    vector = Array(array.basis.children[0], data)
 
     _test_einsum_in_basis(array, vector, TransformedBasis(vector.basis))
     _test_einsum_in_basis(array, vector, CroppedBasis(vector.basis.size, vector.basis))
@@ -85,7 +84,7 @@ def test_einsum() -> None:
 def test_einsum_diagonal() -> None:
     rng = np.random.default_rng()
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
-    array = build(
+    array = Array(
         TupleBasis(
             (
                 FundamentalBasis.from_size(10),
@@ -93,18 +92,18 @@ def test_einsum_diagonal() -> None:
             )
         ).resolve_ctype(),
         data,
-    ).ok()
+    )
 
     data = rng.random((10,)) + 1j * rng.random((10,))
-    vector = build(array.basis.children[0], data).ok()
-    downcast_array = cast_basis(array, array.basis.upcast()).ok()
+    vector = Array(array.basis.children[0], data)
+    downcast_array = cast_basis(array, array.basis.upcast())
     diagonal_array = into_diagonal(downcast_array)
 
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner.children[0])
 
     data = array.raw_data.reshape(array.basis.shape)
     data += np.conj(data.T)
-    array = build(
+    array = Array(
         TupleBasis(
             (
                 FundamentalBasis.from_size(10),
@@ -112,8 +111,8 @@ def test_einsum_diagonal() -> None:
             )
         ).resolve_ctype(),
         data,
-    ).ok()
-    downcast_array = cast_basis(array, array.basis.upcast()).ok()
+    )
+    downcast_array = cast_basis(array, array.basis.upcast())
     diagonal_array = into_diagonal_hermitian(downcast_array)
     _test_einsum_in_basis(array, vector, diagonal_array.basis.inner.children[0])
 

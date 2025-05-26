@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Never
 import numpy as np
 import pytest
 
-from slate_core.array import Array, build
+from slate_core.array import Array
 from slate_core.basis import (
     BlockDiagonalBasis,
     DiagonalBasis,
@@ -34,14 +34,14 @@ def test_transformed_basis_round_trip(
 
     converted_array = slate_array_complex.with_basis(
         TransformedBasis(slate_array_complex.basis).resolve_ctype()
-    ).ok()
+    )
     assert converted_array.basis == basis
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
         slate_array_complex.as_array(),
     )
 
-    round_trip_array = converted_array.with_basis(slate_array_complex.basis).ok()
+    round_trip_array = converted_array.with_basis(slate_array_complex.basis)
     assert round_trip_array.basis == slate_array_complex.basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
@@ -55,40 +55,40 @@ def test_transformed_basis() -> None:
 
     rng = np.random.default_rng()
     data = rng.random(fundamental_basis.size) + 1j * rng.random(fundamental_basis.size)
-    array = build(fundamental_basis, data).ok()
+    array = Array(fundamental_basis, data)
     np.testing.assert_array_almost_equal(array.raw_data, data)
     np.testing.assert_array_almost_equal(
-        array.with_basis(transformed_basis).ok().raw_data,
+        array.with_basis(transformed_basis).raw_data,
         np.fft.fft(data, norm="ortho"),
     )
 
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis.dual_basis()).ok().raw_data, np.conj(data)
+        array.with_basis(fundamental_basis.dual_basis()).raw_data, np.conj(data)
     )
-    array = build(fundamental_basis.dual_basis(), data).ok()
+    array = Array(fundamental_basis.dual_basis(), data)
     np.testing.assert_array_almost_equal(
-        array.with_basis(transformed_basis.dual_basis()).ok().raw_data,
+        array.with_basis(transformed_basis.dual_basis()).raw_data,
         np.conj(np.fft.fft(np.conj(data), norm="ortho")),
     )
 
-    array = build(transformed_basis, data).ok()
+    array = Array(transformed_basis, data)
     np.testing.assert_array_almost_equal(array.raw_data, data)
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis).ok().raw_data,
+        array.with_basis(fundamental_basis).raw_data,
         np.fft.ifft(data, norm="ortho"),
     )
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis.dual_basis()).ok().raw_data,
+        array.with_basis(fundamental_basis.dual_basis()).raw_data,
         np.conj(np.fft.ifft(data, norm="ortho")),
     )
 
-    array = build(transformed_basis.dual_basis(), data).ok()
+    array = Array(transformed_basis.dual_basis(), data)
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis).ok().raw_data,
+        array.with_basis(fundamental_basis).raw_data,
         np.fft.ifft(np.conj(data), norm="ortho"),
     )
     np.testing.assert_array_almost_equal(
-        array.with_basis(fundamental_basis.dual_basis()).ok().raw_data,
+        array.with_basis(fundamental_basis.dual_basis()).raw_data,
         np.conj(np.fft.ifft(np.conj(data), norm="ortho")),
     )
 
@@ -97,32 +97,32 @@ def test_diagonal_basis_round_trip() -> None:
     full_basis = from_shape((10, 10))
     basis_diagonal = DiagonalBasis(full_basis).resolve_ctype()
 
-    array = build(full_basis, np.diag(np.ones(10))).ok()
+    array = Array(full_basis, np.diag(np.ones(10)))
 
-    converted_array = array.with_basis(basis_diagonal).ok()
+    converted_array = array.with_basis(basis_diagonal)
     assert converted_array.basis == basis_diagonal
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
         array.as_array(),
     )
 
-    round_trip_array = converted_array.with_basis(full_basis).ok()
+    round_trip_array = converted_array.with_basis(full_basis)
     assert round_trip_array.basis == full_basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
         array.raw_data,
     )
 
-    array = build(full_basis, np.ones(full_basis.shape)).ok()
+    array = Array(full_basis, np.ones(full_basis.shape))
 
-    converted_array = array.with_basis(basis_diagonal).ok()
+    converted_array = array.with_basis(basis_diagonal)
     assert converted_array.basis == basis_diagonal
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
         np.diag(np.diag(array.as_array())),
     )
 
-    round_trip_array = converted_array.with_basis(full_basis).ok()
+    round_trip_array = converted_array.with_basis(full_basis)
     assert round_trip_array.basis == full_basis
     np.testing.assert_array_almost_equal(
         round_trip_array.raw_data,
@@ -137,16 +137,16 @@ def test_transform_spaced_basis() -> None:
         Truncation(3, 5, 0), TransformedBasis(half_basis).resolve_ctype()
     ).resolve_ctype()
 
-    array = build(
+    array = Array(
         RecastBasis(
             DiagonalBasis(full_basis).resolve_ctype(),
             half_basis,
             spaced_basis,
         ).resolve_ctype(),
         np.ones(spaced_basis.size, dtype=np.complex128),
-    ).ok()
+    )
 
-    converted_array = array.with_basis(full_basis).ok()
+    converted_array = array.with_basis(full_basis)
     assert converted_array.basis == TupleBasis((half_basis, half_basis))
     np.testing.assert_array_almost_equal(
         converted_array.as_array(),
@@ -162,7 +162,7 @@ def test_transform_spaced_basis() -> None:
         array.as_array().ravel(),
     )
 
-    round_trip_array = converted_array.with_basis(array.basis).ok()
+    round_trip_array = converted_array.with_basis(array.basis)
     assert round_trip_array.basis == array.basis
     np.testing.assert_array_almost_equal(round_trip_array.raw_data, array.raw_data)
 
@@ -189,19 +189,19 @@ def test_dual_basis_transform(
         tuple(child.dual_basis() for child in basis.children),
         extra=dual_basis.metadata().extra,
     ).resolve_ctype()
-    array = build(basis, np.ones((10, 10), dtype=np.complex128)).ok()
+    array = Array(basis, np.ones((10, 10), dtype=np.complex128))
 
     np.testing.assert_array_almost_equal(
-        array.with_basis(dual_basis).ok().raw_data,
-        array.with_basis(dual_child_basis).ok().raw_data,
+        array.with_basis(dual_basis).raw_data,
+        array.with_basis(dual_child_basis).raw_data,
     )
     np.testing.assert_array_almost_equal(
-        array.with_basis(dual_basis).ok().as_array(),
-        array.with_basis(dual_child_basis).ok().as_array(),
+        array.with_basis(dual_basis).as_array(),
+        array.with_basis(dual_child_basis).as_array(),
     )
     np.testing.assert_array_almost_equal(
         array.as_array(),
-        array.with_basis(dual_child_basis).ok().as_array(),
+        array.with_basis(dual_child_basis).as_array(),
     )
 
 
@@ -211,7 +211,7 @@ def test_block_basis() -> None:
 
     block_basis = BlockDiagonalBasis(array.basis, (2, 2)).resolve_ctype()
 
-    in_block_basis = array.with_basis(block_basis).ok()
+    in_block_basis = array.with_basis(block_basis)
 
     np.testing.assert_allclose(
         in_block_basis.raw_data,

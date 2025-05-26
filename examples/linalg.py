@@ -10,7 +10,7 @@ if __name__ == "__main__":
     data = rng.random((10, 10)) + 1j * rng.random((10, 10))
     array = Array.from_array(data.reshape(10, 10))
     # We just want a generic `Basis` type
-    array = cast_basis(array, array.basis.upcast()).ok()
+    array = cast_basis(array, array.basis.upcast())
 
     diagonal = into_diagonal(array)
     eigenvalues = get_eigenvalues(array)

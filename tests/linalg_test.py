@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from slate_core import array as _array
-from slate_core.array import Array, build
+from slate_core.array import Array
 from slate_core.basis import (
     BlockDiagonalBasis,
     DiagonalBasis,
@@ -67,10 +67,10 @@ def _test_into_diagonal(
         == original_as_tuple.children[1].is_dual
     )
 
-    full_as_diagonal = array.with_basis(diagonal.basis.upcast()).ok()
+    full_as_diagonal = array.with_basis(diagonal.basis.upcast())
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data, atol=1e-15)
 
-    diagonal_as_full = diagonal.with_basis(array.basis).ok()
+    diagonal_as_full = diagonal.with_basis(array.basis)
     np.testing.assert_allclose(diagonal_as_full.raw_data, array.raw_data, atol=1e-15)
 
     np.testing.assert_allclose(diagonal.as_array(), array.as_array(), atol=1e-15)
@@ -95,7 +95,7 @@ def test_linalg_complex(
     rng = np.random.default_rng()
     data = rng.random(basis.size) + 1j * rng.random(basis.size)
 
-    array = build(basis, data).ok()
+    array = Array(basis, data)
     _test_into_diagonal(array)
 
 
@@ -133,10 +133,10 @@ def _test_into_diagonal_hermitian(
     )
 
     np.testing.assert_allclose(diagonal.as_array(), array.as_array())
-    full_as_diagonal = array.with_basis(diagonal.basis.upcast()).ok()
+    full_as_diagonal = array.with_basis(diagonal.basis.upcast())
     np.testing.assert_allclose(full_as_diagonal.raw_data, diagonal.raw_data)
 
-    diagonal_as_full = diagonal.with_basis(array.basis).ok()
+    diagonal_as_full = diagonal.with_basis(array.basis)
     np.testing.assert_allclose(diagonal_as_full.raw_data, array.raw_data, atol=1e-15)
 
 
@@ -159,7 +159,7 @@ def test_linalg_diagonal(
     rng = np.random.default_rng()
     fundamental = from_metadata(basis.metadata())
     data = np.diag(rng.random(fundamental.shape[0])).astype(np.complex128)
-    array = build(fundamental, data).ok().with_basis(basis).ok()
+    array = Array(fundamental, data).with_basis(basis)
 
     _test_into_diagonal_hermitian(array)
 
@@ -183,9 +183,9 @@ def test_linalg_complex_hermitian(
 ) -> None:
     rng = np.random.default_rng()
 
-    array = build(basis, rng.random(basis.size) + 1j * rng.random(basis.size)).ok()
+    array = Array(basis, rng.random(basis.size) + 1j * rng.random(basis.size))
     array += _array.conjugate(_array.transpose(array))
-    array = array.with_basis(basis).ok()
+    array = array.with_basis(basis)
 
     _test_into_diagonal_hermitian(array)
 
@@ -207,8 +207,8 @@ def test_linalg_real_hermitian(
     ],
 ) -> None:
     rng = np.random.default_rng()
-    array = build(basis, rng.random(basis.size).astype(np.complex128)).ok()
+    array = Array(basis, rng.random(basis.size).astype(np.complex128))
     array += _array.conjugate(_array.transpose(array))
-    array = array.with_basis(basis).ok()
+    array = array.with_basis(basis)
 
     _test_into_diagonal_hermitian(array)

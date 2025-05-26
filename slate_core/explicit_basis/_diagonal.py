@@ -5,7 +5,7 @@ from typing import Any, Never, cast, override
 
 import numpy as np
 
-from slate_core.array._array import Array, build
+from slate_core.array._array import Array
 from slate_core.basis import (
     AsUpcast,
     Basis,
@@ -40,7 +40,7 @@ class TrivialExplicitBasis[
         self: TrivialExplicitBasis[B1_, Ctype[Never]],
         inner: B1_,
     ) -> None:
-        matrix = build(
+        matrix = Array(
             DiagonalBasis(
                 TupleBasis(
                     (
@@ -50,7 +50,7 @@ class TrivialExplicitBasis[
                 ).resolve_ctype()
             ).resolve_ctype(),
             np.ones(inner.size),
-        ).ok()
+        )
         super().__init__(cast("Any", matrix), data_id=uuid.UUID(int=0))
 
     @override

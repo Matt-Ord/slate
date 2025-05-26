@@ -8,7 +8,7 @@ from slate_core._einsum._einstein_basis import reslove_basis
 from slate_core._einsum._einstein_index import (
     parse_einsum_specification,
 )
-from slate_core.array._array import build
+from slate_core.array._array import Array
 from slate_core.basis import (
     FundamentalBasis,
     as_linear_map,
@@ -22,7 +22,6 @@ from slate_core.basis import (
 from slate_core.basis._tuple import TupleBasis, as_tuple, is_tuple_basis_like
 
 if TYPE_CHECKING:
-    from slate_core.array import Array
     from slate_core.basis._basis import Basis, Ctype
 
 
@@ -46,14 +45,14 @@ def _einsum_simple[DT: np.dtype[np.number]](
     final_idx = ",".join("".join(i) for i in raw_idx) + "->"
     result_basis = resolved.result_basis
     if result_basis is None:
-        return build(
+        return Array(
             FundamentalBasis.from_size(1),
             _einsum_numpy(final_idx, *raw_arrays),
-        ).ok()
+        )
 
     final_idx += "".join(resolved.result_index)
 
-    return build(result_basis, _einsum_numpy(final_idx, *raw_arrays)).ok()
+    return Array(result_basis, _einsum_numpy(final_idx, *raw_arrays))
 
 
 def _einsum_smart[DT: np.dtype[np.number]](
@@ -73,23 +72,21 @@ def _einsum_smart[DT: np.dtype[np.number]](
         out_basis = TupleBasis(
             (as_tuple_0.children[0], as_diagonal.inner.children[1])
         ).resolve_ctype()
-        array_0 = (
-            arrays[0].with_basis(cast("Basis[Any, Ctype[np.generic]]", as_tuple_0)).ok()
+        array_0 = arrays[0].with_basis(
+            cast("Basis[Any, Ctype[np.generic]]", as_tuple_0)
         )
-        array_1 = (
-            arrays[1]
-            .with_basis(cast("Basis[Any, Ctype[np.generic]]", as_diagonal))
-            .ok()
+        array_1 = arrays[1].with_basis(
+            cast("Basis[Any, Ctype[np.generic]]", as_diagonal)
         )
 
-        return build(
+        return Array(
             out_basis,
             _einsum_numpy(
                 "ij,j->ij",
                 array_0.raw_data.reshape(as_tuple_0.shape),
                 array_1.raw_data,
             ),
-        ).ok()
+        )
 
     as_block_diagonal = (
         as_block_diagonal_basis(as_linear)
@@ -100,13 +97,11 @@ def _einsum_smart[DT: np.dtype[np.number]](
         out_basis = TupleBasis(
             (as_tuple_0.children[0], as_block_diagonal.inner.children[1])
         )
-        array_0 = (
-            arrays[0].with_basis(cast("Basis[Any, Ctype[np.generic]]", as_tuple_0)).ok()
+        array_0 = arrays[0].with_basis(
+            cast("Basis[Any, Ctype[np.generic]]", as_tuple_0)
         )
-        array_1 = (
-            arrays[1]
-            .with_basis(cast("Basis[Any, Ctype[np.generic]]", as_block_diagonal))
-            .ok()
+        array_1 = arrays[1].with_basis(
+            cast("Basis[Any, Ctype[np.generic]]", as_block_diagonal)
         )
 
         array_1_raw = array_1.raw_data.reshape(
@@ -118,11 +113,11 @@ def _einsum_smart[DT: np.dtype[np.number]](
             as_block_diagonal.block_shape[0],
         )
 
-        return build(
+        return Array(
             out_basis,
             # Diagonal on index j but not on index (k,l)
             _einsum_numpy("ijk,jkl->ijl", array_0_raw, array_1_raw),
-        ).ok()
+        )
     return _einsum_simple("(i j'),(j k)->(i k)", *arrays)
 
 

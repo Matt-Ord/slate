@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Never, cast
 
-from slate_core.array import build
+from slate_core.array import Array
 
 if TYPE_CHECKING:
     import numpy as np
 
-    from slate_core.array import Array, ArrayConversion
     from slate_core.basis import (
         Basis,
         Ctype,
@@ -153,48 +152,33 @@ def basis_conversion() -> None:
 def array_basis_variance() -> None:
     basis = cast("Basis[SimpleMetadata, Ctype[np.float64]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
-    a = build(basis, data).ok()
+    a = Array(basis, data)
     _as_array_0 = a.as_array()
-    _with_basis = a.with_basis(basis).ok()
+    _with_basis = a.with_basis(basis)
 
     basis = cast("Basis[SimpleMetadata, Ctype[np.number]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
-    a = build(basis, data).ok()
+    a = Array(basis, data)
     _as_array_1 = a.as_array()
-    _with_basis_1 = a.with_basis(basis).ok()
+    _with_basis_1 = a.with_basis(basis)
     # It should block an incompatible basis
     incompatible_basis = cast("Basis[SimpleMetadata, Ctype[np.float128]]", {})
-    _ = a.with_basis(incompatible_basis).ok()  # type: ignore should fail
+    _ = a.with_basis(incompatible_basis)  # type: ignore should fail
     # Note here that TupleMetadata is not compatible with SimpleMetadata
     incompatible_basis = cast("Basis[TupleMetadata[Any, Any], Ctype[np.generic]]", {})
-    _ = a.with_basis(incompatible_basis).ok()  # type: ignore should fail
+    _ = a.with_basis(incompatible_basis)  # type: ignore should fail
     # but not a compatible one
     compatible_basis_0 = cast("Basis[SimpleMetadata, Ctype[np.generic]]", {})
-    _with_basis_2 = a.with_basis(compatible_basis_0).ok()
+    _with_basis_2 = a.with_basis(compatible_basis_0)
     compatible_basis_1 = cast("Basis[BasisMetadata, Ctype[np.generic]]", {})
-    _with_basis_3 = a.with_basis(compatible_basis_1).ok()
-
-    conversion = cast(
-        "ArrayConversion[SimpleMetadata, Basis[BasisMetadata, Ctype[np.generic]], np.dtype[np.float64]]",
-        {},
-    )
-    conversion.ok()
-    _: ArrayConversion[
-        BasisMetadata, Basis[BasisMetadata, Ctype[np.generic]], np.dtype[np.float64]
-    ] = conversion
-    conversion = cast(
-        "ArrayConversion[BasisMetadata, Basis[SimpleMetadata, Ctype[np.generic]], np.dtype[np.float64]]",
-        {},
-    )
-    conversion.ok()
+    _with_basis_3 = a.with_basis(compatible_basis_1)
 
     basis = cast("Basis[SimpleMetadata, Ctype[np.complexfloating]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
-    # We can't create an array with any old basis
-    a = build(basis, data).ok()  # type: ignore should fail
-    # But we cannot convert the array if incompatible
-    _ = a.as_array()  # type: ignore should fail
-    _ = a.with_basis(basis).ok()  # type: ignore should fail
+    # We can't create an array with any old basis, but this is not somethig we check on a
+    # type level. The ergonomics of this are too bad - maybe with future refinements
+    # to the type system we can do this better.
+    a = Array(basis, data)
 
 
 def array_dtype_variance() -> None:

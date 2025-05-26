@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, Any, Literal, Never, Self, cast, overload, override
+from typing import Any, Literal, Never, Self, cast, overload, override
 
 import numpy as np
 
 from slate_core import array as _array
 from slate_core import basis
 from slate_core._einsum import einsum
-from slate_core.array import Array, build
+from slate_core.array import Array
 from slate_core.array._misc import cast_as_dual
 from slate_core.array._transpose import inv, transpose
 from slate_core.basis import (
@@ -31,9 +31,6 @@ from slate_core.metadata import (
     shallow_shape_from_nested,
 )
 from slate_core.metadata._tuple import TupleMetadata
-
-if TYPE_CHECKING:
-    from slate_core.array._array import ArrayBuilder
 
 type Direction = Literal["forward", "backward"]
 
@@ -185,7 +182,7 @@ class ExplicitBasis[
                 DT_,
             ]
         ],
-    ) -> ArrayBuilder[
+    ) -> Array[
         AsUpcast[
             RecastBasis[
                 TupleBasis2D[tuple[Basis[M1_, Ctype[np.generic]], BInner_], None],
@@ -260,7 +257,7 @@ class ExplicitBasis[
                     ),
                 )
             )
-            swapped_array = build(flat_basis, flat).ok()
+            swapped_array = Array(flat_basis, flat)
 
             transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
             return (
@@ -292,7 +289,7 @@ class ExplicitBasis[
                     ),
                 )
             )
-            swapped_array = build(flat_basis, flat).ok()
+            swapped_array = Array(flat_basis, flat)
 
             transform = self.inverse_transform()
             transformed = einsum("(i j'),(j k)->(i k)", swapped_array, transform)
@@ -426,11 +423,8 @@ class ExplicitUnitaryBasis[
     ) -> None:
         super().__init__(cast("Any", matrix), direction=direction, data_id=data_id)
         if assert_unitary:
-            states_tuple = (
-                self.eigenvectors()
-                .ok()
-                .with_basis(as_fundamental(self.eigenvectors().basis))
-                .ok()
+            states_tuple = self.eigenvectors().with_basis(
+                as_fundamental(self.eigenvectors().basis)
             )
             _assert_unitary(
                 states_tuple.raw_data.reshape(states_tuple.basis.metadata().shape)
