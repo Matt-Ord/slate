@@ -115,12 +115,10 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
         basis.get_common(basis.as_index(x_data.basis), basis.as_index(y_data.basis)),
     )
 
-    y_errors = (
-        None if y_error is None else y_error.with_basis(common_basis).ok().raw_data
-    )
+    y_errors = None if y_error is None else y_error.with_basis(common_basis).raw_data
     return _plot_raw_data_1d(
-        y_data.with_basis(common_basis).ok().raw_data,
-        x_data.with_basis(common_basis).ok().raw_data,
+        y_data.with_basis(common_basis).raw_data,
+        x_data.with_basis(common_basis).raw_data,
         y_errors,
         periodic=periodic,
         **kwargs,
@@ -167,7 +165,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     converted = array.as_index_basis(array.as_supports_type_basis(data, np.floating))
     coordinates = _get_basis_coordinates(converted.basis)
     return array_against_array(
-        array.build(converted.basis, coordinates).ok(),
+        Array(converted.basis, coordinates),
         converted,
         y_error=y_error,
         periodic=periodic,

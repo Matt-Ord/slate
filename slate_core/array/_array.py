@@ -87,73 +87,6 @@ def _index_raw_along_axis[DT: np.dtype[np.generic]](
     return _index_single_raw_along_axis(index, basis, data, axis=axis)
 
 
-class ArrayConversion[
-    M0: BasisMetadata,
-    B1: Basis,
-    DT: np.dtype[np.generic],
-]:
-    def __init__(
-        self,
-        data: np.ndarray[tuple[int], DT],
-        old_basis: Basis,
-        new_basis: B1,
-    ) -> None:
-        self._data = data
-        # This is not the true type - but this is safe as it must at least be able to support
-        # the data into the new basis.
-        self._old_basis = cast("Basis[BasisMetadata, Ctype[np.generic]]", old_basis)
-        self._new_basis = new_basis
-
-    # metadata should be covariant - and it will inder the lowest common type
-    def _metadata_variance_fn(self, _private: Never) -> M0: ...
-
-    def ok[M_: BasisMetadata, T: np.generic](
-        self: ArrayConversion[M_, Basis[M_, Ctype[T]], np.dtype[T]],
-    ) -> Array[B1, DT]:
-        return cast(
-            "Array[B1, DT]",
-            build(
-                self._new_basis,
-                self._old_basis.__convert_vector_into__(
-                    self._data, self._new_basis
-                ).ok(),
-            ).ok(),
-        )
-
-    def assert_ok(self) -> Array[B1, DT]:
-        assert self._new_basis.ctype.supports_dtype(self._data.dtype)
-        return self.ok()  # type: ignore safe to construct
-
-
-class ArrayBuilder[B: Basis, DT: np.dtype[np.generic]]:
-    def __init__(self, basis: B, data: np.ndarray[Any, DT]) -> None:
-        self._basis = basis
-        self._data = data.ravel()
-
-    @property
-    def basis(self) -> B:
-        return self._basis
-
-    @property
-    def data(self) -> np.ndarray[tuple[int], DT]:
-        return self._data
-
-    def ok[T: np.generic](
-        self: ArrayBuilder[Basis[Any, Ctype[T]], np.dtype[T]],
-    ) -> Array[B, DT]:
-        return cast("Any", Array(self._basis, self._data, 0))  # type: ignore safe to construct
-
-    def assert_ok(self) -> Array[B, DT]:
-        assert self._basis.ctype.supports_dtype(self._data.dtype)
-        return self.ok()  # type: ignore safe to construct
-
-
-def build[B: Basis, DT: np.dtype[np.generic]](
-    basis: B, data: np.ndarray[Any, DT]
-) -> ArrayBuilder[B, DT]:
-    return ArrayBuilder(basis, data)
-
-
 class Array[B: Basis, DT: np.dtype[np.generic]]:
     """
     An array with data stored in a given basis.
@@ -162,16 +95,11 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     This makes constructing an array directly unsafe - it must be done via the ArrayBuilder interface.
     """
 
-    def __init__(self, basis: B, data: np.ndarray[Any, DT], _private: Never) -> None:
+    def __init__(self, basis: B, data: np.ndarray[Any, DT]) -> None:
         assert basis.size == data.size
+        basis.ctype.assert_supports_dtype(data.dtype)
         self._basis = basis
         self._data = data.ravel()
-
-    @staticmethod
-    def build[B_: Basis, DT_: np.dtype[np.generic]](
-        basis: B_, data: np.ndarray[Any, DT_]
-    ) -> ArrayBuilder[B_, DT_]:
-        return ArrayBuilder(basis, data)
 
     @property
     def fundamental_shape(self) -> NestedLength:
@@ -204,7 +132,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         """Get the data as a (full) np.array."""
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
-        return self.with_basis(fundamental).ok().raw_data.reshape(shape)
+        return self.with_basis(fundamental).raw_data.reshape(shape)
 
     @overload
     @staticmethod
@@ -271,18 +199,14 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         DT_,
     ]:
         """Get a Array from an array."""
-        return build(basis.from_shape(array.shape), array).ok()
+        return Array(basis.from_shape(array.shape), array)
 
-    def with_basis[
-        DT_: np.dtype[np.generic],
-        M0_: BasisMetadata,
-        B1_: Basis,
-    ](
-        self: ArrayWithMetadata[M0_, DT_],
-        basis: B1_,
-    ) -> ArrayConversion[M0_, B1_, DT_]:
+    def with_basis[B1_: Basis](self, basis: B1_) -> Array[B1_, DT]:
         """Get the Array with the basis set to basis."""
-        return ArrayConversion(self.raw_data, self.basis, basis)
+        basis.ctype.assert_supports_dtype(self.dtype)
+        assert basis.metadata() == self.basis.metadata()
+        new_data = self.basis.__convert_vector_into__(self.raw_data, basis).ok()
+        return Array(basis, new_data)  # type: ignore[return-value]
 
     def as_type[
         M_: BasisMetadata,
@@ -292,8 +216,8 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         ty: type[T],
     ) -> Array[Basis[M_, Ctype[T]], np.dtype[T]]:
         as_type_basis = basis.as_supports_type(self.basis, ty)
-        converted = self.with_basis(as_type_basis).assert_ok()
-        return self.build(converted.basis, converted.raw_data.astype(ty)).ok()
+        converted = self.with_basis(as_type_basis)
+        return Array(converted.basis, converted.raw_data.astype(ty))
 
     def __add__[M_: BasisMetadata, T: np.number](
         self: ArrayWithMetadata[M_, np.dtype[T]],
@@ -303,11 +227,11 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
             basis.as_add(self.basis), np.result_type(self.dtype, other.dtype).type
         )
         data = final_basis.add_data(
-            self.with_basis(final_basis).ok().raw_data,
-            other.with_basis(final_basis).ok().raw_data,
+            self.with_basis(final_basis).raw_data,
+            other.with_basis(final_basis).raw_data,
         )
 
-        return build(final_basis, data).ok()
+        return Array(final_basis, data)
 
     def __sub__[M_: BasisMetadata, T: np.number](
         self: ArrayWithMetadata[M_, np.dtype[T]],
@@ -317,11 +241,11 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
             basis.as_sub(self.basis), np.result_type(self.dtype, other.dtype).type
         )
         data = final_basis.sub_data(
-            self.with_basis(final_basis).ok().raw_data,
-            other.with_basis(final_basis).ok().raw_data,
+            self.with_basis(final_basis).raw_data,
+            other.with_basis(final_basis).raw_data,
         )
 
-        return build(final_basis, data).ok()
+        return Array(final_basis, data)
 
     def __mul__[M_: BasisMetadata, T: np.number](
         self: ArrayWithMetadata[M_, np.dtype[T]],
@@ -330,8 +254,8 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         final_basis = basis.as_supports_type(
             basis.as_mul(self.basis), np.result_type(self.dtype, other).type
         )
-        data = final_basis.mul_data(self.with_basis(final_basis).ok().raw_data, other)
-        return build(final_basis, data).ok()
+        data = final_basis.mul_data(self.with_basis(final_basis).raw_data, other)
+        return Array(final_basis, data)
 
     @overload
     def __iter__[DT_: np.dtype[np.generic]](
@@ -361,7 +285,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         basis_as_tuple = basis.with_modified_child(
             basis.as_tuple(self.basis), basis.as_fundamental, 0
         )
-        as_tuple = self.with_basis(basis_as_tuple).ok()
+        as_tuple = self.with_basis(basis_as_tuple)
         children = as_tuple.basis.children[1:]
         match len(children):
             case 0:
@@ -373,7 +297,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
                 out_basis = TupleBasis(children)
 
         return (
-            build(out_basis, row).ok()
+            Array(out_basis, row)
             for row in as_tuple.raw_data.reshape(as_tuple.basis.shape)
         )
 
@@ -394,7 +318,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         )
         if indexed_basis is None:
             return cast("DT_", indexed_data.item())
-        return build(indexed_basis, indexed_data).assert_ok()
+        return Array(indexed_basis, indexed_data)
 
 
 type ArrayWithMetadata[M: BasisMetadata, DT: np.dtype[np.generic]] = Array[Basis[M], DT]

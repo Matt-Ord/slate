@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from slate_core import array, basis
-from slate_core.array import Array, build, conjugate, transpose
+from slate_core.array import Array, conjugate, transpose
 from slate_core.basis import (
     Basis,
     BlockDiagonalBasis,
@@ -44,7 +44,7 @@ def test_slate_array_basis(
 
 def test_create_array_with_wrong_size() -> None:
     with pytest.raises(AssertionError):
-        build(from_shape((2, 3)), np.array([1, 2, 3, 4])).ok()
+        Array(from_shape((2, 3)), np.array([1, 2, 3, 4]))
 
 
 def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) -> None:
@@ -67,7 +67,7 @@ def test_create_array_shape(sample_data: np.ndarray[Any, np.dtype[np.int64]]) ->
 def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = build(basis, data).ok()
+    arr = Array(basis, data)
 
     transposed = array.transpose(arr)
     np.testing.assert_allclose(transposed.as_array(), arr.as_array().transpose())
@@ -92,7 +92,7 @@ def test_transpose_with_axes(
 ) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = build(basis, data).ok()
+    arr = Array(basis, data)
 
     transposed = array.transpose(arr, axes=axes)
     np.testing.assert_allclose(
@@ -118,8 +118,8 @@ def test_conjugate_array(
         Ctype[np.generic],
     ],
 ) -> None:
-    data = np.array([1, 2, 3, 4, 4, 6])
-    array = build(basis, data).ok()
+    data = np.array([1, 2, 3, 4, 4, 6]).astype(np.complex128)
+    array = Array(basis, data)
 
     np.testing.assert_allclose(
         array.as_array().conjugate(), conjugate(array).as_array()
@@ -142,6 +142,6 @@ def test_add_mul_array() -> None:
 
 def test_extract_diagonal() -> None:
     data = np.array([1, 2, 3, 4, 4, 6, 7, 8, 9]).reshape(3, 3)
-    slate_array = Array.build(basis.from_shape((3, 3)).upcast(), data).assert_ok()
+    slate_array = Array(basis.from_shape((3, 3)).upcast(), data)
     diagonal = array.extract_diagonal(slate_array)
     np.testing.assert_array_equal(diagonal.as_array(), data.diagonal())

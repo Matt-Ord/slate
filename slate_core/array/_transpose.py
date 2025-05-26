@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Never, overload
 
 import numpy as np
 
-from slate_core.array._array import build
+from slate_core.array._array import Array
 from slate_core.array._conversion import (
     as_diagonal_basis,
     as_index_basis,
@@ -19,7 +19,6 @@ from slate_core.metadata import BasisMetadata
 from slate_core.util._index import get_position_in_sorted, slice_ignoring_axes
 
 if TYPE_CHECKING:
-    from slate_core.array._array import Array
     from slate_core.basis import (
         Basis,
     )
@@ -35,7 +34,7 @@ def conjugate[B: Basis, DT: np.dtype[np.generic]](
     # Since b has the same dtype and metadata as the original basis
     # it is safe to use it in a conversion.
     # Unfortunately is not possible to express this invariant in the type system.
-    return converted.with_basis(array.basis).assert_ok()
+    return converted.with_basis(array.basis)
 
 
 def _transpose_from_diagonal[
@@ -50,7 +49,7 @@ def _transpose_from_diagonal[
         DT,
     ],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E, CT], DT]:
-    return build(
+    return Array(
         DiagonalBasis(
             TupleBasis(
                 (array.basis.inner.children[1], array.basis.inner.children[0]),
@@ -60,7 +59,7 @@ def _transpose_from_diagonal[
         .resolve_ctype()
         .upcast(),
         array.raw_data,
-    ).assert_ok()
+    )
 
 
 def _transpose_from_tuple_simple[
@@ -72,7 +71,7 @@ def _transpose_from_tuple_simple[
 ](
     array: Array[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E, CT], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E, CT], DT]:
-    return build(
+    return Array(
         TupleBasis(
             (array.basis.children[1], array.basis.children[0]),
             array.basis.metadata().extra,
@@ -80,7 +79,7 @@ def _transpose_from_tuple_simple[
         .resolve_ctype()
         .upcast(),
         array.raw_data.reshape(array.basis.shape).transpose(),
-    ).assert_ok()
+    )
 
 
 def _transpose_simple[
@@ -114,9 +113,7 @@ def _transpose_from_tuple[
         tuple(children[i] for i in axes), array.basis.metadata().extra
     ).resolve_ctype()
     # SAFE, since if the original basis supports the data, the new basis will too.
-    return build(
-        out_basis, array.raw_data.reshape(array.basis.shape).transpose(axes)
-    ).assert_ok()
+    return Array(out_basis, array.raw_data.reshape(array.basis.shape).transpose(axes))
 
 
 @overload
@@ -161,7 +158,7 @@ def _inv_from_diagonal[
 ](
     array: Array[DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E]], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
-    return build(
+    return Array(
         DiagonalBasis(
             TupleBasis(
                 (
@@ -179,7 +176,7 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.dtype[np.gen
     array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
     raw_data = array.raw_data.reshape(array.basis.shape)
-    return build(
+    return Array(
         TupleBasis(
             (
                 array.basis.children[1].dual_basis(),
@@ -188,7 +185,7 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.dtype[np.gen
             array.basis.metadata().extra,
         ),
         np.linalg.inv(raw_data),  # type: ignore unknown
-    ).ok()
+    )
 
 
 def inv[M1: BasisMetadata, M2: BasisMetadata, E, DT: np.dtype[np.generic]](

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from slate_core import basis
-from slate_core.array._array import build
+from slate_core.array._array import Array
 from slate_core.basis import TupleBasis
 from slate_core.metadata import BasisMetadata, SimpleMetadata, is_tuple_metadata
 
@@ -66,7 +66,7 @@ def standard_deviation[DT: np.number](
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     )
-    return build(out_basis.resolve_ctype(), data).ok()
+    return Array(out_basis.resolve_ctype(), data)
 
 
 @overload
@@ -119,7 +119,7 @@ def average[DT: np.number](
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).resolve_ctype()
-    return build(out_basis, data).ok()
+    return Array(out_basis, data)
 
 
 @overload
@@ -172,7 +172,7 @@ def min[DT: np.number](  # noqa: A001
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).resolve_ctype()
-    return build(out_basis, data).ok()
+    return Array(out_basis, data)
 
 
 @overload
@@ -225,4 +225,4 @@ def max[DT: np.number](  # noqa: A001
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).resolve_ctype()
-    return build(out_basis, data).ok()
+    return Array(out_basis, data)

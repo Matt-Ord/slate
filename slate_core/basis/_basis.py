@@ -84,6 +84,41 @@ class Ctype[T: np.generic]:
 
     def _variance_fn(self, value: T, _private: Never) -> None: ...
 
+    def assert_supports_type[T_: np.generic](self: Ctype[T_], ty: type[T_]) -> None:
+        """Assert that the type supports the given data type.
+
+        Raises
+        ------
+        CtypeError
+            If the type does not support the given data type.
+        """
+        if not self.supports_type(ty):
+            raise CtypeError(self, ty)
+
+    def assert_supports_dtype[T_: np.generic](
+        self: Ctype[T_], dtype: np.dtype[T_]
+    ) -> None:
+        """Assert that the type supports the given data type.
+
+        Raises
+        ------
+        CtypeError
+            If the type does not support the given data type.
+        """
+        if not self.supports_dtype(dtype):
+            raise CtypeError(self, dtype.type)
+
+
+class CtypeError(TypeError):
+    """Exception raised when a Ctype does not support a given data type."""
+
+    def __init__(self, ctype: Ctype[Never], ty: type) -> None:
+        super().__init__(
+            f"{ctype.__class__.__name__} does not support dtype {ty.__name__}"
+        )
+        self.ctype = ctype
+        self.ty = ty
+
 
 class UnionCtype[T: np.generic](Ctype[T]):
     def __init__[T_: np.generic](
@@ -126,7 +161,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
     return final.__from_fundamental__(fundamental, axis).ok()
 
 
-class Basis[M: BasisMetadata = BasisMetadata, CT: Ctype[Never] = Ctype[Never]](ABC):
+class Basis[M: BasisMetadata = BasisMetadata, CT: Ctype[Any] = Ctype[Any]](ABC):
     """Base class for a basis."""
 
     def __init__(self, metadata: M) -> None:

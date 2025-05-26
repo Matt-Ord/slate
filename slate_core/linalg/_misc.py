@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast, overload
 import numpy as np
 
 from slate_core import basis
-from slate_core.array import build
+from slate_core.array import Array
 from slate_core.basis import (
     Basis,
     DiagonalBasis,
@@ -19,7 +19,7 @@ from slate_core.metadata import (
 )
 
 if TYPE_CHECKING:
-    from slate_core.array import Array, ArrayWithMetadata
+    from slate_core.array import ArrayWithMetadata
     from slate_core.basis._basis import Ctype
     from slate_core.basis._tuple import TupleBasisLike
 
@@ -28,9 +28,9 @@ def extract_diagonal[M1: BasisMetadata, E, DT: np.dtype[np.generic]](
     array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, M1], E], DT],
 ) -> Array[Basis[M1, Ctype[np.generic]], DT]:
     b = DiagonalBasis(basis.as_tuple(basis.as_fundamental(array.basis))).resolve_ctype()
-    converted = array.with_basis(b).ok()
+    converted = array.with_basis(b)
 
-    return build(converted.basis.inner.children[1], converted.raw_data).ok()
+    return Array(converted.basis.inner.children[1], converted.raw_data)
 
 
 @overload
@@ -65,4 +65,4 @@ def norm[DT: np.number](
     out_basis = TupleBasis(
         tuple(b for i, b in enumerate(full_basis.children) if i != axis)
     ).resolve_ctype()
-    return build(out_basis, data).ok()
+    return Array(out_basis, data)

@@ -147,9 +147,7 @@ class BasisSpecification:
         self, *arrays: Array[Basis, Any]
     ) -> tuple[np.ndarray[tuple[int, ...], np.dtype[np.generic]], ...]:
         return tuple(
-            arr.with_basis(b.inner)
-            .ok()
-            .raw_data.reshape(b.outer_recast.metadata().shape)
+            arr.with_basis(b.inner).raw_data.reshape(b.outer_recast.metadata().shape)
             for (arr, b) in zip(arrays, self.part_basis, strict=True)
         )
 

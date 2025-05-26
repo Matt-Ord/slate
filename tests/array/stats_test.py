@@ -9,7 +9,6 @@ from slate_core import array
 from slate_core.array import (
     Array,
     average,
-    build,
     max,  # noqa: A004
     min,  # noqa: A004
     standard_deviation,
@@ -44,7 +43,7 @@ if TYPE_CHECKING:
 def test_transpose_array(basis: Basis[TupleMetadata[Any, Any], Any]) -> None:
     rng = np.random.default_rng()
     data = rng.random(basis.size).astype(np.complex128)
-    arr = build(basis, data).ok()
+    arr = Array(basis, data)
 
     transposed = array.transpose(arr)
     np.testing.assert_allclose(transposed.as_array(), arr.as_array().transpose())
