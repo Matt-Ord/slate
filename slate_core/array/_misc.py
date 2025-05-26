@@ -61,7 +61,7 @@ def real[M: BasisMetadata](
 
 
 def imag[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.generic]],
+    array: ArrayWithMetadata[M, np.dtype[np.number]],
 ) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
     """Extract the imag part of a slate array."""
     converted = as_supports_type_basis(as_index_basis(array), np.floating)
@@ -135,7 +135,19 @@ def square[M: BasisMetadata, DT: np.dtype[np.floating]](
 def sin[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Sine of data in a slate array."""
+    """Calculate the sine of all elements in the array.
+
+    Computes the trigonometric sine of each element in the array, element-wise.
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 126
+        :lines: 126-138
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.sin(converted.raw_data))  # type: ignore[return-value]
 
@@ -143,7 +155,19 @@ def sin[M: BasisMetadata, DT: np.dtype[np.number]](
 def cos[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Cosine of data in a slate array."""
+    """Calculate the cosine of all elements in the array.
+
+    Computes the trigonometric cosine of each element in the array, element-wise.
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 140
+        :lines: 140-153
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.cos(converted.raw_data))  # type: ignore[return-value]
 
@@ -151,7 +175,21 @@ def cos[M: BasisMetadata, DT: np.dtype[np.number]](
 def tan[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Tangent of data in a slate array."""
+    """Calculate the tangent of all elements in the array.
+
+    Computes the trigonometric tangent of each element in the array, element-wise.
+    The result has the same shape and basis as the input array.
+
+    Note: Be cautious with values near π/2 + nπ where the tangent function has singularities.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 276
+        :lines: 276-295
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.tan(converted.raw_data))  # type: ignore[return-value]
 
@@ -159,7 +197,20 @@ def tan[M: BasisMetadata, DT: np.dtype[np.number]](
 def arcsin[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Arcsine of data in a slate array."""
+    """Calculate the inverse sine of all elements in the array.
+
+    Computes the element-wise inverse sine of the array. The domain of this function
+    is [-1, 1], and the range is [-π/2, π/2].
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 155
+        :lines: 155-168
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.arcsin(converted.raw_data))  # type: ignore[return-value]
 
@@ -167,7 +218,20 @@ def arcsin[M: BasisMetadata, DT: np.dtype[np.number]](
 def arccos[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Arccosine of data in a slate array."""
+    """Calculate the inverse cosine of all elements in the array.
+
+    Computes the element-wise inverse cosine of the array. The domain of this function
+    is [-1, 1], and the range is [0, π].
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 170
+        :lines: 170-183
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.arccos(converted.raw_data))  # type: ignore[return-value]
 
@@ -175,7 +239,20 @@ def arccos[M: BasisMetadata, DT: np.dtype[np.number]](
 def arctan[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Arctangent of data in a slate array."""
+    """Calculate the inverse tangent of all elements in the array.
+
+    Computes the element-wise inverse tangent of the array. The domain is all real numbers,
+    and the range is [-π/2, π/2].
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 185
+        :lines: 185-199
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.arctan(converted.raw_data))  # type: ignore[return-value]
 
@@ -183,7 +260,20 @@ def arctan[M: BasisMetadata, DT: np.dtype[np.number]](
 def sinh[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Hyperbolic sine of data in a slate array."""
+    """Calculate the hyperbolic sine of all elements in the array.
+
+    Computes the element-wise hyperbolic sine of the array.
+    The domain is all real numbers, and the result has the same shape and basis
+    as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 201
+        :lines: 201-213
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.sinh(converted.raw_data))  # type: ignore[return-value]
 
@@ -191,7 +281,20 @@ def sinh[M: BasisMetadata, DT: np.dtype[np.number]](
 def cosh[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Hyperbolic cosine of data in a slate array."""
+    """Calculate the hyperbolic cosine of all elements in the array.
+
+    Computes the element-wise hyperbolic cosine of the array.
+    The domain is all real numbers, and the range is [1, ∞).
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 215
+        :lines: 215-230
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.cosh(converted.raw_data))  # type: ignore[return-value]
 
@@ -199,7 +302,20 @@ def cosh[M: BasisMetadata, DT: np.dtype[np.number]](
 def tanh[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Hyperbolic tangent of data in a slate array."""
+    """Calculate the hyperbolic tangent of all elements in the array.
+
+    Computes the element-wise hyperbolic tangent of the array.
+    The domain is all real numbers, and the range is (-1, 1).
+    The result has the same shape and basis as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 297
+        :lines: 297-316
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.tanh(converted.raw_data))  # type: ignore[return-value]
 
@@ -207,7 +323,20 @@ def tanh[M: BasisMetadata, DT: np.dtype[np.number]](
 def arcsinh[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Inverse hyperbolic sine of data in a slate array."""
+    """Calculate the inverse hyperbolic sine of all elements in the array.
+
+    Computes the element-wise inverse hyperbolic sine of the array.
+    The domain is all real numbers, and the result has the same shape and basis
+    as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 232
+        :lines: 232-244
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.arcsinh(converted.raw_data))  # type: ignore[return-value]
 
@@ -215,7 +344,20 @@ def arcsinh[M: BasisMetadata, DT: np.dtype[np.number]](
 def arccosh[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Inverse hyperbolic cosine of data in a slate array."""
+    """Calculate the inverse hyperbolic cosine of all elements in the array.
+
+    Computes the element-wise inverse hyperbolic cosine of the array.
+    The domain of this function is [1, ∞), and the result has the same shape and basis
+    as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 246
+        :lines: 246-259
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.arccosh(converted.raw_data))  # type: ignore[return-value]
 
@@ -223,7 +365,20 @@ def arccosh[M: BasisMetadata, DT: np.dtype[np.number]](
 def arctanh[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
-    """Inverse hyperbolic tangent of data in a slate array."""
+    """Calculate the inverse hyperbolic tangent of all elements in the array.
+
+    Computes the element-wise inverse hyperbolic tangent of the array.
+    The domain of this function is (-1, 1), and the result has the same shape and basis
+    as the input array.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/misc_test.py
+        :language: python
+        :lineno-start: 261
+        :lines: 261-274
+        :dedent: 4
+    """
     converted = as_index_basis(array)
     return Array(converted.basis, np.arctanh(converted.raw_data))  # type: ignore[return-value]
 

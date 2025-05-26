@@ -20,12 +20,12 @@ if TYPE_CHECKING:
 
 class TupleMetadata[
     C: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
-    E = Never,
+    E = Any,
 ](BasisMetadata):
     """Metadata built from a tuple of individual metadata entries."""
 
     @overload
-    def __init__[C_: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...], E_ = Never](
+    def __init__[C_: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...], E_ = Any](
         self: TupleMetadata[C_, E_], children: C_, extra: E_
     ) -> None: ...
     @overload
