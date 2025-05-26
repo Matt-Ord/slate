@@ -468,19 +468,19 @@ def is_tuple(
 type TupleBasis1D[
     C: tuple[Basis] = tuple[Basis],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = AsUpcast[TupleBasis[C, E, CT], TupleMetadata[tuple[BasisMetadata], E], CT]
 type TupleBasis2D[
     C: tuple[Basis, Basis] = tuple[Basis, Basis],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = AsUpcast[
     TupleBasis[C, E, CT], TupleMetadata[tuple[BasisMetadata, BasisMetadata], E], CT
 ]
 type TupleBasis3D[
     C: tuple[Basis, Basis, Basis] = tuple[Basis, Basis, Basis],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = AsUpcast[
     TupleBasis[C, E, CT],
     TupleMetadata[tuple[BasisMetadata, BasisMetadata, BasisMetadata], E],
@@ -490,25 +490,25 @@ type TupleBasis3D[
 type TupleBasisLike[
     M: tuple[BasisMetadata, ...] = tuple[BasisMetadata, ...],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = Basis[TupleMetadata[M, E], CT]
 
 type TupleBasisLike1D[
     M: tuple[BasisMetadata] = tuple[BasisMetadata],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = TupleBasisLike[M, E, CT]
 type TupleBasisLike2D[
     M: tuple[BasisMetadata, BasisMetadata] = tuple[BasisMetadata, BasisMetadata],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = TupleBasisLike[M, E, CT]
 type TupleBasisLike3D[
     M: tuple[BasisMetadata, BasisMetadata, BasisMetadata] = tuple[
         BasisMetadata, BasisMetadata, BasisMetadata
     ],
     E = Any,
-    CT: Ctype[Never] = Ctype[Never],
+    CT: Ctype[Never] = Ctype[Any],
 ] = TupleBasisLike[M, E, CT]
 
 
