@@ -229,7 +229,7 @@ class ExplicitBasis[
     @override
     def size(self) -> int:
         return shallow_shape_from_nested(
-            self.eigenvectors().basis.metadata().fundamental_shape
+            self.transform().basis.metadata().fundamental_shape
         )[0]
 
     @property
