@@ -77,164 +77,164 @@ def angle[M: BasisMetadata](
 
 
 def abs[M: BasisMetadata](  # noqa: A001
-    array: ArrayWithMetadata[M, np.dtype[np.generic]],
+    array: ArrayWithMetadata[M, np.dtype[np.number]],
 ) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
     """Abs value of data in a slate array."""
     converted = as_supports_type_basis(as_index_basis(array), np.floating)
     return build(converted.basis, np.abs(converted.raw_data)).ok()
 
 
-def log[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def log[M: BasisMetadata, DT: np.dtype[np.floating]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Natural log of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.log(converted.raw_data)).ok()
+    return build(converted.basis, np.log(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def log10[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def log10[M: BasisMetadata, DT: np.dtype[np.floating]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Log base 10 of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.log10(converted.raw_data)).ok()
+    return build(converted.basis, np.log10(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def log2[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def log2[M: BasisMetadata, DT: np.dtype[np.floating]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Log base 2 of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.log2(converted.raw_data)).ok()
+    return build(converted.basis, np.log2(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def exp[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def exp[M: BasisMetadata, DT: np.dtype[np.complexfloating]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Exponential of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.exp(converted.raw_data)).ok()
+    return build(converted.basis, np.exp(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def sqrt[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def sqrt[M: BasisMetadata, DT: np.dtype[np.floating]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Square root of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.sqrt(converted.raw_data)).ok()
+    return build(converted.basis, np.sqrt(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def square[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def square[M: BasisMetadata, DT: np.dtype[np.floating]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Square of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.square(converted.raw_data)).ok()
+    return build(converted.basis, np.square(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def sin[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def sin[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Sine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.sin(converted.raw_data)).ok()
+    return build(converted.basis, np.sin(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def cos[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def cos[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Cosine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.cos(converted.raw_data)).ok()
+    return build(converted.basis, np.cos(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def tan[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def tan[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Tangent of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.tan(converted.raw_data)).ok()
+    return build(converted.basis, np.tan(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def arcsin[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def arcsin[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Arcsine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.arcsin(converted.raw_data)).ok()
+    return build(converted.basis, np.arcsin(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def arccos[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def arccos[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Arccosine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.arccos(converted.raw_data)).ok()
+    return build(converted.basis, np.arccos(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def arctan[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def arctan[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Arctangent of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.arctan(converted.raw_data)).ok()
+    return build(converted.basis, np.arctan(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def sinh[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def sinh[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Hyperbolic sine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.sinh(converted.raw_data)).ok()
+    return build(converted.basis, np.sinh(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def cosh[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def cosh[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Hyperbolic cosine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.cosh(converted.raw_data)).ok()
+    return build(converted.basis, np.cosh(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def tanh[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def tanh[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Hyperbolic tangent of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.tanh(converted.raw_data)).ok()
+    return build(converted.basis, np.tanh(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def arcsinh[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def arcsinh[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Inverse hyperbolic sine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.arcsinh(converted.raw_data)).ok()
+    return build(converted.basis, np.arcsinh(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def arccosh[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def arccosh[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Inverse hyperbolic cosine of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.arccosh(converted.raw_data)).ok()
+    return build(converted.basis, np.arccosh(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def arctanh[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def arctanh[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+) -> ArrayWithMetadata[M, DT]:
     """Inverse hyperbolic tangent of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.arctanh(converted.raw_data)).ok()
+    return build(converted.basis, np.arctanh(converted.raw_data)).ok()  # type: ignore[return-value]
 
 
-def mod[M: BasisMetadata](
-    array: ArrayWithMetadata[M, np.dtype[np.floating]],
-    val: np.floating | float,
-) -> ArrayWithMetadata[M, np.dtype[np.floating]]:
+def mod[M: BasisMetadata, DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[M, DT],
+    val: np.number | float,
+) -> ArrayWithMetadata[M, DT]:
     """Modulus of data in a slate array."""
     converted = as_index_basis(array)
-    return build(converted.basis, np.mod(converted.raw_data, val)).ok()
+    return build(converted.basis, np.mod(converted.raw_data, val)).ok()  # type: ignore[return-value]
 
 
 def unwrap[M: BasisMetadata](

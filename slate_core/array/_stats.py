@@ -37,8 +37,24 @@ def standard_deviation[DT: np.number](
 def standard_deviation[DT: np.number](
     array: ArrayWithMetadata[BasisMetadata, np.dtype[DT]], axis: int | None = None
 ) -> ArrayWithMetadata[BasisMetadata, np.dtype[DT]] | DT:
+    """Calculate the standard deviation along the specified axis.
+
+    Computes the standard deviation of array elements over the given axis.
+    When axis is None, the standard deviation of all array elements is computed
+    as a scalar. Otherwise, a new array with the standard deviation along the
+    specified axis is returned.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/stats_test.py
+        :language: python
+        :lineno-start: 56
+        :lines: 56-80
+        :dedent: 4
+    """
     if axis is None:
-        return np.std(array.as_array(), axis=axis)  # type: ignore unknown
+        # Ensure dtype is preserved for complex numbers too
+        return np.std(array.as_array(), axis=axis, dtype=array.raw_data.dtype)  # type: ignore unknown
     meta = array.basis.metadata()
     assert is_tuple_metadata(meta)
     data = np.array(
@@ -76,6 +92,20 @@ def average[DT: np.number](
 def average[DT: np.number](
     array: ArrayWithMetadata[BasisMetadata, np.dtype[DT]], axis: int | None = None
 ) -> ArrayWithMetadata[BasisMetadata, np.dtype[DT]] | DT:
+    """Calculate the average (mean) along the specified axis.
+
+    Computes the arithmetic mean of array elements over the given axis.
+    When axis is None, the mean of all array elements is computed as a scalar.
+    Otherwise, a new array with the mean along the specified axis is returned.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/stats_test.py
+        :language: python
+        :lineno-start: 83
+        :lines: 83-107
+        :dedent: 4
+    """
     if axis is None:
         return np.average(array.as_array(), axis=axis)  # type: ignore unknown
     meta = array.basis.metadata()
@@ -115,6 +145,20 @@ def min[DT: np.number](  # noqa: A001
 def min[DT: np.number](  # noqa: A001
     array: ArrayWithMetadata[BasisMetadata, np.dtype[DT]], axis: int | None = None
 ) -> ArrayWithMetadata[BasisMetadata, np.dtype[DT]] | DT:
+    """Calculate the minimum value along the specified axis.
+
+    Computes the minimum of array elements over the given axis.
+    When axis is None, the minimum of all array elements is computed as a scalar.
+    Otherwise, a new array with the minimum values along the specified axis is returned.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/stats_test.py
+        :language: python
+        :lineno-start: 109
+        :lines: 109-131
+        :dedent: 4
+    """
     if axis is None:
         return np.min(array.as_array(), axis=axis)  # type: ignore unknown
     meta = array.basis.metadata()
@@ -154,6 +198,20 @@ def max[DT: np.number](  # noqa: A001
 def max[DT: np.number](  # noqa: A001
     array: ArrayWithMetadata[BasisMetadata, np.dtype[DT]], axis: int | None = None
 ) -> ArrayWithMetadata[BasisMetadata, np.dtype[DT]] | DT:
+    """Calculate the maximum value along the specified axis.
+
+    Computes the maximum of array elements over the given axis.
+    When axis is None, the maximum of all array elements is computed as a scalar.
+    Otherwise, a new array with the maximum values along the specified axis is returned.
+
+    Examples
+    --------
+    .. literalinclude:: ../../tests/array/stats_test.py
+        :language: python
+        :lineno-start: 133
+        :lines: 133-155
+        :dedent: 4
+    """
     if axis is None:
         return np.max(array.as_array(), axis=axis)  # type: ignore unknown
     meta = array.basis.metadata()
