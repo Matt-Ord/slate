@@ -18,7 +18,7 @@ from slate_core.basis._wrapped import WrappedBasis
 from slate_core.metadata._metadata import BasisMetadata, SimpleMetadata
 from slate_core.metadata._tuple import AnyMetadata, TupleMetadata, is_tuple_metadata
 
-TrigonometricTransformType = Literal["type 1", "type 2", "type 4"]
+TrigonometricTransformType = Literal["type 1", "type 2", "type 3", "type 4"]
 TrigonometricTransformFunction = Literal["sin", "cos"]
 
 

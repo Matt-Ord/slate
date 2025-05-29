@@ -22,13 +22,17 @@ if TYPE_CHECKING:
 
     from slate_core.basis._basis import Basis
 
-BUILD_SIMPLE_BASIS: list[
-    Callable[[FundamentalBasis[SimpleMetadata]], Basis[SimpleMetadata]]
-] = [
+BUILD_SIMPLE_BASIS: list[Callable[[Basis[SimpleMetadata]], Basis[SimpleMetadata]]] = [
     lambda b: TransformedBasis(b, direction="forward").upcast(),
     lambda b: TransformedBasis(b, direction="backward").upcast(),
-    lambda b: TrigonometricTransformBasis(b, ty="cos").upcast(),
-    lambda b: TrigonometricTransformBasis(b, ty="sin").upcast(),
+    lambda b: TrigonometricTransformBasis(b, fn="cos").upcast(),
+    lambda b: TrigonometricTransformBasis(b, fn="sin").upcast(),
+    lambda b: TrigonometricTransformBasis(b, ty="type 2", fn="cos").upcast(),
+    lambda b: TrigonometricTransformBasis(b, ty="type 2", fn="sin").upcast(),
+    lambda b: TrigonometricTransformBasis(b, ty="type 3", fn="cos").upcast(),
+    lambda b: TrigonometricTransformBasis(b, ty="type 3", fn="sin").upcast(),
+    lambda b: TrigonometricTransformBasis(b, ty="type 4", fn="cos").upcast(),
+    lambda b: TrigonometricTransformBasis(b, ty="type 4", fn="sin").upcast(),
     lambda b: CoordinateBasis((0, 1, 2), b).upcast(),
     lambda b: TruncatedBasis(Truncation(3, 7, 0), b).upcast(),
     lambda b: TruncatedBasis(Truncation(3, 7, 1), b).upcast(),
@@ -44,7 +48,7 @@ BUILD_SIMPLE_BASIS: list[
     BUILD_SIMPLE_BASIS,
 )
 def test_simple_basis_round_trip(
-    build_basis: Callable[[FundamentalBasis[SimpleMetadata]], Basis[SimpleMetadata]],
+    build_basis: Callable[[Basis[SimpleMetadata]], Basis[SimpleMetadata]],
 ) -> None:
     inner_basis = FundamentalBasis.from_size(10)
     basis = build_basis(inner_basis)
@@ -59,9 +63,16 @@ def test_simple_basis_round_trip(
     BUILD_SIMPLE_BASIS,
 )
 def test_simple_basis_equality(
-    build_basis: Callable[[FundamentalBasis[SimpleMetadata]], Basis[SimpleMetadata]],
+    build_basis: Callable[[Basis[SimpleMetadata]], Basis[SimpleMetadata]],
 ) -> None:
     basis_0 = build_basis(FundamentalBasis(SimpleMetadata(10)))
     basis_1 = build_basis(FundamentalBasis(SimpleMetadata(10)))
 
     assert basis_0 == basis_1
+
+    basis_2 = build_basis(FundamentalBasis(SimpleMetadata(11)))
+    assert basis_0 != basis_2
+
+    inner_3 = TransformedBasis(FundamentalBasis(SimpleMetadata(10))).upcast()
+    basis_3 = build_basis(inner_3)
+    assert basis_0 != basis_3
