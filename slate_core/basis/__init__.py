@@ -32,14 +32,20 @@ from slate_core.basis._isotropic import IsotropicBasis
 from slate_core.basis._recast import RecastBasis, is_recast_basis
 from slate_core.basis._split import SplitBasis
 from slate_core.basis._transformed import (
+    TransformDirection,
     TransformedBasis,
     as_transformed,
+    is_transformed_basis,
     transformed_from_metadata,
     transformed_from_shape,
 )
 from slate_core.basis._trigonometric import (
     TrigonometricTransformBasis,
+    TrigonometricTransformType,
+    as_trigonometric_transformed,
     is_trigonometric_transform_basis,
+    trigonometric_transformed_from_metadata,
+    trigonometric_transformed_from_shape,
 )
 from slate_core.basis._truncated import Padding, TruncatedBasis, Truncation
 from slate_core.basis._tuple import (
@@ -100,8 +106,10 @@ __all__ = [
     "Padding",
     "RecastBasis",
     "SplitBasis",
+    "TransformDirection",
     "TransformedBasis",
     "TrigonometricTransformBasis",
+    "TrigonometricTransformType",
     "TruncatedBasis",
     "Truncation",
     "TupleBasis",
@@ -130,6 +138,7 @@ __all__ = [
     "as_sub",
     "as_supports_type",
     "as_transformed",
+    "as_trigonometric_transformed",
     "as_tuple",
     "flatten",
     "from_metadata",
@@ -140,6 +149,7 @@ __all__ = [
     "is_cropped",
     "is_diagonal",
     "is_recast_basis",
+    "is_transformed_basis",
     "is_trigonometric_transform_basis",
     "is_tuple",
     "is_tuple_basis_like",
@@ -148,6 +158,8 @@ __all__ = [
     "supports_type",
     "transformed_from_metadata",
     "transformed_from_shape",
+    "trigonometric_transformed_from_metadata",
+    "trigonometric_transformed_from_shape",
     "with_child",
     "with_modified_child",
     "with_modified_children",
