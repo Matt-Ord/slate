@@ -37,6 +37,10 @@ from slate_core.basis._transformed import (
     transformed_from_metadata,
     transformed_from_shape,
 )
+from slate_core.basis._trigonometric import (
+    TrigonometricTransformBasis,
+    is_trigonometric_transform_basis,
+)
 from slate_core.basis._truncated import Padding, TruncatedBasis, Truncation
 from slate_core.basis._tuple import (
     TupleBasis,
@@ -97,6 +101,7 @@ __all__ = [
     "RecastBasis",
     "SplitBasis",
     "TransformedBasis",
+    "TrigonometricTransformBasis",
     "TruncatedBasis",
     "Truncation",
     "TupleBasis",
@@ -135,6 +140,7 @@ __all__ = [
     "is_cropped",
     "is_diagonal",
     "is_recast_basis",
+    "is_trigonometric_transform_basis",
     "is_tuple",
     "is_tuple_basis_like",
     "is_wrapped",
