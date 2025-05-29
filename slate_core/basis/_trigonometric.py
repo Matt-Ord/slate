@@ -15,7 +15,11 @@ class TrigonometricTransformBasis[
 ](
     WrappedBasis[B, CT],
 ):
-    """Represents a hardwall basis, using sin states which are guaranteed to be zero at the boundary."""
+    """A basis with states represented by a trigonometric transform.
+
+    This is useful for representing 'Hardwall' boundary conditions, since
+    the states have a fixed zero value at the boundaries.
+    """
 
     def __init__[B_: Basis](
         self: TrigonometricTransformBasis[B_, Ctype[Never]],
