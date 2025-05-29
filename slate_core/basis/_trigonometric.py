@@ -1,12 +1,24 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Never, Self, TypeGuard, cast, override
+from typing import Any, Literal, Never, Self, TypeGuard, cast, overload, override
 
 import numpy as np
 import scipy.fft  # type: ignore lib types
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
+from slate_core.basis._basis import (
+    Basis,
+    BasisConversion,
+    BasisFeature,
+    Ctype,
+    NestedBoolOrNone,
+)
+from slate_core.basis._fundamental import FundamentalBasis
+from slate_core.basis._tuple import TupleBasis
 from slate_core.basis._wrapped import WrappedBasis
+from slate_core.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate_core.metadata._tuple import AnyMetadata, TupleMetadata, is_tuple_metadata
+
+TrigonometricTransformType = Literal["sin", "cos"]
 
 
 class TrigonometricTransformBasis[
@@ -24,9 +36,9 @@ class TrigonometricTransformBasis[
     def __init__[B_: Basis](
         self: TrigonometricTransformBasis[B_, Ctype[Never]],
         inner: B_,
-        ty: Literal["sin", "cos"] = "sin",
+        ty: TrigonometricTransformType = "sin",
     ) -> None:
-        self._ty: Literal["sin", "cos"] = ty
+        self._ty: TrigonometricTransformType = ty
         super().__init__(cast("B", inner))
 
     @property
@@ -159,3 +171,231 @@ def is_trigonometric_transform_basis(
 ) -> TypeGuard[TrigonometricTransformBasis]:
     """Check if the given basis is a hardwall basis."""
     return isinstance(basis, TrigonometricTransformBasis)
+
+
+@overload
+def trigonometric_transformed_from_metadata[M0: BasisMetadata, E](
+    metadata: TupleMetadata[tuple[M0], E],
+    *,
+    is_dual: NestedBoolOrNone = None,
+) -> TupleBasis[tuple[Basis[M0, Ctype[np.generic]]], E, Ctype[np.generic]]: ...
+@overload
+def trigonometric_transformed_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+](
+    metadata: TupleMetadata[tuple[M0, M1], E],
+    *,
+    is_dual: NestedBoolOrNone = None,
+) -> TupleBasis[
+    tuple[Basis[M0, Ctype[np.generic]], Basis[M1, Ctype[np.generic]]],
+    E,
+    Ctype[np.generic],
+]: ...
+@overload
+def trigonometric_transformed_from_metadata[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+](
+    metadata: TupleMetadata[tuple[M0, M1, M2], E],
+    *,
+    is_dual: NestedBoolOrNone = None,
+) -> TupleBasis[
+    tuple[
+        Basis[M0, Ctype[np.generic]],
+        Basis[M1, Ctype[np.generic]],
+        Basis[M2, Ctype[np.generic]],
+    ],
+    E,
+    Ctype[np.generic],
+]: ...
+
+
+@overload
+def trigonometric_transformed_from_metadata[M: BasisMetadata, E](
+    metadata: TupleMetadata[tuple[M, ...], E], *, is_dual: NestedBoolOrNone = None
+) -> TupleBasis[tuple[Basis[M, Ctype[np.generic]], ...], E, Ctype[np.generic]]: ...
+
+
+@overload
+def trigonometric_transformed_from_metadata[M: SimpleMetadata](
+    metadata: M, *, is_dual: NestedBoolOrNone = None
+) -> TrigonometricTransformBasis[FundamentalBasis[M], Ctype[np.generic]]: ...
+
+
+@overload
+def trigonometric_transformed_from_metadata[M: AnyMetadata](
+    metadata: M, *, is_dual: NestedBoolOrNone = None
+) -> Basis[M, Ctype[np.generic]]: ...
+
+
+def trigonometric_transformed_from_metadata(
+    metadata: AnyMetadata, *, is_dual: NestedBoolOrNone = None
+) -> Basis[AnyMetadata, Ctype[np.generic]]:
+    """Get a transformed fundamental basis with the given metadata."""
+    if isinstance(metadata, SimpleMetadata):
+        is_dual = False if is_dual is None else is_dual
+        assert isinstance(is_dual, bool)
+        return TrigonometricTransformBasis(
+            FundamentalBasis(metadata, is_dual=is_dual)
+        ).resolve_ctype()
+
+    assert is_tuple_metadata(metadata)
+    is_dual = (
+        is_dual
+        if isinstance(is_dual, tuple)
+        else tuple(is_dual for _ in metadata.children)
+    )
+
+    children = tuple(
+        trigonometric_transformed_from_metadata(c, is_dual=dual)
+        for (c, dual) in zip(metadata.children, is_dual, strict=False)
+    )
+    return TupleBasis(children, metadata.extra).resolve_ctype()
+
+
+@overload
+def as_trigonometric_transformed[M0: BasisMetadata, E](
+    basis: Basis[TupleMetadata[tuple[M0], E]],
+) -> TupleBasis[tuple[Basis[M0, Ctype[np.generic]]], E, Ctype[np.generic]]: ...
+
+
+@overload
+def as_trigonometric_transformed[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    E,
+](
+    basis: Basis[TupleMetadata[tuple[M0, M1], E]],
+) -> TupleBasis[
+    tuple[
+        Basis[M0, Ctype[np.generic]],
+        Basis[M1, Ctype[np.generic]],
+    ],
+    E,
+    Ctype[np.generic],
+]: ...
+
+
+@overload
+def as_trigonometric_transformed[
+    M0: BasisMetadata,
+    M1: BasisMetadata,
+    M2: BasisMetadata,
+    E,
+](
+    basis: Basis[TupleMetadata[tuple[M0, M1, M2], E]],
+) -> TupleBasis[
+    tuple[
+        Basis[M0, Ctype[np.generic]],
+        Basis[M1, Ctype[np.generic]],
+        Basis[M2, Ctype[np.generic]],
+    ],
+    E,
+    Ctype[np.generic],
+]: ...
+
+
+@overload
+def as_trigonometric_transformed[M: BasisMetadata, E](
+    basis: Basis[TupleMetadata[tuple[M, ...], E]],
+) -> TupleBasis[tuple[Basis[M, Ctype[np.generic]], ...], E, Ctype[np.generic]]: ...
+
+
+@overload
+def as_trigonometric_transformed[M: SimpleMetadata](
+    basis: Basis[M],
+) -> TrigonometricTransformBasis[FundamentalBasis[M], Ctype[np.generic]]: ...
+
+
+@overload
+def as_trigonometric_transformed[M: AnyMetadata](
+    basis: Basis[M],
+) -> Basis[M, Ctype[np.generic]]: ...
+
+
+def as_trigonometric_transformed(
+    basis: Basis,
+) -> Basis[AnyMetadata, Ctype[np.generic]]:
+    return trigonometric_transformed_from_metadata(
+        basis.metadata(), is_dual=basis.is_dual
+    )
+
+
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int], *, extra: None = None, is_dual: tuple[bool, ...] | None = None
+) -> TupleBasis[tuple[FundamentalBasis], None, Ctype[np.generic]]: ...
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int], *, extra: E, is_dual: tuple[bool, ...] | None = None
+) -> TupleBasis[tuple[FundamentalBasis], E, Ctype[np.generic]]: ...
+
+
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int, int],
+    *,
+    extra: None = None,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[tuple[FundamentalBasis, FundamentalBasis], None, Ctype[np.generic]]: ...
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int, int],
+    *,
+    extra: E,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[tuple[FundamentalBasis, FundamentalBasis], E, Ctype[np.generic]]: ...
+
+
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int, int, int],
+    *,
+    extra: None = None,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[
+    tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis],
+    None,
+    Ctype[np.generic],
+]: ...
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int, int, int],
+    *,
+    extra: E,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[
+    tuple[FundamentalBasis, FundamentalBasis, FundamentalBasis],
+    E,
+    Ctype[np.generic],
+]: ...
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int, ...],
+    *,
+    extra: None = None,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[tuple[FundamentalBasis, ...], None, Ctype[np.generic]]: ...
+@overload
+def trigonometric_transformed_from_shape[E](
+    shape: tuple[int, ...],
+    *,
+    extra: E,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[tuple[FundamentalBasis, ...], E, Ctype[np.generic]]: ...
+
+
+def trigonometric_transformed_from_shape(
+    shape: tuple[int, ...],
+    *,
+    extra: Any | None = None,
+    is_dual: tuple[bool, ...] | None = None,
+) -> Basis[Any, Ctype[np.generic]]:
+    """Get a basis with the basis at idx set to inner."""
+    return trigonometric_transformed_from_metadata(
+        TupleMetadata.from_shape(shape, extra=extra), is_dual=is_dual
+    )
