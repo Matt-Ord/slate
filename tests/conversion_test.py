@@ -8,6 +8,8 @@ import pytest
 from slate_core.array import Array
 from slate_core.basis import (
     BlockDiagonalBasis,
+    CoordinateBasis,
+    CroppedBasis,
     DiagonalBasis,
     FundamentalBasis,
     RecastBasis,
@@ -19,8 +21,6 @@ from slate_core.basis import (
     from_shape,
     transformed_from_shape,
 )
-from slate_core.basis._coordinate import CoordinateBasis
-from slate_core.basis._cropped import CroppedBasis
 
 if TYPE_CHECKING:
     from collections.abc import Callable
