@@ -51,15 +51,15 @@ def expand_contractions[DT: np.dtype[np.generic]](
     input_indices = np.arange(array.ndim)
     output_indices = array.ndim + np.arange(len(out_axes))
 
-    # maps the inner index to the outer indicies
-    matricies = dict[int, tuple[int, ...]]()
+    # maps the inner index to the outer index
+    matrices = dict[int, tuple[int, ...]]()
     for i, ax in enumerate(out_axes):
-        matricies[ax] = (*matricies.get(ax, ()), i)
+        matrices[ax] = (*matrices.get(ax, ()), i)
 
     input_subscripts = [_spec_from_indices(tuple(input_indices))]
     input_arrays = [array]
 
-    for input_axis, output_axes in matricies.items():
+    for input_axis, output_axes in matrices.items():
         output_indices[output_axes[0]] = input_axis
         if len(output_axes) == 1:
             # No need to do a multiplication for a single index

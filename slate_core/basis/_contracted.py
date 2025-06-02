@@ -41,53 +41,53 @@ def _get_contracted_index(
 
 
 def _get_contracted_indices(
-    indicies: NestedIndex,
+    index: NestedIndex,
     contractions: tuple[set[int], ...],
 ) -> NestedIndex:
-    """Get the outer indicies for a contraction."""
-    if isinstance(indicies, int):
-        return _get_contracted_index(indicies, contractions)
+    """Get the outer index for a contraction."""
+    if isinstance(index, int):
+        return _get_contracted_index(index, contractions)
 
-    return tuple(_get_contracted_indices(i, contractions) for i in indicies)
+    return tuple(_get_contracted_indices(i, contractions) for i in index)
 
 
 def _get_outer_indices(
-    indicies: NestedIndex,
+    index: NestedIndex,
 ) -> tuple[int, ...]:
-    """Get the outer indicies for a contraction."""
-    return tuple(sorted(set(_flatten_nested_index(indicies))))
+    """Get the outer index for a contraction."""
+    return tuple(sorted(set(_flatten_nested_index(index))))
 
 
 def _build_contraction_size_map(
     basis: Basis,
-    indicies: NestedIndex,
+    index: NestedIndex,
     *,
     size_map: dict[int, int] | None = None,
 ) -> dict[int, int]:
     size_map = size_map or {}
-    if isinstance(indicies, int):
-        outer_size = size_map.get(indicies, basis.size)
-        size_map[indicies] = outer_size
+    if isinstance(index, int):
+        outer_size = size_map.get(index, basis.size)
+        size_map[index] = outer_size
         if outer_size != basis.size:
             msg = (
                 f"Contraction has inconsistent sizes for contracted index."
-                f"The size at {indicies} is {outer_size}, but the basis size is {basis.size}. "
+                f"The size at {index} is {outer_size}, but the basis size is {basis.size}. "
             )
             raise ValueError(msg)
         return size_map
     assert is_tuple(basis), "Basis must be a tuple basis for contraction."
-    for idx, child in zip(indicies, basis.children, strict=True):
-        size_map = _build_contraction_size_map(child, idx, size_map=size_map)
+    for i, child in zip(index, basis.children, strict=True):
+        size_map = _build_contraction_size_map(child, i, size_map=size_map)
     return size_map
 
 
 def _build_shape(
-    indicies: NestedIndex,
+    index: NestedIndex,
     size_map: dict[int, int],
 ) -> NestedLength:
-    if isinstance(indicies, int):
-        return size_map[indicies]
-    return tuple(_build_shape(idx, size_map) for idx in indicies)
+    if isinstance(index, int):
+        return size_map[index]
+    return tuple(_build_shape(idx, size_map) for idx in index)
 
 
 def _get_flattened_shape(length: NestedLength) -> tuple[int, ...]:
@@ -107,28 +107,28 @@ class ContractedBasis[
     def __init__[B_: Basis](
         self: ContractedBasis[B_, Ctype[Never]],
         inner: B_,
-        indicies: NestedIndex,
+        index: NestedIndex,
     ) -> None:
         super().__init__(cast("B", inner))
 
-        self._indices = indicies
+        self._index = index
         # Assert that it is possible to build the size map
         _ = self._size_map
 
     @cached_property
     def _size_map(self) -> dict[int, int]:
         """The size map for the indices."""
-        return _build_contraction_size_map(self.inner, self._indices)
+        return _build_contraction_size_map(self.inner, self._index)
 
     @cached_property
     def _inner_shape(self) -> NestedLength:
         """The shape of the contracted basis."""
-        return _build_shape(self._indices, self._size_map)
+        return _build_shape(self._index, self._size_map)
 
     @cached_property
     def _outer_indices(self) -> NestedIndex:
         """The outer indices of the contraction."""
-        return _get_outer_indices(self._indices)
+        return _get_outer_indices(self._index)
 
     @cached_property
     def _outer_shape(self) -> NestedLength:
@@ -172,8 +172,8 @@ class ContractedBasis[
 
         s0 = int(np.prod(vectors.shape[:axis]))  # type: ignore[assignment]
         s1 = int(np.prod(vectors.shape[axis + 1 :]))  # type: ignore[assignment]
-        flat_indicies = _flatten_nested_index(self._indices)
-        flat_out_indices = _flatten_nested_index(self._outer_indices)
+        flat_index = _flatten_nested_index(self._index)
+        flat_out_index = _flatten_nested_index(self._outer_indices)
 
         def fn() -> np.ndarray[Any, np.dtype[T2]]:
             stacked = vectors.reshape(s0, *_get_flattened_shape(self._outer_shape), s1)
@@ -181,8 +181,8 @@ class ContractedBasis[
             out_axes: tuple[int, ...] = (
                 0,
                 *(
-                    next(i + 1 for i, val in enumerate(flat_out_indices) if val == idx)
-                    for idx in flat_indicies
+                    next(i + 1 for i, val in enumerate(flat_out_index) if val == idx)
+                    for idx in flat_index
                 ),
                 stacked.ndim - 1,
             )
@@ -203,8 +203,8 @@ class ContractedBasis[
 
         s0 = int(np.prod(vectors.shape[:axis]))  # type: ignore[assignment]
         s1 = int(np.prod(vectors.shape[axis + 1 :]))  # type: ignore[assignment]
-        flat_indicies = _flatten_nested_index(self._indices)
-        flat_out_indices = _flatten_nested_index(self._outer_indices)
+        flat_index = _flatten_nested_index(self._index)
+        flat_out_index = _flatten_nested_index(self._outer_indices)
 
         def fn() -> np.ndarray[Any, np.dtype[T1]]:
             stacked = vectors.reshape(s0, *_get_flattened_shape(self._inner_shape), s1)
@@ -212,8 +212,8 @@ class ContractedBasis[
             mapped_contractions = (
                 {0},
                 *(
-                    {i + 1 for i, val in enumerate(flat_indicies) if val == idx}
-                    for idx in flat_out_indices
+                    {i + 1 for i, val in enumerate(flat_index) if val == idx}
+                    for idx in flat_out_index
                 ),
                 {stacked.ndim - 1},
             )
@@ -230,12 +230,12 @@ class ContractedBasis[
             is_contracted(other)
             and (other.inner == self.inner)
             and self.is_dual == other.is_dual
-            and self._indices == other._indices
+            and self._index == other._index
         )
 
     @override
     def __hash__(self) -> int:
-        return hash((3, self.inner, self.is_dual, self._indices))
+        return hash((3, self.inner, self.is_dual, self._index))
 
     @property
     @override
