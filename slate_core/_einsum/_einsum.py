@@ -128,6 +128,7 @@ def einsum[DT: np.dtype[np.number]](
     # Eventually we will want to support fast einsum for an arbitrary index-like
     # matrix. For now though, we just support the simple case that is
     # required for ExplicitBasis.
+    # Ideally this support should also be for a more general contracted basis
     if idx == "(i j'),(j k)->(i k)":
         return _einsum_smart(idx, *arrays)
 
