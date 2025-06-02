@@ -66,7 +66,7 @@ class FundamentalBasis[M: SimpleMetadata = SimpleMetadata](Basis[M, Ctype[np.gen
 
     @override
     def __eq__(self, other: object) -> bool:
-        if is_fundamental_basis(other):
+        if is_fundamental(other):
             return other.metadata() == self.metadata() and self.is_dual == other.is_dual
         return False
 
@@ -122,6 +122,6 @@ def as_state_list[B: Basis](
     return FundamentalBasis(BasisStateMetadata(basis))
 
 
-def is_fundamental_basis(basis: object) -> TypeGuard[FundamentalBasis]:
+def is_fundamental(basis: object) -> TypeGuard[FundamentalBasis]:
     """Check if a basis is a fundamental basis."""
     return isinstance(basis, FundamentalBasis)

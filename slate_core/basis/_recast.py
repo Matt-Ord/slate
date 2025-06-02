@@ -74,7 +74,7 @@ class RecastBasis[
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            is_recast_basis(other)
+            is_recast(other)
             and self.inner == other.inner
             and self.inner_recast == other.inner_recast
             and self.outer_recast == other.outer_recast
@@ -170,7 +170,7 @@ class RecastBasis[
         return (lhs - rhs).astype(lhs.dtype)
 
 
-def recast_basis_from_diagonal[
+def recast_from_diagonal[
     B0: Basis,
     B1: Basis,
     E,
@@ -182,7 +182,7 @@ def recast_basis_from_diagonal[
     return RecastBasis(basis, basis.inner.children[1], basis.inner.children[1])  # type: ignore it does support DT actually
 
 
-def as_recast_diagonal_basis[
+def as_recast_diagonal[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
@@ -202,22 +202,22 @@ def as_recast_diagonal_basis[
     basis_as_diagonal = as_diagonal(basis)
     if basis_as_diagonal is None:
         return None
-    return recast_basis_from_diagonal(basis_as_diagonal)
+    return recast_from_diagonal(basis_as_diagonal)
 
 
 @overload
-def is_recast_basis[CT: Ctype[np.generic]](  # type: ignore is compatible
+def is_recast[CT: Ctype[np.generic]](  # type: ignore is compatible
     basis: Basis[BasisMetadata, CT],
 ) -> TypeGuard[RecastBasis[Basis, Basis, Basis, CT]]: ...
 
 
 @overload
-def is_recast_basis(
+def is_recast(
     basis: object,
 ) -> TypeGuard[RecastBasis]: ...
 
 
-def is_recast_basis(
+def is_recast(
     basis: object,
 ) -> TypeGuard[RecastBasis[Basis, Basis, Basis, Any]]:
     """Check if the basis is a recast basis."""

@@ -143,7 +143,7 @@ class SplitBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if is_split_basis(other):
+        if is_split(other):
             return other.lhs == self.lhs and other.rhs == self.rhs
         return False
 
@@ -231,5 +231,5 @@ class SplitBasis[
         return (lhs - rhs).astype(lhs.dtype)
 
 
-def is_split_basis(basis: object) -> TypeGuard[SplitBasis]:
+def is_split(basis: object) -> TypeGuard[SplitBasis]:
     return isinstance(basis, SplitBasis)

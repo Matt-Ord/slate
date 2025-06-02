@@ -19,7 +19,12 @@ from slate_core.basis._basis_state_metadata import (
     BasisStateMetadata,
     is_basis_state_metadata,
 )
-from slate_core.basis._block_diagonal import BlockDiagonalBasis, as_block_diagonal
+from slate_core.basis._block_diagonal import (
+    BlockDiagonalBasis,
+    as_block_diagonal,
+    is_block_diagonal,
+)
+from slate_core.basis._contracted import ContractedBasis, as_contracted, is_contracted
 from slate_core.basis._coordinate import CoordinateBasis
 from slate_core.basis._cropped import CroppedBasis, is_cropped
 from slate_core.basis._diagonal import (
@@ -27,15 +32,19 @@ from slate_core.basis._diagonal import (
     as_diagonal,
     is_diagonal,
 )
-from slate_core.basis._fundamental import FundamentalBasis, as_state_list
-from slate_core.basis._isotropic import IsotropicBasis
-from slate_core.basis._recast import RecastBasis, is_recast_basis
-from slate_core.basis._split import SplitBasis
+from slate_core.basis._fundamental import (
+    FundamentalBasis,
+    as_state_list,
+    is_fundamental,
+)
+from slate_core.basis._isotropic import IsotropicBasis, is_isotropic
+from slate_core.basis._recast import RecastBasis, as_recast_diagonal, is_recast
+from slate_core.basis._split import SplitBasis, is_split
 from slate_core.basis._transformed import (
     TransformDirection,
     TransformedBasis,
     as_transformed,
-    is_transformed_basis,
+    is_transformed,
     transformed_from_metadata,
     transformed_from_shape,
 )
@@ -43,7 +52,7 @@ from slate_core.basis._trigonometric import (
     TrigonometricTransformBasis,
     TrigonometricTransformType,
     as_trigonometric_transformed,
-    is_trigonometric_transform_basis,
+    is_trigonometric_transform,
     trigonometric_transformed_from_metadata,
     trigonometric_transformed_from_shape,
 )
@@ -95,6 +104,7 @@ __all__ = [
     "BasisFeature",
     "BasisStateMetadata",
     "BlockDiagonalBasis",
+    "ContractedBasis",
     "CoordinateBasis",
     "CroppedBasis",
     "Ctype",
@@ -127,6 +137,7 @@ __all__ = [
     "are_dual_shapes",
     "as_add",
     "as_block_diagonal",
+    "as_contracted",
     "as_diagonal",
     "as_feature",
     "as_fundamental",
@@ -134,6 +145,7 @@ __all__ = [
     "as_is_dual",
     "as_linear_map",
     "as_mul",
+    "as_recast_diagonal",
     "as_state_list",
     "as_sub",
     "as_supports_type",
@@ -146,11 +158,16 @@ __all__ = [
     "get_common",
     "get_wrapped_basis_super_inner",
     "is_basis_state_metadata",
+    "is_block_diagonal",
+    "is_contracted",
     "is_cropped",
     "is_diagonal",
-    "is_recast_basis",
-    "is_transformed_basis",
-    "is_trigonometric_transform_basis",
+    "is_fundamental",
+    "is_isotropic",
+    "is_recast",
+    "is_split",
+    "is_transformed",
+    "is_trigonometric_transform",
     "is_tuple",
     "is_tuple_basis_like",
     "is_wrapped",
