@@ -200,10 +200,8 @@ def get_common[M: BasisMetadata, CT: Ctype[Never]](
     assert rhs.metadata() == lhs.metadata()
     lhs_rev = list(wrapped_basis_iter_inner(lhs))
     rhs_rev = list(wrapped_basis_iter_inner(rhs))
-    print(f"lhs: {lhs_rev}, rhs: {rhs_rev}")
 
     if is_tuple(lhs_rev[-1]) and is_tuple(rhs_rev[-1]) and lhs_rev[-1] != rhs_rev[-1]:
-        print("pass")
         # For a TupleBasis, we can do a bit better
         # By finding the common basis of the children
         lhs_children = lhs_rev[-1].children
@@ -227,7 +225,6 @@ def get_common[M: BasisMetadata, CT: Ctype[Never]](
             # sparcity of the representation.
             if isinstance(a, ContractedBasis) and isinstance(b, ContractedBasis):
                 # If both are contracted bases, we can find a common contraction
-                print("pass")
                 return cast(
                     "Basis[M, CT]",
                     ContractedBasis(
