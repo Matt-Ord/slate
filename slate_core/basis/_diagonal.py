@@ -12,7 +12,8 @@ from typing import (
 
 import numpy as np
 
-from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
+from slate_core.basis._basis import Basis, BasisFeature, Ctype
+from slate_core.basis._contracted import ContractedBasis
 from slate_core.basis._tuple import TupleBasis
 from slate_core.basis._wrapped import AsUpcast, WrappedBasis, wrapped_basis_iter_inner
 from slate_core.metadata import BasisMetadata
@@ -27,15 +28,14 @@ class DiagonalBasis[
     ] = TupleBasis[tuple[Basis, Basis], Any],
     CT: Ctype[Never] = Ctype[Never],
 ](
-    WrappedBasis[B, CT],
+    ContractedBasis[B, CT],
 ):
     """Represents a diagonal basis."""
 
     def __init__[
         B_: TupleBasis[tuple[Basis[BasisMetadata, Any], Basis[BasisMetadata, Any]], Any]
     ](self: DiagonalBasis[B_, Ctype[Never]], inner: B_) -> None:
-        super().__init__(cast("B", inner))
-        assert self.inner.children[0].size == self.inner.children[1].size
+        super().__init__(cast("B", inner), (0, 0))
 
     @property
     @override
@@ -55,10 +55,15 @@ class DiagonalBasis[
     ) -> TupleMetadata[tuple[M0, M1], E]:
         return self.inner.metadata()
 
-    @override
+    @overload
     def upcast[M0: BasisMetadata, M1: BasisMetadata, E](
         self: DiagonalBasis[TupleBasis[tuple[Basis[M0], Basis[M1]], E], Any],
-    ) -> AsUpcast[DiagonalBasis[B, CT], TupleMetadata[tuple[M0, M1], E], CT]:
+    ) -> AsUpcast[DiagonalBasis[B, CT], TupleMetadata[tuple[M0, M1], E], CT]: ...
+    @overload
+    def upcast(self) -> AsUpcast[DiagonalBasis[B, CT], BasisMetadata, CT]: ...
+
+    @override
+    def upcast(self) -> AsUpcast[DiagonalBasis[B, CT], BasisMetadata, CT]:
         """Metadata associated with the basis.
 
         Note: this should be a property, but this would ruin variance.
@@ -69,70 +74,6 @@ class DiagonalBasis[
     @override
     def size(self) -> int:
         return self.inner.children[0].size
-
-    @override
-    def __into_inner__[T1: np.generic, T2: np.generic](
-        self: DiagonalBasis[Any, Ctype[T1]],
-        vectors: np.ndarray[Any, np.dtype[T2]],
-        axis: int = -1,
-    ) -> BasisConversion[T1, T2, T1]:
-        def fn() -> np.ndarray[Any, np.dtype[T2]]:
-            if vectors.size == 0:
-                return vectors
-            swapped = vectors.swapaxes(axis, 0)
-            stacked = swapped.reshape(self.size, *swapped.shape[1:])
-
-            return (
-                cast(
-                    "np.ndarray[Any, np.dtype[T2]]",
-                    np.einsum(  # type: ignore lib
-                        "i...,ij->ij...",
-                        stacked,  # type: ignore lib
-                        np.eye(
-                            self.inner.children[0].size, self.inner.children[1].size
-                        ),
-                    ),
-                )
-                .reshape(-1, *swapped.shape[1:])
-                .swapaxes(axis, 0)
-            )
-
-        return BasisConversion(fn)
-
-    @override
-    def __from_inner__[T1: np.generic, T2: np.generic](
-        self: DiagonalBasis[Any, Ctype[T2]],
-        vectors: np.ndarray[Any, np.dtype[T1]],
-        axis: int = -1,
-    ) -> BasisConversion[T2, T1, T2]:
-        def fn() -> np.ndarray[Any, np.dtype[T1]]:
-            if vectors.size == 0:
-                return vectors
-            swapped = vectors.swapaxes(axis, 0)
-            stacked = swapped.reshape(*self.inner.shape, *swapped.shape[1:])
-
-            return (
-                cast(
-                    "np.ndarray[Any, np.dtype[T1]]",
-                    np.einsum("ii...->i...", stacked),  # type: ignore lib
-                )
-                .reshape(self.size, *swapped.shape[1:])
-                .swapaxes(axis, 0)
-            )
-
-        return BasisConversion(fn)
-
-    @override
-    def __eq__(self, other: object) -> bool:
-        return (
-            is_diagonal(other)
-            and (other.inner == self.inner)
-            and self.is_dual == other.is_dual
-        )
-
-    @override
-    def __hash__(self) -> int:
-        return hash((2, self.inner, self.is_dual))
 
     @property
     @override

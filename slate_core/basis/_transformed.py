@@ -73,7 +73,7 @@ class TransformedBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if is_transformed_basis(other):
+        if is_transformed(other):
             return (
                 self.size == other.size
                 and other.inner == self.inner
@@ -190,7 +190,7 @@ class TransformedBasis[
         return (lhs - rhs).astype(lhs.dtype)
 
 
-def is_transformed_basis(
+def is_transformed(
     basis: object,
 ) -> TypeGuard[TransformedBasis]:
     """Check if the given basis is a transformed basis."""

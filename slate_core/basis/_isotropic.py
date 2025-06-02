@@ -94,7 +94,7 @@ class IsotropicBasis[
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            is_isotropic_basis(other)
+            is_isotropic(other)
             and (other.inner == self.inner)
             and self.is_dual == other.is_dual
         )
@@ -161,7 +161,7 @@ class IsotropicBasis[
         )
 
 
-def is_isotropic_basis(
+def is_isotropic(
     basis: object,
 ) -> TypeGuard[IsotropicBasis[TupleBasis[tuple[Basis, Basis], Any]]]:
     """Check if a basis is isotropic."""

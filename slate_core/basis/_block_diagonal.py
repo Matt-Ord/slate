@@ -15,14 +15,14 @@ if TYPE_CHECKING:
     from slate_core.metadata._tuple import TupleMetadata
 
 
-# TODO: can we get rid of special block diagonal and generalize Diagonal to support  # noqa: FIX002
+# TODO: can we get rid of special block diagonal and generalize Diagonal to support for  # noqa: FIX002
 # arbitrary nested axes? Can we do this in a way which doesn't make the 'SimpleDiagonal'
 # case much harder to use?
 # block diagonal in its current impl is equivalent to re-casting a basis
-# as [(list,other), (list,other),...] and then taking this
-# general diagonal over the list basis
-# The full diagonal basis can also be a special case of the general diagonal basis
-# in this case...
+# as [(list,other), (list,other),...] and then contracting over this axis
+#
+# For this to work, we also need to update einstein summation to be clever when it sees
+# a sparse recast basis.
 
 
 class BlockDiagonalBasis[
@@ -171,14 +171,15 @@ class BlockDiagonalBasis[
     @override
     def __eq__(self, other: object) -> bool:
         return (
-            is_block_diagonal_basis(other)
+            is_block_diagonal(other)
             and (other.inner == self.inner)
             and self.is_dual == other.is_dual
+            and self.block_shape == other.block_shape
         )
 
     @override
     def __hash__(self) -> int:
-        return hash((3, self.inner, self.is_dual))
+        return hash((3, self.inner, self.is_dual, self.block_shape))
 
     @property
     @override
@@ -239,7 +240,7 @@ class BlockDiagonalBasis[
 
 
 @overload
-def is_block_diagonal_basis[  # type: ignore not incompatible
+def is_block_diagonal[  # type: ignore not incompatible
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,
@@ -250,14 +251,14 @@ def is_block_diagonal_basis[  # type: ignore not incompatible
     BlockDiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT]
 ]: ...
 @overload
-def is_block_diagonal_basis(
+def is_block_diagonal(
     basis: object,
 ) -> TypeGuard[
     BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Never], Ctype[Never]]
 ]: ...
 
 
-def is_block_diagonal_basis(
+def is_block_diagonal(
     basis: object,
 ) -> TypeGuard[BlockDiagonalBasis[TupleBasis[tuple[Basis, Basis], Any], Ctype[Never]]]:
     return isinstance(basis, BlockDiagonalBasis)
@@ -273,6 +274,6 @@ def as_block_diagonal[
 ) -> BlockDiagonalBasis[TupleBasis[tuple[Basis[M0, CT], Basis[M1, CT]], E], CT] | None:
     """Get the closest basis that is block diagonal."""
     return next(
-        (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal_basis(b)),
+        (b for b in wrapped_basis_iter_inner(basis) if is_block_diagonal(b)),
         None,
     )

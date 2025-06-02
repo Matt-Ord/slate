@@ -44,7 +44,7 @@ class CoordinateBasis[  # noqa: PLW1641
 
     @override
     def __eq__(self, other: object) -> bool:
-        if is_coordinate_basis(other):
+        if is_coordinate(other):
             return (
                 np.allclose(self.inner_points, other.inner_points)
                 and other._inner == self._inner
@@ -134,6 +134,6 @@ class CoordinateBasis[  # noqa: PLW1641
         )
 
 
-def is_coordinate_basis(basis: object) -> TypeGuard[CoordinateBasis]:
+def is_coordinate(basis: object) -> TypeGuard[CoordinateBasis]:
     """Check if a basis is a coordinate basis."""
     return isinstance(basis, CoordinateBasis)

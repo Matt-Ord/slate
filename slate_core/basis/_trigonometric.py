@@ -75,7 +75,7 @@ class TrigonometricTransformBasis[
 
     @override
     def __eq__(self, other: object) -> bool:
-        if is_trigonometric_transform_basis(other):
+        if is_trigonometric_transform(other):
             return (
                 other.inner == self.inner
                 and self.ty == other.ty
@@ -182,7 +182,7 @@ class TrigonometricTransformBasis[
         return (lhs - rhs).astype(lhs.dtype)
 
 
-def is_trigonometric_transform_basis(
+def is_trigonometric_transform(
     basis: object,
 ) -> TypeGuard[TrigonometricTransformBasis]:
     """Check if the given basis is a hardwall basis."""
