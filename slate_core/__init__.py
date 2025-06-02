@@ -5,6 +5,7 @@ from __future__ import annotations
 from slate_core import array, basis, explicit_basis, metadata, plot, util
 from slate_core.array import Array
 from slate_core.basis import (
+    AsUpcast,
     Basis,
     BasisFeature,
     Ctype,
@@ -23,6 +24,7 @@ from slate_core.metadata import (
 __all__ = [
     "AnyMetadata",
     "Array",
+    "AsUpcast",
     "Basis",
     "BasisFeature",
     "BasisMetadata",

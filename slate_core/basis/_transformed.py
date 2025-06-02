@@ -14,7 +14,7 @@ from slate_core.basis._basis import (
 )
 from slate_core.basis._fundamental import FundamentalBasis
 from slate_core.basis._tuple import TupleBasis
-from slate_core.basis._wrapped import WrappedBasis
+from slate_core.basis._wrapped import AsUpcast, WrappedBasis
 from slate_core.metadata import (
     AnyMetadata,
     BasisMetadata,
@@ -55,6 +55,12 @@ class TransformedBasis[
             "CT",
             UnionCtype((self.inner.ctype, Ctype(np.complexfloating))),
         )
+
+    @override
+    def upcast[M: BasisMetadata](
+        self: TransformedBasis[Basis[M]],
+    ) -> AsUpcast[TransformedBasis[B, CT], M, CT]:
+        return cast("AsUpcast[TransformedBasis[B, CT], M, CT]", super().upcast())
 
     @override
     def resolve_ctype[DT_: np.complexfloating](
