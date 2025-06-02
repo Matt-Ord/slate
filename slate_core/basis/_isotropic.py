@@ -68,7 +68,7 @@ class IsotropicBasis[
         def fn() -> np.ndarray[Any, np.dtype[T2]]:
             swapped = vectors.swapaxes(axis, 0)
             indices = nx_points(self.size)
-            displacement_matrix = np.mod(indices[:, None] - indices[None, :], self.size)
+            displacement_matrix = np.mod(indices[None, :] - indices[:, None], self.size)
             return (
                 swapped[displacement_matrix]
                 .reshape(-1, *swapped.shape[1:])
