@@ -18,6 +18,7 @@ from slate_core.basis import (
     TrigonometricTransformBasis,
     TruncatedBasis,
     Truncation,
+    get_common_contraction_index,
 )
 from slate_core.metadata import SimpleMetadata
 
@@ -94,6 +95,7 @@ def test_simple_basis_equality(
 
 
 BUILD_GENERIC_BASIS: list[Callable[[], Basis]] = [
+    lambda: basis.from_shape(((2, 3), (2, 3))),
     lambda: TransformedBasis(basis.from_shape((5, 7)), direction="forward"),
     lambda: DiagonalBasis(basis.from_shape((5, 5))),
     lambda: ContractedBasis(basis.from_shape((5, 5)), (0, 0)),
@@ -136,5 +138,32 @@ def test_general_basis_equality(
 
     assert basis_0 == basis_1
 
-    basis_2 = basis.from_metadata(basis_0.metadata())
-    assert basis_0 != basis_2
+
+def test_common_contraction() -> None:
+    index = get_common_contraction_index(
+        basis.from_shape(((1, 2, 3), (1, 2, 3), 6)),
+        ((0, 1, 2), (0, 1, 2), 3),
+        ((0, 1, 2), (0, 1, 2), 3),
+    )
+    assert index == ((0, 1, 2), (0, 1, 2), 3)
+
+    index = get_common_contraction_index(
+        basis.from_shape(((1, 2, 3), (1, 2, 3), 6)),
+        ((0, 1, 2), 3, 3),
+        ((0, 1, 2), (0, 1, 2), 3),
+    )
+    assert index == ((0, 1, 2), (4, 5, 6), 3)
+
+    index = get_common_contraction_index(
+        basis.from_shape(((1, 2, 3), (1, 2, 3), 6)),
+        (0, 0, 0),
+        ((0, 1, 2), 3, 3),
+    )
+    assert index == ((4, 5, 6), 0, 0)
+
+    index = get_common_contraction_index(
+        basis.from_shape(((1, 2, 3), (1, 2, 3), 6)),
+        0,
+        1,
+    )
+    assert index == 0

@@ -24,7 +24,12 @@ from slate_core.basis._block_diagonal import (
     as_block_diagonal,
     is_block_diagonal,
 )
-from slate_core.basis._contracted import ContractedBasis, as_contracted, is_contracted
+from slate_core.basis._contracted import (
+    ContractedBasis,
+    as_contracted,
+    get_common_contraction_index,
+    is_contracted,
+)
 from slate_core.basis._coordinate import CoordinateBasis
 from slate_core.basis._cropped import CroppedBasis, is_cropped
 from slate_core.basis._diagonal import (
@@ -156,6 +161,7 @@ __all__ = [
     "from_metadata",
     "from_shape",
     "get_common",
+    "get_common_contraction_index",
     "get_wrapped_basis_super_inner",
     "is_basis_state_metadata",
     "is_block_diagonal",

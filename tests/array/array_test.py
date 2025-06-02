@@ -10,6 +10,7 @@ from slate_core.array import Array, conjugate, transpose
 from slate_core.basis import (
     Basis,
     BlockDiagonalBasis,
+    ContractedBasis,
     DiagonalBasis,
     from_shape,
     transformed_from_shape,
@@ -128,16 +129,50 @@ def test_conjugate_array(
     assert conjugate(array).basis == array.basis
 
 
-def test_add_mul_array() -> None:
-    data = Array.from_array(np.array([1, 2, 3, 4, 4, 6]).reshape(2, 3))
+ADD_SUB_BASIS: list[tuple[Basis, Basis]] = [
+    (from_shape((2, 3)), from_shape((2, 3))),
+    (transformed_from_shape((2, 3)), from_shape((2, 3))),
+    (from_shape((2, 3, (4, 5))), transformed_from_shape((2, 3, (4, 5)))),
+    (from_shape((2, 3, (4, 5))), transformed_from_shape((2, 3, (4, 5)))),
+    (
+        ContractedBasis(from_shape(((2, 3), (2, 3))), ((0, 1), (0, 1))),
+        ContractedBasis(from_shape(((2, 3), (2, 3))), ((0, 1), (0, 2))),
+    ),
+]
+
+
+@pytest.mark.parametrize(("lhs", "rhs"), ADD_SUB_BASIS)
+def test_add_array(lhs: Basis, rhs: Basis) -> None:
+    rng = np.random.default_rng()
+
+    lhs_data = rng.random(lhs.size).astype(np.complex128)
+    lhs_array = Array(lhs, lhs_data)
+
+    rhs_data = rng.random(rhs.size).astype(np.complex128)
+    rhs_array = Array(rhs, rhs_data)
+
+    np.testing.assert_allclose(
+        lhs_array.as_array() + rhs_array.as_array(),
+        (lhs_array + rhs_array).as_array(),
+        rtol=1e-15,
+    )
+    np.testing.assert_allclose(
+        lhs_array.as_array() - rhs_array.as_array(),
+        (lhs_array - rhs_array).as_array(),
+        rtol=1e-15,
+    )
+
+
+def test_add_fundamental_array() -> None:
+    array = Array.from_array(np.array([1, 2, 3, 4, 4, 6]).reshape(2, 3))
 
     np.testing.assert_array_equal(
-        data.as_array() + data.as_array(), (data + data).as_array()
+        array.as_array() + array.as_array(), (array + array).as_array()
     )
     np.testing.assert_array_equal(
-        data.as_array() - data.as_array(), (data - data).as_array()
+        array.as_array() - array.as_array(), (array - array).as_array()
     )
-    np.testing.assert_array_equal(2 * data.as_array(), (data * 2).as_array())
+    np.testing.assert_array_equal(2 * array.as_array(), (array * 2).as_array())
 
 
 def test_extract_diagonal() -> None:

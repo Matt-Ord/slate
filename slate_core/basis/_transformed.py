@@ -1,6 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Never, Self, TypeGuard, cast, overload, override
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    Never,
+    Self,
+    TypeGuard,
+    cast,
+    overload,
+    override,
+)
 
 import numpy as np
 
@@ -22,6 +32,9 @@ from slate_core.metadata import (
     TupleMetadata,
 )
 from slate_core.metadata._tuple import is_tuple_metadata
+
+if TYPE_CHECKING:
+    from slate_core.metadata._shape import NestedLength
 
 type TransformDirection = Literal["forward", "backward"]
 
@@ -438,8 +451,24 @@ def transformed_from_shape[E](
 ) -> TupleBasis[tuple[FundamentalBasis, ...], E, Ctype[np.complexfloating]]: ...
 
 
+@overload
+def transformed_from_shape[E](
+    shape: NestedLength,
+    *,
+    extra: E,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[tuple[Basis, ...], E, Ctype[np.complexfloating]]: ...
+@overload
+def transformed_from_shape[E](
+    shape: NestedLength,
+    *,
+    extra: None = None,
+    is_dual: tuple[bool, ...] | None = None,
+) -> TupleBasis[tuple[Basis, ...], None, Ctype[np.complexfloating]]: ...
+
+
 def transformed_from_shape(
-    shape: tuple[int, ...],
+    shape: NestedLength,
     *,
     extra: Any | None = None,
     is_dual: tuple[bool, ...] | None = None,
