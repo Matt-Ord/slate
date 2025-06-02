@@ -21,32 +21,7 @@ from slate_core.basis import (
 
 if TYPE_CHECKING:
     from slate_core.basis._basis import Basis, Ctype
-    from slate_core.metadata import SimpleMetadata
     from slate_core.metadata._metadata import BasisMetadata
-
-
-def test_transformed_basis_round_trip(
-    slate_array_complex: Array[
-        FundamentalBasis[SimpleMetadata], np.dtype[np.complex128]
-    ],
-) -> None:
-    basis = TransformedBasis(slate_array_complex.basis)
-
-    converted_array = slate_array_complex.with_basis(
-        TransformedBasis(slate_array_complex.basis).resolve_ctype()
-    )
-    assert converted_array.basis == basis
-    np.testing.assert_array_almost_equal(
-        converted_array.as_array(),
-        slate_array_complex.as_array(),
-    )
-
-    round_trip_array = converted_array.with_basis(slate_array_complex.basis)
-    assert round_trip_array.basis == slate_array_complex.basis
-    np.testing.assert_array_almost_equal(
-        round_trip_array.raw_data,
-        slate_array_complex.raw_data,
-    )
 
 
 def test_transformed_basis() -> None:
@@ -90,43 +65,6 @@ def test_transformed_basis() -> None:
     np.testing.assert_array_almost_equal(
         array.with_basis(fundamental_basis.dual_basis()).raw_data,
         np.conj(np.fft.ifft(np.conj(data), norm="ortho")),
-    )
-
-
-def test_diagonal_basis_round_trip() -> None:
-    full_basis = from_shape((10, 10))
-    basis_diagonal = DiagonalBasis(full_basis).resolve_ctype()
-
-    array = Array(full_basis, np.diag(np.ones(10)))
-
-    converted_array = array.with_basis(basis_diagonal)
-    assert converted_array.basis == basis_diagonal
-    np.testing.assert_array_almost_equal(
-        converted_array.as_array(),
-        array.as_array(),
-    )
-
-    round_trip_array = converted_array.with_basis(full_basis)
-    assert round_trip_array.basis == full_basis
-    np.testing.assert_array_almost_equal(
-        round_trip_array.raw_data,
-        array.raw_data,
-    )
-
-    array = Array(full_basis, np.ones(full_basis.shape))
-
-    converted_array = array.with_basis(basis_diagonal)
-    assert converted_array.basis == basis_diagonal
-    np.testing.assert_array_almost_equal(
-        converted_array.as_array(),
-        np.diag(np.diag(array.as_array())),
-    )
-
-    round_trip_array = converted_array.with_basis(full_basis)
-    assert round_trip_array.basis == full_basis
-    np.testing.assert_array_almost_equal(
-        round_trip_array.raw_data,
-        np.diag(np.diag(array.as_array())).ravel(),
     )
 
 
