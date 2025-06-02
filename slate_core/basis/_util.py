@@ -9,7 +9,10 @@ from typing import (
     overload,
 )
 
+import numpy as np
+
 from slate_core.basis._basis import Basis, Ctype, NestedBool
+from slate_core.basis._contracted import ContractedBasis, get_common_contraction_index
 from slate_core.basis._tuple import (
     TupleBasis,
     TupleBasisLike,
@@ -33,8 +36,6 @@ from slate_core.metadata import (
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-    import numpy as np
 
     from slate_core.basis._fundamental import FundamentalBasis
 
@@ -187,13 +188,22 @@ def from_shape[E](
 def get_common[M: BasisMetadata, CT: Ctype[Never]](
     lhs: Basis[M, CT],
     rhs: Basis[M, CT],
-) -> Basis[M, CT | Ctype[np.generic]]:
-    """Get the closest common basis of two bases."""
+) -> Basis[M, CT]:
+    """Get the closest common basis of two bases.
+
+    The common basis is some basis which is guaranteed to provide
+    an exact representation of both lhs and rhs. Although the common basis
+    of all bases is the fundamental basis, this function
+    will return a more specific basis if possible, minimizing the
+    size of the resulting basis, and the cost of conversion.
+    """
     assert rhs.metadata() == lhs.metadata()
     lhs_rev = list(wrapped_basis_iter_inner(lhs))
     rhs_rev = list(wrapped_basis_iter_inner(rhs))
+    print(f"lhs: {lhs_rev}, rhs: {rhs_rev}")
 
-    if is_tuple(lhs_rev[-1]) and is_tuple(rhs_rev[-1]) and lhs_rev != rhs_rev:
+    if is_tuple(lhs_rev[-1]) and is_tuple(rhs_rev[-1]) and lhs_rev[-1] != rhs_rev[-1]:
+        print("pass")
         # For a TupleBasis, we can do a bit better
         # By finding the common basis of the children
         lhs_children = lhs_rev[-1].children
@@ -206,9 +216,27 @@ def get_common[M: BasisMetadata, CT: Ctype[Never]](
         )
         return cast("Basis[M, CT]", basis)
 
-    last_common = from_metadata(rhs.metadata(), is_dual=rhs.is_dual)
+    last_common = cast(
+        "Basis[M, CT]", from_metadata(rhs.metadata(), is_dual=rhs.is_dual)
+    )
+    # Starting from the inner fundamental basis, walk outwards
+    # through the wrapped basis until they are no longer equal.
     for a, b in zip(reversed(lhs_rev), reversed(rhs_rev), strict=False):
         if a != b:
+            # We can wrap the last common basis in some basis which improves the
+            # sparcity of the representation.
+            if isinstance(a, ContractedBasis) and isinstance(b, ContractedBasis):
+                # If both are contracted bases, we can find a common contraction
+                print("pass")
+                return cast(
+                    "Basis[M, CT]",
+                    ContractedBasis(
+                        last_common,
+                        get_common_contraction_index(last_common, a.index, b.index),
+                    ),
+                )
+            # TODO: if a and b are both COO-like we can find a common COO-like basis  # noqa: FIX002
+            # TODO: if a and b are both RecastBasis, we can find a common RecastBasis # noqa: FIX002
             return last_common
         last_common = a
     return last_common

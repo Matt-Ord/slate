@@ -96,6 +96,106 @@ def _get_flattened_shape(length: NestedLength) -> tuple[int, ...]:
     return tuple(i for idx in length for i in _get_flattened_shape(idx))
 
 
+def _get_uncontracted_index(basis: Basis, current_idx: int = 0) -> NestedIndex:
+    """Get a unique index for the basis."""
+    if is_tuple(basis):
+        return tuple(
+            _get_uncontracted_index(child, current_idx + i)
+            for i, child in enumerate(basis.children)
+        )
+    return current_idx
+
+
+ContractionPath = tuple[int, ...]
+ContractionPathMap = dict[int, set[ContractionPath]]
+
+
+def _get_contraction_path_map(
+    index: NestedIndex,
+    current_path: ContractionPath = (),
+) -> ContractionPathMap:
+    if isinstance(index, int):
+        return {index: {current_path}}
+
+    path_map: ContractionPathMap = {}
+    for i, idx in enumerate(index):
+        child_map = _get_contraction_path_map(idx, (*current_path, i))
+        for k, v in child_map.items():
+            path_map.setdefault(k, set()).update(v)
+    return path_map
+
+
+def _get_common_contraction(
+    contractions_0: list[set[ContractionPath]],
+    contractions_1: list[set[ContractionPath]],
+) -> list[set[ContractionPath]]:
+    # We want a list of all sets of paths such that all paths
+    # are only present in a single set in contractions_0 and contractions_1.
+    contractions = list[set[ContractionPath]]()
+    for contraction_0 in contractions_0:
+        for contraction_1 in contractions_1:
+            common_paths = contraction_0.intersection(contraction_1)
+            if common_paths:
+                contractions.append(common_paths)
+    return contractions
+
+
+def _build_index_from_contraction_paths(
+    contractions: list[set[ContractionPath]],
+    shape_at_path: NestedLength,
+    next_free_idx: int,
+    current_path: ContractionPath = (),
+) -> tuple[NestedIndex, int]:
+    """Build a nested index from the contraction paths."""
+    path_idx = next(
+        (i for i, path in enumerate(contractions) if current_path in path), None
+    )
+    if path_idx is not None:
+        return (path_idx, next_free_idx)
+
+    if isinstance(shape_at_path, int):
+        return (next_free_idx, next_free_idx + 1)
+
+    ret = list[NestedIndex]()
+    for i, shape in enumerate(shape_at_path):
+        (child_idx, next_free_idx) = _build_index_from_contraction_paths(
+            contractions,
+            shape_at_path=shape,
+            next_free_idx=next_free_idx,
+            current_path=(*current_path, i),
+        )
+        ret.append(child_idx)
+
+    return (tuple(ret), next_free_idx)
+
+
+def _get_basis_shape(basis: Basis) -> NestedLength:
+    """Get the shape of the basis at the given index."""
+    if is_tuple(basis):
+        return tuple(_get_basis_shape(child) for child in basis.children)
+    return basis.size
+
+
+def get_common_contraction_index(
+    basis: Basis,
+    index_1: NestedIndex,
+    index_2: NestedIndex,
+) -> NestedIndex:
+    common_contraction = _get_common_contraction(
+        list(_get_contraction_path_map(index_1).values()),
+        list(_get_contraction_path_map(index_2).values()),
+    )
+    return _build_index_from_contraction_paths(
+        common_contraction,
+        shape_at_path=_get_basis_shape(basis),
+        next_free_idx=max(
+            (-1, *_flatten_nested_index(index_1), *_flatten_nested_index(index_2))
+        )
+        + 1,
+    )[0]
+
+
+# TODO: fast conversion between different contracted representations # noqa: FIX002
 class ContractedBasis[
     B: Basis = Basis,
     CT: Ctype[Never] = Ctype[Never],
@@ -114,6 +214,11 @@ class ContractedBasis[
         self._index = index
         # Assert that it is possible to build the size map
         _ = self._size_map
+
+    @property
+    def index(self) -> NestedIndex:
+        """The index of the contraction."""
+        return self._index
 
     @cached_property
     def _size_map(self) -> dict[int, int]:
