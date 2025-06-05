@@ -5,7 +5,9 @@ from typing import Any
 import numpy as np
 import pytest
 
-from slate_core.metadata.volume._util import _project_directions
+from slate_core.metadata.volume._util import (
+    _project_directions,  # type: ignore import # noqa: PLC2701
+)
 
 
 def _normalize_directions(
