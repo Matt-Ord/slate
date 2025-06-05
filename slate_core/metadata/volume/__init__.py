@@ -12,7 +12,7 @@ from slate_core.metadata.volume._util import (
 )
 from slate_core.metadata.volume._volume import (
     AxisDirections,
-    SpacedVolumeMetadata,
+    EvenlySpacedVolumeMetadata,
     VolumeMetadata,
     fundamental_reciprocal_volume,
     fundamental_stacked_delta_k,
@@ -26,7 +26,7 @@ from slate_core.metadata.volume._volume import (
 
 __all__ = [
     "AxisDirections",
-    "SpacedVolumeMetadata",
+    "EvenlySpacedVolumeMetadata",
     "VolumeMetadata",
     "fundamental_reciprocal_volume",
     "fundamental_stacked_delta_k",

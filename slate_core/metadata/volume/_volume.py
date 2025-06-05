@@ -8,7 +8,7 @@ import numpy as np
 
 from slate_core.metadata._shape import shallow_shape_from_nested
 from slate_core.metadata._tuple import TupleMetadata
-from slate_core.metadata.length import LengthMetadata, SpacedLengthMetadata
+from slate_core.metadata.length import EvenlySpacedLengthMetadata, LengthMetadata
 from slate_core.metadata.util import (
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,
@@ -49,8 +49,8 @@ class AxisDirections:
 
 
 type VolumeMetadata = TupleMetadata[tuple[LengthMetadata, ...], AxisDirections]
-type SpacedVolumeMetadata = TupleMetadata[
-    tuple[SpacedLengthMetadata, ...], AxisDirections
+type EvenlySpacedVolumeMetadata = TupleMetadata[
+    tuple[EvenlySpacedLengthMetadata, ...], AxisDirections
 ]
 
 
@@ -68,7 +68,7 @@ def fundamental_stacked_delta_x(
 
 
 def fundamental_stacked_dx(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental stacked dx."""
     scaled = cast(
@@ -83,14 +83,14 @@ def fundamental_stacked_dx(
 
 
 def fundamental_stacked_dk(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental stacked dk."""
     return tuple(2 * np.pi * np.linalg.inv(fundamental_stacked_delta_x(metadata)).T)
 
 
 def fundamental_stacked_delta_k(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental stacked delta k."""
     scaled = cast(
@@ -108,7 +108,7 @@ def fundamental_volume(metadata: VolumeMetadata) -> float:
 
 
 def fundamental_reciprocal_volume(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
 ) -> float:
     """Get the fundamental reciprocal volume."""
     return np.linalg.det(fundamental_stacked_delta_k(metadata))
@@ -150,7 +150,7 @@ def _wrap_and_offset(
 
 
 def _fundamental_stacked_x_points_evenly_spaced(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     return tuple(
         cast(
@@ -179,9 +179,9 @@ def fundamental_stacked_x_points(
     wrapped: bool = False,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the stacked coordinates, using the x convention (0...N)."""
-    if all(isinstance(c, SpacedLengthMetadata) for c in metadata.children):
+    if all(isinstance(c, EvenlySpacedLengthMetadata) for c in metadata.children):
         points = _fundamental_stacked_x_points_evenly_spaced(
-            cast("SpacedVolumeMetadata", metadata)
+            cast("EvenlySpacedVolumeMetadata", metadata)
         )
     else:
         points = _fundamental_stacked_x_points_generic(metadata)
@@ -190,7 +190,7 @@ def fundamental_stacked_x_points(
 
 
 def fundamental_stacked_k_points(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
     *,
     offset: tuple[float, ...] | None = None,
     wrapped: bool = False,

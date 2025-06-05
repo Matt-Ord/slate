@@ -9,7 +9,7 @@ from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
 from slate_core.array._conversion import as_fundamental_basis
 from slate_core.metadata import AxisDirections, LabeledMetadata
-from slate_core.metadata._metadata import SpacedLabeledMetadata
+from slate_core.metadata._metadata import EvenlySpacedMetadata, SpacedMetadata
 from slate_core.metadata.length import (
     fundamental_k_points,
 )
@@ -40,8 +40,12 @@ if TYPE_CHECKING:
 
     from slate_core.basis._basis import Basis, Ctype
     from slate_core.basis._tuple import TupleBasis, TupleBasisLike
-    from slate_core.metadata import BasisMetadata, SpacedVolumeMetadata, TupleMetadata
-    from slate_core.metadata.length import SpacedLengthMetadata
+    from slate_core.metadata import (
+        BasisMetadata,
+        EvenlySpacedVolumeMetadata,
+        TupleMetadata,
+    )
+    from slate_core.metadata.length import EvenlySpacedLengthMetadata
 
 
 class PlotKwargs(TypedDict, total=False):
@@ -139,8 +143,8 @@ def _get_basis_weights(
     basis: Basis,
 ) -> np.ndarray[Any, np.dtype[np.floating]] | None:
     basis_metadata = basis.metadata()
-    if isinstance(basis_metadata, LabeledMetadata) and not isinstance(
-        basis_metadata, SpacedLabeledMetadata
+    if isinstance(basis_metadata, SpacedMetadata) and not isinstance(
+        basis_metadata, EvenlySpacedMetadata
     ):
         return basis_metadata.quadrature_weights[basis.points]
     return None
@@ -231,7 +235,7 @@ def array_against_axes_1d[DT: np.dtype[np.number]](
 
 
 def array_against_axes_1d_k[DT: np.dtype[np.complexfloating]](
-    data: Array[Basis[SpacedVolumeMetadata], DT],
+    data: Array[Basis[EvenlySpacedVolumeMetadata], DT],
     axes: tuple[int,] = (0,),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -426,7 +430,7 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
 
 
 def _get_frequencies_in_axes[E](
-    metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...], E],
+    metadata: TupleMetadata[tuple[EvenlySpacedLengthMetadata, ...], E],
     axes: tuple[int, ...],
 ) -> np.ndarray[tuple[int, ...], np.dtype[np.floating]]:
     """Get the lengths from each axis in a grid."""
@@ -436,7 +440,7 @@ def _get_frequencies_in_axes[E](
 
 
 def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
-    data: Array[TupleBasisLike[tuple[SpacedLengthMetadata, ...], E], DT],
+    data: Array[TupleBasisLike[tuple[EvenlySpacedLengthMetadata, ...], E], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -475,7 +479,7 @@ def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
     )
 
     if isinstance(metadata.extra, AxisDirections):
-        metadata = cast("SpacedVolumeMetadata", metadata)
+        metadata = cast("EvenlySpacedVolumeMetadata", metadata)
         coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
     else:
         coordinates = _get_frequencies_in_axes(metadata, axes)
