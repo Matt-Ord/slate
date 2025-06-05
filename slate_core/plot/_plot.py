@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 
 import numpy as np
+from matplotlib.collections import QuadMesh
 
 from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
@@ -33,8 +34,8 @@ from slate_core.util import (
 )
 
 if TYPE_CHECKING:
-    from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
+    from matplotlib.text import Text
 
     from slate_core.basis._basis import Basis, Ctype
     from slate_core.basis._tuple import TupleBasis, TupleBasisLike
@@ -266,6 +267,12 @@ def _has_colorbar(axis: Axes) -> bool:
     return colourbar is not None
 
 
+def _get_max_clim(
+    clim: list[tuple[float, float]],
+) -> tuple[float, float]:
+    return min(c[0] for c in clim), max(c[1] for c in clim)
+
+
 def _plot_raw_data_2d[DT: np.dtype[np.number]](
     data: np.ndarray[Any, DT],
     coordinates: tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...]
@@ -285,10 +292,22 @@ def _plot_raw_data_2d[DT: np.dtype[np.number]](
         if coordinates is None
         else ax.pcolormesh(*coordinates, measured_data, shading="nearest")
     )
-    clim = get_lim((None, None), measure, measured_data)
+
+    meshes = [
+        mesh,
+        *(child for child in ax.get_children() if isinstance(child, QuadMesh)),
+    ]
+    clim = _get_max_clim(
+        [
+            get_lim((None, None), measure, measured_data),
+            *(x.get_clim() for x in meshes[1:]),
+        ]
+    )
     norm = get_norm_with_lim(scale, clim)
-    mesh.set_norm(norm)
-    mesh.set_clim(*clim)
+
+    for m in meshes:
+        m.set_norm(norm)
+        m.set_clim(*clim)
     ax.set_aspect("equal", adjustable="box")
     if not _has_colorbar(ax):
         fig.colorbar(mesh, ax=ax, format="%4.1e")
@@ -316,11 +335,28 @@ def _get_tuple_basis_units(
     return tuple(_get_basis_units(basis.children[ax]) for ax in axes)
 
 
+def index_text(ax: Axes, idx: tuple[int, ...]) -> Text:
+    return ax.text(
+        0.05,
+        0.95,
+        f"x = {idx}",
+        transform=ax.transAxes,
+        verticalalignment="top",
+        bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
+    )
+
+
+class PlotKwargs2D(PlotKwargs, total=False):
+    """Extra arguments to plot functions."""
+
+    plot_index_text: bool
+
+
 def array_against_axes_2d[DT: np.dtype[np.number], E](
     data: Array[Basis[TupleMetadata[tuple[BasisMetadata, ...], E]], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
-    **kwargs: Unpack[PlotKwargs],
+    **kwargs: Unpack[PlotKwargs2D],
 ) -> tuple[Figure, Axes, QuadMesh]:
     """
     Plot the data in 2d along the x axis in the given basis.
@@ -355,20 +391,19 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
     coordinates = _get_tuple_basis_coordinates(basis_x, axes)
     data_in_axis = get_data_in_axes(data, axes, idx)
 
-    fig, ax, mesh = _plot_raw_data_2d(data_in_axis.as_array(), coordinates, **kwargs)
+    fig, ax, mesh = _plot_raw_data_2d(
+        data_in_axis.as_array(),
+        coordinates,
+        ax=kwargs.get("ax"),
+        scale=kwargs.get("scale", "linear"),
+        measure=kwargs.get("measure", "real"),
+    )
 
     unit_0, unit_1 = _get_tuple_basis_units(basis_x, axes)
     ax.set_xlabel(f"x{axes[0]} axis ({unit_0})")
     ax.set_ylabel(f"x{axes[1]} axis ({unit_1})")
-    if len(idx) > 0:
-        ax.text(
-            0.05,
-            0.95,
-            f"x = {idx}",
-            transform=ax.transAxes,
-            verticalalignment="top",
-            bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
-        )
+    if len(idx) > 0 and kwargs.get("plot_index_text", True):
+        index_text(ax, idx)
     return fig, ax, mesh
 
 
