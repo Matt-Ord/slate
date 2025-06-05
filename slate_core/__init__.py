@@ -17,7 +17,11 @@ from slate_core.basis import (
 from slate_core.metadata import (
     AnyMetadata,
     BasisMetadata,
+    LabeledMetadata,
+    LengthMetadata,
     SimpleMetadata,
+    SpacedLengthMetadata,
+    SpacedVolumeMetadata,
     TupleMetadata,
 )
 
@@ -30,7 +34,11 @@ __all__ = [
     "BasisMetadata",
     "Ctype",
     "FundamentalBasis",
+    "LabeledMetadata",
+    "LengthMetadata",
     "SimpleMetadata",
+    "SpacedLengthMetadata",
+    "SpacedVolumeMetadata",
     "TransformedBasis",
     "TupleBasis",
     "TupleBasisLike",

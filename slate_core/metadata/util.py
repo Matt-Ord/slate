@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate_core.metadata._metadata import BasisMetadata, SimpleMetadata
+from slate_core.metadata._metadata import BasisMetadata, LabeledMetadata, SimpleMetadata
 from slate_core.metadata._shape import shallow_shape_from_nested, size_from_nested_shape
+from slate_core.util._product import outer_product
+
+if TYPE_CHECKING:
+    from ._tuple import TupleMetadata
 
 
 def fundamental_size(
@@ -63,3 +67,11 @@ def fundamental_stacked_nk_points(
         indexing="ij",
     )
     return tuple(nki.ravel() for nki in mesh)
+
+
+def fundamental_stacked_weights(
+    metadata: TupleMetadata[tuple[LabeledMetadata[Any], ...], Any],
+) -> np.ndarray[Any, np.dtype[np.floating]]:
+    """Get the fundamental weights for a stacked metadata."""
+    weights = tuple(i.quadrature_weights for i in metadata.children)
+    return outer_product(*weights)
