@@ -11,6 +11,7 @@ from slate_core.plot._plot import (
     array_against_axes_2d,
     array_against_axes_2d_k,
     array_against_basis,
+    index_text,
 )
 from slate_core.plot._util import (
     Axes,
@@ -24,6 +25,7 @@ from slate_core.plot._util import (
 if TYPE_CHECKING:
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
+    from matplotlib.text import Text
 
     from slate_core.array import Array
     from slate_core.basis import TupleBasisLike
@@ -53,7 +55,7 @@ def animate_array_over_list[DT: np.dtype[np.number]](
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
     periodic: bool = False,
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
@@ -85,7 +87,7 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
@@ -114,7 +116,7 @@ def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
@@ -146,7 +148,7 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
@@ -176,7 +178,7 @@ def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
@@ -209,8 +211,8 @@ def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
-) -> tuple[Figure, Axes, TupleAnimation[QuadMesh]]:
+    measure: Measure = "real",
+) -> tuple[Figure, Axes, TupleAnimation[QuadMesh, Text]]:
     """
     Given data, animate along the given direction.
 
@@ -235,20 +237,23 @@ def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
     """
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)
-    idx = tuple(0 for _ in range(len(shape) - 2)) if idx is None else idx
+    idx = tuple(0 for _ in range(len(shape) - 3)) if idx is None else idx
 
-    frames: list[tuple[QuadMesh]] = []
+    frames: list[tuple[QuadMesh, Text]] = []
 
     for idx_x0 in range(shape[axes[2]]):
+        slice_idx = _get_slice_idx(axes, idx_x0, idx)
         _, _, mesh = array_against_axes_2d(
             data,
             axes[:2],
-            _get_slice_idx(axes, idx_x0, idx),
+            slice_idx,
             ax=ax,
             scale=scale,
             measure=measure,
+            plot_index_text=False,
         )
-        frames.append((mesh,))
+        text = index_text(ax, slice_idx)
+        frames.append((mesh, text))
 
     ani = TupleAnimation(fig, frames)
     return fig, ax, ani
@@ -261,7 +266,7 @@ def animate_data_2d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
-    measure: Measure = "abs",
+    measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[QuadMesh]]:
     """
     Given data, animate along the given direction.

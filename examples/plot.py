@@ -8,6 +8,8 @@ from slate_core.array import Array
 if __name__ == "__main__":
     rng = np.random.default_rng()
     raw_data = rng.random((10, 10, 10), dtype=np.float64)
+    raw_data[0, 0, 0] = -2
+    raw_data[9, 9, 9] = 2
     data = Array.from_array(raw_data)
 
     # Any data can be plotted

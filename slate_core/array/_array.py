@@ -50,7 +50,7 @@ def _index_tuple_raw_along_axis(
     *,
     axis: int = -1,
 ) -> tuple[Basis | None, np.ndarray[Any, Any]]:
-    axis &= data.ndim
+    axis %= data.ndim
     tuple_basis = basis.as_tuple(basis.as_linear_map(data_basis))
     children = tuple_basis.children
     stacked_shape = (
@@ -61,7 +61,7 @@ def _index_tuple_raw_along_axis(
     data = data.reshape(stacked_shape)
 
     final_basis = list[Basis]()
-    for child_index, child in zip(index, children, strict=False):
+    for child_index, child in zip(index, children, strict=True):
         child_axis = axis + len(final_basis)
         meta, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
         if meta is not None:
