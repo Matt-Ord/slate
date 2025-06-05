@@ -28,7 +28,7 @@ def _project_directions(
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     # Perform QR decomposition to get an orthonormal basis of the column space
     _q, r = np.linalg.qr(np.column_stack(directions))
-    # We want thefirst vector to be (1,0,...)
+    # We want the first vector to be (1,0,...)
     if r[0, 0] < 0:
         r[0, :] *= -1
     return tuple(r.T)

@@ -71,7 +71,6 @@ __all__ = [
     "array_against_axes_1d",
     "array_against_axes_1d_k",
     "array_against_axes_2d",
-    "array_against_axes_2d",
     "array_against_axes_2d_k",
     "array_against_basis",
     "array_distribution",
