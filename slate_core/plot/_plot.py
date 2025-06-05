@@ -7,16 +7,14 @@ import numpy as np
 from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
 from slate_core.array._conversion import as_fundamental_basis
-from slate_core.basis import from_metadata
 from slate_core.metadata import AxisDirections, LabeledMetadata
 from slate_core.metadata.length import (
     fundamental_k_points,
-    fundamental_x_points,
 )
 from slate_core.metadata.volume import (
     get_k_coordinates_in_axes,
-    get_x_coordinates_in_axes,
 )
+from slate_core.metadata.volume._util import project_points_along_axes
 from slate_core.plot._util import (
     Axes,
     Figure,
@@ -39,7 +37,7 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
 
     from slate_core.basis._basis import Basis, Ctype
-    from slate_core.basis._tuple import TupleBasisLike
+    from slate_core.basis._tuple import TupleBasis, TupleBasisLike
     from slate_core.metadata import BasisMetadata, SpacedVolumeMetadata, TupleMetadata
     from slate_core.metadata.length import SpacedLengthMetadata
 
@@ -125,9 +123,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
     )
 
 
-def _get_basis_coordinates(
-    basis: Basis,
-) -> np.ndarray[Any, np.dtype[np.floating]]:
+def _get_basis_coordinates(basis: Basis) -> np.ndarray[Any, np.dtype[np.floating]]:
     metadata = basis.metadata()
     if isinstance(metadata, LabeledMetadata):
         values = metadata.values.astype(np.float64)  # type: ignore unknown
@@ -135,6 +131,14 @@ def _get_basis_coordinates(
     else:
         coordinates = basis.points.astype(np.float64)
     return coordinates
+
+
+def _get_basis_units(basis: Basis) -> str:
+    metadata = basis.metadata()
+    if isinstance(metadata, LabeledMetadata):
+        return metadata.unit
+    # Otherwise we use the index of the basis
+    return "idx"
 
 
 def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -264,7 +268,8 @@ def _has_colorbar(axis: Axes) -> bool:
 
 def _plot_raw_data_2d[DT: np.dtype[np.number]](
     data: np.ndarray[Any, DT],
-    coordinates: np.ndarray[tuple[int, ...], np.dtype[np.floating]] | None = None,
+    coordinates: tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...]
+    | None = None,
     *,
     ax: Axes | None = None,
     scale: Scale = "linear",
@@ -290,45 +295,29 @@ def _plot_raw_data_2d[DT: np.dtype[np.number]](
     return fig, ax, mesh
 
 
-def _get_coordinates_grid(
-    metadata: TupleMetadata,
-) -> np.ndarray[Any, np.dtype[np.floating]]:
-    """Get the lengths from each axis in a grid."""
-    points = tuple(_get_basis_coordinates(from_metadata(m)) for m in metadata.children)
-    aa = np.meshgrid(*points, indexing="ij")
-    return np.asarray(aa)
-
-
-def array_against_axes_2d[
-    M: TupleMetadata[tuple[BasisMetadata, ...], Any],
-    DT: np.dtype[np.number],
-](
-    data: Array[Basis[M], DT],
-    axes: tuple[int, int] = (0, 1),
-    idx: tuple[int, ...] | None = None,
-    **kwargs: Unpack[PlotKwargs],
-) -> tuple[Figure, Axes, QuadMesh]:
-    metadata = data.basis.metadata()
-    idx = tuple(0 for _ in range(metadata.n_dim - 2)) if idx is None else idx
-
-    data_in_axis = get_data_in_axes(data, axes, idx)
-
-    coordinates = _get_coordinates_grid(data_in_axis.basis.metadata())
-    return _plot_raw_data_2d(data_in_axis.as_array(), coordinates, **kwargs)
-
-
-def _get_lengths_in_axes(
-    metadata: TupleMetadata[tuple[SpacedLengthMetadata, ...], Any],
+def _get_tuple_basis_coordinates(
+    basis: TupleBasis[tuple[Basis[BasisMetadata, Any], ...], Any],
     axes: tuple[int, ...],
-) -> np.ndarray[Any, np.dtype[np.floating]]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the lengths from each axis in a grid."""
-    points = tuple(fundamental_x_points(metadata.children[ax]) for ax in axes)
-    aa = np.meshgrid(*points, indexing="ij")
-    return np.asarray(aa)
+    points = tuple(_get_basis_coordinates(basis.children[ax]) for ax in axes)
+    mesh = np.meshgrid(*points, indexing="ij")
+    if isinstance(basis.metadata().extra, AxisDirections):
+        return project_points_along_axes(mesh, basis.metadata().extra, axes=axes)
+
+    return mesh
 
 
-def array_against_axes_2d_x[DT: np.dtype[np.number], E](
-    data: Array[Basis[TupleMetadata[tuple[SpacedLengthMetadata, ...], E]], DT],
+def _get_tuple_basis_units(
+    basis: TupleBasis[tuple[Basis[BasisMetadata, Any], ...], Any],
+    axes: tuple[int, ...],
+) -> tuple[str, ...]:
+    """Get the lengths from each axis in a grid."""
+    return tuple(_get_basis_units(basis.children[ax]) for ax in axes)
+
+
+def array_against_axes_2d[DT: np.dtype[np.number], E](
+    data: Array[Basis[TupleMetadata[tuple[BasisMetadata, ...], E]], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     **kwargs: Unpack[PlotKwargs],
@@ -363,18 +352,14 @@ def array_against_axes_2d_x[DT: np.dtype[np.number], E](
 
     idx = get_max_idx(converted_data, axes=axes) if idx is None else idx
 
-    if isinstance(metadata.extra, AxisDirections):
-        metadata = cast("SpacedVolumeMetadata", metadata)
-        coordinates = get_x_coordinates_in_axes(metadata, axes, idx)
-    else:
-        coordinates = _get_lengths_in_axes(metadata, axes)
-
+    coordinates = _get_tuple_basis_coordinates(basis_x, axes)
     data_in_axis = get_data_in_axes(data, axes, idx)
 
     fig, ax, mesh = _plot_raw_data_2d(data_in_axis.as_array(), coordinates, **kwargs)
 
-    ax.set_xlabel(f"x{axes[0]} axis / m")
-    ax.set_ylabel(f"x{axes[1]} axis / m")
+    unit_0, unit_1 = _get_tuple_basis_units(basis_x, axes)
+    ax.set_xlabel(f"x{axes[0]} axis ({unit_0})")
+    ax.set_ylabel(f"x{axes[1]} axis ({unit_1})")
     if len(idx) > 0:
         ax.text(
             0.05,
@@ -446,7 +431,9 @@ def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
     shifted_data = np.fft.fftshift(data_in_axis.as_array())
     shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))
 
-    fig, ax, mesh = _plot_raw_data_2d(shifted_data, shifted_coordinates, **kwargs)
+    fig, ax, mesh = _plot_raw_data_2d(
+        shifted_data, tuple(shifted_coordinates), **kwargs
+    )
 
     ax.set_xlabel(f"k{axes[0]} axis / $m^-1$")
     ax.set_ylabel(f"k{axes[1]} axis / $m^-1$")

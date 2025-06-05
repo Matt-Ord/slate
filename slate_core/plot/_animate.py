@@ -8,8 +8,8 @@ from slate_core.metadata import shallow_shape_from_nested
 from slate_core.plot._plot import (
     array_against_axes_1d,
     array_against_axes_1d_k,
+    array_against_axes_2d,
     array_against_axes_2d_k,
-    array_against_axes_2d_x,
     array_against_basis,
 )
 from slate_core.plot._util import (
@@ -33,6 +33,7 @@ if TYPE_CHECKING:
         SimpleMetadata,
         SpacedVolumeMetadata,
     )
+    from slate_core.metadata._tuple import TupleMetadata
 
 
 def _get_slice_idx(
@@ -40,7 +41,7 @@ def _get_slice_idx(
     x_0_idx: int,
     idx: tuple[int, ...],
 ) -> tuple[int, ...]:
-    insert_pos = axes[0] - len([i for i in axes if i < axes[0]])
+    insert_pos = axes[2] - len([i for i in axes if i < axes[2]])
     return (*idx[:insert_pos], x_0_idx, *idx[insert_pos:])
 
 
@@ -122,10 +123,10 @@ def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
 
     frames: list[tuple[Line2D]] = []
 
-    for idx_x0 in range(shape[axes[0]]):
+    for idx_x0 in range(shape[axes[1]]):
         _, _, line = array_against_axes_1d(
             data,
-            axes[1:],
+            axes[:1],
             _get_slice_idx(axes, idx_x0, idx),
             ax=ax,
             scale=scale,
@@ -184,10 +185,10 @@ def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
 
     frames: list[tuple[Line2D]] = []
 
-    for idx_x0 in range(shape[axes[0]]):
+    for idx_x0 in range(shape[axes[1]]):
         _, _, line = array_against_axes_1d_k(
             data,
-            axes[1:],
+            axes[:1],
             _get_slice_idx(axes, idx_x0, idx),
             ax=ax,
             scale=scale,
@@ -201,8 +202,8 @@ def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     return fig, ax, ani
 
 
-def animate_data_2d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
-    data: Array[Basis[SpacedVolumeMetadata], DT],
+def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
+    data: Array[Basis[TupleMetadata], DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
@@ -238,10 +239,10 @@ def animate_data_2d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
 
     frames: list[tuple[QuadMesh]] = []
 
-    for idx_x0 in range(shape[axes[0]]):
-        _, _, mesh = array_against_axes_2d_x(
+    for idx_x0 in range(shape[axes[2]]):
+        _, _, mesh = array_against_axes_2d(
             data,
-            axes[1:],
+            axes[:2],
             _get_slice_idx(axes, idx_x0, idx),
             ax=ax,
             scale=scale,
@@ -289,10 +290,10 @@ def animate_data_2d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     idx = tuple(0 for _ in range(len(shape) - 2)) if idx is None else idx
 
     frames: list[tuple[QuadMesh]] = []
-    for idx_x0 in range(shape[axes[0]]):
+    for idx_x0 in range(shape[axes[2]]):
         _, _, mesh = array_against_axes_2d_k(
             data,
-            axes[1:],
+            axes[:2],
             _get_slice_idx(axes, idx_x0, idx),
             ax=ax,
             scale=scale,

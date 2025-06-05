@@ -13,12 +13,20 @@ from slate_core.metadata.util import nx_points
 if TYPE_CHECKING:
     from slate_core.metadata._tuple import TupleMetadata
 
+# TODO: use some combination of shifted and contrated basis to implement this  # noqa: FIX002
+
 
 class IsotropicBasis[
     B: TupleBasis[tuple[Basis, Basis], Any],
     CT: Ctype[Never] = Ctype[Never],
 ](WrappedBasis[B, CT]):
-    """Represents an isotropic basis."""
+    """Represents an isotropic basis.
+
+    An isotropic basis is a basis M_ij where
+    M_ij = M_{i+k}_{j+k} for all i, j, k.
+
+    we therefore only store M_0i
+    """
 
     def __init__[B_: TupleBasis[tuple[Basis, Basis], Any]](
         self: IsotropicBasis[B_], inner: B_
