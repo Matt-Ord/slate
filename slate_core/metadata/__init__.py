@@ -26,6 +26,7 @@ from slate_core.metadata.util import (
     fundamental_size,
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,
+    fundamental_stacked_weights,
 )
 from slate_core.metadata.volume import (
     AxisDirections,
@@ -56,6 +57,7 @@ __all__ = [
     "fundamental_size",
     "fundamental_stacked_nk_points",
     "fundamental_stacked_nx_points",
+    "fundamental_stacked_weights",
     "is_simple_metadata",
     "is_tuple_metadata",
     "length",
