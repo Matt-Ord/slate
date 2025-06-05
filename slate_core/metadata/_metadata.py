@@ -47,6 +47,11 @@ class LabeledMetadata[DT: np.dtype[np.generic]](SimpleMetadata, ABC):
         """Shape of the full data."""
 
     @property
+    @abstractmethod
+    def quadrature_weights(self) -> np.ndarray[Any, np.dtype[np.floating]]:
+        """Quadrature weights for the metadata."""
+
+    @property
     def unit(self) -> str:
         """Unit value for the metadata."""
         return "a.u."
@@ -62,8 +67,13 @@ class DeltaMetadata[DT: np.dtype[np.generic]](LabeledMetadata[DT], ABC):
 class ExplicitLabeledMetadata[DT: np.dtype[np.generic]](LabeledMetadata[DT]):
     """A metadata with some data associated to each location."""
 
-    def __init__(self, values: np.ndarray[Any, DT]) -> None:
+    def __init__(
+        self,
+        values: np.ndarray[Any, DT],
+        weights: np.ndarray[Any, np.dtype[np.floating]],
+    ) -> None:
         self._values = values
+        self._weights = weights
         super().__init__(values.shape)
 
     @property
@@ -71,6 +81,11 @@ class ExplicitLabeledMetadata[DT: np.dtype[np.generic]](LabeledMetadata[DT]):
     def values(self) -> np.ndarray[Any, DT]:
         """Shape of the full data."""
         return self._values
+
+    @property
+    @override
+    def quadrature_weights(self) -> np.ndarray[Any, np.dtype[np.floating]]:
+        return self._weights
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -94,6 +109,15 @@ class SpacedLabeledMetadata(DeltaMetadata[np.dtype[np.floating]]):
             self.spacing.delta + self.spacing.start,
             np.prod(self.fundamental_shape),
         )
+
+    @property
+    @override
+    def quadrature_weights(self) -> np.ndarray[Any, np.dtype[np.floating]]:
+        """Quadrature weights for the metadata.
+
+        An evenly spaced metadata has a unit weight for each point.
+        """
+        return np.ones(np.prod(self.fundamental_shape))
 
     @property
     @override

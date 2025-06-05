@@ -9,6 +9,7 @@ from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
 from slate_core.array._conversion import as_fundamental_basis
 from slate_core.metadata import AxisDirections, LabeledMetadata
+from slate_core.metadata._metadata import SpacedLabeledMetadata
 from slate_core.metadata.length import (
     fundamental_k_points,
 )
@@ -134,6 +135,17 @@ def _get_basis_coordinates(basis: Basis) -> np.ndarray[Any, np.dtype[np.floating
     return coordinates
 
 
+def _get_basis_weights(
+    basis: Basis,
+) -> np.ndarray[Any, np.dtype[np.floating]] | None:
+    basis_metadata = basis.metadata()
+    if isinstance(basis_metadata, LabeledMetadata) and not isinstance(
+        basis_metadata, SpacedLabeledMetadata
+    ):
+        return basis_metadata.quadrature_weights[basis.points]
+    return None
+
+
 def _get_basis_units(basis: Basis) -> str:
     metadata = basis.metadata()
     if isinstance(metadata, LabeledMetadata):
@@ -169,6 +181,9 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     """
     converted = array.as_index_basis(array.as_supports_type_basis(data, np.floating))
     coordinates = _get_basis_coordinates(converted.basis)
+    weights = _get_basis_weights(converted.basis)
+    if weights is not None:
+        converted = Array(converted.basis, weights * converted.raw_data)
     return array_against_array(
         Array(converted.basis, coordinates),
         converted,
@@ -390,6 +405,9 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
 
     coordinates = _get_tuple_basis_coordinates(basis_x, axes)
     data_in_axis = get_data_in_axes(data, axes, idx)
+    # TODO: we need to handle non-uniform grids here  # noqa: FIX002
+    # and apply the apropriate quadrature weights when we generate
+    # pixel values
 
     fig, ax, mesh = _plot_raw_data_2d(
         data_in_axis.as_array(),
