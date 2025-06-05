@@ -16,29 +16,12 @@ from slate_core.metadata.volume._volume import (
     fundamental_stacked_delta_k,
     fundamental_stacked_k_points,
     fundamental_stacked_x_points,
+    project_points_along_directions,
 )
 from slate_core.util import (
     get_position_in_sorted,
     slice_ignoring_axes,
 )
-
-
-def _project_directions(
-    directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
-) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
-    # Perform QR decomposition to get an orthonormal basis of the column space
-    _q, r = np.linalg.qr(np.column_stack(directions))
-    # We want the first vector to be (1,0,...)
-    if r[0, 0] < 0:
-        r[0, :] *= -1
-    return tuple(r.T)
-
-
-def _project_points_along_directions(
-    points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
-    directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
-) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
-    return tuple(np.tensordot(_project_directions(directions), points, axes=(0, 0)))
 
 
 def _project_k_points_along_axes(
@@ -49,9 +32,7 @@ def _project_k_points_along_axes(
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the list of k points projected onto the plane including both axes."""
     directions = fundamental_stacked_delta_k(metadata)
-    return _project_points_along_directions(
-        points, tuple(directions[ax] for ax in axes)
-    )
+    return project_points_along_directions(points, tuple(directions[ax] for ax in axes))
 
 
 def get_fundamental_stacked_k_points_projected_along_axes(
@@ -93,7 +74,7 @@ def project_points_along_axes(
     axes: tuple[int, ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the list of points projected onto the plane including both axes."""
-    return _project_points_along_directions(
+    return project_points_along_directions(
         points, tuple(directions.vectors[ax] for ax in axes)
     )
 

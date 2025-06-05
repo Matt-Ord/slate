@@ -114,6 +114,24 @@ def fundamental_reciprocal_volume(
     return np.linalg.det(fundamental_stacked_delta_k(metadata))
 
 
+def _project_directions(
+    directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    # Perform QR decomposition to get an orthonormal basis of the column space
+    _q, r = np.linalg.qr(np.column_stack(directions))
+    # We want the first vector to be (1,0,...)
+    if r[0, 0] < 0:
+        r[0, :] *= -1
+    return tuple(r.T)
+
+
+def project_points_along_directions(
+    points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
+    directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    return tuple(np.tensordot(_project_directions(directions), points, axes=(0, 0)))
+
+
 def _wrap_and_offset(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     delta: tuple[float, ...],
@@ -131,14 +149,10 @@ def _wrap_and_offset(
     return points
 
 
-def fundamental_stacked_x_points(
+def _fundamental_stacked_x_points_evenly_spaced(
     metadata: SpacedVolumeMetadata,
-    *,
-    offset: tuple[float, ...] | None = None,
-    wrapped: bool = False,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
-    """Get the stacked coordinates, using the x convention (0...N)."""
-    points = tuple(
+    return tuple(
         cast(
             "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
             np.einsum(  # type: ignore unknown
@@ -148,6 +162,29 @@ def fundamental_stacked_x_points(
             ),
         )
     )
+
+
+def _fundamental_stacked_x_points_generic(
+    metadata: VolumeMetadata,
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    return project_points_along_directions(
+        np.meshgrid(*(c.values for c in metadata.children)), metadata.extra.vectors
+    )
+
+
+def fundamental_stacked_x_points(
+    metadata: VolumeMetadata,
+    *,
+    offset: tuple[float, ...] | None = None,
+    wrapped: bool = False,
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    """Get the stacked coordinates, using the x convention (0...N)."""
+    if all(isinstance(c, SpacedLengthMetadata) for c in metadata.children):
+        points = _fundamental_stacked_x_points_evenly_spaced(
+            cast("SpacedVolumeMetadata", metadata)
+        )
+    else:
+        points = _fundamental_stacked_x_points_generic(metadata)
     delta = tuple(np.linalg.norm(fundamental_stacked_delta_x(metadata), axis=1))
     return _wrap_and_offset(points, delta, offset=offset, wrapped=wrapped)
 

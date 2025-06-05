@@ -5,8 +5,8 @@ from typing import Any
 import numpy as np
 import pytest
 
-from slate_core.metadata.volume._util import (
-    _project_directions,  # type: ignore import # noqa: PLC2701
+from slate_core.metadata.volume._volume import (
+    _project_directions,  # noqa: PLC2701 # type: ignore[import-untyped]
 )
 
 
