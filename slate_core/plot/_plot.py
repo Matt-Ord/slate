@@ -187,7 +187,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     coordinates = _get_basis_coordinates(converted.basis)
     weights = _get_basis_weights(converted.basis)
     if weights is not None:
-        converted = Array(converted.basis, weights * converted.raw_data)
+        converted = Array(converted.basis, converted.raw_data / weights)
     return array_against_array(
         Array(converted.basis, coordinates),
         converted,
