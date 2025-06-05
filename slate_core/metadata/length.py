@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, override
 
 import numpy as np
 
@@ -17,6 +17,11 @@ from slate_core.metadata.util import (
 
 class LengthMetadata(DeltaMetadata[np.dtype[np.floating]]):
     """Metadata with the addition of length."""
+
+    @property
+    @override
+    def unit(self) -> str:
+        return "m"
 
 
 class SpacedLengthMetadata(SpacedLabeledMetadata, LengthMetadata):

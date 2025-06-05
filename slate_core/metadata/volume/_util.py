@@ -14,7 +14,6 @@ from slate_core.metadata.volume._volume import (
     SpacedVolumeMetadata,
     TupleMetadata,
     fundamental_stacked_delta_k,
-    fundamental_stacked_delta_x,
     fundamental_stacked_k_points,
     fundamental_stacked_x_points,
 )
@@ -24,19 +23,22 @@ from slate_core.util import (
 )
 
 
+def _project_directions(
+    directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    # Perform QR decomposition to get an orthonormal basis of the column space
+    _q, r = np.linalg.qr(np.column_stack(directions))
+    # We want thefirst vector to be (1,0,...)
+    if r[0, 0] < 0:
+        r[0, :] *= -1
+    return tuple(r.T)
+
+
 def _project_points_along_directions(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
-) -> np.ndarray[Any, np.dtype[np.floating]]:
-    projected_axes = np.zeros(np.shape(directions))
-    for i, direction in enumerate(directions):
-        projected = direction.copy()
-        for j in range(i):
-            projected -= projected_axes[j] * np.dot(projected_axes[j], projected)
-
-        projected_axes[i] = projected / np.linalg.norm(projected)
-
-    return np.tensordot(projected_axes, points, axes=(1, 0))
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    return tuple(np.tensordot(_project_directions(directions), points, axes=(0, 0)))
 
 
 def _project_k_points_along_axes(
@@ -44,7 +46,7 @@ def _project_k_points_along_axes(
     metadata: SpacedVolumeMetadata,
     *,
     axes: tuple[int, ...],
-) -> np.ndarray[Any, np.dtype[np.floating]]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the list of k points projected onto the plane including both axes."""
     directions = fundamental_stacked_delta_k(metadata)
     return _project_points_along_directions(
@@ -56,7 +58,7 @@ def get_fundamental_stacked_k_points_projected_along_axes(
     metadata: SpacedVolumeMetadata,
     *,
     axes: tuple[int, ...],
-) -> np.ndarray[tuple[int, int], np.dtype[np.floating]]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental_k_points projected onto the plane including both axes."""
     points = fundamental_stacked_k_points(metadata)
     return _project_k_points_along_axes(points, metadata, axes=axes)
@@ -78,22 +80,21 @@ def get_k_coordinates_in_axes(
     return cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
         np.transpose(
-            points.reshape(-1, *metadata.fundamental_shape)[:, *slice_],
+            np.asarray(points).reshape(-1, *metadata.fundamental_shape)[:, *slice_],
             (0, *(1 + np.array(get_position_in_sorted(axes)))),
         ),
     )
 
 
-def _project_x_points_along_axes(
+def project_points_along_axes(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
-    metadata: SpacedVolumeMetadata,
+    directions: AxisDirections,
     *,
     axes: tuple[int, ...],
-) -> np.ndarray[Any, np.dtype[np.floating]]:
-    """Get the list of k points projected onto the plane including both axes."""
-    directions = fundamental_stacked_delta_x(metadata)
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
+    """Get the list of points projected onto the plane including both axes."""
     return _project_points_along_directions(
-        points, tuple(directions[ax] for ax in axes)
+        points, tuple(directions.vectors[ax] for ax in axes)
     )
 
 
@@ -101,10 +102,10 @@ def get_fundamental_stacked_x_points_projected_along_axes(
     metadata: SpacedVolumeMetadata,
     *,
     axes: tuple[int, ...],
-) -> np.ndarray[tuple[int, int], np.dtype[np.floating]]:
+) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental_x_points projected onto the plane including both axes."""
     points = fundamental_stacked_x_points(metadata)
-    return _project_x_points_along_axes(points, metadata, axes=axes)
+    return project_points_along_axes(points, metadata.extra, axes=axes)
 
 
 def get_x_coordinates_in_axes(
@@ -123,7 +124,7 @@ def get_x_coordinates_in_axes(
     return cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
         np.transpose(
-            points.reshape(-1, *metadata.fundamental_shape)[:, *slice_],
+            np.asarray(points).reshape(-1, *metadata.fundamental_shape)[:, *slice_],
             (0, *(1 + np.array(get_position_in_sorted(axes)))),
         ),
     )

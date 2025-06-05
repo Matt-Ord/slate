@@ -46,6 +46,11 @@ class LabeledMetadata[DT: np.dtype[np.generic]](SimpleMetadata, ABC):
     def values(self) -> np.ndarray[Any, DT]:
         """Shape of the full data."""
 
+    @property
+    def unit(self) -> str:
+        """Unit value for the metadata."""
+        return "a.u."
+
 
 class DeltaMetadata[DT: np.dtype[np.generic]](LabeledMetadata[DT], ABC):
     @property
