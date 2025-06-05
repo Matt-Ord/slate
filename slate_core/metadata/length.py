@@ -5,8 +5,8 @@ from typing import Any, override
 import numpy as np
 
 from slate_core.metadata._metadata import (
-    DeltaMetadata,
-    SpacedLabeledMetadata,
+    EvenlySpacedMetadata,
+    SpacedMetadata,
 )
 from slate_core.metadata.util import (
     fundamental_nk_points,
@@ -15,7 +15,7 @@ from slate_core.metadata.util import (
 )
 
 
-class LengthMetadata(DeltaMetadata[np.dtype[np.floating]]):
+class LengthMetadata(SpacedMetadata[np.dtype[np.floating]]):
     """Metadata with the addition of length."""
 
     @property
@@ -24,7 +24,7 @@ class LengthMetadata(DeltaMetadata[np.dtype[np.floating]]):
         return "m"
 
 
-class SpacedLengthMetadata(SpacedLabeledMetadata, LengthMetadata):
+class EvenlySpacedLengthMetadata(EvenlySpacedMetadata, LengthMetadata):
     """Metadata with the addition of length."""
 
 
@@ -33,30 +33,30 @@ def fundamental_delta_x(metadata: LengthMetadata) -> float:
     return metadata.delta
 
 
-def fundamental_dx(metadata: SpacedLengthMetadata) -> float:
+def fundamental_dx(metadata: EvenlySpacedLengthMetadata) -> float:
     """Get the fundamental dx."""
     return fundamental_delta_x(metadata) / fundamental_size(metadata)
 
 
-def fundamental_dk(metadata: SpacedLengthMetadata) -> float:
+def fundamental_dk(metadata: EvenlySpacedLengthMetadata) -> float:
     """Get the fundamental dk."""
     return 2 * np.pi / fundamental_delta_x(metadata)
 
 
-def fundamental_delta_k(metadata: SpacedLengthMetadata) -> float:
+def fundamental_delta_k(metadata: EvenlySpacedLengthMetadata) -> float:
     """Get the fundamental delta k."""
     return fundamental_size(metadata) * fundamental_dk(metadata)
 
 
 def fundamental_x_points(
-    metadata: SpacedLengthMetadata,
+    metadata: EvenlySpacedLengthMetadata,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the coordinates, using the x convention (0...N)."""
     return fundamental_delta_x(metadata) * fundamental_nx_points(metadata)
 
 
 def fundamental_k_points(
-    metadata: SpacedLengthMetadata,
+    metadata: EvenlySpacedLengthMetadata,
 ) -> np.ndarray[Any, np.dtype[np.floating]]:
     """Get the coordinates, using the kx convention (0...N/2-N/2...)."""
     return fundamental_dk(metadata) * fundamental_nk_points(metadata)

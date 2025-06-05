@@ -32,8 +32,8 @@ if TYPE_CHECKING:
     from slate_core.basis._basis import Basis, Ctype
     from slate_core.metadata import (
         BasisMetadata,
+        EvenlySpacedVolumeMetadata,
         SimpleMetadata,
-        SpacedVolumeMetadata,
     )
     from slate_core.metadata._tuple import TupleMetadata
 
@@ -81,7 +81,7 @@ def animate_array_over_list[DT: np.dtype[np.number]](
 
 
 def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
-    data: Array[TupleBasisLike[tuple[SimpleMetadata, SpacedVolumeMetadata]], DT],
+    data: Array[TupleBasisLike[tuple[SimpleMetadata, EvenlySpacedVolumeMetadata]], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -110,7 +110,7 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
 
 
 def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
-    data: Array[Basis[SpacedVolumeMetadata, Ctype[np.floating]], DT],
+    data: Array[Basis[EvenlySpacedVolumeMetadata, Ctype[np.floating]], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -142,7 +142,7 @@ def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
 
 
 def animate_data_over_list_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
-    data: Array[TupleBasisLike[tuple[SimpleMetadata, SpacedVolumeMetadata]], DT],
+    data: Array[TupleBasisLike[tuple[SimpleMetadata, EvenlySpacedVolumeMetadata]], DT],
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
@@ -172,7 +172,7 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0
 
 
 def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
-    data: Array[Basis[SpacedVolumeMetadata], DT],
+    data: Array[Basis[EvenlySpacedVolumeMetadata], DT],
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
@@ -260,7 +260,7 @@ def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
 
 
 def animate_data_2d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
-    data: Array[Basis[SpacedVolumeMetadata], DT],
+    data: Array[Basis[EvenlySpacedVolumeMetadata], DT],
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,

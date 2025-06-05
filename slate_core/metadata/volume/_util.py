@@ -8,10 +8,10 @@ from typing import (
 import numpy as np
 
 from slate_core.metadata._metadata import LabelSpacing
-from slate_core.metadata.length import SpacedLengthMetadata
+from slate_core.metadata.length import EvenlySpacedLengthMetadata
 from slate_core.metadata.volume._volume import (
     AxisDirections,
-    SpacedVolumeMetadata,
+    EvenlySpacedVolumeMetadata,
     TupleMetadata,
     fundamental_stacked_delta_k,
     fundamental_stacked_k_points,
@@ -26,7 +26,7 @@ from slate_core.util import (
 
 def _project_k_points_along_axes(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
     *,
     axes: tuple[int, ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
@@ -36,7 +36,7 @@ def _project_k_points_along_axes(
 
 
 def get_fundamental_stacked_k_points_projected_along_axes(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
     *,
     axes: tuple[int, ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
@@ -46,7 +46,7 @@ def get_fundamental_stacked_k_points_projected_along_axes(
 
 
 def get_k_coordinates_in_axes(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
     axes: tuple[int, ...],
     idx: tuple[int, ...] | None,
 ) -> np.ndarray[tuple[int, int], np.dtype[np.floating]]:
@@ -80,7 +80,7 @@ def project_points_along_axes(
 
 
 def get_fundamental_stacked_x_points_projected_along_axes(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
     *,
     axes: tuple[int, ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
@@ -90,7 +90,7 @@ def get_fundamental_stacked_x_points_projected_along_axes(
 
 
 def get_x_coordinates_in_axes(
-    metadata: SpacedVolumeMetadata,
+    metadata: EvenlySpacedVolumeMetadata,
     axes: tuple[int, ...],
     idx: tuple[int, ...] | None,
 ) -> np.ndarray[tuple[int, int], np.dtype[np.floating]]:
@@ -114,13 +114,13 @@ def get_x_coordinates_in_axes(
 def spaced_volume_metadata_from_stacked_delta_x(
     vectors: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     shape: tuple[int, ...],
-) -> SpacedVolumeMetadata:
+) -> EvenlySpacedVolumeMetadata:
     """Get the metadata for a spaced volume from the vectors and spacing."""
     delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
     normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v, strict=False))
     return TupleMetadata(
         tuple(
-            SpacedLengthMetadata(s, spacing=LabelSpacing(delta=delta))
+            EvenlySpacedLengthMetadata(s, spacing=LabelSpacing(delta=delta))
             for (s, delta) in zip(shape, delta_v, strict=True)
         ),
         AxisDirections(vectors=normalized_vectors),
