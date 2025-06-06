@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import operator
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -36,16 +35,13 @@ def slice_ignoring_axes[A: slice | int | None](
     return tuple(new_slice)
 
 
-def reshape_along_axes(
+def recast_along_axes(
     shape: tuple[int, ...],
-    axes: tuple[int, ...],
+    axes: tuple[int, ...] | set[int],
 ) -> tuple[int, ...]:
     """Given a slice, insert slice(None) everywhere given in axes."""
-    max_axis = max(axes)
-    new_slice = list[int](1 for _ in range(max_axis - len(axes)))
-    for axis, s in sorted(zip(axes, shape, strict=True), key=operator.itemgetter(0)):
-        new_slice.insert(axis, s)
-    return tuple(new_slice)
+    axes = set(axes)
+    return tuple(s if i in axes else 1 for i, s in enumerate(shape))
 
 
 def get_position_in_sorted(axes: tuple[int, ...]) -> tuple[int, ...]:
