@@ -33,6 +33,7 @@ from slate_core.plot._util import (
 from slate_core.util import (
     get_max_idx,
 )
+from slate_core.util._index import slice_along_axis
 
 if TYPE_CHECKING:
     from matplotlib.lines import Line2D
@@ -406,12 +407,17 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
 
     coordinates = _get_tuple_basis_coordinates(basis_x, axes)
     data_in_axis = get_data_in_axes(data, axes, idx)
+
+    raw_data = data_in_axis.as_array()
     # TODO: we need to handle non-uniform grids here  # noqa: FIX002
-    # and apply the apropriate quadrature weights when we generate
-    # pixel values
+    # when the weights applied perpendicular to the axis
+    for i, child in enumerate(data_in_axis.basis.metadata().children):
+        weights = _get_basis_weights(basis.from_metadata(child))
+        if weights is not None:
+            raw_data *= weights[slice_along_axis(slice(None), axis=i)]
 
     fig, ax, mesh = _plot_raw_data_2d(
-        data_in_axis.as_array(),
+        raw_data,
         coordinates,
         ax=kwargs.get("ax"),
         scale=kwargs.get("scale", "linear"),
