@@ -414,7 +414,7 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
     for i, child in enumerate(data_in_axis.basis.metadata().children):
         weights = _get_basis_weights(basis.from_metadata(child))
         if weights is not None:
-            raw_data *= weights.reshape(recast_along_axes(raw_data.shape, {i}))
+            raw_data /= weights.reshape(recast_along_axes(raw_data.shape, {i}))
 
     fig, ax, mesh = _plot_raw_data_2d(
         raw_data,

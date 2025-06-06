@@ -125,6 +125,14 @@ def _project_directions(
     return tuple(r.T)
 
 
+def project_directions_onto_axes(
+    directions: AxisDirections, axes: tuple[int, ...]
+) -> AxisDirections:
+    """Project the AxisDirections onto the specified axes."""
+    projected = _project_directions(directions.vectors[axes])
+    return AxisDirections(vectors=projected)
+
+
 def project_points_along_directions(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
