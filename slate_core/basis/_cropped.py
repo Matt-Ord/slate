@@ -17,6 +17,9 @@ class CroppedBasis[B: Basis = Basis, CT: Ctype[Never] = Ctype[Never]](
 
     def __init__(self, size: int, inner: B) -> None:
         self._size = size
+        assert size <= inner.fundamental_size, (
+            "CroppedBasis size must be smaller than the inner basis fundamental size."
+        )
         super().__init__(inner)
 
     @property
