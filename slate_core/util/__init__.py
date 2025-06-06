@@ -7,6 +7,7 @@ from slate_core.util._diagonal import build_diagonal, extract_diagonal
 from slate_core.util._index import (
     get_max_idx,
     get_position_in_sorted,
+    reshape_along_axes,
     slice_along_axis,
     slice_ignoring_axes,
 )
@@ -29,6 +30,7 @@ __all__ = [
     "get_position_in_sorted",
     "pad_along_axis",
     "pad_ft_points",
+    "reshape_along_axes",
     "slice_along_axis",
     "slice_ignoring_axes",
     "timed",
