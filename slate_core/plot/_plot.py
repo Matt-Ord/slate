@@ -110,7 +110,6 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
     y_data: Array[Basis[M], DT],
     *,
     y_error: Array[Basis[M], np.dtype[np.floating]] | None = None,
-    periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
     """Plot two arrays against each other."""
@@ -124,7 +123,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
         y_data.with_basis(common_basis).raw_data,
         x_data.with_basis(common_basis).raw_data,
         y_errors,
-        periodic=periodic,
+        periodic=x_data.basis.metadata().is_periodic,
         **kwargs,
     )
 
@@ -162,7 +161,6 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     data: Array[Basis[M], DT],
     *,
     y_error: Array[Basis[M], np.dtype[np.floating]] | None = None,
-    periodic: bool = False,
     **kwargs: Unpack[PlotKwargs],
 ) -> tuple[Figure, Axes, Line2D]:
     """
@@ -192,7 +190,6 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
         Array(converted.basis, coordinates),
         converted,
         y_error=y_error,
-        periodic=periodic,
         **kwargs,
     )
 
@@ -229,7 +226,7 @@ def array_against_axes_1d[DT: np.dtype[np.number]](
     idx = tuple(0 for _ in range(metadata.n_dim - 1)) if idx is None else idx
 
     data_in_axis = array.flatten(get_data_in_axes(data, axes, idx))
-    fig, ax, line = array_against_basis(data_in_axis, periodic=True, **kwargs)
+    fig, ax, line = array_against_basis(data_in_axis, **kwargs)
 
     return fig, ax, line
 

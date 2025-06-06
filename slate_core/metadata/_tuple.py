@@ -38,6 +38,11 @@ class TupleMetadata[
         self._extra = cast("E", extra)
 
     @property
+    @override
+    def is_periodic(self) -> bool:
+        return False
+
+    @property
     def shape(self) -> tuple[int, ...]:
         """Shape of the metadata."""
         return tuple(size_from_nested_shape(i.fundamental_shape) for i in self.children)
