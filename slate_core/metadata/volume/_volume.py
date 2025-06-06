@@ -129,7 +129,7 @@ def project_directions_onto_axes(
     directions: AxisDirections, axes: tuple[int, ...]
 ) -> AxisDirections:
     """Project the AxisDirections onto the specified axes."""
-    projected = _project_directions(directions.vectors[axes])
+    projected = _project_directions(tuple(directions.vectors[ax] for ax in axes))
     return AxisDirections(vectors=projected)
 
 
