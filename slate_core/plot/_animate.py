@@ -56,7 +56,6 @@ def animate_array_over_list[DT: np.dtype[np.number]](
     ax: Axes | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
-    periodic: bool = False,
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
@@ -70,7 +69,6 @@ def animate_array_over_list[DT: np.dtype[np.number]](
             ax=ax,
             scale=scale,
             measure=measure,
-            periodic=periodic,
         )
 
         frames.append((line,))

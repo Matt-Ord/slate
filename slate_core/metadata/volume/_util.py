@@ -114,14 +114,19 @@ def get_x_coordinates_in_axes(
 def spaced_volume_metadata_from_stacked_delta_x(
     vectors: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     shape: tuple[int, ...],
+    *,
+    is_periodic: tuple[bool, ...] | None = None,
 ) -> EvenlySpacedVolumeMetadata:
     """Get the metadata for a spaced volume from the vectors and spacing."""
     delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
     normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v, strict=False))
+    is_periodic = tuple(True for _ in shape) if is_periodic is None else is_periodic
     return TupleMetadata(
         tuple(
-            EvenlySpacedLengthMetadata(s, spacing=LabelSpacing(delta=delta))
-            for (s, delta) in zip(shape, delta_v, strict=True)
+            EvenlySpacedLengthMetadata(
+                s, spacing=LabelSpacing(delta=delta), is_periodic=periodic
+            )
+            for (s, delta, periodic) in zip(shape, delta_v, is_periodic, strict=True)
         ),
         AxisDirections(vectors=normalized_vectors),
     )

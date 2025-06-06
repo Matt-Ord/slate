@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Protocol, TypeGuard, override
 
 import numpy as np
@@ -14,6 +14,11 @@ class BasisMetadata(Protocol):
     """Protocol that all Metadata should implement."""
 
     @property
+    def is_periodic(self) -> bool:
+        """Whether the metadata is periodic."""
+        ...
+
+    @property
     def fundamental_shape(self) -> NestedLength:
         """Shape of the full data."""
         ...
@@ -24,6 +29,7 @@ class SimpleMetadata(BasisMetadata):
     """Basic Metadata for a Fundamental Basis."""
 
     fundamental_size: int
+    is_periodic: bool = field(default=False, kw_only=False)  # type: ignore[assignment]
 
     @property
     @override
