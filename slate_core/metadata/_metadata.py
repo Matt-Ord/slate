@@ -29,7 +29,7 @@ class SimpleMetadata(BasisMetadata):
     """Basic Metadata for a Fundamental Basis."""
 
     fundamental_size: int
-    is_periodic: bool = field(default=False, kw_only=False)  # type: ignore[assignment]
+    is_periodic: bool = field(default=False, kw_only=True)  # type: ignore[assignment]
 
     @property
     @override
@@ -103,7 +103,7 @@ class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
         return np.linspace(
             self.spacing.start,
             self.spacing.delta + self.spacing.start,
-            np.prod(self.fundamental_shape),
+            self.fundamental_size,
         )
 
     @property
@@ -113,7 +113,7 @@ class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
 
         An evenly spaced metadata has a unit weight for each point.
         """
-        return np.ones(np.prod(self.fundamental_shape))
+        return np.ones(self.fundamental_size)
 
     @property
     @override
