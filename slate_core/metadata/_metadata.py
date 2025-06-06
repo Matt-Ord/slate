@@ -104,6 +104,7 @@ class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
             self.spacing.start,
             self.spacing.delta + self.spacing.start,
             self.fundamental_size,
+            endpoint=False,
         )
 
     @property
