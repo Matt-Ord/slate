@@ -4,15 +4,15 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from slate_core.metadata._metadata import (
-    BasisMetadata,
-    SimpleMetadata,
-    SpacedMetadata,
-)
-from slate_core.metadata._shape import shallow_shape_from_nested, size_from_nested_shape
+from slate_core.metadata._shape import size_from_nested_shape
 from slate_core.util._product import outer_product
 
 if TYPE_CHECKING:
+    from slate_core.metadata._metadata import (
+        BasisMetadata,
+        SpacedMetadata,
+    )
+
     from ._tuple import TupleMetadata
 
 
@@ -50,24 +50,22 @@ def fundamental_nk_points(
 
 
 def fundamental_stacked_nx_points(
-    metadata: BasisMetadata,
+    metadata: TupleMetadata[tuple[BasisMetadata, ...], Any],
 ) -> tuple[np.ndarray[Any, np.dtype[np.int_]], ...]:
     """Get the stacked index, using the x convention (0...N)."""
-    shallow_shape = shallow_shape_from_nested(metadata.fundamental_shape)
     mesh = np.meshgrid(
-        *(fundamental_nx_points(SimpleMetadata(n)) for n in shallow_shape),
+        *(fundamental_nx_points(m) for m in metadata.children),
         indexing="ij",
     )
     return tuple(nki.ravel() for nki in mesh)
 
 
 def fundamental_stacked_nk_points(
-    metadata: BasisMetadata,
+    metadata: TupleMetadata[tuple[BasisMetadata, ...], Any],
 ) -> tuple[np.ndarray[Any, np.dtype[np.int_]], ...]:
     """Get the stacked index, using the kx convention (0...N/2-N/2...)."""
-    shallow_shape = shallow_shape_from_nested(metadata.fundamental_shape)
     mesh = np.meshgrid(
-        *(fundamental_nk_points(SimpleMetadata(n)) for n in shallow_shape),
+        *(fundamental_nk_points(m) for m in metadata.children),
         indexing="ij",
     )
     return tuple(nki.ravel() for nki in mesh)
