@@ -22,6 +22,8 @@ from slate_core.metadata.volume._volume import (
     fundamental_stacked_k_points,
     fundamental_stacked_x_points,
     fundamental_volume,
+    project_directions_onto_axes,
+    project_points_along_directions,
 )
 
 __all__ = [
@@ -40,6 +42,8 @@ __all__ = [
     "get_fundamental_stacked_x_points_projected_along_axes",
     "get_k_coordinates_in_axes",
     "get_x_coordinates_in_axes",
+    "project_directions_onto_axes",
     "project_points_along_axes",
+    "project_points_along_directions",
     "spaced_volume_metadata_from_stacked_delta_x",
 ]
