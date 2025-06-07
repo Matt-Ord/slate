@@ -48,6 +48,11 @@ def test_lobatto_points_symmetry() -> None:
         err_msg=f"Weights not symmetric for n={random_n}",
         atol=1e-10,
     )
+    np.testing.assert_array_equal(
+        result.values,
+        np.sort(result.values),
+        err_msg=f"Points not sorted for n={random_n}",
+    )
 
 
 def _lobatto_from_fortran(
@@ -61,7 +66,7 @@ def _lobatto_from_fortran(
     """
     Calculate lobatto weights based on the fortran approach.
 
-    Coppied directly from the code provided by <https://doi.org/10.1007/978-94-015-8240-7_4>
+    Copied directly from the code provided by <https://doi.org/10.1007/978-94-015-8240-7_4>
 
     Parameters
     ----------
