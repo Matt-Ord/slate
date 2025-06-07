@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from slate_core.metadata import length, volume
+from slate_core.metadata._lobatto import LobattoSpacedMetadata
 from slate_core.metadata._metadata import (
     BasisMetadata,
     EvenlySpacedMetadata,
@@ -19,7 +20,11 @@ from slate_core.metadata._shape import (
     size_from_nested_shape,
 )
 from slate_core.metadata._tuple import AnyMetadata, TupleMetadata, is_tuple_metadata
-from slate_core.metadata.length import EvenlySpacedLengthMetadata, LengthMetadata
+from slate_core.metadata.length import (
+    EvenlySpacedLengthMetadata,
+    LengthMetadata,
+    LobattoSpacedLengthMetadata,
+)
 from slate_core.metadata.util import (
     fundamental_nk_points,
     fundamental_nx_points,
@@ -47,6 +52,8 @@ __all__ = [
     "LabeledMetadata",
     "LengthMetadata",
     "LengthMetadata",
+    "LobattoSpacedLengthMetadata",
+    "LobattoSpacedMetadata",
     "NestedLength",
     "SimpleMetadata",
     "SpacedMetadata",

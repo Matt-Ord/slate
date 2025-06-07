@@ -4,6 +4,7 @@ from typing import Any, override
 
 import numpy as np
 
+from slate_core.metadata._lobatto import LobattoSpacedMetadata
 from slate_core.metadata._metadata import (
     EvenlySpacedMetadata,
     SpacedMetadata,
@@ -25,6 +26,10 @@ class LengthMetadata(SpacedMetadata[np.dtype[np.floating]]):
 
 
 class EvenlySpacedLengthMetadata(EvenlySpacedMetadata, LengthMetadata):
+    """Metadata with the addition of length."""
+
+
+class LobattoSpacedLengthMetadata(LobattoSpacedMetadata, LengthMetadata):
     """Metadata with the addition of length."""
 
 
