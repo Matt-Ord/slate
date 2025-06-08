@@ -164,3 +164,20 @@ def test_block_basis() -> None:
             [0.0, 0.0, 20.0, 21.0, 0.0, 0.0],
         ],
     )
+
+
+def test_nested_wrapped_basis_conversion() -> None:
+    fundamental_basis = FundamentalBasis.from_size(20)
+
+    inner_basis = TransformedBasis(
+        TransformedBasis(TransformedBasis(fundamental_basis))
+    )
+    initial_basis = TruncatedBasis(Truncation(2, 3, 0), inner_basis)
+    final_basis = TransformedBasis(TruncatedBasis(Truncation(3, 3, 0), inner_basis))
+
+    array = Array(initial_basis, np.ones(initial_basis.size, dtype=np.complex128))
+
+    np.testing.assert_array_almost_equal(
+        array.with_basis(final_basis).raw_data,
+        array.with_basis(fundamental_basis).with_basis(final_basis).raw_data,
+    )
