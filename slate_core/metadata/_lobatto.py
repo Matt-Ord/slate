@@ -103,7 +103,17 @@ def _get_lobatto_data(
 
 @dataclass(frozen=True, kw_only=True)
 class LobattoSpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
-    """Metadata for a Lobatto basis."""
+    """Metadata defining a basis who's points are lobatto spaced.
+
+    The lobatto points are defined in the range [-1, 1] as the endpoints,
+    plus the n-2 roots of the Legendre polynomial of degree n-1.
+
+    This metadata defines a basis with points that are a rescaled version of the lobatto points,
+    which is configured using the `spacing` attribute.
+
+    This is particularly useful for systems in which precision is required at the endpoints,
+    as the lobatto points have a higher density of points near the endpoints compared to the midpoint.
+    """
 
     spacing: LabelSpacing
 
