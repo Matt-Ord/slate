@@ -30,9 +30,23 @@ def _convert_vectors_unsafe[DT2: np.generic](
     if initial == final:
         return vectors
 
+    final_unwrapped = list(wrapped_basis_iter_inner(final))
+    # If some basis in final_unwrapped is equal to the initial basis
+    # we can convert from that basis to the final basis directly.
+    for i, basis in enumerate(final_unwrapped):
+        if basis != initial:
+            continue
+
+        # Walk back through final_unwrapped to convert from this
+        # common basis to the final basis.
+        as_outer = vectors
+        for outer_basis in final_unwrapped[i - 1 :: -1]:
+            assert is_wrapped(outer_basis)
+            as_outer = outer_basis.__from_inner__(as_outer, axis=axis).ok()
+        return as_outer
+
+    # Convert to inner, and try to convert from the inner basis to the final basis.
     as_inner = initial.__into_inner__(vectors, axis).ok()
-    if is_wrapped(final) and initial.inner == final.inner:
-        return final.__from_inner__(as_inner, axis).ok()
     return initial.inner.__convert_vector_into__(as_inner, final, axis=axis).ok()
 
 
