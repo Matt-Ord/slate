@@ -13,8 +13,11 @@ from typing import (
 
 from slate_core.metadata._metadata import BasisMetadata, SimpleMetadata
 from slate_core.metadata._shape import size_from_nested_shape
+from slate_core.util._product import outer_product
 
 if TYPE_CHECKING:
+    import numpy as np
+
     from slate_core.metadata._shape import NestedLength
 
 
@@ -36,11 +39,6 @@ class TupleMetadata[
     def __init__(self, children: C, extra: E | None = None) -> None:
         self._children = children
         self._extra = cast("E", extra)
-
-    @property
-    @override
-    def is_periodic(self) -> bool:
-        return False
 
     @property
     def shape(self) -> tuple[int, ...]:
@@ -157,6 +155,16 @@ class TupleMetadata[
         return TupleMetadata[tuple[BasisMetadata, ...], Any](
             tuple(TupleMetadata.from_shape(s) for s in shape), extra
         )
+
+    @property
+    @override
+    def basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.floating]]:
+        return outer_product(*(c.basis_weights for c in self.children)).reshape(-1)
+
+    @property
+    @override
+    def features(self) -> set[str]:
+        return set[str].intersection(*(c.features for c in self.children))
 
 
 type AnyMetadata = BasisMetadata | TupleMetadata[AnyMetadata, Any]

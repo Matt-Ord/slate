@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from typing import (
     Any,
+    Literal,
     cast,
 )
 
 import numpy as np
 
-from slate_core.metadata._metadata import LabelSpacing
+from slate_core.metadata._spaced import Domain
 from slate_core.metadata.length import EvenlySpacedLengthMetadata
 from slate_core.metadata.volume._volume import (
     AxisDirections,
@@ -115,18 +116,20 @@ def spaced_volume_metadata_from_stacked_delta_x(
     vectors: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     shape: tuple[int, ...],
     *,
-    is_periodic: tuple[bool, ...] | None = None,
+    interpolation: tuple[Literal["Fourier", "DST"]] | None = None,
 ) -> EvenlySpacedVolumeMetadata:
     """Get the metadata for a spaced volume from the vectors and spacing."""
     delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
     normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v, strict=False))
-    is_periodic = tuple(True for _ in shape) if is_periodic is None else is_periodic
+    interpolation = (
+        tuple[Literal["Fourier"]]("Fourier" for _ in shape)
+        if interpolation is None
+        else interpolation
+    )
     return TupleMetadata(
         tuple(
-            EvenlySpacedLengthMetadata(
-                s, spacing=LabelSpacing(delta=delta), is_periodic=periodic
-            )
-            for (s, delta, periodic) in zip(shape, delta_v, is_periodic, strict=True)
+            EvenlySpacedLengthMetadata(s, domain=Domain(delta=delta), interpolation=i)
+            for (s, delta, i) in zip(shape, delta_v, interpolation, strict=True)
         ),
         AxisDirections(vectors=normalized_vectors),
     )
