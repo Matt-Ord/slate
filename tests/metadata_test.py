@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from slate_core.metadata import LabelSpacing, LobattoSpacedMetadata
+from slate_core.metadata import BarycentricMetadata, Domain, LobattoSpacedMetadata
 from slate_core.metadata.volume._volume import (
     _project_directions,  # noqa: PLC2701 # type: ignore[import-untyped]
 )
@@ -22,10 +22,10 @@ def test_lobatto_points_known_results() -> None:
     }
 
     for n, (expected_points, expected_weights) in known_results.items():
-        result = LobattoSpacedMetadata(n, spacing=LabelSpacing(delta=2.0))
+        result = LobattoSpacedMetadata(n, domain=Domain(delta=2.0))
         np.testing.assert_allclose(result.values - 1, expected_points, rtol=1e-5)
         np.testing.assert_allclose(
-            result.quadrature_weights,
+            1 / np.square(result.basis_weights),
             expected_weights,
             rtol=1e-5,
         )
@@ -35,7 +35,7 @@ def test_lobatto_points_symmetry() -> None:
     rng = np.random.default_rng()
     random_n = rng.integers(2, 300).item()
 
-    result = LobattoSpacedMetadata(random_n, spacing=LabelSpacing(delta=2.0))
+    result = LobattoSpacedMetadata(random_n, domain=Domain(delta=2.0))
     np.testing.assert_allclose(
         result.values - 1.0,
         -(result.values[::-1] - 1.0),
@@ -43,8 +43,8 @@ def test_lobatto_points_symmetry() -> None:
         atol=2e-7,
     )
     np.testing.assert_allclose(
-        result.quadrature_weights,
-        result.quadrature_weights[::-1],
+        result.basis_weights,
+        result.basis_weights[::-1],
         err_msg=f"Weights not symmetric for n={random_n}",
         atol=1e-10,
     )
@@ -125,10 +125,21 @@ def test_lobatto_points_against_fortran() -> None:
     rng = np.random.default_rng()
     random_n = rng.integers(2, 300).item()
 
-    result = LobattoSpacedMetadata(random_n, spacing=LabelSpacing(delta=1.0))
-    fortran_result = _lobatto_from_fortran(0, 1, random_n)
+    result = LobattoSpacedMetadata(random_n, domain=Domain(delta=100))
+    fortran_result = _lobatto_from_fortran(
+        result.domain.start, result.domain.end, random_n
+    )
     np.testing.assert_allclose(result.values, fortran_result[0], atol=1e-8)
-    np.testing.assert_allclose(result.quadrature_weights, fortran_result[1], atol=1e-8)
+    np.testing.assert_allclose(
+        1 / np.square(result.basis_weights), fortran_result[1], atol=1e-8
+    )
+
+    as_barycentric = BarycentricMetadata(
+        result.fundamental_size, result.domain, result.values
+    )
+    np.testing.assert_allclose(
+        as_barycentric.basis_weights, result.basis_weights, atol=1e-8
+    )
 
 
 def _normalize_directions(

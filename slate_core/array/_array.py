@@ -11,7 +11,8 @@ from slate_core.metadata import (
     NestedLength,
     shallow_shape_from_nested,
 )
-from slate_core.util._index import slice_along_axis
+from slate_core.metadata._metadata import SIMPLE_FEATURE
+from slate_core.util._index import recast_along_axes, slice_along_axis
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -32,9 +33,19 @@ def _index_single_raw_along_axis(
 ) -> tuple[Basis | None, np.ndarray[Any, Any]]:
     if index == slice(None):
         return data_basis, data
-    basis.as_fundamental(data_basis)
+    axis %= data.ndim
+
     data = data_basis.__into_fundamental__(data, axis=axis).ok()
     out = data[slice_along_axis(index, axis=axis)]
+
+    # Scale data according to the weights of the basis
+    if SIMPLE_FEATURE not in data_basis.metadata().features:
+        weights = data_basis.metadata().basis_weights[index]
+        out = cast(
+            "np.ndarray[Any, Any]",
+            out * weights.reshape(recast_along_axes((weights.size,), (axis,))),
+        )
+
     out_basis = (
         FundamentalBasis.from_size(out.shape[axis])
         if isinstance(index, slice)
@@ -63,9 +74,9 @@ def _index_tuple_raw_along_axis(
     final_basis = list[Basis]()
     for child_index, child in zip(index, children, strict=True):
         child_axis = axis + len(final_basis)
-        meta, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
-        if meta is not None:
-            final_basis.append(meta)
+        b, data = _index_raw_along_axis(child_index, child, data, axis=child_axis)
+        if b is not None:
+            final_basis.append(b)
     if len(final_basis) == 0:
         return None, data.reshape(data.shape[:axis] + data.shape[axis + 1 :])
 
@@ -132,7 +143,14 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         """Get the data as a (full) np.array."""
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
-        return self.with_basis(fundamental).raw_data.reshape(shape)
+        fundamental_raw = self.with_basis(fundamental).raw_data.reshape(shape)
+        if SIMPLE_FEATURE not in self.basis.metadata().features:
+            fundamental_raw = cast(
+                "np.ndarray[Any, DT]",
+                fundamental_raw * fundamental.metadata().basis_weights,  # type: ignore[return-value]
+            )
+
+        return fundamental_raw
 
     @overload
     @staticmethod

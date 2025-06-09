@@ -4,9 +4,9 @@ from typing import Any, override
 
 import numpy as np
 
-from slate_core.metadata._lobatto import LobattoSpacedMetadata
-from slate_core.metadata._metadata import (
+from slate_core.metadata._spaced import (
     EvenlySpacedMetadata,
+    LobattoSpacedMetadata,
     SpacedMetadata,
 )
 from slate_core.metadata.util import (

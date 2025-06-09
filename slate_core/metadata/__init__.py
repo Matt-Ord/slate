@@ -3,21 +3,26 @@
 from __future__ import annotations
 
 from slate_core.metadata import length, volume
-from slate_core.metadata._lobatto import LobattoSpacedMetadata
 from slate_core.metadata._metadata import (
+    PERIODIC_FEATUIRE,
+    SIMPLE_FEATURE,
     BasisMetadata,
-    EvenlySpacedMetadata,
     ExplicitLabeledMetadata,
     LabeledMetadata,
-    LabelSpacing,
     SimpleMetadata,
-    SpacedMetadata,
     is_simple_metadata,
 )
 from slate_core.metadata._shape import (
     NestedLength,
     shallow_shape_from_nested,
     size_from_nested_shape,
+)
+from slate_core.metadata._spaced import (
+    BarycentricMetadata,
+    Domain,
+    EvenlySpacedMetadata,
+    LobattoSpacedMetadata,
+    SpacedMetadata,
 )
 from slate_core.metadata._tuple import AnyMetadata, TupleMetadata, is_tuple_metadata
 from slate_core.metadata.length import (
@@ -31,7 +36,6 @@ from slate_core.metadata.util import (
     fundamental_size,
     fundamental_stacked_nk_points,
     fundamental_stacked_nx_points,
-    fundamental_stacked_weights,
 )
 from slate_core.metadata.volume import (
     AxisDirections,
@@ -41,14 +45,17 @@ from slate_core.metadata.volume import (
 )
 
 __all__ = [
+    "PERIODIC_FEATUIRE",
+    "SIMPLE_FEATURE",
     "AnyMetadata",
     "AxisDirections",
+    "BarycentricMetadata",
     "BasisMetadata",
+    "Domain",
     "EvenlySpacedLengthMetadata",
     "EvenlySpacedMetadata",
     "EvenlySpacedVolumeMetadata",
     "ExplicitLabeledMetadata",
-    "LabelSpacing",
     "LabeledMetadata",
     "LengthMetadata",
     "LengthMetadata",
@@ -64,7 +71,6 @@ __all__ = [
     "fundamental_size",
     "fundamental_stacked_nk_points",
     "fundamental_stacked_nx_points",
-    "fundamental_stacked_weights",
     "is_simple_metadata",
     "is_tuple_metadata",
     "length",
