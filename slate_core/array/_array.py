@@ -140,17 +140,17 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         self._data = cast("np.ndarray[tuple[int], Any]", data.ravel())
 
     def as_array(self) -> np.ndarray[Any, DT]:
-        """Get the data as a (full) np.array."""
+        """Get the data as a (dense) np.array."""
         fundamental = basis.as_fundamental(self.basis)
         shape = shallow_shape_from_nested(fundamental.fundamental_shape)
-        fundamental_raw = self.with_basis(fundamental).raw_data.reshape(shape)
+        fundamental_raw = self.with_basis(fundamental).raw_data
         if SIMPLE_FEATURE not in self.basis.metadata().features:
             fundamental_raw = cast(
                 "np.ndarray[Any, DT]",
                 fundamental_raw * fundamental.metadata().basis_weights,  # type: ignore[return-value]
             )
 
-        return fundamental_raw
+        return fundamental_raw.reshape(shape)
 
     @overload
     @staticmethod

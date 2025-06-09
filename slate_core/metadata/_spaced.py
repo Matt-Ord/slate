@@ -125,7 +125,6 @@ class BarycentricMetadata(SpacedMetadata[np.dtype[np.floating]]):
     @property
     @override
     def basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.float64]]:
-        """Get the weights of the lobatto points."""
         if self._basis_weights is None:
             self._basis_weights = _get_barycentric_basis_weights(
                 self.domain, self._values
@@ -256,5 +255,4 @@ class LobattoSpacedMetadata(BarycentricMetadata):
     @property
     @override
     def basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.float64]]:
-        """Get the weights of the lobatto points."""
         return self._basis_weights
