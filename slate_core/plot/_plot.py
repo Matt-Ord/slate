@@ -9,7 +9,10 @@ from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
 from slate_core.array._conversion import as_fundamental_basis
 from slate_core.metadata import AxisDirections, LabeledMetadata
-from slate_core.metadata._metadata import EvenlySpacedMetadata, SpacedMetadata
+from slate_core.metadata._metadata import (
+    PERIODIC_FEATUIRE,
+    SIMPLE_FEATURE,
+)
 from slate_core.metadata.length import (
     fundamental_k_points,
 )
@@ -33,7 +36,6 @@ from slate_core.plot._util import (
 from slate_core.util import (
     get_max_idx,
 )
-from slate_core.util._index import recast_along_axes
 
 if TYPE_CHECKING:
     from matplotlib.lines import Line2D
@@ -124,7 +126,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
         y_data.with_basis(common_basis).raw_data,
         x_data.with_basis(common_basis).raw_data,
         y_errors,
-        periodic=x_data.basis.metadata().is_periodic,
+        periodic=PERIODIC_FEATUIRE in x_data.basis.metadata().features,
         **kwargs,
     )
 
@@ -137,17 +139,6 @@ def _get_basis_coordinates(basis: Basis) -> np.ndarray[Any, np.dtype[np.floating
     else:
         coordinates = basis.points.astype(np.float64)
     return coordinates
-
-
-def _get_basis_weights(
-    basis: Basis,
-) -> np.ndarray[Any, np.dtype[np.floating]] | None:
-    basis_metadata = basis.metadata()
-    if isinstance(basis_metadata, SpacedMetadata) and not isinstance(
-        basis_metadata, EvenlySpacedMetadata
-    ):
-        return basis_metadata.quadrature_weights[basis.points]
-    return None
 
 
 def _get_basis_units(basis: Basis) -> str:
@@ -184,13 +175,28 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
     """
     converted = array.as_index_basis(array.as_supports_type_basis(data, np.floating))
     coordinates = _get_basis_coordinates(converted.basis)
-    weights = _get_basis_weights(converted.basis)
-    if weights is not None:
-        converted = Array(converted.basis, converted.raw_data / weights)
-    return array_against_array(
-        Array(converted.basis, coordinates),
-        converted,
-        y_error=y_error,
+
+    raw_data = converted.raw_data
+    if SIMPLE_FEATURE not in converted.basis.metadata().features:
+        raw_data = cast(
+            "np.ndarray[Any, DT]",
+            raw_data * converted.basis.metadata().basis_weights,
+        )
+    y_errors = None if y_error is None else y_error.with_basis(converted.basis).raw_data
+    if (
+        y_errors is not None
+        and SIMPLE_FEATURE not in converted.basis.metadata().features
+    ):
+        y_errors = cast(
+            "np.ndarray[Any, np.dtype[np.floating]]",
+            y_errors * converted.basis.metadata().basis_weights,
+        )
+
+    return _plot_raw_data_1d(
+        raw_data,
+        coordinates,
+        y_errors,
+        periodic=PERIODIC_FEATUIRE in converted.basis.metadata().features,
         **kwargs,
     )
 
@@ -409,12 +415,6 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
     data_in_axis = get_data_in_axes(data, axes, idx)
 
     raw_data = data_in_axis.as_array()
-    # TODO: we need to handle non-uniform grids here  # noqa: FIX002
-    # when the weights applied perpendicular to the axis
-    for i, child in enumerate(data_in_axis.basis.metadata().children):
-        weights = _get_basis_weights(basis.from_metadata(child))
-        if weights is not None:
-            raw_data /= weights.reshape(recast_along_axes(raw_data.shape, {i}))
 
     fig, ax, mesh = _plot_raw_data_2d(
         raw_data,
