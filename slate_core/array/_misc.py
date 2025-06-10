@@ -10,9 +10,9 @@ from slate_core.array._conversion import (
     as_fundamental_basis,
     as_index_basis,
     as_supports_type_basis,
-    cast_basis,
 )
 from slate_core.basis import Basis, Ctype
+from slate_core.metadata._metadata import SIMPLE_FEATURE
 
 if TYPE_CHECKING:
     from slate_core.array._array import ArrayWithMetadata
@@ -454,10 +454,31 @@ def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
     """
     as_diagonal = basis.as_diagonal(basis.as_index(array.basis))
     if as_diagonal is not None:
-        return cast_basis(array.with_basis(as_diagonal), as_diagonal.inner.children[0])
+        lhs_basis = as_diagonal.inner.children[0]
+        rhs_basis = as_diagonal.inner.children[1]
+        old_points = (
+            array.raw_data
+            if SIMPLE_FEATURE in array.basis.metadata().features
+            else cast(
+                "Any",
+                array.raw_data  # type: ignore[return-value, arg-type]
+                * lhs_basis.metadata().basis_weights[lhs_basis.points]
+                * rhs_basis.metadata().basis_weights[rhs_basis.points],
+            )
+        )
+
+        new_components = (
+            old_points
+            if SIMPLE_FEATURE in lhs_basis.metadata().features
+            else cast(
+                "Any",
+                old_points / lhs_basis.metadata().basis_weights[lhs_basis.points],  # type: ignore[return-value, arg-type]
+            )
+        )
+        return Array(lhs_basis, new_components)
     out_basis = basis.from_metadata(array.basis.metadata().children[0])
     data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
-    return Array(out_basis, data)
+    return Array.from_array(data, metadata=out_basis.metadata())
 
 
 def max_arg[M: BasisMetadata, DT: np.dtype[np.generic]](

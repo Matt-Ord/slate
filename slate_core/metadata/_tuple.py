@@ -81,6 +81,14 @@ class TupleMetadata[
     def __hash__(self) -> int:
         return hash((self.extra, self.children))
 
+    @override
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"children={self.children!r}, "
+            f"extra={self.extra!r})"
+        )
+
     @overload
     @staticmethod
     def from_shape[E1](

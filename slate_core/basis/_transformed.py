@@ -208,6 +208,14 @@ class TransformedBasis[
             raise NotImplementedError(msg)
         return (lhs - rhs).astype(lhs.dtype)
 
+    @override
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"inner={self.inner!r}, "
+            f"direction={self.direction!r})"
+        )
+
 
 def is_transformed(
     basis: object,

@@ -118,7 +118,7 @@ def _convert_vectors_unsafe[DT2: np.generic](
     return converted
 
 
-class TupleBasis[
+class TupleBasis[  # noqa: PLR0904
     C: tuple[Basis, ...],
     E,
     CT: Ctype[Never] = Ctype[Never],
@@ -343,6 +343,10 @@ class TupleBasis[
             .__from_fundamental__(np.arange(self.size))
             .ok()
         )
+
+    @override
+    def __repr__(self) -> str:
+        return f"TupleBasis(children={self.children!r}, extra={self._extra!r})"
 
 
 @overload
