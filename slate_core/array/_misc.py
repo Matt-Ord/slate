@@ -456,25 +456,19 @@ def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
     if as_diagonal is not None:
         lhs_basis = as_diagonal.inner.children[0]
         rhs_basis = as_diagonal.inner.children[1]
-        old_points = (
+        # Note if lhs_basis is not 'simple' there is no need
+        # to scale here since we would then have to immediately
+        # scale it back
+        new_components = (
             array.raw_data
-            if SIMPLE_FEATURE in array.basis.metadata().features
+            if SIMPLE_FEATURE in rhs_basis.metadata().features
             else cast(
                 "Any",
                 array.raw_data  # type: ignore[return-value, arg-type]
-                * lhs_basis.metadata().basis_weights[lhs_basis.points]
                 * rhs_basis.metadata().basis_weights[rhs_basis.points],
             )
         )
 
-        new_components = (
-            old_points
-            if SIMPLE_FEATURE in lhs_basis.metadata().features
-            else cast(
-                "Any",
-                old_points / lhs_basis.metadata().basis_weights[lhs_basis.points],  # type: ignore[return-value, arg-type]
-            )
-        )
         return Array(lhs_basis, new_components)
     out_basis = basis.from_metadata(array.basis.metadata().children[0])
     data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
