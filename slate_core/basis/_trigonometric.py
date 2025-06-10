@@ -91,6 +91,10 @@ class TrigonometricTransformBasis[
     def __hash__(self) -> int:
         return hash((2, self.inner, self.ty, self.fn))
 
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(inner={self.inner!r}, ty={self.ty!r}, fn={self.fn!r})"
+
     @property
     @override
     def size(self) -> int:

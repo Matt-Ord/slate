@@ -29,8 +29,9 @@ class BasisMetadata(Protocol):
     def basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.floating]]:
         r"""Weights for the basis functions.
 
-        Data is not always stored in "raw" form, but rather in a form that is
-        weighted by the basis functions. This property provides the weights
+        Data is not always stored as the points in the array, but rather in a
+        form that is weighted by the value of the basis function at the point.
+        This property provides the weights
         that are applied to the data when it is transformed to the basis.
 
         The fundamental basis represents data discretised into a series

@@ -7,18 +7,20 @@ import numpy as np
 from slate_core import basis
 from slate_core.basis import Basis, FundamentalBasis, TupleBasis, is_tuple_basis_like
 from slate_core.metadata import (
+    SIMPLE_FEATURE,
     BasisMetadata,
     NestedLength,
+    SimpleMetadata,
+    TupleMetadata,
+    basis_components_from_array_points,
     shallow_shape_from_nested,
 )
-from slate_core.metadata._metadata import SIMPLE_FEATURE
 from slate_core.util._index import recast_along_axes, slice_along_axis
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from slate_core.basis import Ctype, TupleBasisLike
-    from slate_core.metadata import SimpleMetadata, TupleMetadata
 
 type Index = int | slice
 type NestedIndex = Index | tuple[NestedIndex, ...]
@@ -155,7 +157,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
-        array: np.ndarray[tuple[int,], DT_],
+        array: np.ndarray[tuple[int,], DT_], *, metadata: None = None
     ) -> Array[
         TupleBasis[
             tuple[FundamentalBasis[SimpleMetadata]], None, Ctype[np.generic[Any]]
@@ -166,7 +168,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
-        array: np.ndarray[tuple[int, int], DT_],
+        array: np.ndarray[tuple[int, int], DT_], *, metadata: None = None
     ) -> Array[
         TupleBasis[
             tuple[
@@ -182,7 +184,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
-        array: np.ndarray[tuple[int, int, int], DT_],
+        array: np.ndarray[tuple[int, int, int], DT_], *, metadata: None = None
     ) -> Array[
         TupleBasis[
             tuple[
@@ -199,25 +201,43 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
-        array: np.ndarray[tuple[int, ...], DT_],
+        array: np.ndarray[tuple[int, ...], DT_], *, metadata: None = None
     ) -> Array[
         TupleBasis[
             tuple[FundamentalBasis[SimpleMetadata], ...], None, Ctype[np.generic[Any]]
         ],
         DT_,
     ]: ...
-
+    @overload
+    @staticmethod
+    def from_array[DT_: np.dtype[np.generic], M: BasisMetadata](
+        array: np.ndarray[tuple[int, ...], DT_], *, metadata: M
+    ) -> Array[Basis[M], DT_]: ...
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
         array: np.ndarray[tuple[int, ...], DT_],
+        *,
+        metadata: BasisMetadata | None = None,
     ) -> Array[
         TupleBasis[
-            tuple[FundamentalBasis[SimpleMetadata], ...], None, Ctype[np.generic[Any]]
-        ],
+            tuple[FundamentalBasis[SimpleMetadata], ...],
+            None,
+            Ctype[np.generic[Any]],
+        ]
+        | Basis[BasisMetadata],
         DT_,
     ]:
         """Get a Array from an array."""
-        return Array(basis.from_shape(array.shape), array)
+        if metadata is None:
+            metadata = TupleMetadata.from_shape(array.shape)
+        if array.ndim > 1:
+            assert shallow_shape_from_nested(metadata.fundamental_shape) == array.shape
+        raw_data = (
+            array
+            if SIMPLE_FEATURE in metadata.features
+            else basis_components_from_array_points(metadata, array)
+        )
+        return Array(basis.from_metadata(metadata), raw_data)
 
     def with_basis[B1_: Basis](self, basis: B1_) -> Array[B1_, DT]:
         """Get the Array with the basis set to basis."""
