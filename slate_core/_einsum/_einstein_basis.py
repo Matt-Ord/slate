@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
+from itertools import starmap
 from typing import TYPE_CHECKING, Any, cast
 
 from slate_core._einsum._einstein_index import (
@@ -17,11 +18,10 @@ from slate_core.basis import (
     as_tuple,
     from_shape,
 )
-from slate_core.basis import (
-    as_diagonal as as_diagonal_basis,
-)
+from slate_core.basis._contracted import NestedIndex, as_contracted
 from slate_core.basis._tuple import TupleBasis, TupleBasisLike, is_tuple_basis_like
 from slate_core.metadata import NestedLength
+from slate_core.util._nested import flatten_nested
 
 if TYPE_CHECKING:
     import numpy as np
@@ -41,7 +41,6 @@ def _get_einsum_result_basis(
 class EinsumBasisMap:
     def __init__(self) -> None:
         self._single_map = dict[str, Basis]()
-        self._tuple_map = dict[tuple[str, ...], Basis]()
 
     def resolve_single(self, idx: EinsteinIndex) -> tuple[Basis, int]:
         current = self._single_map.get(idx.label, None)
@@ -75,10 +74,30 @@ class InvalidBasisError(ValueError):
         self.message = message
 
 
+def _build_contraction_map(
+    contraction: NestedIndex, idx: NestedEinsteinIndex
+) -> dict[int, set[str]]:
+    """Build a map of the contraction indices to the nested Einstein indices."""
+    if isinstance(idx, EinsteinIndex) and isinstance(contraction, int):
+        return {contraction: {idx.label}}
+    if isinstance(idx, EinsteinIndex):
+        # No contraction since we can't contract part of a basis for now
+        return {}
+    assert isinstance(contraction, tuple)
+    maps = list(starmap(_build_contraction_map, zip(contraction, idx, strict=True)))
+    out = dict[int, set[str]]()
+    for m in maps:
+        for k, v in m.items():
+            out[k] = out.get(k, set()).union(v)
+    return out
+
+
 class EinsumBasisHints:
+    _contractions: list[set[str]]
+
     def __init__(self) -> None:
         self._single_map = defaultdict[str, list[Basis]](list)
-        self._diag_map = defaultdict[tuple[str, ...], list[Basis]](list)
+        self._contractions = []
 
     def add_hint(self, idx: EinsteinIndex, basis: Basis) -> None:
         current = self._single_map.get(idx.label, None)
@@ -94,9 +113,23 @@ class EinsumBasisHints:
 
         self._single_map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
 
-    def add_diag_hint(self, idx: tuple[EinsteinIndex, ...], basis: Basis) -> None:
-        diag = basis.dual_basis() if idx[0].is_dual else basis
-        self._diag_map[tuple(i.label for i in idx)].append(diag)
+    def add_contraction(self, index: NestedIndex, idx: NestedEinsteinIndex) -> None:
+        # Find all contractions which map onto einstein indices
+        contraction_map = _build_contraction_map(index, idx)
+        for contraction in contraction_map.values():
+            independent_contractions = [
+                x for x in self._contractions if x.isdisjoint(contraction)
+            ]
+            intersecting_contractions = [
+                x for x in self._contractions if not x.isdisjoint(contraction)
+            ]
+            # Combine all contractions that intersect with the current one
+            # into a new contraction set
+            next_contraction = set[str](contraction, *intersecting_contractions)
+            self._contractions = [
+                *independent_contractions,
+                next_contraction,
+            ]
 
     def resolve_basis_map(self) -> EinsumBasisMap:
         # The resolved inner basis for the einsum operation
@@ -130,27 +163,15 @@ def _collect_einsum_basis_hints(
         hints.add_hint(idx, basis)
         return
 
-    as_diagonal = (
-        as_diagonal_basis(basis) if is_tuple_basis_like(basis, n_dim=2) else None
-    )
-    # TODO: Add generalized diagonal so we can also support block diagonal  # noqa: FIX002
-    if as_diagonal is not None and all(isinstance(i, EinsteinIndex) for i in idx):
-        idx = cast("tuple[EinsteinIndex, ...]", idx)
-        hints.add_diag_hint(idx, basis)
+    as_contracted_basis = as_contracted(as_linear_map(basis))
+    # TODO: support for block diagonal, ie Recast[ContractedBasis]  # noqa: FIX002
+    if as_contracted_basis is not None:
+        hints.add_contraction(as_contracted_basis.index, idx)
     assert is_tuple_basis_like(basis)
     basis_as_tuple = as_tuple(basis)
     for n, i in enumerate(idx):
         child = basis_as_tuple.children[n]
         _collect_einsum_basis_hints(child, i, hints)
-
-
-type NestedData[T] = T | tuple[NestedData[T], ...]
-
-
-def _flatten_nested[T](nested: NestedData[T]) -> tuple[T, ...]:
-    if isinstance(nested, tuple):
-        return tuple(item for subtuple in nested for item in _flatten_nested(subtuple))  # type: ignore unknown
-    return (nested,)
 
 
 @dataclass(frozen=True)
@@ -193,12 +214,12 @@ def reslove_basis(
         part_basis.append(
             RecastBasis(
                 cast("Basis[Any, Ctype[np.generic]]", basis),
-                from_shape(_flatten_nested(shape)),
-                from_shape(_flatten_nested(shape)),
+                from_shape(flatten_nested(shape)),
+                from_shape(flatten_nested(shape)),
             )
         )
 
-        part_index.append(tuple(i.label for i in _flatten_nested(part)))
+        part_index.append(tuple(i.label for i in flatten_nested(part)))
 
     result_basis = (
         None
@@ -208,7 +229,7 @@ def reslove_basis(
     out_shape_flat = (
         tuple[EinsteinIndex]()
         if specification.result is None
-        else _flatten_nested(specification.result)
+        else flatten_nested(specification.result)
     )
 
     return BasisSpecification(
