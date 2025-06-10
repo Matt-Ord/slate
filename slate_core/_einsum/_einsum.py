@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
-from slate_core._einsum._einstein_basis import reslove_basis
+from slate_core._einsum._einstein_basis import InvalidBasisError, reslove_basis
 from slate_core._einsum._einstein_index import (
     parse_einsum_specification,
 )
@@ -131,5 +131,7 @@ def einsum[DT: np.dtype[np.number]](
     # Ideally this support should also be for a more general contracted basis
     if idx == "(i j'),(j k)->(i k)":
         return _einsum_smart(idx, *arrays)
-
-    return _einsum_simple(idx, *arrays)
+    try:
+        return _einsum_simple(idx, *arrays)
+    except InvalidBasisError as e:
+        raise e from None

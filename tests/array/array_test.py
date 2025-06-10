@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate_core import array, basis
+from slate_core import array
 from slate_core.array import Array, conjugate, transpose
 from slate_core.basis import (
     Basis,
@@ -15,10 +15,11 @@ from slate_core.basis import (
     from_shape,
     transformed_from_shape,
 )
+from slate_core.metadata import Domain, LobattoSpacedMetadata, TupleMetadata
 
 if TYPE_CHECKING:
     from slate_core.basis import Ctype, TupleBasis
-    from slate_core.metadata import BasisMetadata, SimpleMetadata, TupleMetadata
+    from slate_core.metadata import BasisMetadata, SimpleMetadata
 
 
 def test_slate_array_as_array(
@@ -176,7 +177,20 @@ def test_add_fundamental_array() -> None:
 
 
 def test_extract_diagonal() -> None:
-    data = np.array([1, 2, 3, 4, 4, 6, 7, 8, 9]).reshape(3, 3)
-    slate_array = Array(basis.from_shape((3, 3)).upcast(), data)
+    data = np.array([1, 2, 3, 4, 4, 6, 7, 8, 9]).reshape(3, 3).astype(np.float64)
+    meta = TupleMetadata.from_shape((3, 3))
+    slate_array = Array.from_array(data, metadata=meta)
+    diagonal = array.extract_diagonal(slate_array)
+    np.testing.assert_array_equal(diagonal.as_array(), data.diagonal())
+
+    meta = TupleMetadata(
+        (
+            LobattoSpacedMetadata(3, domain=Domain(delta=1)),
+            LobattoSpacedMetadata(3, domain=Domain(delta=1)),
+        )
+    )
+    slate_array = Array.from_array(data, metadata=meta)
+    np.testing.assert_array_almost_equal(slate_array.as_array(), data)
+
     diagonal = array.extract_diagonal(slate_array)
     np.testing.assert_array_equal(diagonal.as_array(), data.diagonal())

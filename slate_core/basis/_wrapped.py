@@ -151,6 +151,10 @@ class WrappedBasisWithMetadata[
             lambda: _convert_vectors_unsafe(self, vectors, basis, axis)  # type: ignore BasisConversion makes this safe
         )
 
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(inner={self.inner!r})"
+
 
 class WrappedBasis[
     B: Basis = Basis,
@@ -311,6 +315,10 @@ class AsUpcast[B: Basis, M: BasisMetadata, CT: Ctype[Never] = Ctype[Never]](
     @override
     def __hash__(self) -> int:
         return hash(self._inner)
+
+    @override
+    def __repr__(self) -> str:
+        return f"Upcast{self.inner!r}"
 
 
 @overload

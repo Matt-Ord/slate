@@ -69,12 +69,29 @@ def _resolve_einsum_basis(
     return TupleBasis(tuple(children), None), tuple(lengths)
 
 
+class InvalidBasisError(ValueError):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+
 class EinsumBasisHints:
     def __init__(self) -> None:
         self._single_map = defaultdict[str, list[Basis]](list)
         self._diag_map = defaultdict[tuple[str, ...], list[Basis]](list)
 
     def add_hint(self, idx: EinsteinIndex, basis: Basis) -> None:
+        current = self._single_map.get(idx.label, None)
+        # If we already have a basis for this index, we need to ensure
+        # that the metadata matches.
+        if current is not None and current[0].metadata() != basis.metadata():
+            msg = (
+                f"Metadata mismatch for index {idx.label}:\n"
+                f"Expected: {current[0].metadata()}\n"
+                f"Actual: {basis.metadata()}"
+            )
+            raise InvalidBasisError(msg)
+
         self._single_map[idx.label].append(basis.dual_basis() if idx.is_dual else basis)
 
     def add_diag_hint(self, idx: tuple[EinsteinIndex, ...], basis: Basis) -> None:
