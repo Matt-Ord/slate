@@ -115,6 +115,11 @@ class EinsumBasisHints:
 
     def add_contraction(self, index: NestedIndex, idx: NestedEinsteinIndex) -> None:
         # Find all contractions which map onto einstein indices
+        # TODO: this is "wrong" in the sense that we can only contract a basis if the  # noqa: FIX002
+        # inner basis is the same as the inner basis that the contraction is
+        # defined on.
+        # To make use of these contractions we need to ensure that
+        # we choose the correct basis when we resolve the basis map.
         contraction_map = _build_contraction_map(index, idx)
         for contraction in contraction_map.values():
             independent_contractions = [

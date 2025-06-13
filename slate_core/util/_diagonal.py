@@ -68,7 +68,7 @@ def expand_contractions[DT: np.dtype[np.generic]](
         # We need to multiply by an identity matrix
         # ie A_i M_ij = B_ij
         input_subscripts.append(
-            _spec_from_indices(tuple(output_indices[list(output_axes)]))
+            _spec_from_indices(tuple(output_indices[c] for c in output_axes))
         )
         eye = np.zeros((array.shape[input_axis],) * len(output_axes), dtype=array.dtype)
         np.fill_diagonal(eye, 1)
@@ -97,7 +97,7 @@ def extract_diagonal[DT: np.dtype[np.generic]](
     n_out = np.min(np.array(array.shape)[list(axes)])
     square_slice[list(axes)] = slice(n_out)
 
-    subscripts = f"{_spec_from_indices(tuple(input_indices))}->{_spec_from_indices(tuple(output_indices))}"
+    subscripts = f"{_spec_from_indices(tuple(input_indices.ravel().tolist()))}->{_spec_from_indices(tuple(output_indices.ravel().tolist()))}"
     return np.einsum(subscripts, array[tuple(square_slice)])  # type: ignore unknown
 
 
@@ -133,5 +133,5 @@ def build_diagonal[DT: np.dtype[np.generic]](
     else:
         padded = truncate_along_axis(array, Truncation(out_shape[0], 0, 0), axis)
 
-    subscripts = f"{_spec_from_indices(tuple(input_indices))},{_spec_from_indices(tuple(eye_indices))}->{_spec_from_indices(tuple(output_indices))}"
+    subscripts = f"{_spec_from_indices(tuple(input_indices.tolist()))},{_spec_from_indices(tuple(eye_indices.tolist()))}->{_spec_from_indices(tuple(output_indices.tolist()))}"
     return np.einsum(subscripts, padded, eye)  # type: ignore unknown

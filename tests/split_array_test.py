@@ -14,7 +14,7 @@ from slate_core.basis import (
 
 
 def test_split_array_equals_diagonal() -> None:
-    data = np.diag(np.arange(1, 4)).astype(np.complex128)
+    data = np.diag(np.arange(1, 4)).astype(np.complex128).reshape(4, 4)
     array = Array.from_array(data)
 
     diagonal = array.with_basis(

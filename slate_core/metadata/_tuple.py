@@ -136,17 +136,17 @@ class TupleMetadata[
 
     @overload
     @staticmethod
-    def from_shape[E1](shape: int, *, extra: None = None) -> SimpleMetadata: ...
+    def from_shape[E1](shape: int, *, extra: None = None) -> SimpleMetadata: ...  # type: ignore unknown
 
     @overload
     @staticmethod
     def from_shape[E1](
-        shape: tuple[NestedLength, ...], *, extra: None = None
+        shape: NestedLength, *, extra: None = None
     ) -> TupleMetadata[tuple[BasisMetadata, ...], None]: ...
     @overload
     @staticmethod
     def from_shape[E1](
-        shape: tuple[NestedLength, ...], *, extra: E1
+        shape: NestedLength, *, extra: E1
     ) -> TupleMetadata[tuple[BasisMetadata, ...], E1]: ...
 
     @staticmethod
@@ -161,7 +161,8 @@ class TupleMetadata[
         if isinstance(shape, int):
             return SimpleMetadata(shape)
         return TupleMetadata[tuple[BasisMetadata, ...], Any](
-            tuple(TupleMetadata.from_shape(s) for s in shape), extra
+            tuple(TupleMetadata.from_shape(s) for s in shape),
+            extra,  # type: ignore unknown
         )
 
     @property

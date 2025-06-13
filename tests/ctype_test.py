@@ -17,7 +17,7 @@ from slate_core.basis import Ctype
         np.float64,
     ],
 )
-def test_supports_ctype_generic(dtype: type) -> None:
+def test_supports_ctype_generic(dtype: type[np.generic]) -> None:
     generic_ctype = Ctype(np.generic)
     assert generic_ctype.supports_type(dtype)
     assert generic_ctype.supports_dtype(np.dtype(cast("type[object]", dtype)))
@@ -41,7 +41,7 @@ def test_supports_ctype_generic(dtype: type) -> None:
     ],
 )
 def test_supports_ctype_number(
-    ctype: type[np.generic], dtype: type, *, expected: bool
+    ctype: type[np.generic], dtype: type[np.generic], *, expected: bool
 ) -> None:
     actual_type = Ctype(ctype)
     assert actual_type.supports_type(dtype) == expected

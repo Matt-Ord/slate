@@ -201,7 +201,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
-        array: np.ndarray[tuple[int, ...], DT_], *, metadata: None = None
+        array: np.ndarray[tuple[Any, ...], DT_], *, metadata: None = None
     ) -> Array[
         TupleBasis[
             tuple[FundamentalBasis[SimpleMetadata], ...], None, Ctype[np.generic[Any]]
@@ -211,7 +211,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     @staticmethod
     def from_array[DT_: np.dtype[np.generic], M: BasisMetadata](
-        array: np.ndarray[tuple[int, ...], DT_], *, metadata: M
+        array: np.ndarray[tuple[Any, ...], DT_], *, metadata: M
     ) -> Array[Basis[M], DT_]: ...
     @staticmethod
     def from_array[DT_: np.dtype[np.generic]](
@@ -274,13 +274,16 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     ) -> Any:
         if isinstance(other, (complex, float, int)):
             final_basis = basis.as_supports_type(
-                basis.as_index(self.basis), np.result_type(self.dtype, other).type
+                basis.as_index(self.basis),
+                cast("type[np.number]", np.result_type(self.dtype, other).type),
             )
             data = self.with_basis(final_basis).raw_data + other
             return Array(final_basis, data)
         # TODO: support efficient add for Coordinate-Like basis  # noqa: FIX002
         # this would involve a more precise get_common_basis
-        result_type = np.result_type(self.dtype, other.dtype).type
+        result_type = cast(
+            "type[np.number]", np.result_type(self.dtype, other.dtype).type
+        )
         final_basis = basis.get_common(
             basis.as_supports_type(basis.as_linear_map(self.basis), result_type),
             basis.as_supports_type(basis.as_linear_map(other.basis), result_type),
@@ -308,13 +311,16 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     ) -> Any:
         if isinstance(other, (complex, float, int)):
             final_basis = basis.as_supports_type(
-                basis.as_index(self.basis), np.result_type(self.dtype, other).type
+                basis.as_index(self.basis),
+                cast("type[np.number]", np.result_type(self.dtype, other).type),
             )
             data = self.with_basis(final_basis).raw_data - other
             return Array(final_basis, data)
         # TODO: support efficient sub for Coordinate-Like basis  # noqa: FIX002
         # this would involve a more precise get_common_basis
-        result_type = np.result_type(self.dtype, other.dtype).type
+        result_type = cast(
+            "type[np.number]", np.result_type(self.dtype, other.dtype).type
+        )
         final_basis = basis.get_common(
             basis.as_supports_type(basis.as_linear_map(self.basis), result_type),
             basis.as_supports_type(basis.as_linear_map(other.basis), result_type),
@@ -331,7 +337,8 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         other: complex,
     ) -> ArrayWithMetadata[M_, np.dtype[np.number]]:
         final_basis = basis.as_supports_type(
-            basis.as_mul(self.basis), np.result_type(self.dtype, other).type
+            basis.as_mul(self.basis),
+            cast("type[np.number]", np.result_type(self.dtype, other).type),
         )
         data = final_basis.mul_data(self.with_basis(final_basis).raw_data, other)
         return Array(final_basis, data)

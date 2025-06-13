@@ -50,7 +50,7 @@ def get_position_in_sorted(axes: tuple[int, ...]) -> tuple[int, ...]:
 
     ie 2,4,1,3 -> 1,3,0,2
     """
-    return tuple(np.argsort(np.argsort(axes)))
+    return tuple(int(x) for x in np.argsort(np.argsort(axes)))
 
 
 def get_max_idx[DT: np.number](
