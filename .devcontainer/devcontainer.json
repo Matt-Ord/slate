@@ -124,7 +124,8 @@
 					"pytest",
 					"savez",
 					"eigvalsh",
-					"eigvals"
+					"eigvals",
+					"Lobatto"
 				]
 			},
 			"extensions": [
