@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Literal, override
+from typing import Literal, Self, override
 
 import numpy as np
 from scipy.special import eval_legendre  # type: ignore[import-untyped]
@@ -45,6 +45,13 @@ class SpacedMetadata[DT: np.dtype[np.generic]](LabeledMetadata[DT], ABC):
     @abstractmethod
     def features(self) -> set[str]: ...
 
+    def with_domain(self, domain: Domain) -> Self:
+        """Create a new metadata with the same data but a different domain."""
+        return self.__class__(
+            fundamental_size=self.fundamental_size,
+            domain=domain,
+        )
+
 
 @dataclass(frozen=True, kw_only=True)
 class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
@@ -76,6 +83,14 @@ class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
             {SIMPLE_FEATURE, PERIODIC_FEATUIRE}
             if self.interpolation == "Fourier"
             else {SIMPLE_FEATURE}
+        )
+
+    @override
+    def with_domain(self, domain: Domain) -> Self:
+        return self.__class__(
+            fundamental_size=self.fundamental_size,
+            domain=domain,
+            interpolation=self.interpolation,
         )
 
 
@@ -136,6 +151,14 @@ class BarycentricMetadata(SpacedMetadata[np.dtype[np.floating]]):
     def values(self) -> np.ndarray[tuple[int], np.dtype[np.float64]]:
         """Get the points of the lobatto points."""
         return self._values
+
+    @override
+    def with_domain(self, domain: Domain) -> Self:
+        return self.__class__(
+            fundamental_size=self.fundamental_size,
+            domain=domain,
+            values=self.values,
+        )
 
 
 def _eval_legendre_derivatives(n: int, x: float) -> tuple[float, float, float]:
@@ -256,3 +279,10 @@ class LobattoSpacedMetadata(BarycentricMetadata):
     @override
     def basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.float64]]:
         return self._basis_weights
+
+    @override
+    def with_domain(self, domain: Domain) -> Self:
+        return self.__class__(
+            fundamental_size=self.fundamental_size,
+            domain=domain,
+        )
