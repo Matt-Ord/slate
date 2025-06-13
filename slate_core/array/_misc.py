@@ -116,7 +116,7 @@ def exp[M: BasisMetadata, DT: np.dtype[np.complexfloating]](
     return Array(converted.basis, np.exp(converted.raw_data))  # type: ignore[return-value]
 
 
-def sqrt[M: BasisMetadata, DT: np.dtype[np.floating]](
+def sqrt[M: BasisMetadata, DT: np.dtype[np.number]](
     array: ArrayWithMetadata[M, DT],
 ) -> ArrayWithMetadata[M, DT]:
     """Square root of data in a slate array."""
