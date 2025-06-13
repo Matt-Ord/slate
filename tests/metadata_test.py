@@ -197,3 +197,18 @@ def test_projected(
 
     expected = _normalize_directions(expected)
     np.testing.assert_allclose(np.asarray(result), np.asarray(expected), atol=1e-3)
+
+
+def test_lobatto_metadata_eq() -> None:
+    """Test that LobattoSpacedMetadata is equal to itself."""
+    metadata = LobattoSpacedMetadata(10, domain=Domain(delta=2.0))
+    assert metadata == metadata  # noqa: PLR0124
+
+    metadata2 = LobattoSpacedMetadata(10, domain=Domain(delta=3.0))
+    assert metadata != metadata2
+
+    metadata3 = LobattoSpacedMetadata(11, domain=Domain(delta=2.0))
+    assert metadata != metadata3
+
+    metadata4 = LobattoSpacedMetadata(10, domain=Domain(delta=2.0))
+    assert metadata == metadata4

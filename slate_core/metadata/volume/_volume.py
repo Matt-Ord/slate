@@ -86,7 +86,8 @@ def fundamental_stacked_dk(
     metadata: EvenlySpacedVolumeMetadata,
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental stacked dk."""
-    return tuple(2 * np.pi * np.linalg.inv(fundamental_stacked_delta_x(metadata)).T)
+    stacked = 2 * np.pi * np.linalg.inv(fundamental_stacked_delta_x(metadata)).T
+    return tuple(stacked[i] for i in range(stacked.shape[0]))
 
 
 def fundamental_stacked_delta_k(
@@ -137,7 +138,8 @@ def project_points_along_directions(
     points: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
     directions: tuple[np.ndarray[Any, np.dtype[np.floating]], ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
-    return tuple(np.tensordot(_project_directions(directions), points, axes=(0, 0)))
+    projected = np.tensordot(_project_directions(directions), points, axes=(0, 0))
+    return tuple(projected[i] for i in range(projected.shape[0]))
 
 
 def _wrap_and_offset(
