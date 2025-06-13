@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, overrid
 
 import numpy as np
 
-from slate_core._einsum._einstein_basis import flatten_nested
 from slate_core.basis._basis import Basis, BasisConversion, BasisFeature, Ctype
 from slate_core.basis._tuple import is_tuple
 from slate_core.basis._wrapped import AsUpcast, WrappedBasis, wrapped_basis_iter_inner
@@ -14,6 +13,7 @@ from slate_core.util._diagonal import (
     apply_contractions,
     expand_contractions,
 )
+from slate_core.util._nested import flatten_nested
 
 if TYPE_CHECKING:
     from slate_core.metadata._shape import NestedLength

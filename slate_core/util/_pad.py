@@ -37,7 +37,7 @@ def pad_ft_points[DT: np.dtype[np.generic]](
     slice_start = np.array([slice(None) for _ in array.shape], dtype=slice)
     slice_start[axes_arr] = np.array(
         [
-            slice(1 + min((n - 1) // 2, (s - 1) // 2))
+            slice(1 + min((n.item() - 1) // 2, (s - 1) // 2))
             for (n, s) in zip(shape_arr[axes_arr], s, strict=True)
         ],
         dtype=slice,
@@ -46,7 +46,7 @@ def pad_ft_points[DT: np.dtype[np.generic]](
     slice_end[axes_arr] = np.array(
         [
             slice(start, None)
-            if (start := max((-n + 1) // 2, (-s + 1) // 2)) < 0
+            if (start := max((-n.item() + 1) // 2, (-s + 1) // 2)) < 0
             # else no negative frequencies
             else slice(0, 0)
             for (n, s) in zip(shape_arr[axes_arr], s, strict=True)

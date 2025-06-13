@@ -8,6 +8,7 @@ import pytest
 from slate_core import basis
 from slate_core.array import Array
 from slate_core.basis import (
+    AsUpcast,
     ContractedBasis,
     CoordinateBasis,
     CroppedBasis,
@@ -18,9 +19,17 @@ from slate_core.basis import (
     TrigonometricTransformBasis,
     TruncatedBasis,
     Truncation,
+    TupleBasis,
     get_common_contraction_index,
 )
-from slate_core.metadata import SimpleMetadata
+from slate_core.metadata import (
+    AxisDirections,
+    Domain,
+    EvenlySpacedLengthMetadata,
+    LobattoSpacedLengthMetadata,
+    SimpleMetadata,
+    TupleMetadata,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -94,8 +103,31 @@ def test_simple_basis_equality(
     assert basis_0 != basis_3
 
 
+def _scatter_basis() -> Basis:
+    state_metadata = TupleMetadata(
+        (
+            EvenlySpacedLengthMetadata(5, domain=Domain(delta=2.0)),
+            EvenlySpacedLengthMetadata(7, domain=Domain(delta=2.0)),
+            LobattoSpacedLengthMetadata(3, domain=Domain(delta=2.0)),
+        ),
+        AxisDirections(
+            vectors=(np.array([1, 0, 0]), np.array([0, 1, 0]), np.array([0, 0, 1]))
+        ),
+    )
+    fundamental_state_basis = AsUpcast(
+        basis.from_metadata(state_metadata),
+        state_metadata,
+    )
+
+    return DiagonalBasis(
+        TupleBasis((fundamental_state_basis, fundamental_state_basis), None),
+    ).upcast()
+
+
 BUILD_GENERIC_BASIS: list[Callable[[], Basis]] = [
     lambda: basis.from_shape(((2, 3), (2, 3))),
+    lambda: basis.from_shape((5, 7)).upcast(),
+    _scatter_basis,
     lambda: TransformedBasis(basis.from_shape((5, 7)), direction="forward"),
     lambda: DiagonalBasis(basis.from_shape((5, 5))),
     lambda: ContractedBasis(basis.from_shape((5, 5)), (0, 0)),

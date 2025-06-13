@@ -15,11 +15,11 @@ if TYPE_CHECKING:
 
 
 @overload
-def standard_deviation[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
+def standard_deviation[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
     *,
     axis: Literal[0],
-) -> ArrayWithMetadata[TupleMetadata[tuple[*M], None], DT]: ...
+) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
 
 
 @overload
@@ -70,11 +70,11 @@ def standard_deviation[DT: np.number](
 
 
 @overload
-def average[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
+def average[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
     *,
     axis: Literal[0],
-) -> ArrayWithMetadata[TupleMetadata[tuple[*M], None], DT]: ...
+) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
 
 
 @overload
@@ -123,11 +123,11 @@ def average[DT: np.number](
 
 
 @overload
-def min[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](  # noqa: A001
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
+def min[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](  # noqa: A001
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
     *,
     axis: Literal[0],
-) -> ArrayWithMetadata[TupleMetadata[tuple[*M], None], DT]: ...
+) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
 
 
 @overload
@@ -176,11 +176,11 @@ def min[DT: np.number](  # noqa: A001
 
 
 @overload
-def max[M: tuple[SimpleMetadata], DT: np.dtype[np.number]](  # noqa: A001
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
+def max[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](  # noqa: A001
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
     *,
     axis: Literal[0],
-) -> ArrayWithMetadata[TupleMetadata[tuple[*M], None], DT]: ...
+) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
 
 
 @overload

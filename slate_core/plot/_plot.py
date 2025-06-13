@@ -492,7 +492,7 @@ def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
     shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))
 
     fig, ax, mesh = _plot_raw_data_2d(
-        shifted_data, tuple(shifted_coordinates), **kwargs
+        shifted_data, tuple(shifted_coordinates[i] for i in range(2)), **kwargs
     )
 
     ax.set_xlabel(f"k{axes[0]} axis / $m^-1$")
