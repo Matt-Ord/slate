@@ -121,6 +121,8 @@ def sqrt[M: BasisMetadata, DT: np.dtype[np.floating]](
 ) -> ArrayWithMetadata[M, DT]:
     """Square root of data in a slate array."""
     converted = as_index_basis(array)
+    if array.dtype is np.complexfloating:
+        return Array(converted.basis, np.lib.scimath.sqrt(converted.raw_data))  # type: ignore[return-value]
     return Array(converted.basis, np.sqrt(converted.raw_data))  # type: ignore[return-value]
 
 
