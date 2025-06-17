@@ -110,7 +110,7 @@ def _eig_from_tuple[
         .resolve_ctype()
         .upcast()
     )
-    return Array(  # type: ignore unkown
+    return Array(  # type: ignore unknown
         DiagonalBasis(
             TupleBasis((basis_0, basis_1), array.basis.metadata().extra).resolve_ctype()
         ).resolve_ctype(),

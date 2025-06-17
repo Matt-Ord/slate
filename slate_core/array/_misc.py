@@ -121,7 +121,7 @@ def sqrt[M: BasisMetadata, DT: np.dtype[np.number]](
 ) -> ArrayWithMetadata[M, DT]:
     """Square root of data in a slate array."""
     converted = as_index_basis(array)
-    if array.dtype is np.complexfloating:
+    if np.issubdtype(array.dtype, np.complexfloating):  # cspell:disable-line
         return Array(converted.basis, np.lib.scimath.sqrt(converted.raw_data))  # type: ignore[return-value]
     return Array(converted.basis, np.sqrt(converted.raw_data))  # type: ignore[return-value]
 
@@ -451,8 +451,8 @@ def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
 ) -> ArrayWithMetadata[M, DT]:
     """Extract the diagonal of a 2D slate array.
 
-    Note that this traets the data as a raw 2d array of data, it does not return the eigenstates
-    of the array, even if it is already diagonalised.
+    Note that this treats the data as a raw 2d array of data, it does not return the eigenstates
+    of the array, even if it is already diagonalized.
     """
     as_diagonal = basis.as_diagonal(basis.as_index(array.basis))
     if as_diagonal is not None:

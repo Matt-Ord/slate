@@ -637,7 +637,7 @@ def as_supports_type[M: BasisMetadata, T: np.generic](
 ) -> Basis[M, Ctype[T]]:
     """Get the closest basis that supports the type ty.
 
-    Note that the type displayed will be incorrect if ty is porided as a
+    Note that the type displayed will be incorrect if ty is provided as a
     union - this should only be called by a literal value for ty.
     """
     inner_basis = from_metadata(basis.metadata(), is_dual=basis.is_dual)

@@ -9,7 +9,7 @@ import numpy as np
 if TYPE_CHECKING:
     from slate_core.metadata._shape import NestedLength
 
-PERIODIC_FEATUIRE = "Periodic"
+PERIODIC_FEATURE = "Periodic"
 """The periodic feature indicates that the basis functions are periodic, such as in Fourier interpolation."""
 SIMPLE_FEATURE = "Simple"
 """The simple feature indicates that all of the basis functions are unitary."""
@@ -34,7 +34,7 @@ class BasisMetadata(Protocol):
         This property provides the weights
         that are applied to the data when it is transformed to the basis.
 
-        The fundamental basis represents data discretised into a series
+        The fundamental basis represents data discretized into a series
         of orthogonal basis functions U_i at discrete points R_j
         where j = 0, ..., N-1 such that:
 

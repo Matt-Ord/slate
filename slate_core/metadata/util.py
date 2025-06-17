@@ -80,7 +80,7 @@ def basis_components_from_array_points[DT: np.dtype[np.generic]](
     form that is weighted by the basis functions. This property provides the weights
     that are applied to the data when it is transformed to the basis.
 
-    The fundamental basis represents data discretised into a series
+    The fundamental basis represents data discretized into a series
     of orthogonal basis functions U_i at discrete points R_j
     where j = 0, ..., N-1 such that:
 
@@ -116,7 +116,7 @@ def array_points_from_basis_components[DT: np.dtype[np.generic]](
     form that is weighted by the basis functions. This property provides the weights
     that are applied to the data when it is transformed to the basis.
 
-    The fundamental basis represents data discretised into a series
+    The fundamental basis represents data discretized into a series
     of orthogonal basis functions U_i at discrete points R_j
     where j = 0, ..., N-1 such that:
 
