@@ -14,7 +14,7 @@ from slate_core.basis import (
 
 
 def test_split_array_equals_diagonal() -> None:
-    data = np.diag(np.arange(1, 4)).astype(np.complex128).reshape(4, 4)
+    data = np.diag(np.arange(4)).astype(np.complex128).reshape(4, 4)
     array = Array.from_array(data)
 
     diagonal = array.with_basis(
@@ -26,8 +26,8 @@ def test_split_array_equals_diagonal() -> None:
     )
     split = array.with_basis(SplitBasis(diagonal.basis, diagonal.basis).resolve_ctype())
 
-    np.testing.assert_allclose(diagonal.raw_data, [1.0, 2.0, 3.0])
-    np.testing.assert_allclose(split.raw_data, [1.0, 2.0, 3.0, 0, 0, 0])
+    np.testing.assert_allclose(diagonal.raw_data, [0.0, 1.0, 2.0, 3.0])
+    np.testing.assert_allclose(split.raw_data, [0.0, 1.0, 2.0, 3.0, 0, 0, 0, 0])
     np.testing.assert_allclose(diagonal.as_array(), split.as_array())
 
 
