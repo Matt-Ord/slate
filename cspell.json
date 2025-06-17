@@ -64,7 +64,9 @@
         "pyright",
         "pydata",
         "pylint",
-        "pickler"
+        "pickler",
+        "Caldeira",
+        "lanczos"
     ],
     "ignoreWords": [
         "toarray",
@@ -117,7 +119,11 @@
         "eigh",
         "pylab",
         "unpickler",
-        "issubdtype"
+        "issubdtype",
+        "braket",
+        "ntraj",
+        "sesolve",
+        "sinc"
     ],
     "flagWords": [
         "hte",
