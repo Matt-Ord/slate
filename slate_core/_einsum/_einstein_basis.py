@@ -130,7 +130,7 @@ class EinsumBasisHints:
             ]
             # Combine all contractions that intersect with the current one
             # into a new contraction set
-            next_contraction = set[str]([contraction, *intersecting_contractions])
+            next_contraction = contraction.union(*intersecting_contractions)
             self._contractions = [
                 *independent_contractions,
                 next_contraction,
