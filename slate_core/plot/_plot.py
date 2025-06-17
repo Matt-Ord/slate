@@ -10,7 +10,7 @@ from slate_core.array import Array, get_data_in_axes
 from slate_core.array._conversion import as_fundamental_basis
 from slate_core.metadata import AxisDirections, LabeledMetadata
 from slate_core.metadata._metadata import (
-    PERIODIC_FEATUIRE,
+    PERIODIC_FEATURE,
     SIMPLE_FEATURE,
 )
 from slate_core.metadata.length import (
@@ -31,7 +31,7 @@ from slate_core.plot._util import (
     get_measured_data,
     get_norm_with_lim,
     get_scale_with_lim,
-    set_ymargin,
+    set_ymargin,  # cspell:disable-line
 )
 from slate_core.util import (
     get_max_idx,
@@ -100,8 +100,8 @@ def _plot_raw_data_1d[DT: np.dtype[np.number]](  # noqa: PLR0913
 
     container = ax.errorbar(coordinates, measured_data, yerr=y_errors)
     line = container.lines[0]
-    ax.set_xmargin(0)
-    set_ymargin(ax, 0, 0.05)
+    ax.set_xmargin(0)  # cspell:disable-line
+    set_ymargin(ax, 0, 0.05)  # cspell:disable-line
     if measure == "abs":
         ax.set_ylim(0, ax.get_ylim()[1])
     ax.set_yscale(get_scale_with_lim(scale, ax.get_ylim()))
@@ -126,7 +126,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
         y_data.with_basis(common_basis).raw_data,
         x_data.with_basis(common_basis).raw_data,
         y_errors,
-        periodic=PERIODIC_FEATUIRE in x_data.basis.metadata().features,
+        periodic=PERIODIC_FEATURE in x_data.basis.metadata().features,
         **kwargs,
     )
 
@@ -196,7 +196,7 @@ def array_against_basis[M: BasisMetadata, DT: np.dtype[np.number]](
         raw_data,
         coordinates,
         y_errors,
-        periodic=PERIODIC_FEATUIRE in converted.basis.metadata().features,
+        periodic=PERIODIC_FEATURE in converted.basis.metadata().features,
         **kwargs,
     )
 

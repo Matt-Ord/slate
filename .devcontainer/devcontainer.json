@@ -9,6 +9,9 @@
 			"version": "3.13",
 			"installTools": false
 		},
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "lts"
+		},
 		"ghcr.io/va-h/devcontainers-features/uv:1": {
 			"shellautocompletion": true,
 			"version": "latest"
@@ -38,95 +41,7 @@
 				"python.analysis.include": [
 					"slate_core"
 				],
-				"python.analysis.autoImportCompletions": true,
-				"cSpell.allowCompoundWords": true,
-				"cSpell.flagWords": [
-					"hte",
-					"teh"
-				],
-				"cSpell.words": [
-					"arange",
-					"argmax",
-					"argmin",
-					"asarray",
-					"astype",
-					"atol",
-					"clim",
-					"colorbar",
-					"dtype",
-					"eigenstate",
-					"eigenstates",
-					"eigh",
-					"fftfreq",
-					"fftn",
-					"fftshift",
-					"hbar",
-					"hermitian",
-					"ifft",
-					"ifftn",
-					"ifftshift",
-					"imshow",
-					"irfft",
-					"irfftn",
-					"ishermitian",
-					"isreal",
-					"issymmetric",
-					"jianding",
-					"kinded",
-					"Libary",
-					"lindblad",
-					"lindbladian",
-					"linestyle",
-					"linspace",
-					"matplotlib",
-					"meshgrid",
-					"mesolve",
-					"ncols",
-					"ndarray",
-					"ndenumerate",
-					"ndim",
-					"ndimage",
-					"ndindex",
-					"ndk",
-					"nrows",
-					"pcolormesh",
-					"prefactor",
-					"pyplot",
-					"Qobj",
-					"qutip",
-					"rfft",
-					"rfftn",
-					"savefig",
-					"scipy",
-					"Seitz",
-					"sharey",
-					"splev",
-					"splrep",
-					"suptitle",
-					"symlog",
-					"toarray",
-					"twinx",
-					"vmax",
-					"vmin",
-					"Wannier",
-					"wavefunction",
-					"wavefunctions",
-					"wavepacket",
-					"wavepackets",
-					"Wavevector",
-					"xlabel",
-					"xlim",
-					"xscale",
-					"yerr",
-					"ylabel",
-					"ylim",
-					"yscale",
-					"pytest",
-					"savez",
-					"eigvalsh",
-					"eigvals",
-					"Lobatto"
-				]
+				"python.analysis.autoImportCompletions": true
 			},
 			"extensions": [
 				"donjayamanne.python-extension-pack",
@@ -141,5 +56,5 @@
 			]
 		}
 	},
-	"onCreateCommand": "uv sync --all-extras"
+	"onCreateCommand": "npm install -g cspell && uv sync --all-extras"
 }

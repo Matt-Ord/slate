@@ -124,7 +124,8 @@ class Axes(MPLAxesBase):
         cmap: str | Colormap | None = ...,
         vmin: float | None = ...,
         vmax: float | None = ...,
-        shading: Literal["flat", "nearest", "gouraud", "auto"] | None = ...,
+        shading: Literal["flat", "nearest", "gouraud", "auto"]  # cspell:disable-line
+        | None = ...,
         antialiased: bool = ...,
     ) -> QuadMesh: ...
     def text(  # type: ignore bad overload  # noqa: PLR0913

@@ -83,11 +83,11 @@ def _build_shape(
     return tuple(_build_shape(idx, size_map) for idx in index)
 
 
-def _get_uncontracted_index(basis: Basis, current_idx: int = 0) -> NestedIndex:
+def _get_non_contracted_index(basis: Basis, current_idx: int = 0) -> NestedIndex:
     """Get a unique index for the basis."""
     if is_tuple(basis):
         return tuple(
-            _get_uncontracted_index(child, current_idx + i)
+            _get_non_contracted_index(child, current_idx + i)
             for i, child in enumerate(basis.children)
         )
     return current_idx

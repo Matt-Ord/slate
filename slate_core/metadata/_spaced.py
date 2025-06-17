@@ -9,7 +9,7 @@ from scipy.special import eval_legendre  # type: ignore[import-untyped]
 
 from slate_core.metadata._metadata import (
     BARICENTRIC_FEATURE,
-    PERIODIC_FEATUIRE,
+    PERIODIC_FEATURE,
     SIMPLE_FEATURE,
     LabeledMetadata,
 )
@@ -80,7 +80,7 @@ class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
     def features(self) -> set[str]:
         """Shape of the full data."""
         return (
-            {SIMPLE_FEATURE, PERIODIC_FEATUIRE}
+            {SIMPLE_FEATURE, PERIODIC_FEATURE}
             if self.interpolation == "Fourier"
             else {SIMPLE_FEATURE}
         )
@@ -106,12 +106,12 @@ def _get_barycentric_basis_weights(
     # the log of the barycentric weights
     # λ_i = 1 / Π_{k ≠ i} (x_i - x_k)
     # For numerical stability, we subtract the maximum log weight
-    # to avoid overflow when exponentiating. This scales
+    # to avoid overflow during exponentiation. This scales
     # the weights but does not change the output.
     log_abs_diff = np.log(np.abs(difference))
     log_weights = -np.sum(log_abs_diff, axis=1)
     log_weights -= np.max(log_weights)
-    # Exponentiate to get the barycentric weights
+    # Exponentiation to get the barycentric weights
     # multiplied by a prefactor
     barycentric_weights = np.exp(log_weights)
 

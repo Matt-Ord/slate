@@ -175,7 +175,7 @@ def array_basis_variance() -> None:
 
     basis = cast("Basis[SimpleMetadata, Ctype[np.complexfloating]]", {})
     data = cast("np.ndarray[Any, np.dtype[np.float64]]", {})
-    # We can't create an array with any old basis, but this is not somethig we check on a
+    # We can't create an array with any old basis, but this is not something we check on a
     # type level. The ergonomics of this are too bad - maybe with future refinements
     # to the type system we can do this better.
     a = Array(basis, data)
