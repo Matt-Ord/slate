@@ -276,6 +276,10 @@ class ContractedBasis[
                 stacked.ndim - 1,
             )
             contracted = expand_contractions(stacked, out_axes)
+            if contracted.size == 0:
+                return contracted.reshape(
+                *vectors.shape[:axis], 0, *vectors.shape[axis + 1 :]
+            )
             return contracted.reshape(
                 *vectors.shape[:axis], -1, *vectors.shape[axis + 1 :]
             )
