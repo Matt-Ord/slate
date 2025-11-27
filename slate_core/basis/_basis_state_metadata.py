@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TypeGuard, override
 
 from slate_core.basis._basis import Basis

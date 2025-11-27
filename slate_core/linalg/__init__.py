@@ -8,8 +8,6 @@ basis that diagonalizes the array
     :lineno-start: 8
 """
 
-from __future__ import annotations
-
 from slate_core._einsum import einsum
 from slate_core.array._transpose import inv, transpose
 from slate_core.linalg._eig import (

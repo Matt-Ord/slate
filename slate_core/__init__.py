@@ -1,7 +1,5 @@
 """Slate, a framework for automatic basis conversions."""
 
-from __future__ import annotations
-
 from slate_core import array, basis, explicit_basis, metadata, plot, util
 from slate_core.array import Array
 from slate_core.basis import (

@@ -1,7 +1,5 @@
 """Metadata is used to store information about a basis."""
 
-from __future__ import annotations
-
 from slate_core.metadata import length, volume
 from slate_core.metadata._metadata import (
     PERIODIC_FEATURE,

@@ -1,7 +1,5 @@
 """A collection of util functions."""
 
-from __future__ import annotations
-
 from slate_core.util._decorators import CachedFunction, cached, timed
 from slate_core.util._diagonal import build_diagonal, extract_diagonal
 from slate_core.util._index import (

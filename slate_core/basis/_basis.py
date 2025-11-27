@@ -1,7 +1,4 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from itertools import starmap
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -49,7 +46,7 @@ def are_dual_shapes(lhs: NestedBool, rhs: NestedBool) -> bool:
         If the two shapes are not dual to each other.
     """
     if isinstance(lhs, tuple) and isinstance(rhs, tuple):
-        return all(starmap(are_dual_shapes, zip(lhs, rhs, strict=False)))
+        return all(map(are_dual_shapes, lhs, rhs, strict=False))
     if isinstance(lhs, bool) and isinstance(rhs, bool):
         return lhs != rhs
     msg = "The two basis have different shapes"

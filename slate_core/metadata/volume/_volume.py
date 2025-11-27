@@ -1,7 +1,4 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
-from itertools import starmap
 from typing import Any, cast, override
 
 import numpy as np
@@ -38,9 +35,7 @@ class AxisDirections:
     @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, AxisDirections):
-            return all(
-                starmap(np.allclose, zip(self.vectors, value.vectors, strict=False))
-            )
+            return all(map(np.allclose, self.vectors, value.vectors, strict=False))
         return False
 
     @override

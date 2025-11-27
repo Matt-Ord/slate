@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import datetime
 import pickle  # noqa: S403
 from functools import update_wrapper, wraps

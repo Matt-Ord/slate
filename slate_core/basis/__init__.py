@@ -1,7 +1,5 @@
 """The basis type that powers Slate."""
 
-from __future__ import annotations
-
 from slate_core.basis._basis import (
     Basis,
     BasisConversion,

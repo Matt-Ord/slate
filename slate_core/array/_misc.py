@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any, Literal, Never, TypeGuard, cast, overload
 
 import numpy as np

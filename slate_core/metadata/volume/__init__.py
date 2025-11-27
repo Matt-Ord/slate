@@ -1,7 +1,5 @@
 """Module for stacked volume metadata."""
 
-from __future__ import annotations
-
 from slate_core.metadata.volume._util import (
     get_fundamental_stacked_k_points_projected_along_axes,
     get_fundamental_stacked_x_points_projected_along_axes,

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, override
 
@@ -278,8 +276,8 @@ class ContractedBasis[
             contracted = expand_contractions(stacked, out_axes)
             if contracted.size == 0:
                 return contracted.reshape(
-                *vectors.shape[:axis], 0, *vectors.shape[axis + 1 :]
-            )
+                    *vectors.shape[:axis], 0, *vectors.shape[axis + 1 :]
+                )
             return contracted.reshape(
                 *vectors.shape[:axis], -1, *vectors.shape[axis + 1 :]
             )
