@@ -1,14 +1,7 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/debian
 {
 	"name": "Debian",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+	"image": "mcr.microsoft.com/devcontainers/base:bookworm",
 	"features": {
-		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.13",
-			"installTools": false
-		},
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "lts"
 		},
@@ -56,5 +49,5 @@
 			]
 		}
 	},
-	"onCreateCommand": "npm install -g cspell && uv sync --all-extras"
+	"onCreateCommand": "npm install -g cspell && uv python install && uv sync --all-extras"
 }

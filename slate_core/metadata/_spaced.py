@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Literal, Self, override
+from functools import cached_property
+from typing import Literal, override
 
 import numpy as np
 from scipy.special import eval_legendre  # type: ignore[import-untyped]
@@ -45,12 +46,9 @@ class SpacedMetadata[DT: np.dtype[np.generic]](LabeledMetadata[DT], ABC):
     @abstractmethod
     def features(self) -> set[str]: ...
 
-    def with_domain(self, domain: Domain) -> Self:
+    @abstractmethod
+    def with_domain(self, domain: Domain) -> SpacedMetadata[DT]:
         """Create a new metadata with the same data but a different domain."""
-        return self.__class__(
-            fundamental_size=self.fundamental_size,
-            domain=domain,
-        )
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -86,8 +84,8 @@ class EvenlySpacedMetadata(SpacedMetadata[np.dtype[np.floating]]):
         )
 
     @override
-    def with_domain(self, domain: Domain) -> Self:
-        return self.__class__(
+    def with_domain(self, domain: Domain) -> EvenlySpacedMetadata:
+        return EvenlySpacedMetadata(
             fundamental_size=self.fundamental_size,
             domain=domain,
             interpolation=self.interpolation,
@@ -135,15 +133,13 @@ class BarycentricMetadata(SpacedMetadata[np.dtype[np.floating]]):
         """Get the features of the barycentric points."""
         return {BARICENTRIC_FEATURE}
 
-    _basis_weights: np.ndarray[tuple[int], np.dtype[np.float64]] | None = None
+    @cached_property
+    def _basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.float64]]:
+        return _get_barycentric_basis_weights(self.domain, self._values)
 
     @property
     @override
     def basis_weights(self) -> np.ndarray[tuple[int], np.dtype[np.float64]]:
-        if self._basis_weights is None:
-            self._basis_weights = _get_barycentric_basis_weights(
-                self.domain, self._values
-            )
         return self._basis_weights
 
     @property
@@ -153,7 +149,7 @@ class BarycentricMetadata(SpacedMetadata[np.dtype[np.floating]]):
         return self._values
 
     @override
-    def with_domain(self, domain: Domain) -> Self:
+    def with_domain(self, domain: Domain) -> BarycentricMetadata:
         return self.__class__(
             fundamental_size=self.fundamental_size,
             domain=domain,
@@ -281,7 +277,7 @@ class LobattoSpacedMetadata(BarycentricMetadata):
         return self._basis_weights
 
     @override
-    def with_domain(self, domain: Domain) -> Self:
+    def with_domain(self, domain: Domain) -> LobattoSpacedMetadata:
         return self.__class__(
             fundamental_size=self.fundamental_size,
             domain=domain,
