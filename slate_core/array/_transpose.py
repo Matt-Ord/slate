@@ -233,20 +233,7 @@ def get_data_in_axes[M: BasisMetadata, DT: np.dtype[np.generic]](
     axes: tuple[int, ...],
     idx: tuple[int, ...],
 ) -> Array[TupleBasisLike[tuple[BasisMetadata, ...], Any], DT]:
-    """
-    Given a slice, insert slice(None) everywhere given in axes.
-
-    Parameters
-    ----------
-    slice : list[slice  |  _IntLike_co  |  None]
-        slice excluding axes
-    axes : tuple[_IntLike_co]
-        axes to insert slice(None)
-
-    Returns
-    -------
-    list[slice | _IntLike_co | None]
-    """
+    """Given a slice, insert slice(None) everywhere given in axes."""
     indexed = array[slice_ignoring_axes(idx, axes)]
     if len(axes) == 1:
         # Must be TupleBasis((basis,))
