@@ -1,7 +1,5 @@
 """The array type for Slate."""
 
-from __future__ import annotations
-
 from slate_core.array._array import (
     Array,
     ArrayWithMetadata,

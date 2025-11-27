@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from itertools import starmap
 from typing import (
     TYPE_CHECKING,
@@ -342,12 +340,7 @@ def as_is_dual[M: BasisMetadata, CT: Ctype[Never]](
     return cast(
         "Basis[M, CT]",
         TupleBasis(
-            tuple(
-                starmap(
-                    as_is_dual,
-                    zip(basis_as_tuple.children, is_dual, strict=False),
-                )
-            ),
+            tuple(map(as_is_dual, basis_as_tuple.children, is_dual, strict=False)),
             basis_as_tuple.metadata().extra,
         ),
     )

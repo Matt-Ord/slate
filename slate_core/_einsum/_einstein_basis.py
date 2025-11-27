@@ -1,8 +1,5 @@
-from __future__ import annotations
-
 from collections import defaultdict
 from dataclasses import dataclass
-from itertools import starmap
 from typing import TYPE_CHECKING, Any, cast
 
 from slate_core._einsum._einstein_index import (
@@ -84,7 +81,7 @@ def _build_contraction_map(
         # No contraction since we can't contract part of a basis for now
         return {}
     assert isinstance(contraction, tuple)
-    maps = list(starmap(_build_contraction_map, zip(contraction, idx, strict=True)))
+    maps = list(map(_build_contraction_map, contraction, idx, strict=True))
     out = dict[int, set[str]]()
     for m in maps:
         for k, v in m.items():

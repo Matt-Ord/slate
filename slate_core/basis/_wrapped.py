@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import abstractmethod
 from copy import copy
 from typing import TYPE_CHECKING, Any, Never, Self, TypeGuard, cast, overload, override

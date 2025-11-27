@@ -1,7 +1,5 @@
 """Functions for plotting slate data."""
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any
 
 from slate_core.plot._animate import (
