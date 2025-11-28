@@ -12,11 +12,9 @@ from slate_core.plot._plot import (
     index_text,
 )
 from slate_core.plot._util import (
-    Axes,
-    Figure,
     Measure,
     Scale,
-    TupleAnimation,
+    build_tuple_animation,
     get_figure,
 )
 
@@ -34,6 +32,7 @@ if TYPE_CHECKING:
         SimpleMetadata,
     )
     from slate_core.metadata._tuple import TupleMetadata
+    from slate_core.plot._annotations import Axes, Figure, TupleAnimation
 
 
 def _get_slice_idx(
@@ -72,7 +71,7 @@ def animate_array_over_list[DT: np.dtype[np.number]](
         frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
     return fig, ax, ani
 
 
@@ -101,7 +100,7 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
         frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
     return fig, ax, ani
 
 
@@ -133,7 +132,7 @@ def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
         frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
     return fig, ax, ani
 
 
@@ -163,7 +162,7 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0
         frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
     return fig, ax, ani
 
 
@@ -195,7 +194,7 @@ def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
         frames.append((line,))
         line.set_color(frames[0][0].get_color())
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
 
     return fig, ax, ani
 
@@ -230,7 +229,7 @@ def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
         text = index_text(ax, slice_idx)
         frames.append((mesh, text))
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
     return fig, ax, ani
 
 
@@ -260,5 +259,5 @@ def animate_data_2d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
         )
         frames.append((mesh,))
 
-    ani = TupleAnimation(fig, frames)
+    ani = build_tuple_animation(fig, frames)
     return fig, ax, ani

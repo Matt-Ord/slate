@@ -19,8 +19,6 @@ from slate_core.metadata.volume import (
 )
 from slate_core.metadata.volume._util import project_points_along_axes
 from slate_core.plot._util import (
-    Axes,
-    Figure,
     Measure,
     Scale,
     get_axis_colorbar,
@@ -47,6 +45,7 @@ if TYPE_CHECKING:
         TupleMetadata,
     )
     from slate_core.metadata.length import EvenlySpacedLengthMetadata
+    from slate_core.plot._annotations import Axes, Figure
 
 
 class PlotKwargs(TypedDict, total=False):
