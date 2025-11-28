@@ -37,13 +37,10 @@ except ImportError:
 if TYPE_CHECKING:
     from slate_core.plot._squared_scale import SquaredScale as SquaredScaleTy
 
-
+from slate_core.plot._annotations import Axes, Figure, TupleAnimation
 from slate_core.plot._util import (
-    Axes,
-    Figure,
     Measure,
     Scale,
-    TupleAnimation,
     combine_animations,
     get_figure,
     get_measured_data,

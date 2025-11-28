@@ -4,8 +4,6 @@ import numpy as np
 
 from slate_core.basis import Basis
 from slate_core.plot._util import (
-    Axes,
-    Figure,
     Measure,
     Scale,
     get_figure,
@@ -15,6 +13,7 @@ from slate_core.plot._util import (
 
 if TYPE_CHECKING:
     from slate_core.array import Array
+    from slate_core.plot._annotations import Axes, Figure
 
 Distribution = Literal["normal", "exponential normal", "skew normal"]
 
