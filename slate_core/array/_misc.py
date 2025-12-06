@@ -460,19 +460,18 @@ def extract_diagonal[M: BasisMetadata, DT: np.dtype[np.generic]](
         # to scale here since we would then have to immediately
         # scale it back
         new_components = (
-            array.raw_data
+            array.with_basis(as_diagonal).raw_data
             if SIMPLE_FEATURE in rhs_basis.metadata().features
             else cast(
                 "Any",
-                array.raw_data  # type: ignore[return-value, arg-type]
+                array.with_basis(as_diagonal).raw_data  # type: ignore[return-value, arg-type]
                 * rhs_basis.metadata().basis_weights[rhs_basis.points],
             )
         )
 
         return Array(lhs_basis, new_components)
-    out_basis = basis.from_metadata(array.basis.metadata().children[0])
     data = cast("np.ndarray[Any, DT]", np.diag(array.as_array()))
-    return Array.from_array(data, metadata=out_basis.metadata())
+    return Array.from_array(data, metadata=array.basis.metadata().children[0])
 
 
 def max_arg[M: BasisMetadata, DT: np.dtype[np.generic]](
