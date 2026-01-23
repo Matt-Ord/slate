@@ -29,6 +29,7 @@ except ImportError:
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from matplotlib.axes import Axes as MPLAxesBase
     from matplotlib.colorbar import Colorbar
     from matplotlib.colors import Normalize
     from matplotlib.scale import ScaleBase
@@ -39,7 +40,7 @@ if TYPE_CHECKING:
 Scale = Literal["symlog", "linear", "squared", "log"]
 
 
-def get_figure(ax: Axes | None = None) -> tuple[Figure, Axes]:
+def get_figure(ax: MPLAxesBase | None = None) -> tuple[Figure, Axes]:
     """Get the figure of the given axis.
 
     If no figure exists, a new figure is created
@@ -51,6 +52,7 @@ def get_figure(ax: Axes | None = None) -> tuple[Figure, Axes]:
     if ax is None:
         return cast("tuple[Figure, Axes]", plt.subplots())  # type: ignore plt.subplots Unknown type
 
+    ax = cast("Axes", ax)
     fig = ax.get_figure()
     if fig is None:
         fig = cast("Figure", plt.figure())  # type: ignore plt.figure Unknown type

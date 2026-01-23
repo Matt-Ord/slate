@@ -19,6 +19,7 @@ from slate_core.plot._util import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes as MPLAxesBase
     from matplotlib.collections import QuadMesh
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
@@ -50,7 +51,7 @@ def animate_array_over_list[DT: np.dtype[np.number]](
         DT,
     ],
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
@@ -80,7 +81,7 @@ def animate_data_over_list_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
@@ -109,7 +110,7 @@ def animate_data_1d_x[DT: np.dtype[np.number]](  # noqa: PLR0913
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
@@ -141,7 +142,7 @@ def animate_data_over_list_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0
     axes: tuple[int] = (0,),
     idx: tuple[int, ...] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
@@ -171,7 +172,7 @@ def animate_data_1d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     axes: tuple[int, int] = (0, 1),
     idx: tuple[int, ...] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[Line2D]]:
@@ -204,7 +205,7 @@ def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[QuadMesh, Text]]:
@@ -238,7 +239,7 @@ def animate_data_2d_k[DT: np.dtype[np.complexfloating]](  # noqa: PLR0913
     axes: tuple[int, int, int] = (0, 1, 2),
     idx: tuple[int, ...] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, TupleAnimation[QuadMesh]]:

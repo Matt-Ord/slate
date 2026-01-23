@@ -12,16 +12,17 @@ from slate_core.plot._util import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes as MPLAxesBase
+
     from slate_core.array import Array
     from slate_core.plot._annotations import Axes, Figure
-
 Distribution = Literal["normal", "exponential normal", "skew normal"]
 
 
 def array_distribution[B: Basis, DT: np.dtype[np.floating]](
     array: Array[B, DT],
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
     distribution: Distribution | None = None,
