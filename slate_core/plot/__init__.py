@@ -21,7 +21,7 @@ from slate_core.plot._plot import (
     array_against_basis,
 )
 
-try:
+try:  # noqa: RUF067
     from slate_core.plot._squared_scale import SquaredScale
 except ImportError:
 
