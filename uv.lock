@@ -594,7 +594,7 @@ dev = [
     { name = "pyright", specifier = "==1.1.408" },
     { name = "pytest", specifier = ">=9.0.0,<10.0.0" },
     { name = "ruff" },
-    { name = "sphinx", specifier = ">=9.0.0rc1,<10.0.0" },
+    { name = "sphinx", specifier = ">=9.1.0,<10.0.0" },
     { name = "ty", specifier = ">=0.0.1a28" },
 ]
 
