@@ -63,7 +63,6 @@ __all__ = [
     "ExplicitLabeledMetadata",
     "LabeledMetadata",
     "LengthMetadata",
-    "LengthMetadata",
     "LobattoSpacedLengthMetadata",
     "LobattoSpacedMetadata",
     "NestedLength",
