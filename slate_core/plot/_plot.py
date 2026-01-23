@@ -34,6 +34,7 @@ from slate_core.util import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes as MPLAxesBase
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
 
@@ -61,7 +62,7 @@ def _plot_raw_data_1d[DT: np.dtype[np.number]](  # noqa: PLR0913
     coordinates: np.ndarray[Any, np.dtype[np.floating]],
     y_errors: np.ndarray[Any, np.dtype[np.floating]] | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
     periodic: bool = False,
@@ -298,7 +299,7 @@ def _plot_raw_data_2d[DT: np.dtype[np.number]](
     coordinates: tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...]
     | None = None,
     *,
-    ax: Axes | None = None,
+    ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
 ) -> tuple[Figure, Axes, QuadMesh]:
