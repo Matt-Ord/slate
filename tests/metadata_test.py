@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from slate_core.metadata import BarycentricMetadata, Domain, LobattoSpacedMetadata
-from slate_core.metadata.volume._volume import (
-    _project_directions,  # noqa: PLC2701 # type: ignore[import-untyped]
+from slate_core.metadata.volume._volume import (  # noqa: PLC2701
+    _project_directions,  # type: ignore[import-untyped]
 )
 
 

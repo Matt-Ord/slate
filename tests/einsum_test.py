@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from slate_core._einsum._einstein_index import (
-    EinsteinIndex,  # noqa: PLC2701
+from slate_core._einsum._einstein_index import (  # noqa: PLC2701
+    EinsteinIndex,
     NestedEinsteinIndex,
-    parse_einsum_index,  # noqa: PLC2701
+    parse_einsum_index,
 )
 from slate_core.array import Array, cast_basis
 from slate_core.basis import (
