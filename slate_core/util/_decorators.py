@@ -1,7 +1,8 @@
 import datetime
 import pickle  # noqa: S403
+import types
 from functools import update_wrapper, wraps
-from typing import TYPE_CHECKING, Literal, overload
+from typing import TYPE_CHECKING, Literal, TypeVar, overload
 
 import numpy as np
 
@@ -46,6 +47,12 @@ CallType = Literal[
 ]
 
 
+def _reduce_typevars(obj: object) -> tuple[type, tuple[str]]:
+    # This tells pickle: "If you see a TypeVar, just treat it as its name string"
+    # This prevents the 'typing.M' lookup entirely.
+    return str, (str(obj),)
+
+
 class CachedFunction[**P, R]:
     """A function wrapper which is used to cache the output."""
 
@@ -83,6 +90,9 @@ class CachedFunction[**P, R]:
                     pickle.HIGHEST_PROTOCOL,
                     buffer_callback=buffers.append,
                 )
+                pickler.dispatch_table = pickle.dispatch_table.copy()  # type: ignore[attr-defined]
+                pickler.dispatch_table[TypeVar] = _reduce_typevars  # type: ignore[attr-defined]
+                pickler.dispatch_table[types.GenericAlias] = _reduce_typevars  # type: ignore[attr-defined]
                 pickler.dump(obj)
 
             np.savez(cache_path.with_suffix(".buffer.npz"), *buffers)
