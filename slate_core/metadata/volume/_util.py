@@ -12,8 +12,8 @@ from slate_core.metadata.volume._volume import (
     AxisDirections,
     EvenlySpacedVolumeMetadata,
     TupleMetadata,
-    fundamental_stacked_delta_k,
-    fundamental_stacked_k_points,
+    fundamental_stacked_dk,
+    fundamental_stacked_nk_points,
     fundamental_stacked_x_points,
     project_points_along_directions,
 )
@@ -30,8 +30,10 @@ def _project_k_points_along_axes(
     axes: tuple[int, ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the list of k points projected onto the plane including both axes."""
-    directions = fundamental_stacked_delta_k(metadata)
-    return project_points_along_directions(points, tuple(directions[ax] for ax in axes))
+    directions = fundamental_stacked_dk(metadata)
+    return project_points_along_directions(
+        tuple(points[ax] for ax in axes), tuple(directions[ax] for ax in axes)
+    )
 
 
 def get_fundamental_stacked_k_points_projected_along_axes(
@@ -40,8 +42,10 @@ def get_fundamental_stacked_k_points_projected_along_axes(
     axes: tuple[int, ...],
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the fundamental_k_points projected onto the plane including both axes."""
-    points = fundamental_stacked_k_points(metadata)
-    return _project_k_points_along_axes(points, metadata, axes=axes)
+    points = fundamental_stacked_nk_points(metadata)
+    return _project_k_points_along_axes(
+        tuple(points[ax].astype(np.float64) for ax in axes), metadata, axes=axes
+    )
 
 
 def get_k_coordinates_in_axes(
