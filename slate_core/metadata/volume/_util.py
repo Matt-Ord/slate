@@ -31,9 +31,7 @@ def _project_k_points_along_axes(
 ) -> tuple[np.ndarray[Any, np.dtype[np.floating]], ...]:
     """Get the list of k points projected onto the plane including both axes."""
     directions = fundamental_stacked_dk(metadata)
-    return project_points_along_directions(
-        tuple(points[ax] for ax in axes), tuple(directions[ax] for ax in axes)
-    )
+    return project_points_along_directions(points, tuple(directions[ax] for ax in axes))
 
 
 def get_fundamental_stacked_k_points_projected_along_axes(
