@@ -388,10 +388,10 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
     @overload
     def __getitem__(self, index: int) -> DT: ...
     @overload
-    def __getitem__[CT: Ctype[Never]](
-        self: Array[Basis[BasisMetadata, CT], DT],
+    def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
+        self: Array[Basis[BasisMetadata, CT], DT_],
         index: tuple[NestedIndex, ...] | slice,
-    ) -> Array[Basis[BasisMetadata, CT], DT]: ...
+    ) -> Array[Basis[BasisMetadata, CT], DT_]: ...
 
     def __getitem__[CT: Ctype[Never], DT_: np.dtype[np.generic]](
         self: Array[Basis[BasisMetadata, CT], DT_],
