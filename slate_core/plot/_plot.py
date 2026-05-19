@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 
 import numpy as np
 from matplotlib.collections import PolyCollection, QuadMesh
-from scipy.spatial import Voronoi
+from scipy.spatial import Voronoi  # type: ignore stub
 
 from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
@@ -371,25 +371,24 @@ def _plot_nearest_neighbor_mesh(
     # 2. Compute the Voronoi diagram to find cell boundaries
     vor = Voronoi(all_points)
 
-    polygons = []
-    cell_values = []
+    polygons: list[np.ndarray[tuple[int], np.dtype[np.floating]]] = []
+    cell_values: list[float] = []
 
-    # 3. Match each input point to its corresponding Voronoi cell polygon
-    for i, region_idx in enumerate(vor.point_region):
-        region = vor.regions[region_idx]
+    for i, data_val in enumerate(data):
+        region_idx = vor.point_region[i]
+        region = vor.regions[region_idx]  # type: ignore unknown  # ty:ignore[unused-ignore-comment]
 
         # Ensure the region is closed/bounded (doesn't shoot off to infinity at the edges)
         if region and -1 not in region:
-            # Grab the coordinates of the vertices forming this cell's polygon
             polygon = vor.vertices[region]
             polygons.append(polygon)
-            cell_values.append(data[i])
+            cell_values.append(data_val)
 
     # 4. Efficiently draw all the polygons together as a collection
     coll = PolyCollection(
         polygons,
         array=np.array(cell_values),
-        cmap="viridis",
+        cmap="viridis",  # cspell: disable-line
         edgecolors="none",  # Turn on/set a color if you want grid lines
     )
 
