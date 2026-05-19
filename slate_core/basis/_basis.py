@@ -139,7 +139,7 @@ class BasisConversion[T1: np.generic, T2: np.generic, T3: np.generic]:
 
     def ok[T: np.generic](
         self: BasisConversion[T, T, T],
-    ) -> np.ndarray[Any, np.dtype[T2]]:
+    ) -> np.ndarray[Any, np.dtype[T]]:
         return cast("Any", self)._fn()  # noqa: SLF001
 
 

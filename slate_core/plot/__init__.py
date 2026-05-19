@@ -18,6 +18,8 @@ from slate_core.plot._plot import (
     array_against_axes_1d_k,
     array_against_axes_2d,
     array_against_axes_2d_k,
+    array_against_axes_2d_k_nearest_neighbor,
+    array_against_axes_2d_nearest_neighbor,
     array_against_basis,
 )
 
@@ -67,6 +69,8 @@ __all__ = [
     "array_against_axes_1d_k",
     "array_against_axes_2d",
     "array_against_axes_2d_k",
+    "array_against_axes_2d_k_nearest_neighbor",
+    "array_against_axes_2d_nearest_neighbor",
     "array_against_basis",
     "array_distribution",
     "combine_animations",

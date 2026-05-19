@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 
 import numpy as np
-from matplotlib.collections import QuadMesh
+from matplotlib.collections import PolyCollection, QuadMesh
+from scipy.spatial import Voronoi
 
 from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
@@ -335,6 +336,108 @@ def _plot_raw_data_2d[DT: np.dtype[np.number]](
     return fig, ax, mesh
 
 
+def _build_boundary_coordinates(
+    coordinates: tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...],
+) -> tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...]:
+    """Build the coordinates for the boundary of the plot."""
+    x, y = coordinates
+    x_min, x_max = x.min(), x.max()
+    y_min, y_max = y.min(), y.max()
+
+    delta_x = x_max - x_min
+    delta_y = y_max - y_min
+
+    # 2. Place 4 dummy points at "infinity" in each direction
+    return (
+        np.array([x_min - delta_x, x_min - delta_x, x_max + delta_x, x_max + delta_x]),
+        np.array([y_min - delta_y, y_max + delta_y, y_min - delta_y, y_max + delta_y]),
+    )
+
+
+def _plot_nearest_neighbor_mesh(
+    data: np.ndarray[Any, np.dtype[np.floating]],
+    coordinates: tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...],
+    ax: Axes,
+) -> PolyCollection:
+    """Plot a cell around every coordinate, shaded by its value."""
+    # 1. Flatten arrays to handle any input shape (1D or 2D meshes)
+    points = np.column_stack([c.ravel() for c in coordinates])
+    boundary_points = np.column_stack(
+        [c.ravel() for c in _build_boundary_coordinates(coordinates)]
+    )
+    all_points = np.vstack([points, boundary_points])
+    data = data.ravel()
+
+    # 2. Compute the Voronoi diagram to find cell boundaries
+    vor = Voronoi(all_points)
+
+    polygons = []
+    cell_values = []
+
+    # 3. Match each input point to its corresponding Voronoi cell polygon
+    for i, region_idx in enumerate(vor.point_region):
+        region = vor.regions[region_idx]
+
+        # Ensure the region is closed/bounded (doesn't shoot off to infinity at the edges)
+        if region and -1 not in region:
+            # Grab the coordinates of the vertices forming this cell's polygon
+            polygon = vor.vertices[region]
+            polygons.append(polygon)
+            cell_values.append(data[i])
+
+    # 4. Efficiently draw all the polygons together as a collection
+    coll = PolyCollection(
+        polygons,
+        array=np.array(cell_values),
+        cmap="viridis",
+        edgecolors="none",  # Turn on/set a color if you want grid lines
+    )
+
+    ax.add_collection(coll)
+
+    # Clean up the plot limits so everything is visible
+    ax.set_xlim(points[:, 0].min(), points[:, 0].max())
+    ax.set_ylim(points[:, 1].min(), points[:, 1].max())
+
+    return coll
+
+
+def _plot_raw_data_2d_nearest_neighbor[DT: np.dtype[np.number]](
+    data: np.ndarray[Any, DT],
+    coordinates: tuple[np.ndarray[tuple[int], np.dtype[np.floating]], ...],
+    *,
+    ax: MPLAxesBase | None = None,
+    scale: Scale = "linear",
+    measure: Measure = "real",
+) -> tuple[Figure, Axes, PolyCollection]:
+    """Plot data in 2d."""
+    fig, ax = get_figure(ax)
+
+    measured_data = get_measured_data(data, measure)
+
+    mesh = _plot_nearest_neighbor_mesh(measured_data, coordinates, ax)
+
+    meshes = [
+        mesh,
+        *(child for child in ax.get_children() if isinstance(child, QuadMesh)),
+    ]
+    clim = _get_max_clim(
+        [
+            get_lim((None, None), measure, measured_data),
+            *(x.get_clim() for x in meshes[1:]),
+        ]
+    )
+    norm = get_norm_with_lim(scale, clim)
+
+    for m in meshes:
+        m.set_norm(norm)
+        m.set_clim(*clim)
+    ax.set_aspect("equal", adjustable="box")
+    if not _has_colorbar(ax):
+        fig.colorbar(mesh, ax=ax, format="%4.1e")
+    return fig, ax, mesh
+
+
 def _get_tuple_basis_coordinates(
     basis: TupleBasis[tuple[Basis[BasisMetadata, Any], ...], Any],
     axes: tuple[int, ...],
@@ -430,6 +533,63 @@ def array_against_axes_2d[DT: np.dtype[np.number], E](
     return fig, ax, mesh
 
 
+def array_against_axes_2d_nearest_neighbor[DT: np.dtype[np.number], E](
+    data: Array[Basis[TupleMetadata[tuple[BasisMetadata, ...], E]], DT],
+    axes: tuple[int, int] = (0, 1),
+    idx: tuple[int, ...] | None = None,
+    **kwargs: Unpack[PlotKwargs2D],
+) -> tuple[Figure, Axes, PolyCollection]:
+    """
+    Plot the data in 2d along the x axis in the given basis.
+
+    Parameters
+    ----------
+    basis : TupleBasisLike
+        basis to interpret the data in
+    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
+        plot data
+    axes : tuple[int, int, int], optional
+        axes to plot in, by default (0, 1, 2)
+    idx : SingleStackedIndexLike | None, optional
+        index to plot, by default None
+    ax : Axes | None, optional
+        plot axis, by default None
+    scale : Scale, optional
+        scale, by default "linear"
+    measure : Measure, optional
+        measure, by default "abs"
+
+    Returns
+    -------
+    tuple[Figure, Axes, QuadMesh]
+    """
+    metadata = data.basis.metadata()
+    basis_x = basis.from_metadata(metadata, is_dual=data.basis.is_dual)
+    converted_data = as_fundamental_basis(data).raw_data.reshape(basis_x.shape)
+
+    idx = get_max_idx(converted_data, axes=axes) if idx is None else idx
+
+    coordinates = _get_tuple_basis_coordinates(basis_x, axes)
+    data_in_axis = get_data_in_axes(data, axes, idx)
+
+    raw_data = data_in_axis.as_array()
+
+    fig, ax, mesh = _plot_raw_data_2d_nearest_neighbor(
+        raw_data,
+        coordinates,
+        ax=kwargs.get("ax"),
+        scale=kwargs.get("scale", "linear"),
+        measure=kwargs.get("measure", "real"),
+    )
+
+    unit_0, unit_1 = _get_tuple_basis_units(basis_x, axes)
+    ax.set_xlabel(f"x{axes[0]} axis ({unit_0})")
+    ax.set_ylabel(f"x{axes[1]} axis ({unit_1})")
+    if len(idx) > 0 and kwargs.get("plot_index_text", True):
+        index_text(ax, idx)
+    return fig, ax, mesh
+
+
 def _get_frequencies_in_axes[E](
     metadata: TupleMetadata[tuple[EvenlySpacedLengthMetadata, ...], E],
     axes: tuple[int, ...],
@@ -490,6 +650,73 @@ def array_against_axes_2d_k[DT: np.dtype[np.complexfloating], E](
     shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))
 
     fig, ax, mesh = _plot_raw_data_2d(
+        shifted_data, tuple(shifted_coordinates[i] for i in range(2)), **kwargs
+    )
+
+    ax.set_xlabel(f"k{axes[0]} axis / $m^-1$")
+    ax.set_ylabel(f"k{axes[1]} axis / $m^-1$")
+    if len(idx) > 0:
+        ax.text(
+            0.05,
+            0.95,
+            f"k = {idx}",
+            transform=ax.transAxes,
+            verticalalignment="top",
+            bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
+        )
+    return fig, ax, mesh
+
+
+def array_against_axes_2d_k_nearest_neighbor[DT: np.dtype[np.complexfloating], E](
+    data: Array[TupleBasisLike[tuple[EvenlySpacedLengthMetadata, ...], E], DT],
+    axes: tuple[int, int] = (0, 1),
+    idx: tuple[int, ...] | None = None,
+    **kwargs: Unpack[PlotKwargs],
+) -> tuple[Figure, Axes, PolyCollection]:
+    """
+    Plot the data in a 2d slice in k along the given axis.
+
+    Parameters
+    ----------
+    basis : TupleBasisLike
+    data : np.ndarray[tuple[_L0Inv], np.dtype[np.complex_]]
+    axes : tuple[int, int], optional
+        axes to plot in, by default (0, 1)
+    idx : SingleStackedIndexLike | None, optional
+        index to plot, by default None
+    ax : Axes | None, optional
+        plot axis, by default None
+    scale : Scale, optional
+        scale, by default "linear"
+    measure : Measure, optional
+        measure, by default "abs"
+
+    Returns
+    -------
+    tuple[Figure, Axes, PolyCollection]
+    """
+    metadata = data.basis.metadata()
+    converted_data = array.as_raw_tuple(array.as_transformed_basis(data))
+
+    idx = (
+        get_max_idx(
+            converted_data.raw_data.reshape(converted_data.basis.shape), axes=axes
+        )
+        if idx is None
+        else idx
+    )
+
+    if isinstance(metadata.extra, AxisDirections):
+        metadata = cast("EvenlySpacedVolumeMetadata", metadata)
+        coordinates = get_k_coordinates_in_axes(metadata, axes, idx)
+    else:
+        coordinates = _get_frequencies_in_axes(metadata, axes)
+    data_in_axis = get_data_in_axes(converted_data, axes, idx)
+
+    shifted_data = np.fft.fftshift(data_in_axis.as_array())
+    shifted_coordinates = np.fft.fftshift(coordinates, axes=(1, 2))
+
+    fig, ax, mesh = _plot_raw_data_2d_nearest_neighbor(
         shifted_data, tuple(shifted_coordinates[i] for i in range(2)), **kwargs
     )
 
