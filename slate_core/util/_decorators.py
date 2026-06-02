@@ -106,7 +106,7 @@ class CachedFunction[**P, R]:
         if cache_path is None:
             return None
 
-        try:
+        try:  # noqa: PLW0717
             buffer_data = np.load(cache_path.with_suffix(".buffer.npz"))
 
             def _get_buffer() -> Generator[memoryview, memoryview]:
