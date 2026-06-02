@@ -28,9 +28,7 @@ def pad_ft_points[DT: np.dtype[np.generic]](
 
     padded_shape = shape_arr.copy()
     padded_shape[axes_arr] = tuple(s)
-    padded: np.ndarray[Any, DT] = np.zeros(  # type: ignore can't infer dtype
-        shape=padded_shape, dtype=array.dtype
-    )
+    padded: np.ndarray[Any, DT] = np.zeros(shape=padded_shape, dtype=array.dtype)
 
     slice_start = np.array([slice(None) for _ in array.shape], dtype=slice)
     slice_start[axes_arr] = np.array(
@@ -95,7 +93,7 @@ def _truncate_along_axis_continuous[DT: np.dtype[np.generic]](
     # We could alternatively roll after we take the slice
     # but this more complex (ie not worth performance)
     rolled = np.roll(vectors, -offset, axis=axis)
-    return rolled[slice_along_axis(slice(0, n * step, step), axis)]  # type: ignore index type wrong
+    return rolled[slice_along_axis(slice(0, n * step, step), axis)]
 
 
 def _is_contiguous_truncate(size: int, truncation: Truncation) -> bool:

@@ -221,7 +221,7 @@ def reslove_basis(
             )
         )
 
-        part_index.append(tuple(i.label for i in flatten_nested(part)))
+        part_index.append(tuple(i.label for i in flatten_nested(part)))  # ty:ignore[unresolved-attribute]
 
     result_basis = (
         None
@@ -229,13 +229,13 @@ def reslove_basis(
         else _resolve_einsum_basis(specification.result, basis_map)[0]
     )
     out_shape_flat = (
-        tuple[EinsteinIndex]()
+        tuple[EinsteinIndex, ...]()
         if specification.result is None
         else flatten_nested(specification.result)
     )
 
     return BasisSpecification(
-        result_index=tuple(i.label for i in out_shape_flat),
+        result_index=tuple(i.label for i in out_shape_flat),  # ty:ignore[unresolved-attribute]
         result_basis=result_basis,
         part_index=tuple(part_index),
         part_basis=tuple(part_basis),

@@ -55,7 +55,7 @@ def fundamental_stacked_delta_x(
     """Get the fundamental stacked delta x."""
     scaled = cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-        np.einsum(  # type: ignore unknown
+        np.einsum(
             "ij,i->ij", metadata.extra.vectors, [c.delta for c in metadata.children]
         ),
     )
@@ -68,7 +68,7 @@ def fundamental_stacked_dx(
     """Get the fundamental stacked dx."""
     scaled = cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-        np.einsum(  # type: ignore unknown
+        np.einsum(
             "ij,i->ij",
             fundamental_stacked_delta_x(metadata),
             [1 / s for s in shallow_shape_from_nested(metadata.fundamental_shape)],
@@ -91,7 +91,7 @@ def fundamental_stacked_delta_k(
     """Get the fundamental stacked delta k."""
     scaled = cast(
         "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-        np.einsum(  # type: ignore unknown
+        np.einsum(
             "ij,i->ij", fundamental_stacked_dk(metadata), metadata.fundamental_shape
         ),
     )
@@ -160,7 +160,7 @@ def _fundamental_stacked_x_points_evenly_spaced(
     return tuple(
         cast(
             "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-            np.einsum(  # type: ignore unknown
+            np.einsum(
                 "ij,ik->jk",
                 fundamental_stacked_dx(metadata),
                 fundamental_stacked_nx_points(metadata),
@@ -204,7 +204,7 @@ def fundamental_stacked_k_points(
     points = tuple(
         cast(
             "np.ndarray[tuple[int, int], np.dtype[np.floating]]",
-            np.einsum(  # type: ignore unknown
+            np.einsum(
                 "ij,ik->jk",
                 fundamental_stacked_dk(metadata),
                 fundamental_stacked_nk_points(metadata),

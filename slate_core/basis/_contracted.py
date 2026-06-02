@@ -46,7 +46,7 @@ def _get_outer_indices(
     index: NestedIndex,
 ) -> tuple[int, ...]:
     """Get the outer index for a contraction."""
-    return tuple(sorted(set(flatten_nested(index))))
+    return tuple(sorted(set(flatten_nested(index))))  # ty:ignore[invalid-return-type]
 
 
 def _build_contraction_size_map(
@@ -173,7 +173,7 @@ def get_common_contraction_index(
     return _build_index_from_contraction_paths(
         common_contraction,
         shape_at_path=_get_basis_shape(basis),
-        next_free_idx=max((-1, *flatten_nested(index_1), *flatten_nested(index_2))) + 1,
+        next_free_idx=max((-1, *flatten_nested(index_1), *flatten_nested(index_2))) + 1,  # ty:ignore[unsupported-operator]
     )[0]
 
 
@@ -263,7 +263,7 @@ class ContractedBasis[
         flat_out_index = flatten_nested(self._outer_indices)
 
         def fn() -> np.ndarray[Any, np.dtype[T2]]:
-            stacked = vectors.reshape(s0, *flatten_nested(self._outer_shape), s1)
+            stacked = vectors.reshape(s0, *flatten_nested(self._outer_shape), s1)  # ty:ignore[invalid-argument-type]
 
             out_axes: tuple[int, ...] = (
                 0,
@@ -298,7 +298,7 @@ class ContractedBasis[
         flat_out_index = flatten_nested(self._outer_indices)
 
         def fn() -> np.ndarray[Any, np.dtype[T1]]:
-            stacked = vectors.reshape(s0, *flatten_nested(self._inner_shape), s1)
+            stacked = vectors.reshape(s0, *flatten_nested(self._inner_shape), s1)  # ty:ignore[invalid-argument-type]
 
             mapped_contractions = (
                 {0},

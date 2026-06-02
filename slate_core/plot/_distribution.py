@@ -12,10 +12,11 @@ from slate_core.plot._util import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from matplotlib.axes import Axes as MPLAxesBase
+    from matplotlib.figure import Figure
 
     from slate_core.array import Array
-    from slate_core.plot._annotations import Axes, Figure
 Distribution = Literal["normal", "exponential normal", "skew normal"]
 
 
@@ -40,7 +41,7 @@ def array_distribution[B: Basis, DT: np.dtype[np.floating]](
     )
     n_bins = np.max([11, data.size // 100]).item()
 
-    ax.hist(data, bins=n_bins, range=x_range, density=True)  # type: ignore unknown arg
+    ax.hist(data, bins=n_bins, range=x_range, density=True)
     ax.set_ylabel("Occupation")
     ax.set_yscale(get_scale_with_lim(scale, ax.get_ylim()))
     return fig, ax

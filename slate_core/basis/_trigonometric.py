@@ -1,7 +1,7 @@
 from typing import Any, Literal, Never, Self, TypeGuard, cast, overload, override
 
 import numpy as np
-import scipy.fft  # type: ignore lib types
+import scipy.fft
 
 from slate_core.basis._basis import (
     Basis,
@@ -106,9 +106,9 @@ class TrigonometricTransformBasis[
     ) -> np.ndarray[Any, T]:
         return cast(
             "np.ndarray[Any, T]",
-            scipy.fft.idct(vectors, axis=axis, type=self._ty_idx, norm="ortho")  # type: ignore lib types
+            scipy.fft.idct(vectors, axis=axis, type=self._ty_idx, norm="ortho")
             if self.fn == "cos"
-            else scipy.fft.idst(vectors, axis=axis, type=self._ty_idx, norm="ortho"),  # type: ignore lib types
+            else scipy.fft.idst(vectors, axis=axis, type=self._ty_idx, norm="ortho"),
         )
 
     @override
@@ -117,7 +117,7 @@ class TrigonometricTransformBasis[
         vectors: np.ndarray[Any, np.dtype[T1]],
         axis: int = -1,
     ) -> BasisConversion[np.complexfloating, T1, T2]:
-        return BasisConversion(lambda: (self._transform_backward(vectors, axis)))
+        return BasisConversion(lambda: self._transform_backward(vectors, axis))
 
     def _transform_forward[T: np.dtype[np.generic]](
         self,
@@ -126,9 +126,9 @@ class TrigonometricTransformBasis[
     ) -> np.ndarray[Any, T]:
         return cast(
             "np.ndarray[Any, T]",
-            scipy.fft.dct(vectors, axis=axis, type=self._ty_idx, norm="ortho")  # type: ignore lib types
+            scipy.fft.dct(vectors, axis=axis, type=self._ty_idx, norm="ortho")
             if self.fn == "cos"
-            else scipy.fft.dst(vectors, axis=axis, type=self._ty_idx, norm="ortho"),  # type: ignore lib types
+            else scipy.fft.dst(vectors, axis=axis, type=self._ty_idx, norm="ortho"),
         )
 
     @override
@@ -138,7 +138,7 @@ class TrigonometricTransformBasis[
         axis: int = -1,
     ) -> BasisConversion[T1, T2, np.complexfloating]:
         return BasisConversion[T1, T2, np.complexfloating](
-            lambda: (self._transform_forward(vectors, axis))
+            lambda: self._transform_forward(vectors, axis)
         )
 
     @property

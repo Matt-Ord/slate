@@ -135,8 +135,8 @@ def basis_conversion() -> None:
     wrapped_basis = cast(
         "WrappedBasis[Basis[SimpleMetadata, Ctype[np.generic]], Ctype[np.float64]]", {}
     )
-    _converted = wrapped_basis.__into_fundamental__(compatible_data).ok()
-    _converted = wrapped_basis.__from_fundamental__(compatible_data).ok()
+    _converted1 = wrapped_basis.__into_fundamental__(compatible_data).ok()
+    _converted2 = wrapped_basis.__from_fundamental__(compatible_data).ok()
     # We should be able to make this basis, but that doesn't guarantee we can convert the data...
     # Note this is not perfect, because the wrapped basis can be assigned to Basis[Any,ctype[np.float64]]
     bad_wrapped_basis = cast(
@@ -161,10 +161,10 @@ def array_basis_variance() -> None:
     _with_basis_1 = a.with_basis(basis)
     # It should block an incompatible basis
     incompatible_basis = cast("Basis[SimpleMetadata, Ctype[np.float128]]", {})
-    _ = a.with_basis(incompatible_basis)  # type: ignore should fail
+    _ = a.with_basis(incompatible_basis)
     # Note here that TupleMetadata is not compatible with SimpleMetadata
     incompatible_basis = cast("Basis[TupleMetadata[Any, Any], Ctype[np.generic]]", {})
-    _ = a.with_basis(incompatible_basis)  # type: ignore should fail
+    _ = a.with_basis(incompatible_basis)
     # but not a compatible one
     compatible_basis_0 = cast("Basis[SimpleMetadata, Ctype[np.generic]]", {})
     _with_basis_2 = a.with_basis(compatible_basis_0)

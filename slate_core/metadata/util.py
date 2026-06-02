@@ -101,7 +101,7 @@ def basis_components_from_array_points[DT: np.dtype[np.generic]](
     assert np.issubdtype(points.dtype, np.floating) or np.issubdtype(
         points.dtype, np.complexfloating
     ), f"Expected float or complex dtype, got {points.dtype}"
-    return points.ravel() / metadata.basis_weights  # type: ignore[return-value]
+    return points.ravel() / metadata.basis_weights  # type: ignore[return-value]  # ty:ignore[unsupported-operator]
 
 
 def array_points_from_basis_components[DT: np.dtype[np.generic]](
@@ -136,4 +136,4 @@ def array_points_from_basis_components[DT: np.dtype[np.generic]](
     assert np.issubdtype(components.dtype, np.floating) or np.issubdtype(
         components.dtype, np.complexfloating
     ), f"Expected float or complex dtype, got {components.dtype}"
-    return components.ravel() * metadata.basis_weights  # type: ignore[return-value]
+    return components.ravel() * metadata.basis_weights  # type: ignore[return-value]  # ty:ignore[unsupported-operator]

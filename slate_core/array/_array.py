@@ -242,7 +242,7 @@ class Array[B: Basis, DT: np.dtype[np.generic]]:
         basis.ctype.assert_supports_dtype(self.dtype)
         assert basis.metadata() == self.basis.metadata()
         new_data = self.basis.__convert_vector_into__(self.raw_data, basis).ok()
-        return Array(basis, new_data)  # type: ignore[return-value]
+        return Array(basis, new_data)  # ty:ignore[invalid-return-type]
 
     def as_type[
         M_: BasisMetadata,

@@ -4,13 +4,14 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
+    Never,
     cast,
 )
 
 import numpy as np
 from matplotlib.animation import ArtistAnimation
 
-try:
+try:  # noqa: PLW0717
     from matplotlib import pyplot as plt
     from matplotlib.animation import ArtistAnimation
     from matplotlib.colors import LogNorm, SymLogNorm
@@ -19,22 +20,24 @@ try:
 
     from slate_core.plot._squared_scale import SquaredScale
 except ImportError:
-    plt = None
-    LogNorm, BaseNorm, SymLogNorm = (None, None, None)
-    LinearScale, LogScale, SymmetricalLogScale = (None, None, None)
-    SquaredScale = None
-    ArtistAnimation = None
+    plt = cast("Never", None)
+    LogNorm, BaseNorm, SymLogNorm = cast("Never", (None, None, None))
+    LinearScale, LogScale, SymmetricalLogScale = cast("Never", (None, None, None))
+    SquaredScale = cast("Never", None)
+    ArtistAnimation = cast("Never", None)
 
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from matplotlib.axes import Axes
     from matplotlib.axes import Axes as MPLAxesBase
     from matplotlib.colorbar import Colorbar
     from matplotlib.colors import Normalize
+    from matplotlib.figure import Figure
     from matplotlib.scale import ScaleBase
 
-    from slate_core.plot._annotations import Axes, Figure, TupleAnimation
+    from slate_core.plot._annotations import TupleAnimation
 
 
 Scale = Literal["symlog", "linear", "squared", "log"]
@@ -52,8 +55,7 @@ def get_figure(ax: MPLAxesBase | None = None) -> tuple[Figure, Axes]:
     if ax is None:
         return cast("tuple[Figure, Axes]", plt.subplots())  # type: ignore plt.subplots Unknown type
 
-    ax = cast("Axes", ax)
-    fig = ax.get_figure()
+    fig = cast("Figure|None", ax.get_figure())
     if fig is None:
         fig = cast("Figure", plt.figure())  # type: ignore plt.figure Unknown type
         ax.set_figure(fig)
@@ -143,7 +145,7 @@ def get_norm_with_lim(
             return SymLogNorm(
                 vmin=lim[0],
                 vmax=lim[1],
-                linthresh=1 if max_abs <= 0 else 1e-3 * max_abs,  # type: ignore No parameter named "linthresh"
+                linthresh=1 if max_abs <= 0 else 1e-3 * max_abs,
             )
         case "squared":
             return BaseNorm(vmin=lim[0], vmax=lim[1])
@@ -186,10 +188,10 @@ def set_ymargin(ax: Axes, bottom: float = 0.0, top: float = 0.3) -> None:
     ax.set_ylim(bottom, top)
 
 
-def build_tuple_animation[*TS](
+def build_tuple_animation[A](
     fig: Figure,
-    artists: Sequence[tuple[*TS]],
-) -> TupleAnimation[*TS]:
+    artists: Sequence[tuple[A, ...]],
+) -> TupleAnimation[A]:
     """Build a TupleAnimation from the given frames.
 
     Raises
@@ -199,15 +201,12 @@ def build_tuple_animation[*TS](
     if ArtistAnimation is None:
         msg = "Matplotlib is not installed. Please install it with the 'plot' extra."
         raise ImportError(msg)
-    return cast(
-        "TupleAnimation[*TS]",
-        ArtistAnimation(fig, cast("Any", artists)),
-    )
+    return cast("TupleAnimation[A]", ArtistAnimation(fig, cast("Any", artists)))
 
 
-def combine_animations[*TS0, *TS1](
-    fig: Figure, lhs: TupleAnimation[*TS0], rhs: TupleAnimation[*TS1]
-) -> TupleAnimation[*TS0, *TS1]:
+def combine_animations[A](
+    fig: Figure, lhs: TupleAnimation[A], rhs: TupleAnimation[A]
+) -> TupleAnimation[A]:
     """Combine multiple animations into a single animation.
 
     Raises

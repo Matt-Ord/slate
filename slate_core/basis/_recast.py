@@ -32,8 +32,8 @@ class RecastBasis[
         inner_recast: BInnerRecast_,
         outer_recast: BOuterRecast_,
     ) -> None:
-        self._inner_recast = cast("BInnerRecast", inner_recast)
-        self._outer_recast = cast("BOuterRecast", outer_recast)
+        self._inner_recast: BInnerRecast = cast("BInnerRecast", inner_recast)
+        self._outer_recast: BOuterRecast = cast("BOuterRecast", outer_recast)
         super().__init__(cast("BInner", inner))
 
         assert self._inner_recast.size == self.inner.size
@@ -119,7 +119,7 @@ class RecastBasis[
         return BasisConversion[T1, T1, T2](
             lambda: self._inner_recast.__convert_vector_into__(
                 vectors, self._outer_recast, axis
-            ).ok()  # type: ignore safe
+            ).ok()
         )
 
     @property
@@ -204,7 +204,7 @@ def as_recast_diagonal[
 
 
 @overload
-def is_recast[CT: Ctype[np.generic]](  # type: ignore is compatible
+def is_recast[CT: Ctype[np.generic]](
     basis: Basis[BasisMetadata, CT],
 ) -> TypeGuard[RecastBasis[Basis, Basis, Basis, CT]]: ...
 

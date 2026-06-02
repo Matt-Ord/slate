@@ -100,8 +100,8 @@ class SplitBasis[
         B0_: Basis,
         B1_: Basis,
     ](self: SplitBasis[B0_, B1_, Ctype[Never]], lhs: B0_, rhs: B1_) -> None:
-        self._lhs: B0 = lhs
-        self._rhs: B1 = rhs
+        self._lhs: B0 = cast("B0", lhs)
+        self._rhs: B1 = cast("B1", rhs)
         super().__init__(get_common(lhs, rhs))
 
     @property

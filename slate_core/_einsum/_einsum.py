@@ -27,7 +27,7 @@ def _einsum_numpy[DT: np.dtype[np.number]](
     idx: str,
     *arrays: np.ndarray[Any, Any],
 ) -> np.ndarray[Any, Any]:
-    return cast("np.ndarray[Any, Any]", np.einsum(idx, *arrays))  # type: ignore unknown
+    return cast("np.ndarray[Any, Any]", np.einsum(idx, *arrays))
 
 
 def _einsum_simple[DT: np.dtype[np.number]](

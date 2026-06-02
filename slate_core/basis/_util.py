@@ -260,7 +260,7 @@ def flatten(
     if len(as_tuple.shape) == 1:
         return as_tuple.children[0]
 
-    children = tuple[Basis]()
+    children = tuple[Basis, ...]()
     for b in as_tuple.children:
         if is_tuple_basis_like(b):
             b_as_tuple = as_tuple_basis(b)
@@ -342,5 +342,5 @@ def as_is_dual[M: BasisMetadata, CT: Ctype[Never]](
         TupleBasis(
             tuple(map(as_is_dual, basis_as_tuple.children, is_dual, strict=False)),
             basis_as_tuple.metadata().extra,
-        ),
+        ),  # ty:ignore[no-matching-overload]
     )
