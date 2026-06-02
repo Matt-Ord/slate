@@ -35,12 +35,12 @@ def _test_einsum_in_basis(
     transformed_vector = vector.with_basis(basis)
 
     np.testing.assert_allclose(
-        np.einsum(  # type: ignore libary
+        np.einsum(
             "ij,j->i",
             array.raw_data.reshape(array.basis.shape),
             vector.raw_data.reshape(vector.basis.size),
         ),
-        np.einsum(  # type: ignore libary
+        np.einsum(
             "ij,j->i",
             transformed_array.raw_data.reshape(array.basis.shape),
             transformed_vector.raw_data.reshape(vector.basis.size),

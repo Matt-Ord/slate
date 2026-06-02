@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, TypedDict, Unpack, cast
 
 import numpy as np
 from matplotlib.collections import PolyCollection, QuadMesh
-from scipy.spatial import Voronoi  # type: ignore stub
+from scipy.spatial import Voronoi
 
 from slate_core import array, basis
 from slate_core.array import Array, get_data_in_axes
@@ -35,7 +35,9 @@ from slate_core.util import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from matplotlib.axes import Axes as MPLAxesBase
+    from matplotlib.figure import Figure
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
 
@@ -47,7 +49,6 @@ if TYPE_CHECKING:
         TupleMetadata,
     )
     from slate_core.metadata.length import EvenlySpacedLengthMetadata
-    from slate_core.plot._annotations import Axes, Figure
 
 
 class PlotKwargs(TypedDict, total=False):
@@ -133,7 +134,7 @@ def array_against_array[M: BasisMetadata, DT: np.dtype[np.number]](
 def _get_basis_coordinates(basis: Basis) -> np.ndarray[Any, np.dtype[np.floating]]:
     metadata = basis.metadata()
     if isinstance(metadata, LabeledMetadata):
-        values = metadata.values.astype(np.float64)  # type: ignore unknown
+        values = metadata.values.astype(np.float64)
         coordinates = values[basis.points]
     else:
         coordinates = basis.points.astype(np.float64)

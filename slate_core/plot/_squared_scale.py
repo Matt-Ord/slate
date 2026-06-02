@@ -16,7 +16,7 @@ class SquaredLocator(Locator):
     @override
     def __call__(self):  # noqa: ANN204
         assert self.axis is not None
-        min_val, max_val = self.axis.get_view_interval()  # type: ignore unknown lib type
+        min_val, max_val = self.axis.get_view_interval()
         return self.tick_values(min_val, max_val)
 
     @override

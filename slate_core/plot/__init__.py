@@ -39,7 +39,7 @@ except ImportError:
 if TYPE_CHECKING:
     from slate_core.plot._squared_scale import SquaredScale as SquaredScaleTy
 
-from slate_core.plot._annotations import Axes, Figure, TupleAnimation
+
 from slate_core.plot._util import (
     Measure,
     Scale,
@@ -50,13 +50,10 @@ from slate_core.plot._util import (
 )
 
 __all__ = [
-    "Axes",
     "Distribution",
-    "Figure",
     "Measure",
     "Scale",
     "SquaredScale",
-    "TupleAnimation",
     "animate_array_over_list",
     "animate_data_1d_k",
     "animate_data_1d_x",

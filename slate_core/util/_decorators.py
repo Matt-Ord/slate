@@ -2,6 +2,7 @@ import datetime
 import pickle  # noqa: S403
 import types
 from functools import update_wrapper, wraps
+from types import FunctionType
 from typing import TYPE_CHECKING, Literal, TypeVar, overload
 
 import numpy as np
@@ -25,6 +26,7 @@ def timed[**P, R](f: Callable[P, R]) -> Callable[P, R]:
     Callable[P, R]
         The decorated function
     """
+    assert isinstance(f, FunctionType)
 
     @wraps(f)
     def wrap(*args: P.args, **kw: P.kwargs) -> R:
@@ -69,7 +71,7 @@ class CachedFunction[**P, R]:
         self.default_call: CallType = default_call
 
     def _get_cache_path(self, *args: P.args, **kw: P.kwargs) -> Path | None:
-        cache_path = self.Path(*args, **kw) if callable(self.Path) else self.Path
+        cache_path = self.Path(*args, **kw) if callable(self.Path) else self.Path  # ty:ignore[call-top-callable]
         if cache_path is None:
             return None
         return cache_path
@@ -90,7 +92,7 @@ class CachedFunction[**P, R]:
                     pickle.HIGHEST_PROTOCOL,
                     buffer_callback=buffers.append,
                 )
-                pickler.dispatch_table = pickle.dispatch_table.copy()  # type: ignore[attr-defined]
+                pickler.dispatch_table = pickle.dispatch_table.copy()  # type: ignore[attr-defined]  # ty:ignore[unresolved-attribute]
                 pickler.dispatch_table[TypeVar] = _reduce_typevars  # type: ignore[attr-defined]
                 pickler.dispatch_table[types.GenericAlias] = _reduce_typevars  # type: ignore[attr-defined]
                 pickler.dump(obj)
@@ -192,7 +194,7 @@ def cached[**P, R](
 
     def _cached(f: Callable[P, R]) -> CachedFunction[P, R]:
         return update_wrapper(  # type: ignore aaa
-            CachedFunction(f, path, default_call=default_call),
+            CachedFunction(f, path, default_call=default_call),  # ty:ignore[invalid-argument-type]
             f,
         )
 

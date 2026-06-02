@@ -134,7 +134,7 @@ class TupleMetadata[
 
     @overload
     @staticmethod
-    def from_shape[E1](shape: int, *, extra: None = None) -> SimpleMetadata: ...  # type: ignore unknown
+    def from_shape[E1](shape: int, *, extra: None = None) -> SimpleMetadata: ...
 
     @overload
     @staticmethod
@@ -160,7 +160,7 @@ class TupleMetadata[
             return SimpleMetadata(shape)
         return TupleMetadata[tuple[BasisMetadata, ...], Any](
             tuple(TupleMetadata.from_shape(s) for s in shape),
-            extra,  # type: ignore unknown
+            extra,
         )
 
     @property
@@ -174,7 +174,7 @@ class TupleMetadata[
         return set[str].intersection(*(c.features for c in self.children))
 
 
-type AnyMetadata = BasisMetadata | TupleMetadata[AnyMetadata, Any]
+type AnyMetadata = BasisMetadata | TupleMetadata[tuple[AnyMetadata, ...], Any]
 
 
 @overload

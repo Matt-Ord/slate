@@ -133,9 +133,9 @@ class BasisConversion[T1: np.generic, T2: np.generic, T3: np.generic]:
     def __init__(self, fn: Callable[[], np.ndarray[Any, np.dtype[T2]]]) -> None:
         self._fn = fn
 
-    def _variance_fn_1(self, value: T1, _private: Never) -> Never: ...
-    def _variance_fn_2(self, value: T2, _private: Never) -> T2: ...
-    def _variance_fn_3(self, value: T3, _private: Never) -> Never: ...
+    def _variance_fn_1(self, value: T1, _private: Never) -> Never: ...  # ty:ignore[empty-body]
+    def _variance_fn_2(self, value: T2, _private: Never) -> T2: ...  # ty:ignore[empty-body]
+    def _variance_fn_3(self, value: T3, _private: Never) -> Never: ...  # ty:ignore[empty-body]
 
     def ok[T: np.generic](
         self: BasisConversion[T, T, T],

@@ -1,4 +1,4 @@
-from typing import Any, cast
+from typing import Any
 
 import numpy as np
 
@@ -13,7 +13,7 @@ from slate_core.util._pad import (
 def _spec_from_indices[DT: int | np.signedinteger](
     indices: tuple[DT, ...],
 ) -> str:
-    return "".join(chr(cast("int", 97 + i)) for i in indices)
+    return "".join(chr(97 + int(i)) for i in indices)
 
 
 def apply_contractions[DT: np.dtype[np.generic]](
@@ -96,7 +96,7 @@ def extract_diagonal[DT: np.dtype[np.generic]](
     square_slice[list(axes)] = slice(n_out)
 
     subscripts = f"{_spec_from_indices(tuple(input_indices.ravel().tolist()))}->{_spec_from_indices(tuple(output_indices.ravel().tolist()))}"
-    return np.einsum(subscripts, array[tuple(square_slice)])  # type: ignore unknown
+    return np.einsum(subscripts, array[tuple(square_slice)])
 
 
 def build_diagonal[DT: np.dtype[np.generic]](

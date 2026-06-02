@@ -87,7 +87,7 @@ def log[M: BasisMetadata, DT: np.dtype[np.floating]](
 ) -> ArrayWithMetadata[M, DT]:
     """Natural log of data in a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.log(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.log(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def log10[M: BasisMetadata, DT: np.dtype[np.floating]](
@@ -95,7 +95,7 @@ def log10[M: BasisMetadata, DT: np.dtype[np.floating]](
 ) -> ArrayWithMetadata[M, DT]:
     """Log base 10 of data in a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.log10(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.log10(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def log2[M: BasisMetadata, DT: np.dtype[np.floating]](
@@ -103,7 +103,7 @@ def log2[M: BasisMetadata, DT: np.dtype[np.floating]](
 ) -> ArrayWithMetadata[M, DT]:
     """Log base 2 of data in a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.log2(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.log2(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def exp[M: BasisMetadata, DT: np.dtype[np.complexfloating]](
@@ -111,7 +111,7 @@ def exp[M: BasisMetadata, DT: np.dtype[np.complexfloating]](
 ) -> ArrayWithMetadata[M, DT]:
     """Exponential of data in a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.exp(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.exp(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def sqrt[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -120,8 +120,8 @@ def sqrt[M: BasisMetadata, DT: np.dtype[np.number]](
     """Square root of data in a slate array."""
     converted = as_index_basis(array)
     if np.issubdtype(array.dtype, np.complexfloating):  # cspell:disable-line
-        return Array(converted.basis, np.lib.scimath.sqrt(converted.raw_data))  # type: ignore[return-value]
-    return Array(converted.basis, np.sqrt(converted.raw_data))  # type: ignore[return-value]
+        return Array(converted.basis, np.lib.scimath.sqrt(converted.raw_data))  # ty:ignore[invalid-return-type]
+    return Array(converted.basis, np.sqrt(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def square[M: BasisMetadata, DT: np.dtype[np.floating]](
@@ -129,7 +129,7 @@ def square[M: BasisMetadata, DT: np.dtype[np.floating]](
 ) -> ArrayWithMetadata[M, DT]:
     """Square of data in a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.square(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.square(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def sin[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -149,7 +149,7 @@ def sin[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.sin(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.sin(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def cos[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -169,7 +169,7 @@ def cos[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.cos(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.cos(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def tan[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -191,7 +191,7 @@ def tan[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.tan(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.tan(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def arcsin[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -212,7 +212,7 @@ def arcsin[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.arcsin(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.arcsin(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def arccos[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -233,7 +233,7 @@ def arccos[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.arccos(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.arccos(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def arctan[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -254,7 +254,7 @@ def arctan[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.arctan(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.arctan(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def sinh[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -275,7 +275,7 @@ def sinh[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.sinh(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.sinh(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def cosh[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -296,7 +296,7 @@ def cosh[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.cosh(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.cosh(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def tanh[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -317,7 +317,7 @@ def tanh[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.tanh(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.tanh(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def arcsinh[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -338,7 +338,7 @@ def arcsinh[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.arcsinh(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.arcsinh(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def arccosh[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -359,7 +359,7 @@ def arccosh[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.arccosh(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.arccosh(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def arctanh[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -380,7 +380,7 @@ def arctanh[M: BasisMetadata, DT: np.dtype[np.number]](
         :dedent: 4
     """
     converted = as_index_basis(array)
-    return Array(converted.basis, np.arctanh(converted.raw_data))  # type: ignore[return-value]
+    return Array(converted.basis, np.arctanh(converted.raw_data))  # ty:ignore[invalid-return-type]
 
 
 def mod[M: BasisMetadata, DT: np.dtype[np.number]](
@@ -389,7 +389,7 @@ def mod[M: BasisMetadata, DT: np.dtype[np.number]](
 ) -> ArrayWithMetadata[M, DT]:
     """Modulus of data in a slate array."""
     converted = as_index_basis(array)
-    return Array(converted.basis, np.mod(converted.raw_data, val))  # type: ignore[return-value]
+    return Array(converted.basis, np.mod(converted.raw_data, val))
 
 
 def unwrap[M: BasisMetadata](
@@ -410,7 +410,7 @@ def cast_as_dual[B: Basis, DT: np.dtype[np.generic]](
     """Cast a slate array as an array in dual space."""
     basis_dual = array.basis.dual_basis()
     assert basis.supports_dtype(basis_dual, array.dtype)
-    return Array(basis_dual, array.raw_data)
+    return Array(basis_dual, array.raw_data)  # ty:ignore[invalid-return-type]
 
 
 def dual_basis[B: Basis, DT: np.dtype[np.generic]](
@@ -419,7 +419,7 @@ def dual_basis[B: Basis, DT: np.dtype[np.generic]](
     """Cast a slate array as an array in dual space."""
     basis_dual = array.basis.dual_basis()
     assert basis.supports_dtype(basis_dual, array.dtype)
-    return array.with_basis(basis_dual)
+    return array.with_basis(basis_dual)  # ty:ignore[invalid-return-type]
 
 
 def supports_type[M: BasisMetadata, T: np.generic, DT: np.dtype[np.generic]](

@@ -1,3 +1,4 @@
+from types import FunctionType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -200,6 +201,7 @@ def test_stats_negative_axis(
     result_pos = func(arr, axis=pos_axis)
 
     # Compare arrays
+    assert isinstance(func, FunctionType)
     np.testing.assert_allclose(
         result_neg.as_array(),
         result_pos.as_array(),
@@ -236,6 +238,7 @@ def test_shape(
     result = func(arr, axis=axis)
 
     # Verify the function produces the correct output shape
+    assert isinstance(func, FunctionType)
     assert result.as_array().shape == expected_shape, (
         f"{func.__name__} with axis={axis} produced incorrect shape"
     )
@@ -259,6 +262,7 @@ def test_stats_axis_none(func: Callable[..., float], expected_scalar: float) -> 
     result = func(arr, axis=None)
 
     # Verify the result is a scalar with the expected value
+    assert isinstance(func, FunctionType)
     assert np.isclose(result, expected_scalar), (
         f"{func.__name__} with axis=None returned {result} instead of {expected_scalar}"
     )

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 @overload
 def standard_deviation[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
     *,
     axis: Literal[0],
 ) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
@@ -52,7 +52,7 @@ def standard_deviation[DT: np.number](
     """
     if axis is None:
         # Ensure dtype is preserved for complex numbers too
-        return np.std(array.as_array(), axis=axis, dtype=array.raw_data.dtype)  # type: ignore unknown
+        return np.std(array.as_array(), axis=axis, dtype=array.raw_data.dtype)
     meta = array.basis.metadata()
     assert is_tuple_metadata(meta)
     data = np.array(
@@ -69,7 +69,7 @@ def standard_deviation[DT: np.number](
 
 @overload
 def average[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
     *,
     axis: Literal[0],
 ) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
@@ -105,11 +105,11 @@ def average[DT: np.number](
         :dedent: 4
     """
     if axis is None:
-        return np.average(array.as_array(), axis=axis)  # type: ignore unknown
+        return np.average(array.as_array(), axis=axis)
     meta = array.basis.metadata()
     assert is_tuple_metadata(meta)
     data = np.asarray(
-        cast("Any", np.average(array.as_array(), axis=axis)),  # type: ignore unknown
+        cast("Any", np.average(array.as_array(), axis=axis)),
         dtype=array.raw_data.dtype,
     )
     full_basis = basis.from_metadata(meta)
@@ -122,7 +122,7 @@ def average[DT: np.number](
 
 @overload
 def min[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](  # noqa: A001
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
     *,
     axis: Literal[0],
 ) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
@@ -158,7 +158,7 @@ def min[DT: np.number](  # noqa: A001
         :dedent: 4
     """
     if axis is None:
-        return np.min(array.as_array(), axis=axis)  # type: ignore unknown
+        return np.min(array.as_array(), axis=axis)
     meta = array.basis.metadata()
     assert is_tuple_metadata(meta)
     data = np.asarray(
@@ -175,7 +175,7 @@ def min[DT: np.number](  # noqa: A001
 
 @overload
 def max[M: tuple[SimpleMetadata, ...], DT: np.dtype[np.number]](  # noqa: A001
-    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],  # type: ignore unknown
+    array: ArrayWithMetadata[TupleMetadata[tuple[BasisMetadata, *M], Any], DT],
     *,
     axis: Literal[0],
 ) -> ArrayWithMetadata[TupleMetadata[M, None], DT]: ...
@@ -211,7 +211,7 @@ def max[DT: np.number](  # noqa: A001
         :dedent: 4
     """
     if axis is None:
-        return np.max(array.as_array(), axis=axis)  # type: ignore unknown
+        return np.max(array.as_array(), axis=axis)
     meta = array.basis.metadata()
     assert is_tuple_metadata(meta)
     data = np.asarray(

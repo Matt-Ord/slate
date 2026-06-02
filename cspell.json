@@ -44,7 +44,6 @@
         "pydocstyle",
         "pylint",
         "pyplot",
-        "pyright",
         "pytest",
         "Qobj",
         "qutip",

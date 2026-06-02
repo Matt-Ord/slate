@@ -63,7 +63,7 @@ class WrappedBasisWithMetadata[
     def __init__[B_: Basis](
         self: WrappedBasisWithMetadata[B_, Ctype[Never]], inner: B_
     ) -> None:
-        self._inner = cast("B", inner)
+        self._inner: B = cast("B", inner)
         super().__init__(self._inner.metadata())
 
     def resolve_ctype[DT_: Ctype[Never]](

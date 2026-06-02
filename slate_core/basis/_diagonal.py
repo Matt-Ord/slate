@@ -132,7 +132,7 @@ class DiagonalBasis[
 
 
 @overload
-def is_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](  # type: ignore not overlapping
+def is_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](
     basis: Basis[TupleMetadata[tuple[M1, M2], E], CT],
 ) -> TypeGuard[
     DiagonalBasis[TupleBasis[tuple[Basis[M1, CT], Basis[M2, CT]], E], CT]
@@ -154,7 +154,7 @@ def is_diagonal(basis: object) -> TypeGuard[DiagonalBasis]:
 
 
 @overload
-def as_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](  # type: ignore not overlapping
+def as_diagonal[M1: BasisMetadata, M2: BasisMetadata, E, CT: Ctype[Never]](
     basis: Basis[TupleMetadata[tuple[M1, M2], E], CT],
 ) -> DiagonalBasis[TupleBasis[tuple[Basis[M1, CT], Basis[M2, CT]], E], CT] | None: ...
 @overload

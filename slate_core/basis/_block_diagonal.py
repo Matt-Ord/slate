@@ -238,7 +238,7 @@ class BlockDiagonalBasis[
 
 
 @overload
-def is_block_diagonal[  # type: ignore not incompatible
+def is_block_diagonal[
     M0: BasisMetadata,
     M1: BasisMetadata,
     E,

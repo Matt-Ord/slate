@@ -19,8 +19,10 @@ from slate_core.plot._util import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from matplotlib.axes import Axes as MPLAxesBase
     from matplotlib.collections import QuadMesh
+    from matplotlib.figure import Figure
     from matplotlib.lines import Line2D
     from matplotlib.text import Text
 
@@ -33,7 +35,7 @@ if TYPE_CHECKING:
         SimpleMetadata,
     )
     from slate_core.metadata._tuple import TupleMetadata
-    from slate_core.plot._annotations import Axes, Figure, TupleAnimation
+    from slate_core.plot._annotations import TupleAnimation
 
 
 def _get_slice_idx(
@@ -208,7 +210,7 @@ def animate_data_2d[DT: np.dtype[np.number]](  # noqa: PLR0913
     ax: MPLAxesBase | None = None,
     scale: Scale = "linear",
     measure: Measure = "real",
-) -> tuple[Figure, Axes, TupleAnimation[QuadMesh, Text]]:
+) -> tuple[Figure, Axes, TupleAnimation[QuadMesh | Text]]:
     """Given data, animate along the given direction."""
     fig, ax = get_figure(ax)
     shape = shallow_shape_from_nested(data.basis.fundamental_shape)

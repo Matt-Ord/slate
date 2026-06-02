@@ -121,10 +121,8 @@ def spaced_volume_metadata_from_stacked_delta_x(
     """Get the metadata for a spaced volume from the vectors and spacing."""
     delta_v = tuple(np.linalg.norm(v).item() for v in vectors)
     normalized_vectors = tuple(v / dv for v, dv in zip(vectors, delta_v, strict=False))
-    interpolation = (
-        tuple[Literal["Fourier"]]("Fourier" for _ in shape)
-        if interpolation is None
-        else interpolation
+    interpolation: tuple[Literal["Fourier", "DST"], ...] = (
+        tuple("Fourier" for _ in shape) if interpolation is None else interpolation
     )
     return TupleMetadata(
         tuple(

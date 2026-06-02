@@ -108,7 +108,10 @@ def _convert_vectors_unsafe[DT2: np.generic](
         return super_inner.__convert_vector_into__(vectors, final, axis).ok()
 
     converted = _convert_tuple_basis_vector_unsafe(
-        vectors, initial, basis_as_tuple, axis
+        vectors,
+        initial,
+        basis_as_tuple,  # ty:ignore[invalid-argument-type]
+        axis,
     )
     for wrapped_basis in reversed(inner):
         assert is_wrapped(wrapped_basis)
@@ -142,8 +145,8 @@ class TupleBasis[  # noqa: PLR0904
         children: C_,
         extra: E_ | None = None,
     ) -> None:
-        self._children = cast("C", children)
-        self._extra = cast("E", extra)
+        self._children: C = cast("C", children)
+        self._extra: E = cast("E", extra)
 
     @property
     @override
@@ -190,7 +193,7 @@ class TupleBasis[  # noqa: PLR0904
         self,
     ) -> TupleBasis[C, E, CT]:
         copied = copy(self)
-        copied._children = tuple(c.dual_basis() for c in self.children)  # noqa: SLF001
+        copied._children = tuple(c.dual_basis() for c in self.children)  # noqa: SLF001  # ty:ignore[invalid-assignment]
         return cast("TupleBasis[C, E, CT]", copied)
 
     @property
@@ -282,7 +285,7 @@ class TupleBasis[  # noqa: PLR0904
             return other.children == self.children
         if is_wrapped(other):
             # Check if the inner basis is equal
-            return other == self  # type: ignore this is simply not true?
+            return other == self
         return False
 
     @override

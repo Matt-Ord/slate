@@ -174,14 +174,14 @@ def _inv_from_tuple[M0: BasisMetadata, M1: BasisMetadata, E, DT: np.dtype[np.gen
     array: Array[TupleBasis[tuple[Basis[M0], Basis[M1]], E], DT],
 ) -> Array[TupleBasisLike[tuple[M1, M0], E], DT]:
     raw_data = array.raw_data.reshape(array.basis.shape)
-    return Array(
+    return Array[TupleBasisLike[tuple[M1, M0], E], DT](
         TupleBasis(
             (
                 array.basis.children[1].dual_basis(),
                 array.basis.children[0].dual_basis(),
             ),
             array.basis.metadata().extra,
-        ),
+        ),  # ty:ignore[invalid-argument-type]
         np.linalg.inv(raw_data),  # type: ignore unknown
     )
 
