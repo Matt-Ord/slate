@@ -1,6 +1,6 @@
 """A collection of util functions."""
 
-from slate_core.util._decorators import CachedFunction, cached, timed
+from slate_core.util._decorators import CachedFunction, cached, disabled_timing, timed
 from slate_core.util._diagonal import build_diagonal, extract_diagonal
 from slate_core.util._index import (
     get_max_idx,
@@ -23,6 +23,7 @@ __all__ = [
     "Truncation",
     "build_diagonal",
     "cached",
+    "disabled_timing",
     "extract_diagonal",
     "get_max_idx",
     "get_position_in_sorted",
