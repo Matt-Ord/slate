@@ -164,6 +164,17 @@ class CachedFunction[**P, R]:
             obj = self.call_cached(*args, **kw)
         return obj
 
+    def delete_cache(self, *args: P.args, **kw: P.kwargs) -> None:
+        """Delete the cache file if it exists."""
+        cache_path = self._get_cache_path(*args, **kw)
+        if cache_path is None:
+            return
+        if cache_path.exists():
+            cache_path.unlink()
+        buffer_path = cache_path.with_suffix(".buffer.npz")
+        if buffer_path.exists():
+            buffer_path.unlink()
+
     def __call__(self, *args: P.args, **kw: P.kwargs) -> R:
         """Call the function using the cache."""
         match self.default_call:
