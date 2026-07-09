@@ -37,7 +37,7 @@ class AxisDirections:
     @override
     def __eq__(self, value: object) -> bool:
         if isinstance(value, AxisDirections):
-            return all(map(np.allclose, self.vectors, value.vectors, strict=False))
+            return all(map(np.allclose, self.vectors, value.vectors))
         return False
 
     @override

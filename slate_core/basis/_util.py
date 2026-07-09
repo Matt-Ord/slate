@@ -342,7 +342,7 @@ def as_is_dual[M: BasisMetadata, CT: Ctype[Never]](
     return cast(
         "Basis[M, CT]",
         TupleBasis(
-            tuple(map(as_is_dual, basis_as_tuple.children, is_dual, strict=False)),
+            tuple(map(as_is_dual, basis_as_tuple.children, is_dual)),
             basis_as_tuple.metadata().extra,
         ),  # ty:ignore[no-matching-overload]
     )
