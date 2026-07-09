@@ -34,7 +34,10 @@
 				"python.analysis.include": [
 					"slate_core"
 				],
-				"python.analysis.autoImportCompletions": true
+				"python.analysis.autoImportCompletions": true,
+				"ty.diagnosticMode": "workspace",
+				"ty.experimental.rename": true,
+				"ty.experimental.autoImport": true
 			},
 			"extensions": [
 				"donjayamanne.python-extension-pack",
