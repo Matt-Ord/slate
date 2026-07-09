@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 from typing import TYPE_CHECKING, Any, Never, TypeGuard, cast, overload, override
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 type NestedData[T] = T | tuple[NestedData[T], ...]
 
 

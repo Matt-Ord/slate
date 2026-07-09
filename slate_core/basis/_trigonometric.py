@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Literal, Never, Self, TypeGuard, cast, overload, override
 
 import numpy as np

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 project = "Slate"
 author = "Matthew Ord"
 version = "0.0.1"
