@@ -7,9 +7,11 @@
     "words": [
         "Caldeira",
         "colorbar",
+        "ctype",
         "dtype",
         "eigenstate",
         "eigenstates",
+        "einsum",
         "fftfreq",
         "fftn",
         "fftshift",
