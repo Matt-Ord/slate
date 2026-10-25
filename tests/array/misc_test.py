@@ -146,7 +146,11 @@ def test_cos() -> None:
     # Arccos acts as the inverse of cos in the range [0, pi]
     arr = generate_ranged_data((0, np.pi), (3, 4), np.float64)
     inverse = arccos(cos(arr))
-    np.testing.assert_allclose(inverse.as_array(), arr.as_array(), rtol=1e-10)
+    # arccos is ill-conditioned near x = 0 and x = pi, where cos(x) is within one
+    # ulp of +-1, so x can only be recovered to about sqrt(2 eps) ~ 2e-8 absolute
+    np.testing.assert_allclose(
+        inverse.as_array(), arr.as_array(), rtol=1e-10, atol=1e-7
+    )
 
 
 def test_arcsin() -> None:
@@ -176,7 +180,11 @@ def test_arccos() -> None:
 
     # Cos acts as the inverse of arccos
     inverse = cos(arccos(arr))
-    np.testing.assert_allclose(inverse.as_array(), arr.as_array(), rtol=1e-10)
+    # Near x = 0, arccos(x) ~ pi/2 carries an absolute rounding error of ~eps,
+    # so the relative error of cos(arccos(x)) is unbounded as x -> 0
+    np.testing.assert_allclose(
+        inverse.as_array(), arr.as_array(), rtol=1e-10, atol=1e-15
+    )
 
 
 def test_arctan() -> None:
@@ -223,7 +231,11 @@ def test_cosh() -> None:
     cosh_result = cosh(arr)
     inverse = arccosh(cosh_result)
     # Since cosh is even, arccosh gives the absolute value of the input
-    np.testing.assert_allclose(inverse.as_array(), np.abs(arr.as_array()), rtol=1e-10)
+    # arccosh is ill-conditioned near x = 0, where cosh(x) is within one ulp
+    # of 1, so |x| can only be recovered to about sqrt(2 eps) ~ 2e-8 absolute
+    np.testing.assert_allclose(
+        inverse.as_array(), np.abs(arr.as_array()), rtol=1e-10, atol=1e-7
+    )
 
 
 def test_arcsinh() -> None:
