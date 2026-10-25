@@ -5,6 +5,7 @@
     "name": "cspell Project Config",
     "language": "en",
     "words": [
+        "BLAS",
         "Caldeira",
         "colorbar",
         "ctype",
